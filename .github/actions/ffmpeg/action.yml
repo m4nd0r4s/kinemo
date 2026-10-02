@@ -1,0 +1,16 @@
+name: Install ffmpeg
+description: Installs ffmpeg with the runner's package manager (Linux x64/arm64, macOS arm64, Windows).
+runs:
+  using: composite
+  steps:
+    - if: runner.os == 'Linux'
+      shell: bash
+      run: sudo apt-get update -q && sudo apt-get install -y -q ffmpeg
+    - if: runner.os == 'macOS'
+      shell: bash
+      run: brew install ffmpeg
+    - if: runner.os == 'Windows'
+      shell: pwsh
+      run: choco install ffmpeg -y --no-progress
+    - shell: bash
+      run: ffmpeg -version | head -1

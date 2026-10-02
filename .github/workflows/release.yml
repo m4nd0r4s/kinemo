@@ -64,7 +64,8 @@ jobs:
           name: sdist
           path: dist
 
-  # Each wheel, installed alone (no Rust, no checkout), must check and render a new project.
+  # Each wheel, installed alone (no Rust; the checkout only provides the ffmpeg action), must
+  # check and render a new project.
   try:
     needs: wheels
     runs-on: ${{ matrix.os }}
@@ -72,10 +73,11 @@ jobs:
       matrix:
         os: [ubuntu-latest, ubuntu-24.04-arm, macos-14, windows-latest]
     steps:
+      - uses: actions/checkout@v7
       - uses: actions/setup-python@v7
         with:
           python-version: "3.11"
-      - uses: FedericoCarboni/setup-ffmpeg@v3
+      - uses: ./.github/actions/ffmpeg
       - uses: actions/download-artifact@v8
         with:
           pattern: wheels-*

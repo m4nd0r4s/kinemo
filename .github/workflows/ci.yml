@@ -18,7 +18,7 @@ jobs:
         with:
           components: clippy
       - uses: Swatinem/rust-cache@v2
-      - uses: FedericoCarboni/setup-ffmpeg@v3
+      - uses: ./.github/actions/ffmpeg
       - run: cargo clippy --workspace --all-targets -- -D warnings
       - run: cargo test --workspace
 
@@ -37,7 +37,7 @@ jobs:
           python-version: ${{ matrix.python }}
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
-      - uses: FedericoCarboni/setup-ffmpeg@v3
+      - uses: ./.github/actions/ffmpeg
       - run: pip install maturin pytest numpy polars pyarrow pandas pyright
       - run: maturin build --release --out dist
       - run: pip install --find-links dist kinemo
@@ -58,7 +58,7 @@ jobs:
           python-version: "3.13"
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
-      - uses: FedericoCarboni/setup-ffmpeg@v3
+      - uses: ./.github/actions/ffmpeg
       - run: pip install maturin pytest numpy polars
       - run: maturin build --release --out dist && pip install --find-links dist kinemo
         shell: bash
@@ -74,7 +74,7 @@ jobs:
           python-version: "3.13"
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
-      - uses: FedericoCarboni/setup-ffmpeg@v3
+      - uses: ./.github/actions/ffmpeg
       - uses: actions/setup-node@v7
         with:
           node-version: 24
@@ -83,7 +83,7 @@ jobs:
       - name: Build kinemo
         run: |
           python -m venv .venv
-          .venv/bin/pip install maturin pytest
+          .venv/bin/pip install maturin pytest numpy polars
           source .venv/bin/activate && maturin develop
       - name: Type-check the site
         working-directory: website

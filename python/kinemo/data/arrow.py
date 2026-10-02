@@ -29,6 +29,13 @@ class ArrowStreamExportable(Protocol):
     def __arrow_c_stream__(self, *args: Any, **kwargs: Any) -> object: ...
 
 
+class SupportsArray(Protocol):
+    """An array-like with `__array__` (numpy). Matches numpy arrays on every Python version;
+    `__buffer__` (below) is only declared by numpy's stubs from Python 3.12."""
+
+    def __array__(self) -> object: ...
+
+
 class SupportsBuffer(Protocol):
     """A 1-D array read through the buffer protocol (numpy)."""
 
@@ -36,9 +43,9 @@ class SupportsBuffer(Protocol):
 
 
 #: A column of numbers: an Arrow column, a 1-D numpy array or a plain sequence.
-FloatColumn = Union[Sequence[float], ArrowArrayExportable, ArrowStreamExportable, SupportsBuffer]
+FloatColumn = Union[Sequence[float], ArrowArrayExportable, ArrowStreamExportable, SupportsBuffer, SupportsArray]
 #: A column of numbers or texts.
-DataColumn = Union[Sequence[object], ArrowArrayExportable, ArrowStreamExportable, SupportsBuffer]
+DataColumn = Union[Sequence[object], ArrowArrayExportable, ArrowStreamExportable, SupportsBuffer, SupportsArray]
 #: A table: an Arrow table (polars/pandas DataFrame, pyarrow Table, duckdb relation), a
 #: dict of columns or a list of rows.
 DataTable = Union[ArrowStreamExportable, ArrowArrayExportable, Mapping[str, DataColumn], Sequence[Mapping[str, object]]]

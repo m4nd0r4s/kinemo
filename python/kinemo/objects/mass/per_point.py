@@ -26,7 +26,7 @@ from ..props import PropSignal, PropSpec
 from .symbolic_point import SymbolicPoint, trace_per_point
 
 if TYPE_CHECKING:
-    from ...data.arrow import ArrowArrayExportable, ArrowStreamExportable, FloatColumn, SupportsBuffer
+    from ...data.arrow import ArrowArrayExportable, ArrowStreamExportable, FloatColumn, SupportsArray, SupportsBuffer
     from ...reactive.native import ColorExpr, FloatExpr
     from ...values.aliases import ColorLike, ColorVal, FloatVal, VecLike
 
@@ -53,6 +53,7 @@ PointsInput = Union[
     "Sequence[VecLike]",
     "tuple[FloatColumn, FloatColumn]",
     "SupportsBuffer",
+    "SupportsArray",
     "ArrowArrayExportable",
     "ArrowStreamExportable",
 ]

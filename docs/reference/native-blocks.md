@@ -608,7 +608,7 @@ def orbit(s: k.Scene):
 k.e: float = 2.71828
 ```
 
-Documented together with [`k.pi`](#k-pi).
+Documented together with [`k.pi`](#k-pi). Constants `k.pi`, `k.tau` (2π) and `k.e`, for use inside traced functions.
 
 <a id="k-tau"></a>
 ### `k.tau` *(constant)*
@@ -617,4 +617,4 @@ Documented together with [`k.pi`](#k-pi).
 k.tau: float = 6.28319
 ```
 
-Documented together with [`k.pi`](#k-pi).
+Documented together with [`k.pi`](#k-pi). Constants `k.pi`, `k.tau` (2π) and `k.e`, for use inside traced functions.

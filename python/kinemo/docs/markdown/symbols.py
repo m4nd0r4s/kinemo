@@ -323,6 +323,10 @@ def own_docstring(obj: Any) -> str:
         return inspect.cleandoc(doc) if isinstance(doc, str) else ""
     if inspect.isfunction(obj) or inspect.ismethod(obj) or inspect.isbuiltin(obj):
         return inspect.getdoc(obj) or ""
+    if type(obj).__module__ in ("typing", "types", "builtins"):
+        # A typing construct (`Val`, a Union since Python 3.14) carries its class's docstring,
+        # which describes the construct, not this symbol.
+        return ""
     doc = type(obj).__dict__.get("__doc__")
     if not isinstance(doc, str) or doc.startswith(f"{type(obj).__name__}("):
         return ""

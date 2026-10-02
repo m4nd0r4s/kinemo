@@ -36,7 +36,7 @@ def site(tmp_path_factory: pytest.TempPathFactory) -> Path:
     data = tmp_path_factory.mktemp("data") / "site-data.json"
     export(videos=False, measure=False, data_file=data)
     run = subprocess.run(
-        ["npm", "run", "build"], cwd=WEBSITE, env={**os.environ, "KINEMO_SITE_OUT": str(out), "KINEMO_SITE_DATA": str(data)},
+        ["npm", "run", "build"], cwd=WEBSITE, env={**os.environ, "KINEMO_SITE_OUT": str(out), "KINEMO_SITE_DATA": str(data), "KINEMO_SITE_NO_MEDIA": "1"},
         capture_output=True, text=True, check=False,
         encoding="utf-8",
     )

@@ -110,3 +110,32 @@ def test_a_default_prop_is_added_and_unknown_targets_refused(tmp_path: Path) -> 
     play = site_of(server.scenes[-1], "s.play")
     session.process_edits([{"id": 2, "live": False, "changes": [{"site": play, "target": "nope", "value": "1"}]}])
     assert server.notes[-1]["ok"] is False and "does not set nope" in server.notes[-1]["message"]
+
+
+AXES_SCENE = '''import kinemo as k
+
+
+@k.scene
+def chart(s: k.Scene):
+    ax = k.Axes(x=(0, 10, 2), y=(0, 5, 1))
+    limit = ax.vline(4, style="dashed")
+    curve = ax.plot(lambda x: x / 2)
+    tan = curve.tangent_at(2.0, length=3)
+    s.play(k.draw(ax))
+'''
+
+
+def test_objects_made_by_a_method_bind_to_its_parameters(tmp_path: Path) -> None:
+    path = tmp_path / "chart.py"
+    path.write_text(AXES_SCENE, encoding="utf-8")
+    server = FakeServer()
+    session = Session(str(path), None, {}, server)  # type: ignore[arg-type]
+    assert session.rebuild()
+    meta = server.scenes[-1]
+    vline = meta["sources"][site_of(meta, "ax.vline")]
+    assert [(a["param"], a["kind"]) for a in vline["arguments"]] == [("at", "number"), ("style", "string")]
+    assert vline["types"]["at"] == {"type": "number"} and "enter_with_axes" in vline["accepts"]
+    tangent = meta["sources"][site_of(meta, "curve.tangent_at")]
+    assert [a["param"] for a in tangent["arguments"]] == ["x", "length"]
+    session.process_edits([{"id": 1, "live": False, "changes": [{"site": site_of(meta, "ax.vline"), "target": "at", "value": "6"}]}])
+    assert 'limit = ax.vline(6, style="dashed")' in path.read_text(encoding="utf-8")

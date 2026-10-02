@@ -38,14 +38,16 @@ PALETTE_CYCLE = ("BLUE", "YELLOW", "RED", "GREEN", "PURPLE", "ORANGE")
 LineStyle = Literal["solid", "dashed"]
 
 
-def _name_from_call(node: Node, method: str) -> None:
+def _name_from_call(node: Node, factory: Callable[..., Any]) -> None:
     """`curve = ax.plot(...)`: name the returned object after the variable, so labels and
-    fixes say `curve` instead of an internal id."""
+    fixes say `curve` instead of an internal id. The method is kept as the object's factory:
+    the preview binds that call's arguments to its parameters, not the constructor's."""
     import re
 
+    object.__setattr__(node, "_factory", factory)
     if node._name is not None:
         return
-    match = re.match(rf"^\s*([A-Za-z_]\w*)\s*=\s*[\w.\[\]]+\.{method}\(", node._span.source_line())
+    match = re.match(rf"^\s*([A-Za-z_]\w*)\s*=\s*[\w.\[\]]+\.{factory.__name__}\(", node._span.source_line())
     if match:
         object.__setattr__(node, "_name", match.group(1))
 
@@ -219,7 +221,7 @@ class Axes(Group):
         plot_props: dict[str, Any] = {**style, "stroke": stroke, "stroke_width": style.get("stroke_width", 4.0)}
         curve = Plot(self, fn, segments, clip, **plot_props)
         self._append(curve, enter_with_axes)
-        _name_from_call(curve, "plot")
+        _name_from_call(curve, Axes.plot)
         if label:
             xe = float(x1)
             ye = float(fn(xe)) if segments else 0.0
@@ -257,7 +259,7 @@ class Axes(Group):
         clip = vec(-FAR, until if until is not None else FAR)
         region = Area(self, top, base, clip, **style)
         self._append(region, enter_with_axes)
-        _name_from_call(region, "area")
+        _name_from_call(region, Axes.area)
         return region
 
     def vline(self, at: FloatVal, *, style: LineStyle = "solid", enter_with_axes: bool = True, **props: Unpack[StyleKeywords]) -> Line:
@@ -267,6 +269,7 @@ class Axes(Group):
         props.setdefault("stroke_width", 2.5)
         line = Line(start=vec(self.map_x(at), -h.y / 2), end=vec(self.map_x(at), h.y / 2), **props)
         self._append(line, enter_with_axes)
+        _name_from_call(line, Axes.vline)
         return line
 
     def hline(self, at: FloatVal, *, style: LineStyle = "solid", enter_with_axes: bool = True, **props: Unpack[StyleKeywords]) -> Line:
@@ -276,6 +279,7 @@ class Axes(Group):
         props.setdefault("stroke_width", 2.5)
         line = Line(start=vec(-w.x / 2, self.map_y(at)), end=vec(w.x / 2, self.map_y(at)), **props)
         self._append(line, enter_with_axes)
+        _name_from_call(line, Axes.hline)
         return line
 
     def scatter(self, xs: FloatColumn, ys: FloatColumn, *, radius: float = 0.06, enter_with_axes: bool = True, **props: Unpack[UnplacedStyleKeywords]) -> Group[Dot]:
@@ -284,6 +288,7 @@ class Axes(Group):
         dots = [Dot(r=radius, x=self.map_x(x), y=self.map_y(y), **props) for x, y in zip(to_float_list(xs), to_float_list(ys))]
         group = Group(*dots)
         self._append(group, enter_with_axes)
+        _name_from_call(group, Axes.scatter)
         return group
 
     def parametric(
@@ -308,7 +313,7 @@ class Axes(Group):
         options: dict[str, Any] = dict(style)
         curve = ParametricPlot(self, fx, fy, [points], stroke=stroke, stroke_width=options.pop("stroke_width", 4.0), **options)
         self._append(curve, enter_with_axes)
-        _name_from_call(curve, "parametric")
+        _name_from_call(curve, Axes.parametric)
         return curve
 
     def bars(self, xs: FloatColumn, heights: FloatColumn, *, width: float = 0.6, enter_with_axes: bool = True, **props: Unpack[UnplacedStyleKeywords]) -> Group[Node]:
@@ -329,7 +334,7 @@ class Axes(Group):
             bars.append(Rect(w=unit_w * width, h=abs(top - base), x=self.map_x(x), y=(top + base) / 2, **options))
         group = Group(*bars)
         self._append(group, enter_with_axes)
-        _name_from_call(group, "bars")
+        _name_from_call(group, Axes.bars)
         return group
 
     def zoom_to(self, *, x: Sequence[float] | None = None, y: Sequence[float] | None = None, **kw: Unpack[AnimationTiming]) -> Animation:

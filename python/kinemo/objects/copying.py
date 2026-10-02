@@ -73,5 +73,5 @@ def copy_node(node: "Node", frozen: bool) -> "Node":
     if not node.__dict__.get("_copying_child"):
         from .charts.axes import _name_from_call
 
-        _name_from_call(clone, "copy")
+        _name_from_call(clone, Node.copy)
     return clone

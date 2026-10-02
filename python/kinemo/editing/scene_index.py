@@ -114,6 +114,14 @@ def index_scene(scene: "Scene", ir: Mapping[str, Any], sources: Mapping[str, Sou
         if site is None:
             continue
         node = constructors.get(key)
+        factory = node.__dict__.get("_factory") if node is not None else None
+        if factory is not None:
+            # `ax.vline(4)`: the call is the method that made the object, not its constructor.
+            params, accepts = _positional_params(factory), _factory_accepts(factory, node)
+            types = {**_prop_types(type(node)), **_types_of(factory)} if node is not None else _types_of(factory)
+            defaults = _insertable_defaults(factory, types)
+            index.sites[key] = IndexedSite(source, site, params, accepts, max(counts[key], 1), types, defaults)
+            continue
         fn = _site_callable(site, source, node, owners.get(key))
         params, accepts = _constructor_binding(node) if node is not None else (_positional_params(fn), None)
         types = _site_types(fn, node, owners.get(key))
@@ -209,6 +217,20 @@ def _prop_types(cls: type["Node"]) -> dict[str, ValueType]:
     if any(p in out for p in ("fill", "stroke")):
         out["color"] = {"type": "color"}
     return out
+
+
+def _factory_accepts(factory: Callable[..., Any], node: "Node | None") -> frozenset[str] | None:
+    """Keywords the factory method takes; its `**style` takes the made object's props."""
+    try:
+        parameters = list(inspect.signature(inspect.unwrap(factory)).parameters.values())[1:]  # self
+    except (TypeError, ValueError):
+        return None
+    accepts = {p.name for p in parameters if p.kind in (p.POSITIONAL_OR_KEYWORD, p.KEYWORD_ONLY)}
+    if node is not None and any(p.kind is p.VAR_KEYWORD for p in parameters):
+        accepts.update(type(node)._all_props)  # pyright: ignore[reportPrivateUsage]
+        if node._color_props():  # pyright: ignore[reportPrivateUsage]
+            accepts.add("color")
+    return frozenset(accepts)
 
 
 def _constructor_binding(node: "Node") -> tuple[tuple[tuple[int, str], ...], frozenset[str] | None]:

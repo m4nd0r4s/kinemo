@@ -96,5 +96,5 @@ class PolarAxes(Group[Node]):
         self._add_child(curve, enter_with_axes)
         from .axes import _name_from_call
 
-        _name_from_call(curve, "plot")
+        _name_from_call(curve, PolarAxes.plot)
         return curve

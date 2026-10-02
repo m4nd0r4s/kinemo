@@ -96,7 +96,7 @@ class Plot(Shape):
         ax._append(line, enter_with_axes)
         from .axes import _name_from_call
 
-        _name_from_call(line, "tangent_at")
+        _name_from_call(line, Plot.tangent_at)
         return line
 
 

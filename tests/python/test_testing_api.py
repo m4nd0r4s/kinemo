@@ -109,6 +109,7 @@ def test_inspect_matches_cli_json() -> None:
     cli = subprocess.run(
         [sys.executable, "-m", "kinemo.cli", "inspect", str(ROOT / "examples" / "hello.py"), "--at", "end", "--json"],
         capture_output=True, text=True, check=True,
+        encoding="utf-8",
     )
     assert json.loads(json.dumps(report)) == json.loads(cli.stdout)
 
@@ -148,9 +149,12 @@ def run_snapshot_test(directory: Path, body: str, env: dict[str, str] | None = N
         "def test_frame():\n    assert_snapshot(hello, 'end')\n",
         encoding="utf-8",
     )
+    # No bytecode cache: the file is rewritten within the same second with the same size
+    # ("one" → "two"), which a cached .pyc (validated by mtime and size) would not notice.
     return subprocess.run(
         [sys.executable, "-m", "pytest", "-q", "-p", "no:cacheprovider", str(test_file)],
-        capture_output=True, text=True, cwd=directory, env={**os.environ, **(env or {})},
+        capture_output=True, text=True, cwd=directory, env={**os.environ, "PYTHONDONTWRITEBYTECODE": "1", **(env or {})},
+        encoding="utf-8",
     )
 
 

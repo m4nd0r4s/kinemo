@@ -17,6 +17,7 @@ import { installTimeline } from "./timeline.js";
 /**
  * The page can open on a given state, for links and screenshots:
  * `#t=1.5` (instant), `select=dot` (an object, by label), `bar=2` (a timeline bar).
+ * Changing the hash later moves the open page there too.
  */
 function applyLocationHash() {
   const params = new URLSearchParams(location.hash.slice(1));
@@ -48,5 +49,10 @@ installOutliner();
 installTimeline();
 installProblems();
 listen("message:scene", onScene);
+window.addEventListener("hashchange", () => {
+  if (!state.meta) return;
+  applyLocationHash();
+  setTime(state.t, true);
+});
 listen("message:notice", (msg) => console.info("kinemo:", msg.message));
 connect();

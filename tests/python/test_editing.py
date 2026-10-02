@@ -35,7 +35,7 @@ def built(path: Path, text: str | None = None) -> tuple[Any, SceneIndex, SourceF
     module = load_module(str(path), text)
     result = build(find_scenes(module)[0])
     assert result.scene is not None, result.diagnostics
-    source = SourceFile(str(path), text if text is not None else path.read_text())
+    source = SourceFile(str(path), text if text is not None else path.read_text(encoding="utf-8"))
     ir = json.loads(result.scene.builder.to_json())
     return result.scene, index_scene(result.scene, ir, {str(path): source}), source
 
@@ -43,7 +43,7 @@ def built(path: Path, text: str | None = None) -> tuple[Any, SceneIndex, SourceF
 @pytest.fixture
 def scene_file(tmp_path: Path) -> Path:
     path = tmp_path / "scene.py"
-    path.write_text(SCENE)
+    path.write_text(SCENE, encoding="utf-8")
     return path
 
 
@@ -98,7 +98,7 @@ def test_a_default_prop_is_added_as_a_keyword(scene_file: Path) -> None:
 
 def test_several_keywords_go_into_empty_parentheses(tmp_path: Path) -> None:
     path = tmp_path / "scene.py"
-    path.write_text(SCENE.replace("k.Dot(r=0.2, color=k.RED)", "k.Dot()"))
+    path.write_text(SCENE.replace("k.Dot(r=0.2, color=k.RED)", "k.Dot()"), encoding="utf-8")
     scene, index, source = built(path)
     dot = index.sites[span_key(node(scene, "dot")._span)]
     text = apply_changes(source, [Change(dot.site, "x", "1"), Change(dot.site, "y", "2")])
@@ -124,7 +124,7 @@ def test_an_edited_text_builds_without_touching_the_file(scene_file: Path) -> No
     ir = json.loads(live.builder.to_json())
     radius = next(sig for sig in ir["signals"] if sig["owner"] == [node(live, "dot")._id, "r"])
     assert radius["initial"] == {"Float": 0.9}
-    assert scene_file.read_text() == SCENE
+    assert scene_file.read_text(encoding="utf-8") == SCENE
 
 
 TYPED = '''import kinemo as k
@@ -141,7 +141,7 @@ def typed(s: k.Scene):
 
 def test_parameters_carry_the_kind_of_value_they_take(tmp_path: Path) -> None:
     path = tmp_path / "scene.py"
-    path.write_text(TYPED)
+    path.write_text(TYPED, encoding="utf-8")
     scene, index, _ = built(path)
     sites = index.json()
     by_callee = {site["callee"]: site for site in sites.values()}
@@ -165,7 +165,7 @@ def test_parameters_carry_the_kind_of_value_they_take(tmp_path: Path) -> None:
 
 def test_optional_parameters_can_be_added_with_their_defaults(tmp_path: Path) -> None:
     path = tmp_path / "scene.py"
-    path.write_text(TYPED)
+    path.write_text(TYPED, encoding="utf-8")
     scene, index, source = built(path)
     play = next(entry for entry in index.sites.values() if entry.site.callee == "s.play")
     assert play.defaults == {"duration": 1.0, "ease": "ease.smooth"}  # `at=` would move the play
@@ -188,7 +188,7 @@ def test_positional_arguments_bind_to_their_parameter_on_every_call(tmp_path: Pa
     path.write_text(
         "import kinemo as k\n\n@k.scene\ndef bound(s: k.Scene):\n    x = k.signal(0.0)\n"
         "    dot = k.Dot()\n    s.play(k.fade_in(dot), duration=0.5)\n    s.play(x.to(2.5))\n"
-    )
+    , encoding="utf-8")
     _, index, _ = built(path)
     sites = {entry.site.callee: entry for entry in index.sites.values()}
     assert dict(sites["x.to"].params)[0] == "value"

@@ -220,7 +220,7 @@ def test_row_25_clock_animated_with_easing_is_w0312(tmp_path: Any) -> None:
         "    soc = k.integrate(1.0, d=hour)\n"
         "    s.add(k.Text(lambda: f'{soc():.1f}'))\n"
         "    s.play(hour.to(24), duration=4)\n"
-    )
+    , encoding="utf-8")
     from kinemo.cli.loader import find_scenes, load_module
 
     result = build_with_lints(find_scenes(load_module(str(src)))[0])
@@ -247,11 +247,11 @@ def test_row_28_python_exception_in_dev_keeps_the_last_good_version(tmp_path: An
     from kinemo.cli.dev import Session
 
     path = tmp_path / "scene.py"
-    path.write_text("import kinemo as k\n\n@k.scene\ndef scene(s: k.Scene):\n    s.add(k.Circle())\n")
+    path.write_text("import kinemo as k\n\n@k.scene\ndef scene(s: k.Scene):\n    s.add(k.Circle())\n", encoding="utf-8")
     server = FakeServer()
     session = Session(str(path), None, {}, server)  # type: ignore[arg-type]
     assert session.rebuild()
-    path.write_text("import kinemo as k\n\n@k.scene\ndef scene(s: k.Scene):\n    1 / 0\n")
+    path.write_text("import kinemo as k\n\n@k.scene\ndef scene(s: k.Scene):\n    1 / 0\n", encoding="utf-8")
     os.utime(path, None)
     assert not session.rebuild()
     assert len(server.scenes) == 1  # the good version stays published
@@ -349,7 +349,7 @@ def test_dev_warns_when_two_builds_differ(tmp_path: Any, capsys: Any) -> None:
     path.write_text(
         "import itertools\nimport kinemo as k\n\n_counter = itertools.count()\n\n"
         "@k.scene\ndef scene(s: k.Scene):\n    s.add(k.Circle(r=1 + next(_counter)))\n"
-    )
+    , encoding="utf-8")
     session = Session(str(path), None, {}, FakeServer())  # type: ignore[arg-type]
     assert session.rebuild()
     assert "gave different results" in capsys.readouterr().out

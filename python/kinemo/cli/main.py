@@ -101,7 +101,19 @@ def parser() -> argparse.ArgumentParser:
     return ap
 
 
+def _utf8_output() -> None:
+    """kinemo prints "—", "×" and "→". On Windows, output to a pipe (CI, an editor, a
+    subprocess) defaults to the ANSI code page, which cannot encode them; use UTF-8."""
+    if sys.platform != "win32":
+        return
+    for stream in (sys.stdout, sys.stderr):
+        reconfigure = getattr(stream, "reconfigure", None)
+        if reconfigure is not None:
+            reconfigure(encoding="utf-8", errors="replace")
+
+
 def main(argv: list[str] | None = None) -> int:
+    _utf8_output()
     args = parser().parse_args(argv)
     args.params = _params(getattr(args, "param_items", None))
     run: Callable[[argparse.Namespace], int] = args.run

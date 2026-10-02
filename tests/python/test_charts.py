@@ -266,5 +266,6 @@ def test_energy_example_passes_check_strict() -> None:
         [sys.executable, "-m", "kinemo.cli", "check", "--strict", str(ROOT / "examples" / "energy.py")],
         capture_output=True,
         text=True,
+        encoding="utf-8",
     )
     assert result.returncode == 0, result.stdout + result.stderr

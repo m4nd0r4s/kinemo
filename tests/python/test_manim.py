@@ -103,7 +103,7 @@ def test_a_bare_manim_name_from_a_star_import_habit_is_k1101(tmp_path: Path) -> 
     from kinemo.cli.loader import build, find_scenes, load_module
 
     path = tmp_path / "scene.py"
-    path.write_text("import kinemo as k\n\n@k.scene\ndef habit(s: k.Scene):\n    s.play(Create(k.Circle()))\n")
+    path.write_text("import kinemo as k\n\n@k.scene\ndef habit(s: k.Scene):\n    s.play(Create(k.Circle()))\n", encoding="utf-8")
     result = build(find_scenes(load_module(str(path)))[0])
     (d,) = result.diagnostics
     assert d.code == "K1101" and "k.draw(obj)" in d.message

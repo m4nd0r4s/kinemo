@@ -186,6 +186,7 @@ def test_inspect_matches_cli_json_and_labels_objects() -> None:
     cli = subprocess.run(
         [sys.executable, "-m", "kinemo.cli", "inspect", HELLO, "--at", "end", "--json"],
         capture_output=True, text=True, check=True, cwd=ROOT,
+        encoding="utf-8",
     )
     expected = json.loads(cli.stdout)
     assert {k: scene[k] for k in expected} == expected
@@ -256,7 +257,7 @@ def test_python_dash_m_kinemo_mcp_over_stdio() -> None:
     env = {**os.environ, "PYTHONUNBUFFERED": "1"}
     process = subprocess.run(
         [sys.executable, "-m", "kinemo.mcp"], input=stdin, capture_output=True, text=True, timeout=120, cwd=ROOT, env=env
-    )
+    , encoding="utf-8")
     assert process.returncode == 0, process.stderr
     responses = [json.loads(line) for line in process.stdout.splitlines()]
     assert [r["id"] for r in responses] == [0, 1, 2]

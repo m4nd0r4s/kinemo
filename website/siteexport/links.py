@@ -17,12 +17,12 @@ def broken_links(out: Path, ignore: tuple[str, ...] = ()) -> list[str]:
 
     def anchors(page: Path) -> set[str]:
         if page not in ids:
-            ids[page] = set(_ID.findall(page.read_text())) if page.suffix == ".html" else set()
+            ids[page] = set(_ID.findall(page.read_text(encoding="utf-8"))) if page.suffix == ".html" else set()
         return ids[page]
 
     problems: list[str] = []
     for page in sorted(out.rglob("*.html")):
-        for target in _REF.findall(page.read_text()):
+        for target in _REF.findall(page.read_text(encoding="utf-8")):
             if re.match(r"[a-z][a-z0-9+.-]*:", target) or target.startswith("//"):
                 continue
             path_part, _, anchor = target.partition("#")

@@ -26,6 +26,7 @@ def check_output(file: Path, *extra: str) -> str:
     run = subprocess.run(
         [sys.executable, "-m", "kinemo.cli", "check", file.name, *extra],
         cwd=file.parent, env=env, capture_output=True, text=True, check=False,
+        encoding="utf-8",
     )
     return (run.stdout + run.stderr).rstrip().replace(str(ROOT) + os.sep, "")
 
@@ -54,7 +55,7 @@ def preview_edit() -> Edit:
     from kinemo.editing.source_edit import Change, apply_changes
 
     path = EXAMPLES / "derivative.py"
-    text = path.read_text()
+    text = path.read_text(encoding="utf-8")
     scene = load_scene("derivative").build()
     index = index_scene(scene, json.loads(scene.builder.to_json()), {str(path): SourceFile(str(path), text)})
     dot = next(n for n in scene._nodes if n._name == "dot")  # pyright: ignore[reportPrivateUsage]
@@ -87,7 +88,7 @@ def timings() -> list[Timing]:
 
     out: list[Timing] = []
     code = "import time; t = time.perf_counter(); import kinemo; print(time.perf_counter() - t)"
-    imports = min(float(subprocess.run([sys.executable, "-c", code], capture_output=True, text=True, check=True).stdout) for _ in range(3))
+    imports = min(float(subprocess.run([sys.executable, "-c", code], capture_output=True, text=True, check=True, encoding="utf-8").stdout) for _ in range(3))
     out.append(Timing("import kinemo", "150 ms", f"{imports * 1000:.0f} ms", imports < 0.150))
     bubble = load_scene("bubble_sort")
     check = _best(3, lambda: build(bubble))

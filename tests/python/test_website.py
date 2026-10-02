@@ -38,6 +38,7 @@ def site(tmp_path_factory: pytest.TempPathFactory) -> Path:
     run = subprocess.run(
         ["npm", "run", "build"], cwd=WEBSITE, env={**os.environ, "KINEMO_SITE_OUT": str(out), "KINEMO_SITE_DATA": str(data)},
         capture_output=True, text=True, check=False,
+        encoding="utf-8",
     )
     assert run.returncode == 0, run.stdout[-3000:] + run.stderr[-3000:]
     return out
@@ -57,7 +58,7 @@ def test_every_docs_file_has_a_page(site: Path) -> None:
 
 
 def test_the_search_index_covers_symbols_and_sections(site: Path) -> None:
-    index = json.loads((site / "search.json").read_text())
+    index = json.loads((site / "search.json").read_text(encoding="utf-8"))
     sections = {entry["section"] for entry in index}
     assert "Constraints versus animation" in sections
     assert "k.Node.to_place (method)" in sections
@@ -65,7 +66,7 @@ def test_the_search_index_covers_symbols_and_sections(site: Path) -> None:
 
 
 def test_the_landing_page_shows_real_output(site: Path) -> None:
-    page = (site / "index.html").read_text()
+    page = (site / "index.html").read_text(encoding="utf-8")
     assert "cannot animate x: the axis is held by a constraint" in page
     assert "K1101 error" in page
     assert "examples/derivative.py" in page

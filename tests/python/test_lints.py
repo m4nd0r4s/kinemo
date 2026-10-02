@@ -116,7 +116,7 @@ def test_w1001_clamp_fix_produces_a_scene_without_the_lint(tmp_path: Path) -> No
     path.write_text(source, encoding="utf-8")
 
     def load() -> Any:
-        spec = importlib.util.spec_from_file_location(f"edge_scene_{len(path.read_text())}", path)
+        spec = importlib.util.spec_from_file_location(f"edge_scene_{len(path.read_text(encoding='utf-8'))}", path)
         assert spec and spec.loader
         module = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(module)

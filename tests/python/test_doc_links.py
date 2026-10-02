@@ -24,7 +24,7 @@ def slug(heading: str) -> str:
 
 
 def anchors(path: Path) -> set[str]:
-    text = FENCE.sub("", path.read_text())
+    text = FENCE.sub("", path.read_text(encoding="utf-8"))
     found = set(EXPLICIT.findall(text))
     seen: dict[str, int] = {}
     for h in HEADING.findall(text):
@@ -37,7 +37,7 @@ def anchors(path: Path) -> set[str]:
 
 @pytest.mark.parametrize("doc", DOCS, ids=lambda p: str(p.relative_to(ROOT)))
 def test_links_resolve(doc: Path) -> None:
-    text = FENCE.sub("", doc.read_text())
+    text = FENCE.sub("", doc.read_text(encoding="utf-8"))
     broken: list[str] = []
     for target in LINK.findall(text) + IMAGE.findall(text):
         if re.match(r"[a-z]+:", target) or target.startswith("#") and False:

@@ -50,7 +50,7 @@ def export(*, videos: bool = True, measure: bool = True, data_file: Path = DATA)
         "version": kinemo.__version__,
         "hero": {
             "name": HERO,
-            "source": (EXAMPLES / f"{HERO}.py").read_text().rstrip("\n"),
+            "source": (EXAMPLES / f"{HERO}.py").read_text(encoding="utf-8").rstrip("\n"),
             "duration": hero.duration,
             "bars": hero.bars,
         },
@@ -66,7 +66,7 @@ def export(*, videos: bool = True, measure: bool = True, data_file: Path = DATA)
         "machine": f"{platform.system()} {platform.machine()}, Python {sys.version_info.major}.{sys.version_info.minor}",
     }
     data_file.parent.mkdir(parents=True, exist_ok=True)
-    data_file.write_text(json.dumps(data, indent=1))
+    data_file.write_text(json.dumps(data, indent=1), encoding="utf-8")
     print(f"exported {len(examples)} examples and the landing data in {time.perf_counter() - started:.1f} s", flush=True)
     return data
 

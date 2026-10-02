@@ -35,8 +35,8 @@ def test_check_summary_is_stable(name: str) -> None:
     summary = {"duration": round(s.duration, 6), "timeline": [(round(e.start, 6), round(e.end, 6), e.label) for e in s._log]}
     path = GOLDEN / f"{name}.timeline.json"
     if UPDATE or not path.exists():
-        path.write_text(json.dumps(summary, indent=1, ensure_ascii=False))
-    assert json.loads(path.read_text()) == json.loads(json.dumps(summary))
+        path.write_text(json.dumps(summary, indent=1, ensure_ascii=False), encoding="utf-8")
+    assert json.loads(path.read_text(encoding="utf-8")) == json.loads(json.dumps(summary))
 
 
 @pytest.mark.parametrize("name,t", [(n, t) for n, ts in sorted(CASES.items()) for t in ts])

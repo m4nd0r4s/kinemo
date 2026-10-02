@@ -41,7 +41,7 @@ def _cache_key(name: str) -> str:
     import kinemo
 
     digest = hashlib.sha256()
-    for part in (RENDER_VERSION, kinemo.__version__, (EXAMPLES / f"{name}.py").read_text()):
+    for part in (RENDER_VERSION, kinemo.__version__, (EXAMPLES / f"{name}.py").read_text(encoding="utf-8")):
         digest.update(part.encode())
     return digest.hexdigest()[:16]
 

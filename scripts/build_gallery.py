@@ -64,7 +64,7 @@ def main() -> None:
             image = IMAGES / f"{name}_{i}.png"
             image.write_bytes(scene.builder.frame_png(t, "draft"))
             frames.append((image.name, t))
-        code = (EXAMPLES / f"{name}.py").read_text().rstrip()
+        code = (EXAMPLES / f"{name}.py").read_text(encoding="utf-8").rstrip()
         feature_list = ", ".join(f"`{f}`" for f in features)
         page = [
             f"# {title}",
@@ -82,10 +82,10 @@ def main() -> None:
             "```",
             "",
         ]
-        (OUT / f"{name}.md").write_text("\n".join(page))
+        (OUT / f"{name}.md").write_text("\n".join(page), encoding="utf-8")
         index.append(f"| [{title}]({name}.md) | {about.split('. ')[0].rstrip('.')}. |")
     index.append("")
-    (OUT / "README.md").write_text("\n".join(index))
+    (OUT / "README.md").write_text("\n".join(index), encoding="utf-8")
     print(f"wrote {len(GALLERY)} examples to {OUT}")
 
 

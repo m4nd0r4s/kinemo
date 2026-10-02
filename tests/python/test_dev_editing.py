@@ -40,7 +40,7 @@ class FakeServer:
 
 def session_for(tmp_path: Path) -> tuple[Session, FakeServer, Path]:
     path = tmp_path / "scene.py"
-    path.write_text(SCENE)
+    path.write_text(SCENE, encoding="utf-8")
     server = FakeServer()
     session = Session(str(path), None, {}, server)  # type: ignore[arg-type]
     assert session.rebuild()
@@ -68,7 +68,7 @@ def test_a_committed_edit_rewrites_the_file(tmp_path: Path) -> None:
     meta = server.scenes[-1]
     request = {"id": 1, "live": False, "changes": [{"site": site_of(meta, "k.Dot"), "target": "r", "value": "0.5"}]}
     session.process_edits([request])
-    assert "dot = k.Dot(r=0.5)" in path.read_text()
+    assert "dot = k.Dot(r=0.5)" in path.read_text(encoding="utf-8")
     assert server.notes[-1] == {"type": "edit_result", "id": 1, "ok": True, "message": "", "live": False}
 
 
@@ -78,7 +78,7 @@ def test_live_edits_rebuild_without_writing_and_only_the_last_counts(tmp_path: P
     site = site_of(meta, "k.Dot")
     live = [{"id": i, "live": True, "changes": [{"site": site, "target": "r", "value": str(v)}]} for i, v in enumerate((0.3, 0.4, 0.5))]
     session.process_edits(live)
-    assert path.read_text() == SCENE
+    assert path.read_text(encoding="utf-8") == SCENE
     assert len(server.scenes) == 2 and server.scenes[-1]["live"] is True
     assert [n["id"] for n in server.notes] == [2]
 
@@ -94,10 +94,10 @@ def test_a_cancelled_drag_shows_the_disk_version_again(tmp_path: Path) -> None:
 def test_edits_against_a_file_changed_elsewhere_are_refused(tmp_path: Path) -> None:
     session, server, path = session_for(tmp_path)
     site = site_of(server.scenes[-1], "k.Dot")
-    path.write_text(SCENE + "\n# edited in the editor\n")
+    path.write_text(SCENE + "\n# edited in the editor\n", encoding="utf-8")
     session.process_edits([{"id": 1, "live": False, "changes": [{"site": site, "target": "r", "value": "0.5"}]}])
     assert server.notes[-1]["ok"] is False and "changed since the preview was built" in server.notes[-1]["message"]
-    assert "edited in the editor" in path.read_text()
+    assert "edited in the editor" in path.read_text(encoding="utf-8")
 
 
 def test_a_default_prop_is_added_and_unknown_targets_refused(tmp_path: Path) -> None:
@@ -105,7 +105,7 @@ def test_a_default_prop_is_added_and_unknown_targets_refused(tmp_path: Path) -> 
     meta = server.scenes[-1]
     square = site_of(meta, "k.Square")
     session.process_edits([{"id": 1, "live": False, "changes": [{"site": square, "target": "rotate", "value": "45"}]}])
-    assert "k.Square(1.6, rotate=45)" in path.read_text()
+    assert "k.Square(1.6, rotate=45)" in path.read_text(encoding="utf-8")
     session.rebuild()
     play = site_of(server.scenes[-1], "s.play")
     session.process_edits([{"id": 2, "live": False, "changes": [{"site": play, "target": "nope", "value": "1"}]}])

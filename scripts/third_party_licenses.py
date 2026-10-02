@@ -27,7 +27,7 @@ COPYRIGHT = re.compile(r"^[ \t]*(?:(?:Copyright|COPYRIGHT)[ \t]*(?:\(c\)|\(C\)|Â
 
 
 def metadata(*features: str) -> dict:  # type: ignore[type-arg]
-    run = subprocess.run(["cargo", "metadata", "--format-version", "1", *features], cwd=ROOT, capture_output=True, text=True, check=True)
+    run = subprocess.run(["cargo", "metadata", "--format-version", "1", *features], cwd=ROOT, capture_output=True, text=True, check=True, encoding="utf-8")
     return json.loads(run.stdout)
 
 
@@ -64,7 +64,7 @@ def reachable(meta: dict, start: str) -> set[str]:  # type: ignore[type-arg]
 def license_texts(package: dict) -> list[tuple[str, str]]:  # type: ignore[type-arg]
     folder = Path(package["manifest_path"]).parent
     files = sorted(p for p in folder.iterdir() if p.is_file() and p.name.upper().startswith(LICENSE_NAMES))
-    return [(p.name, p.read_text(errors="replace").strip()) for p in files]
+    return [(p.name, p.read_text(errors="replace", encoding="utf-8").strip()) for p in files]
 
 
 def main() -> int:
@@ -120,7 +120,7 @@ def main() -> int:
     ]
     for n, text in enumerate(texts.values(), start=1):
         lines += [f'<a id="text-{n}"></a>', "", f"### Text {n}", "", "```text", text, "```", ""]
-    OUT.write_text("\n".join(lines))
+    OUT.write_text("\n".join(lines), encoding="utf-8")
     print(f"wrote {OUT.relative_to(ROOT)}: {len(extension)} crates in the extension, {len(gpu)} more with the GPU backend, {len(texts)} distinct texts")
     return 0
 

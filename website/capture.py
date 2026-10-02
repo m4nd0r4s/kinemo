@@ -70,6 +70,7 @@ def main() -> int:
     server = subprocess.Popen(
         [sys.executable, "-m", "kinemo.cli", "dev", "examples/derivative.py", "--no-open", "--port", str(port)],
         cwd=ROOT, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True,
+        encoding="utf-8",
     )
     try:
         wait_until_built(server)

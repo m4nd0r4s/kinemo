@@ -65,5 +65,5 @@ def test_final_render_at_least_real_time(tmp_path: Path) -> None:
 
 def test_import_under_150ms() -> None:
     code = "import time; t = time.perf_counter(); import kinemo; print(time.perf_counter() - t)"
-    times = [float(subprocess.run([sys.executable, "-c", code], capture_output=True, text=True, check=True).stdout) for _ in range(3)]
+    times = [float(subprocess.run([sys.executable, "-c", code], capture_output=True, text=True, check=True, encoding="utf-8").stdout) for _ in range(3)]
     assert min(times) < 0.150

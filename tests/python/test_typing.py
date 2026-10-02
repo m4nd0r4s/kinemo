@@ -79,6 +79,7 @@ def _pyright(project: Path) -> list[dict[str, Any]]:
         text=True,
         cwd=ROOT,
         timeout=600,
+        encoding="utf-8",
     )
     try:
         report = json.loads(result.stdout)
@@ -112,7 +113,7 @@ def _strict_project(directory: Path, *, report_unused_variables: bool = True) ->
         # Docs examples bind objects to names so diagnostics read `grid`, not `grid#3`.
         config["reportUnusedVariable"] = False
     path = directory / "pyrightconfig.json"
-    path.write_text(json.dumps(config, indent=2))
+    path.write_text(json.dumps(config, indent=2), encoding="utf-8")
     return path
 
 
@@ -124,7 +125,7 @@ def test_user_scenes_pass_pyright_strict() -> None:
 def test_docs_examples_pass_pyright_strict(tmp_path: Path) -> None:
     for i, entry in enumerate(catalog.entries()):
         name = re.sub(r"\W+", "_", entry.symbol).strip("_").lower()
-        (tmp_path / f"example_{i:03d}_{name}.py").write_text(entry.example)
+        (tmp_path / f"example_{i:03d}_{name}.py").write_text(entry.example, encoding="utf-8")
     errors = _errors(_pyright(_strict_project(tmp_path, report_unused_variables=False)))
     assert not errors, "Pyright strict errors in docs examples:\n" + _describe(errors)
 
@@ -154,7 +155,7 @@ def _surface_lines() -> list[str]:
 
 def test_public_surface_is_fully_typed(tmp_path: Path) -> None:
     lines = _surface_lines()
-    (tmp_path / "surface.py").write_text("\n".join(lines) + "\n")
+    (tmp_path / "surface.py").write_text("\n".join(lines) + "\n", encoding="utf-8")
     diagnostics = _pyright(_strict_project(tmp_path))
     errors = _errors(diagnostics)
     assert not errors, "public symbols with unknown types:\n" + _describe(errors)

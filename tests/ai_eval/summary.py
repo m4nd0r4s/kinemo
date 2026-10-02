@@ -14,6 +14,7 @@ def strict_ok(path: Path) -> tuple[bool, list[str]]:
     out = subprocess.run(
         [sys.executable, "-m", "kinemo.cli.main", "check", "--json", "--strict", str(path)],
         capture_output=True, text=True,
+        encoding="utf-8",
     )
     try:
         report = json.loads(out.stdout)
@@ -24,8 +25,8 @@ def strict_ok(path: Path) -> tuple[bool, list[str]]:
 
 
 def main() -> int:
-    prompts = [line.split("|")[0].strip() for line in (HERE / "prompts.txt").read_text().splitlines() if line and not line.startswith("#")]
-    recorded = {r["id"]: r for r in json.loads((HERE / "results.json").read_text())} if (HERE / "results.json").exists() else {}
+    prompts = [line.split("|")[0].strip() for line in (HERE / "prompts.txt").read_text(encoding="utf-8").splitlines() if line and not line.startswith("#")]
+    recorded = {r["id"]: r for r in json.loads((HERE / "results.json").read_text(encoding="utf-8"))} if (HERE / "results.json").exists() else {}
     passed = 0
     for pid in prompts:
         path = HERE / "runs" / f"{pid}.py"

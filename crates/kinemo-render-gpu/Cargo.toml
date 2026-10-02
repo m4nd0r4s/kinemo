@@ -1,0 +1,19 @@
+[package]
+name = "kinemo-render-gpu"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+description = "Vello (wgpu) GPU backend for kinemo-render: headless render to texture with RGBA8 readback."
+
+[dependencies]
+kinemo-render.workspace = true
+kurbo.workspace = true
+tiny-skia.workspace = true
+vello.workspace = true
+pollster.workspace = true
+rayon.workspace = true
+
+[dev-dependencies]
+kinemo-ir.workspace = true
+kinemo-text.workspace = true

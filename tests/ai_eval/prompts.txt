@@ -1,0 +1,51 @@
+# One request per line: id | natural-language description
+p01 | Write "Hello, world" in the center and then change the color to blue.
+p02 | Draw a red circle, then transform it into a green square.
+p03 | Show three circles side by side that enter one after another.
+p04 | A dot moves from the left to the right of the screen in 3 seconds.
+p05 | A title at the top and a subtitle right below it, both appearing with a fade.
+p06 | Sort the bars [4, 1, 3, 2] with bubble sort, highlighting the comparisons in yellow.
+p07 | Show the formula a^2 + b^2 = c^2 and then transform it into c = \sqrt{a^2 + b^2}.
+p08 | Cartesian axes with the parabola y = x^2 from -2 to 2.
+p09 | A dot travels along the curve y = sin(x) from 0 to 2π while a label shows the value of x.
+p10 | A progress bar that fills from 0% to 100% with the percentage text updating.
+p11 | A square rotates 360 degrees and returns to its original size with a pulse.
+p12 | Show a snippet of Python code and highlight the second line.
+p13 | Morph between two versions of a Python function: one with a loop and another with sum().
+p14 | A 3x3 grid of squares that enter with a stagger starting from the center.
+p15 | A ball falls and bounces on the floor for 5 seconds using a simulation.
+p16 | A digital clock that shows the seconds passing from 0 to 10.
+p17 | A text with the word "important" highlighted in yellow after it appears.
+p18 | An arrow points from a square to a circle; then the circle moves and the arrow follows.
+p19 | A list of three items in a left-aligned column, each item entering with a fade.
+p20 | A function plot that grows from left to right as time passes.
+p21 | A tangent that slides along the curve y = x^3 - x showing the slope.
+p22 | Show the integral from 0 to 1 of x^2 as a shaded area under the curve.
+p23 | Three texts that swap positions in a row (the first goes to the end).
+p24 | A counter that fires a flash when it goes past 5.
+p25 | A rectangle that is highlighted in yellow while a text explains something, returning to its original color afterwards.
+p26 | The animation progressively speeds up while 10 dots enter in sequence.
+p27 | A "Thermometer" component with a temperature prop that changes the height and color of a bar.
+p28 | A scene with two slide breaks: title, development and conclusion.
+p29 | A regular polygon whose number of sides is a scene parameter.
+p30 | A text that says "Done!" when an integral of a constant rate reaches 1.
+p31 | A horizontal dashed line in the middle of the screen and a dot above it.
+p32 | A text that appears letter by letter and then fades out.
+p33 | A group with a circle and a text inside it that moves as a whole to the top-left corner.
+p34 | Two stacked equations, the second with the term "x" highlighted.
+p35 | Axes with two plots (sine and cosine) with different labels and colors.
+p36 | An animated zoom on an axis from 0..10 to 2..4.
+p37 | A dot that leaves a trail while tracing a circle.
+p38 | Show a simple table of 3 rows with name and value.
+p39 | Show a bar chart of 4 categories that changes to new values.
+p40 | An arc that grows from 0 to 270 degrees.
+p41 | A multi-line text with a maximum width of 6 units, center-aligned.
+p42 | A square that enters growing from the bottom edge.
+p43 | An animation that waits for an event from a simulation to continue the script.
+p44 | A circle that follows the outline of a square and rotates along with the tangent.
+p45 | A sequence: draw a triangle, show squares on its sides and highlight the largest one.
+p46 | A reactive text that shows double a signal while it goes from 0 to 10.
+p47 | Two animations in parallel with different durations followed by a pause.
+p48 | A dot that gradually changes color from blue to red as it rises.
+p49 | A line chart with two years of data that transforms into the following year.
+p50 | A movie with two short scenes linked by a crossfade.

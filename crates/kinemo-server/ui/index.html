@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>kinemo dev</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <header class="topbar">
+    <span class="brand">kinemo<span class="brand-dim">dev</span></span>
+    <span id="scene-title" class="scene-title">connecting…</span>
+    <span class="spacer"></span>
+    <span id="build-status" class="build-status"></span>
+    <span id="connection" class="connection" title="WebSocket"></span>
+  </header>
+
+  <main class="workspace">
+    <nav class="outliner" id="outliner">
+      <input id="outliner-filter" class="outliner-filter" placeholder="Filter objects" spellcheck="false">
+      <div id="outliner-tree" class="outliner-tree"></div>
+    </nav>
+
+    <section class="stage" id="stage">
+      <div class="frame-wrap" id="frame-wrap">
+        <canvas id="frame" width="960" height="540"></canvas>
+        <canvas id="highlight" width="960" height="540"></canvas>
+      </div>
+      <div class="error-overlay hidden" id="error-overlay">
+        <div class="error-card">
+          <div class="error-head">
+            <span class="error-title">Build failed</span>
+            <span class="error-sub">showing the last good version</span>
+            <button class="ghost" id="error-dismiss" title="Dismiss">✕</button>
+          </div>
+          <div id="error-body"></div>
+        </div>
+      </div>
+      <div class="toast hidden" id="toast"></div>
+    </section>
+
+    <aside class="inspector" id="inspector">
+      <div class="inspector-empty" id="inspector-empty">
+        <p>Click an object (or a timeline bar) to see where each value came from. Values the
+          code wrote as literals can be edited here: drag a number, or click to type. Drag a
+          selected object to move it. Every edit is written to the source file.</p>
+        <div id="problems"></div>
+      </div>
+      <div class="inspector-object hidden" id="inspector-object"></div>
+    </aside>
+  </main>
+
+  <footer class="transport">
+    <div class="controls">
+      <button id="play" class="play" title="Play/pause (space)">▶</button>
+      <button id="step-back" class="ghost" title="Previous frame (←)">◀︎|</button>
+      <button id="step-forward" class="ghost" title="Next frame (→)">|▶︎</button>
+      <span class="time" id="time">0.00 s</span>
+      <span class="time-dim" id="time-total">/ 0.00 s</span>
+      <span class="time-dim" id="frame-number"></span>
+      <span class="spacer"></span>
+      <label class="option" title="Bars from one statement in a loop as one bar (double-click to expand)"><input type="checkbox" id="group-repeats" checked> group repeats</label>
+      <span class="zoom">
+        <button id="zoom-out" class="ghost" title="Zoom out (Ctrl/⌘ + wheel)">−</button>
+        <button id="zoom-fit" class="ghost" title="Fit the whole scene">fit</button>
+        <button id="zoom-in" class="ghost" title="Zoom in (Ctrl/⌘ + wheel)">+</button>
+      </span>
+      <select id="speed" class="speed" title="Playback speed">
+        <option value="0.25">0.25×</option>
+        <option value="0.5">0.5×</option>
+        <option value="1" selected>1×</option>
+        <option value="2">2×</option>
+      </select>
+      <label class="option"><input type="checkbox" id="loop" checked> loop</label>
+    </div>
+    <div class="timeline" id="timeline">
+      <div class="timeline-content" id="timeline-content">
+        <div class="ruler" id="ruler"></div>
+        <div class="marks" id="marks"></div>
+        <div class="lanes" id="lanes"></div>
+        <div class="playhead" id="playhead"></div>
+      </div>
+    </div>
+  </footer>
+
+  <script type="module" src="/ui/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,88 @@
+[workspace]
+resolver = "2"
+members = ["crates/*"]
+# The Vello/wgpu backend is optional (`--features gpu`); plain `cargo build/test` skip it.
+default-members = [
+    "crates/kinemo-ir",
+    "crates/kinemo-eval",
+    "crates/kinemo-layout",
+    "crates/kinemo-text",
+    "crates/kinemo-code",
+    "crates/kinemo-math",
+    "crates/kinemo-resolve",
+    "crates/kinemo-render",
+    "crates/kinemo-encode",
+    "crates/kinemo-server",
+    "crates/kinemo-py",
+]
+
+[workspace.package]
+version = "0.9.0"
+edition = "2021"
+license = "MIT OR Apache-2.0"
+# The crates are internal to the Python package (published to PyPI), not crates.io libraries.
+publish = false
+
+[workspace.dependencies]
+kinemo-ir = { path = "crates/kinemo-ir" }
+kinemo-eval = { path = "crates/kinemo-eval" }
+kinemo-layout = { path = "crates/kinemo-layout" }
+kinemo-resolve = { path = "crates/kinemo-resolve" }
+kinemo-text = { path = "crates/kinemo-text" }
+kinemo-math = { path = "crates/kinemo-math" }
+kinemo-code = { path = "crates/kinemo-code" }
+kinemo-render = { path = "crates/kinemo-render" }
+kinemo-encode = { path = "crates/kinemo-encode" }
+kinemo-server = { path = "crates/kinemo-server" }
+kinemo-render-gpu = { path = "crates/kinemo-render-gpu" }
+serde = { version = "1", features = ["derive"] }
+serde_json = { version = "1", features = ["float_roundtrip"] }
+tiny-skia = "0.11"
+kurbo = "0.11"
+rustybuzz = "0.20"
+ttf-parser = "0.25"
+png = "0.17"
+# Raster images (`k.Image`): PNG/JPEG decoding only; same crate typst already pulls in.
+image = { version = "0.25", default-features = false, features = ["png", "jpeg"] }
+# SVG import (`k.SVG`) and data URIs in SVG export.
+usvg = { version = "0.47", default-features = false, features = ["text"] }
+base64 = "0.22"
+rayon = "1"
+tree-sitter = "0.25"
+tree-sitter-highlight = "0.25"
+tree-sitter-python = "0.25"
+tree-sitter-rust = "0.24"
+tree-sitter-javascript = "0.25"
+tree-sitter-typescript = "0.23"
+tree-sitter-c = "0.24"
+tree-sitter-cpp = "0.23"
+tree-sitter-json = "0.24"
+axum = { version = "0.8", features = ["ws"] }
+tokio = { version = "1", features = ["rt-multi-thread", "net", "sync", "macros", "time"] }
+typst = "0.15.1"
+typst-layout = "0.15.1"
+typst-assets = { version = "0.15.1", features = ["fonts"] }
+comemo = "0.5"
+mitex = "0.2.4"
+mitex-spec-gen = "0.2.4"
+fxhash = "0.2"
+arrow-array = { version = "60", features = ["ffi"] }
+arrow-schema = { version = "60", features = ["ffi"] }
+arrow-cast = { version = "60", default-features = false }
+vello = "0.10"
+pollster = "0.4"
+i_overlay = "9"
+pyo3 = { version = "0.27", features = ["extension-module", "abi3-py311", "multiple-pymethods"] }
+
+[profile.release]
+debug = false
+opt-level = 3
+
+[profile.dev]
+opt-level = 1
+# Keep the dev build small: line tables for our crates, no debuginfo for dependencies.
+debug = "line-tables-only"
+
+[profile.dev.package."*"]
+opt-level = 3
+debug = false

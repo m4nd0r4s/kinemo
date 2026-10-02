@@ -1,0 +1,87 @@
+/* Code: token colors for Shiki's css-variables theme. Blocks in prose follow the page theme; blocks on a stage
+   (the studio, terminals) are always dark, like kinemo's own code highlighting. */
+
+:root {
+  --code-bg: var(--paper-raised);
+  --code-ink: #24272e;
+  --tok-keyword: #8a3ffc;
+  --tok-name-fn: #1f5fbf;
+  --tok-string: #1b7f4c;
+  --tok-number: #b35a00;
+  --tok-comment: #7b828d;
+  --tok-builtin: #b0306a;
+  --tok-punct: #5b6170;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --code-ink: #dfe3ea;
+    --tok-keyword: #c3a6ff;
+    --tok-name-fn: #8fbaff;
+    --tok-string: #7fd6a2;
+    --tok-number: #f3b277;
+    --tok-comment: #7f8794;
+    --tok-builtin: #f598c8;
+    --tok-punct: #a1a8b4;
+  }
+}
+
+:root[data-theme="dark"] {
+  --code-ink: #dfe3ea;
+  --tok-keyword: #c3a6ff;
+  --tok-name-fn: #8fbaff;
+  --tok-string: #7fd6a2;
+  --tok-number: #f3b277;
+  --tok-comment: #7f8794;
+  --tok-builtin: #f598c8;
+  --tok-punct: #a1a8b4;
+}
+
+.on-stage, .studio, .terminal {
+  --code-bg: var(--stage);
+  --code-ink: #dfe3ea;
+  --tok-keyword: #c3a6ff;
+  --tok-name-fn: #8fbaff;
+  --tok-string: #7fd6a2;
+  --tok-number: #f3b277;
+  --tok-comment: #7f8794;
+  --tok-builtin: #f598c8;
+  --tok-punct: #a1a8b4;
+}
+
+pre.code {
+  margin: 1.2em 0;
+  padding: 14px 16px;
+  background: var(--code-bg);
+  color: var(--code-ink);
+  border: 1px solid var(--rule);
+  border-radius: 8px;
+  font-size: 14px;
+  line-height: 1.55;
+  overflow-x: auto;
+  tab-size: 4;
+}
+pre.code code { font-size: inherit; background: none; padding: 0; border: 0; }
+pre.code { position: relative; }
+pre.code .copy {
+  position: absolute; top: 8px; right: 8px; opacity: 0;
+  font: 500 12px var(--sans); color: var(--ink-soft); background: var(--paper);
+  border: 1px solid var(--rule); border-radius: 6px; padding: 3px 8px; cursor: pointer;
+}
+pre.code:hover .copy, pre.code .copy:focus-visible { opacity: 1; }
+
+/* Shiki's css-variables theme reads these. */
+pre.code, .studio, .terminal {
+  --shiki-foreground: var(--code-ink);
+  --shiki-background: transparent;
+  --shiki-token-keyword: var(--tok-keyword);
+  --shiki-token-function: var(--tok-name-fn);
+  --shiki-token-string: var(--tok-string);
+  --shiki-token-string-expression: var(--tok-string);
+  --shiki-token-constant: var(--tok-number);
+  --shiki-token-comment: var(--tok-comment);
+  --shiki-token-parameter: var(--code-ink);
+  --shiki-token-punctuation: var(--tok-punct);
+  --shiki-token-link: var(--tok-name-fn);
+}
+pre.code code span[style*="--shiki-token-comment"] { font-style: italic; }

@@ -1,0 +1,358 @@
+[
+ {
+  "id": "p01",
+  "iterations": 1,
+  "passed": true,
+  "codes": [],
+  "note": "passed first try"
+ },
+ {
+  "id": "p02",
+  "iterations": 1,
+  "passed": true,
+  "codes": [],
+  "note": "morph Circle->Square; no doc on whether morph between different shape types is a nice warp (no W0801 emitted)."
+ },
+ {
+  "id": "p03",
+  "iterations": 1,
+  "passed": true,
+  "codes": [],
+  "note": "passed first try"
+ },
+ {
+  "id": "p04",
+  "iterations": 1,
+  "passed": true,
+  "codes": [],
+  "note": "passed first try"
+ },
+ {
+  "id": "p05",
+  "iterations": 1,
+  "passed": true,
+  "codes": [],
+  "note": "passed first try"
+ },
+ {
+  "id": "p06",
+  "iterations": 1,
+  "passed": true,
+  "codes": [],
+  "note": "row.swap + s.during; had to track order in a Python list (docs don't say whether row[i] reflects post-swap order at build time)."
+ },
+ {
+  "id": "p07",
+  "iterations": 1,
+  "passed": true,
+  "codes": [],
+  "note": "passed first try"
+ },
+ {
+  "id": "p08",
+  "iterations": 1,
+  "passed": true,
+  "codes": [],
+  "note": "passed first try"
+ },
+ {
+  "id": "p09",
+  "iterations": 1,
+  "passed": true,
+  "codes": [],
+  "note": "passed first try"
+ },
+ {
+  "id": "p10",
+  "iterations": 1,
+  "passed": true,
+  "codes": [],
+  "note": "progress fill built from signal arithmetic on Rect w/x; no left-anchored growth primitive documented (would like place(align='left') or k.grow from_ for value-driven bars)."
+ },
+ {
+  "id": "p11",
+  "iterations": 1,
+  "passed": true,
+  "codes": [],
+  "note": "'pulse back' interpreted as scale back with ease.out_elastic."
+ },
+ {
+  "id": "p12",
+  "iterations": 1,
+  "passed": true,
+  "codes": [],
+  "note": "passed first try"
+ },
+ {
+  "id": "p13",
+  "iterations": 1,
+  "passed": true,
+  "codes": [],
+  "note": "passed first try"
+ },
+ {
+  "id": "p14",
+  "iterations": 1,
+  "passed": true,
+  "codes": [],
+  "note": "passed first try"
+ },
+ {
+  "id": "p15",
+  "iterations": 1,
+  "passed": true,
+  "codes": [],
+  "note": "Used Python if inside simulate step; docs don't state explicitly that plain Python control flow is allowed in step (only that it runs in Python)."
+ },
+ {
+  "id": "p16",
+  "iterations": 1,
+  "passed": true,
+  "codes": [],
+  "note": "k.time.map with k.min/k.floor."
+ },
+ {
+  "id": "p17",
+  "iterations": 1,
+  "passed": true,
+  "codes": [],
+  "note": "No documented way to address a substring of k.Text (Math has eq['...'], Text doesn't); split into two Texts in a Row."
+ },
+ {
+  "id": "p18",
+  "iterations": 1,
+  "passed": true,
+  "codes": [],
+  "note": "No documented edge/anchor accessors (obj.right, obj.world.position only appears in k.trace); used k.vec(sq.x + offset, ...) with explicit coordinates."
+ },
+ {
+  "id": "p19",
+  "iterations": 1,
+  "passed": true,
+  "codes": [],
+  "note": "passed first try"
+ },
+ {
+  "id": "p20",
+  "iterations": 1,
+  "passed": true,
+  "codes": [],
+  "note": "passed first try"
+ },
+ {
+  "id": "p21",
+  "iterations": 2,
+  "passed": true,
+  "codes": [
+   "W1001"
+  ],
+  "note": "W1001: curve y=x^3-x on x in [-2,2] reaches +-6 but y range was (-3,3); plot is not clipped to the axes. Suggested fix (place clamp=True) didn't target the real cause; fixed by y=(-6,6,2). Docs don't say whether ax.plot clips to the y range."
+ },
+ {
+  "id": "p22",
+  "iterations": 1,
+  "passed": true,
+  "codes": [],
+  "note": "\\int and \\frac accepted by builtin Math engine; supported LaTeX subset not listed in llms.txt."
+ },
+ {
+  "id": "p23",
+  "iterations": 1,
+  "passed": true,
+  "codes": [],
+  "note": "row.to(children=[b, c, a]) inferred from 'equivalent to group.to(children=[...])' in swap docs; not shown as its own example."
+ },
+ {
+  "id": "p24",
+  "iterations": 1,
+  "passed": true,
+  "codes": [],
+  "note": "k.when(n > 5, k.flash(...), once=True)."
+ },
+ {
+  "id": "p25",
+  "iterations": 1,
+  "passed": true,
+  "codes": [],
+  "note": "passed first try"
+ },
+ {
+  "id": "p26",
+  "iterations": 1,
+  "passed": true,
+  "codes": [],
+  "note": "s.tempo(1, to=5) + fade_in in a loop; straight from the s.tempo example."
+ },
+ {
+  "id": "p27",
+  "iterations": 1,
+  "passed": true,
+  "codes": [],
+  "note": "Component with k.Prop + .map for height/color; place(inside=, align='bottom') inferred from the RoundedRect example."
+ },
+ {
+  "id": "p28",
+  "iterations": 1,
+  "passed": true,
+  "codes": [],
+  "note": "s.mark(slide=True) twice."
+ },
+ {
+  "id": "p29",
+  "iterations": 1,
+  "passed": true,
+  "codes": [],
+  "note": "Passed the parameter signal straight to k.Polygon.regular(n); llms.txt doesn't say whether n accepts a signal (passed, but it's a guess)."
+ },
+ {
+  "id": "p30",
+  "iterations": 1,
+  "passed": true,
+  "codes": [],
+  "note": "k.integrate(rate) + k.when(accumulated >= 1, k.write(...), once=True)."
+ },
+ {
+  "id": "p31",
+  "iterations": 1,
+  "passed": true,
+  "codes": [],
+  "note": "dash= format not documented in llms.txt nor in `kinemo docs k.Line`; guessed dash=(0.3, 0.2) and it passed."
+ },
+ {
+  "id": "p32",
+  "iterations": 1,
+  "passed": true,
+  "codes": [],
+  "note": "k.write + k.fade_out."
+ },
+ {
+  "id": "p33",
+  "iterations": 1,
+  "passed": true,
+  "codes": [],
+  "note": "group.to(place=dict(at='top-left', margin=...)); 'top-left' only appears in the Manim table."
+ },
+ {
+  "id": "p34",
+  "iterations": 1,
+  "passed": true,
+  "codes": [],
+  "note": "k.Column of two k.Math, \\id{x}{x} + eq2['x'].to(color=)."
+ },
+ {
+  "id": "p35",
+  "iterations": 2,
+  "passed": true,
+  "codes": [
+   "W1002"
+  ],
+  "note": "W1002: the label= labels of the two curves overlap at the end of the domain. The suggested fix uses internal ids (ax[37].place(below=ax[35])), which can't be applied in code: Plot doesn't expose the label object and there is no label position option. Fixed by changing the x range so the curves end far apart."
+ },
+ {
+  "id": "p36",
+  "iterations": 1,
+  "passed": true,
+  "codes": [],
+  "note": "ax.zoom_to(x=(2, 4))."
+ },
+ {
+  "id": "p37",
+  "iterations": 1,
+  "passed": true,
+  "codes": [],
+  "note": "k.trace(dot.world.position) with motion driven by k.time."
+ },
+ {
+  "id": "p38",
+  "iterations": 1,
+  "passed": true,
+  "codes": [],
+  "note": "k.Table with a dict of lists."
+ },
+ {
+  "id": "p39",
+  "iterations": 1,
+  "passed": true,
+  "codes": [],
+  "note": "k.BarChart + chart.to(data=)."
+ },
+ {
+  "id": "p40",
+  "iterations": 1,
+  "passed": true,
+  "codes": [],
+  "note": "Arc with angle=0 and .to(angle=270); instant add."
+ },
+ {
+  "id": "p41",
+  "iterations": 1,
+  "passed": true,
+  "codes": [],
+  "note": "k.Text(width=6, align='center')."
+ },
+ {
+  "id": "p42",
+  "iterations": 1,
+  "passed": true,
+  "codes": [],
+  "note": "k.grow(from_='bottom')."
+ },
+ {
+  "id": "p43",
+  "iterations": 1,
+  "passed": true,
+  "codes": [],
+  "note": "k.State with a payload-less `floor: k.Event` field, st.floor.emit(), s.wait_for(sim.floor). Unclear whether emit() returns a new state (states are values) or is a side effect; passed."
+ },
+ {
+  "id": "p44",
+  "iterations": 1,
+  "passed": true,
+  "codes": [],
+  "note": "k.follow(rotate=True) along the outline of a Square, with a tick mark on the circle so the rotation is visible."
+ },
+ {
+  "id": "p45",
+  "iterations": 1,
+  "passed": true,
+  "codes": [],
+  "note": "Passed, but the placement of the squares on the sides (especially on the rotated hypotenuse) is approximate; llms.txt has no way to attach an object to an edge/side (only place relative to a bbox)."
+ },
+ {
+  "id": "p46",
+  "iterations": 1,
+  "passed": true,
+  "codes": [],
+  "note": "x.map(lambda v: v*2) + Text with a lambda."
+ },
+ {
+  "id": "p47",
+  "iterations": 1,
+  "passed": true,
+  "codes": [],
+  "note": "Different durations via .to(duration=) inside the same s.play, then s.wait."
+ },
+ {
+  "id": "p48",
+  "iterations": 1,
+  "passed": true,
+  "codes": [],
+  "note": "y.map(k.mix(BLUE, RED, ...)) bound to fill."
+ },
+ {
+  "id": "p49",
+  "iterations": 2,
+  "passed": true,
+  "codes": [
+   "K1202"
+  ],
+  "note": "K1202: chart.to(data=) with different y columns ('2022','2023' -> '2023','2024'). llms.txt doesn't say that the y= names stay fixed after construction nor how to rename the legend/series. Fixed with relatively named columns ('previous year','current year') and a text title with the years."
+ },
+ {
+  "id": "p50",
+  "iterations": 1,
+  "passed": true,
+  "codes": [],
+  "note": "Two scenes + k.movie(transitions=[k.crossfade(0.5)])."
+ }
+]

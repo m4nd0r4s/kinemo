@@ -1,0 +1,199 @@
+# kinemo math corpus: one LaTeX math formula per line (no $ delimiters).
+# Lines starting with '#' and blank lines are ignored.
+# Used by crates/kinemo-math/tests/corpus.rs (success = layout_math is Ok with > 0 glyphs).
+
+# --- Algebra and basics
+a^2 + b^2 = c^2
+x = \frac{-b \pm \sqrt{b^2 - 4ac}}{2a}
+(a+b)^2 = a^2 + 2ab + b^2
+a^3 - b^3 = (a-b)(a^2 + ab + b^2)
+\frac{1}{1-x} = \sum_{n=0}^{\infty} x^n
+\binom{n}{k} = \frac{n!}{k!(n-k)!}
+(x+y)^n = \sum_{k=0}^{n} \binom{n}{k} x^{n-k} y^k
+\log_b(xy) = \log_b x + \log_b y
+e^{i\pi} + 1 = 0
+|x| = \begin{cases} x & x \geq 0 \\ -x & x < 0 \end{cases}
+\sqrt[n]{a^m} = a^{m/n}
+\lfloor x \rfloor \le x < \lfloor x \rfloor + 1
+\gcd(a, b) \cdot \operatorname{lcm}(a, b) = |ab|
+a \equiv b \pmod{n}
+\prod_{i=1}^{n} i = n!
+1 + 2 + \cdots + n = \frac{n(n+1)}{2}
+\sum_{k=1}^{n} k^2 = \frac{n(n+1)(2n+1)}{6}
+x_{1,2} = \frac{-p}{2} \pm \sqrt{\left(\frac{p}{2}\right)^2 - q}
+\frac{a}{b} + \frac{c}{d} = \frac{ad + bc}{bd}
+\sqrt{2} \approx 1.41421
+\phi = \frac{1 + \sqrt{5}}{2}
+F_n = \frac{\phi^n - (1-\phi)^n}{\sqrt{5}}
+
+# --- Calculus
+\int_0^1 x\,dx = \frac{1}{2}
+\frac{d}{dx} \sin x = \cos x
+\lim_{x \to 0} \frac{\sin x}{x} = 1
+\lim_{n \to \infty} \left(1 + \frac{1}{n}\right)^n = e
+f'(x) = \lim_{h \to 0} \frac{f(x+h) - f(x)}{h}
+\int_a^b f(x)\,dx = F(b) - F(a)
+\int u\,dv = uv - \int v\,du
+\frac{d}{dx}\left[f(g(x))\right] = f'(g(x))\,g'(x)
+e^x = \sum_{n=0}^{\infty} \frac{x^n}{n!}
+f(x) = \sum_{n=0}^{\infty} \frac{f^{(n)}(a)}{n!}(x-a)^n
+\int_{-\infty}^{\infty} e^{-x^2}\,dx = \sqrt{\pi}
+\frac{\partial f}{\partial x}
+\frac{\partial^2 u}{\partial t^2} = c^2 \nabla^2 u
+\nabla f = \left( \frac{\partial f}{\partial x}, \frac{\partial f}{\partial y}, \frac{\partial f}{\partial z} \right)
+\iint_D f(x,y)\,dA
+\oint_C \mathbf{F} \cdot d\mathbf{r}
+\int_0^{2\pi} \int_0^{R} r\,dr\,d\theta = \pi R^2
+\frac{dy}{dx} + P(x)y = Q(x)
+y'' + \omega^2 y = 0
+\dot{x} = f(x, t)
+\ddot{x} + 2\zeta\omega_0\dot{x} + \omega_0^2 x = 0
+\int \frac{dx}{\sqrt{1-x^2}} = \arcsin x + C
+\sum_{n=1}^{\infty} \frac{1}{n^2} = \frac{\pi^2}{6}
+\Gamma(z) = \int_0^\infty t^{z-1} e^{-t}\,dt
+\left. \frac{df}{dx} \right|_{x=0}
+\lim_{x \to a^+} f(x) = L
+\max_{x \in [0,1]} f(x)
+\mathcal{L}\{f(t)\} = \int_0^\infty f(t) e^{-st}\,dt
+\hat{f}(\xi) = \int_{-\infty}^{\infty} f(x) e^{-2\pi i x \xi}\,dx
+
+# --- Linear algebra
+A = \begin{pmatrix} a & b \\ c & d \end{pmatrix}
+\det A = \begin{vmatrix} a & b \\ c & d \end{vmatrix} = ad - bc
+A^{-1} = \frac{1}{ad - bc} \begin{bmatrix} d & -b \\ -c & a \end{bmatrix}
+A\mathbf{x} = \lambda \mathbf{x}
+\mathbf{u} \cdot \mathbf{v} = \|\mathbf{u}\| \|\mathbf{v}\| \cos\theta
+\mathbf{u} \times \mathbf{v} = \begin{vmatrix} \mathbf{i} & \mathbf{j} & \mathbf{k} \\ u_1 & u_2 & u_3 \\ v_1 & v_2 & v_3 \end{vmatrix}
+(AB)^T = B^T A^T
+\operatorname{tr}(A) = \sum_{i=1}^{n} a_{ii}
+I_n = \begin{pmatrix} 1 & 0 & \cdots & 0 \\ 0 & 1 & \cdots & 0 \\ \vdots & \vdots & \ddots & \vdots \\ 0 & 0 & \cdots & 1 \end{pmatrix}
+\det(A - \lambda I) = 0
+A = U \Sigma V^T
+\langle \mathbf{u}, \mathbf{v} \rangle = \sum_i u_i v_i
+\|\mathbf{x}\|_2 = \sqrt{\sum_{i=1}^n x_i^2}
+\operatorname{rank}(A) + \dim \ker A = n
+\begin{bmatrix} x' \\ y' \end{bmatrix} = \begin{bmatrix} \cos\theta & -\sin\theta \\ \sin\theta & \cos\theta \end{bmatrix} \begin{bmatrix} x \\ y \end{bmatrix}
+\mathbf{v} = \sum_{i} c_i \mathbf{e}_i
+P^{-1} A P = D
+\vec{a} + \vec{b} = \vec{c}
+\left[ \begin{array}{cc|c} 1 & 2 & 3 \\ 4 & 5 & 6 \end{array} \right]
+Q^T Q = I
+
+# --- Probability and statistics
+P(A \mid B) = \frac{P(B \mid A) P(A)}{P(B)}
+E[X] = \sum_{i} x_i p_i
+\operatorname{Var}(X) = E[X^2] - (E[X])^2
+f(x) = \frac{1}{\sigma\sqrt{2\pi}} e^{-\frac{(x-\mu)^2}{2\sigma^2}}
+P(X = k) = \binom{n}{k} p^k (1-p)^{n-k}
+P(X = k) = \frac{\lambda^k e^{-\lambda}}{k!}
+\bar{x} = \frac{1}{n} \sum_{i=1}^{n} x_i
+s^2 = \frac{1}{n-1} \sum_{i=1}^{n} (x_i - \bar{x})^2
+\rho_{X,Y} = \frac{\operatorname{Cov}(X,Y)}{\sigma_X \sigma_Y}
+Z = \frac{X - \mu}{\sigma}
+P(A \cup B) = P(A) + P(B) - P(A \cap B)
+X \sim \mathcal{N}(\mu, \sigma^2)
+\Pr\left[ |X - \mu| \geq k\sigma \right] \leq \frac{1}{k^2}
+H(X) = -\sum_{x} p(x) \log_2 p(x)
+\mathbb{E}[X] = \int_{-\infty}^{\infty} x f(x)\,dx
+\hat{\beta} = (X^T X)^{-1} X^T y
+L(\theta) = \prod_{i=1}^{n} f(x_i \mid \theta)
+D_{KL}(P \| Q) = \sum_x P(x) \log \frac{P(x)}{Q(x)}
+\binom{n}{k} = \binom{n-1}{k-1} + \binom{n-1}{k}
+\lim_{n\to\infty} P\left( \left| \bar{X}_n - \mu \right| > \varepsilon \right) = 0
+
+# --- Mechanics
+F = ma
+\vec{F} = m\vec{a}
+\mathbf{F} = \frac{d\mathbf{p}}{dt}
+x(t) = x_0 + v_0 t + \frac{1}{2} a t^2
+v^2 = v_0^2 + 2a\Delta x
+E_k = \frac{1}{2} m v^2
+U = mgh
+W = \int_{a}^{b} \mathbf{F} \cdot d\mathbf{s}
+P = \frac{dW}{dt}
+\tau = \mathbf{r} \times \mathbf{F}
+L = I\omega
+F = G \frac{m_1 m_2}{r^2}
+T = 2\pi \sqrt{\frac{L}{g}}
+\omega = \sqrt{\frac{k}{m}}
+\mathcal{L} = T - V
+\frac{d}{dt}\left(\frac{\partial \mathcal{L}}{\partial \dot{q}_i}\right) - \frac{\partial \mathcal{L}}{\partial q_i} = 0
+H = \sum_i p_i \dot{q}_i - \mathcal{L}
+\dot{q} = \frac{\partial H}{\partial p}, \quad \dot{p} = -\frac{\partial H}{\partial q}
+I = \int r^2\,dm
+a_c = \frac{v^2}{r} = \omega^2 r
+\sum \mathbf{F} = 0, \quad \sum \boldsymbol{\tau} = 0
+p = mv
+J = \int_{t_1}^{t_2} F\,dt = \Delta p
+\sigma = E\varepsilon
+\Delta x \, \Delta p \geq \frac{\hbar}{2}
+
+# --- Electromagnetism and physics
+\nabla \cdot \mathbf{E} = \frac{\rho}{\varepsilon_0}
+\nabla \cdot \mathbf{B} = 0
+\nabla \times \mathbf{E} = -\frac{\partial \mathbf{B}}{\partial t}
+\nabla \times \mathbf{B} = \mu_0 \mathbf{J} + \mu_0 \varepsilon_0 \frac{\partial \mathbf{E}}{\partial t}
+F = k_e \frac{q_1 q_2}{r^2}
+V = IR
+P = VI = I^2 R
+\mathbf{F} = q(\mathbf{E} + \mathbf{v} \times \mathbf{B})
+E = mc^2
+E^2 = (pc)^2 + (m_0 c^2)^2
+\gamma = \frac{1}{\sqrt{1 - v^2/c^2}}
+E = h\nu = \hbar\omega
+\lambda = \frac{h}{p}
+i\hbar \frac{\partial}{\partial t} \Psi = \hat{H} \Psi
+-\frac{\hbar^2}{2m} \nabla^2 \psi + V\psi = E\psi
+\langle \psi | \phi \rangle
+PV = nRT
+\Delta S \geq 0
+dU = T\,dS - P\,dV
+S = k_B \ln \Omega
+\eta = 1 - \frac{T_C}{T_H}
+Q = mc\Delta T
+\Phi_B = \oint \mathbf{B} \cdot d\mathbf{A}
+\mathcal{E} = -\frac{d\Phi_B}{dt}
+v = f\lambda
+I = I_0 \cos^2\theta
+n_1 \sin\theta_1 = n_2 \sin\theta_2
+R_{\mu\nu} - \frac{1}{2} R g_{\mu\nu} + \Lambda g_{\mu\nu} = \frac{8\pi G}{c^4} T_{\mu\nu}
+ds^2 = -c^2 dt^2 + dx^2 + dy^2 + dz^2
+Z = \sum_i e^{-\beta E_i}
+\frac{1}{f} = \frac{1}{d_o} + \frac{1}{d_i}
+\oint_{\partial \Sigma} \mathbf{B} \cdot d\boldsymbol{\ell} = \mu_0 I_{\text{enc}}
+
+# --- Signals, numerics, discrete math, misc
+X(f) = \int_{-\infty}^{\infty} x(t) e^{-i 2\pi f t}\,dt
+X_k = \sum_{n=0}^{N-1} x_n e^{-\frac{2\pi i}{N} k n}
+x_{n+1} = x_n - \frac{f(x_n)}{f'(x_n)}
+\mathcal{O}(n \log n)
+\forall \varepsilon > 0\, \exists \delta > 0 : |x - a| < \delta \implies |f(x) - f(a)| < \varepsilon
+A \subseteq B \iff \forall x\,(x \in A \Rightarrow x \in B)
+\neg (p \land q) \equiv \neg p \lor \neg q
+\bigcup_{i=1}^{n} A_i
+\mathbb{N} \subset \mathbb{Z} \subset \mathbb{Q} \subset \mathbb{R} \subset \mathbb{C}
+f: \mathbb{R} \to \mathbb{R}, \quad x \mapsto x^2
+\overline{z} = a - bi
+\overbrace{1 + 1 + \cdots + 1}^{n} = n
+\underbrace{a + \cdots + a}_{k \text{ times}} = ka
+z = r e^{i\theta} = r(\cos\theta + i \sin\theta)
+\sigma(x) = \frac{1}{1 + e^{-x}}
+\operatorname*{arg\,max}_{x} f(x)
+\boxed{E = mc^2}
+\begin{aligned} f(x) &= (x+1)^2 \\ &= x^2 + 2x + 1 \end{aligned}
+\frac{1}{2} \left\| \mathbf{w} \right\|^2 + C \sum_i \xi_i
+\theta \leftarrow \theta - \eta \nabla_\theta J(\theta)
+\mathrm{softmax}(z)_i = \frac{e^{z_i}}{\sum_j e^{z_j}}
+a_n = a_1 + (n-1)d
+\cos^2\theta + \sin^2\theta = 1
+\tan\theta = \frac{\sin\theta}{\cos\theta}
+\sin(\alpha \pm \beta) = \sin\alpha\cos\beta \pm \cos\alpha\sin\beta
+\zeta(s) = \sum_{n=1}^{\infty} \frac{1}{n^s} = \prod_{p} \frac{1}{1 - p^{-s}}
+\left\{ x \in \mathbb{R} : x^2 < 2 \right\}
+\xrightarrow{f}
+\int\!\!\int_{S} \mathbf{F} \cdot \hat{\mathbf{n}}\,dS
+\frac{\displaystyle\sum_{i} x_i}{n}
+\tfrac{1}{2} + \dfrac{1}{3}
+\mathfrak{g} \oplus \mathfrak{h}
+\aleph_0 < 2^{\aleph_0}
+\int_{\Omega} \nabla \cdot \mathbf{F}\,dV = \oint_{\partial\Omega} \mathbf{F} \cdot d\mathbf{S}

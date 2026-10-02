@@ -1,0 +1,13 @@
+{
+  // Pyright strict over user-style scenes: the scenes here plus every file in examples/.
+  // Lines expected to fail carry `# pyright: ignore[rule]`; unnecessary ignores are errors,
+  // so each expected error is asserted too.
+  "include": [".", "../../examples"],
+  "extraPaths": ["../../python"],
+  "venvPath": "../..",
+  "venv": ".venv",
+  "pythonVersion": "3.11",
+  "typeCheckingMode": "strict",
+  "enableTypeIgnoreComments": false,
+  "reportUnnecessaryTypeIgnoreComment": "error"
+}

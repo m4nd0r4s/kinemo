@@ -1,0 +1,11 @@
+[package]
+name = "kinemo-text"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[dependencies]
+kurbo.workspace = true
+rustybuzz.workspace = true
+ttf-parser.workspace = true

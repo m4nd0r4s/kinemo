@@ -1,0 +1,96 @@
+"""`kinemo render`: final output (video, GIF, frames)."""
+
+from __future__ import annotations
+
+import argparse
+import os
+import sys
+
+from .loader import LoadError, build, find_scenes, load_module, select
+
+VIDEO = ("mp4", "webm", "mov", "gif")
+
+
+def _progress(name: str):  # type: ignore[no-untyped-def]
+    def report(done: int, total: int) -> None:
+        if done == total or done % 10 == 0:
+            width = 30
+            filled = int(width * done / total)
+            sys.stderr.write(f"\r  {name} [{'#' * filled}{'.' * (width - filled)}] {done}/{total}")
+            if done == total:
+                sys.stderr.write("\n")
+            sys.stderr.flush()
+
+    return report
+
+
+def run(args: argparse.Namespace) -> int:
+    try:
+        module = load_module(args.file)
+    except LoadError as e:
+        print(e.diagnostic.render())
+        return 1
+    status = 0
+    os.makedirs(args.out, exist_ok=True)
+    from ..movie import Movie
+
+    movies = [m for m in vars(module).values() if isinstance(m, Movie)]
+    if movies and args.scene is None and args.format not in VIDEO:
+        print(f"kinemo: a movie renders to video ({', '.join(VIDEO)}); pass --scene NAME for --format {args.format}")
+        return 2
+    if movies and args.scene is None:
+        for m in movies:
+            path = os.path.join(args.out, f"{m.name}.{args.format if args.format in VIDEO else 'mp4'}")
+            m.render(path, args.format if args.format in VIDEO else "mp4", args.quality, _progress(m.name))
+            print(f"kinemo: {path}")
+        return 0
+    for defn in select(find_scenes(module), args.scene):
+        result = build(defn, args.params)
+        if result.scene is None:
+            print("\n".join(d.render() for d in result.diagnostics))
+            status = 1
+            continue
+        b = result.scene.builder
+        base = os.path.join(args.out, defn.name)
+        if args.format in VIDEO:
+            path = f"{base}.{args.format}"
+            b.render_video(path, args.format, args.quality, args.transparent, _progress(defn.name))
+            print(f"kinemo: {path}")
+        elif args.format == "png":
+            if args.frames:
+                os.makedirs(base, exist_ok=True)
+                fps = result.scene.config.fps if args.quality == "final" else min(30.0, result.scene.config.fps)
+                n = int(result.scene.duration * fps) + 1
+                for i in range(n):
+                    with open(os.path.join(base, f"{i:05d}.png"), "wb") as fh:
+                        fh.write(b.frame_png(i / fps, args.quality, args.transparent))
+                print(f"kinemo: {n} frames in {base}/")
+            else:
+                t = parse_time(args.at or "end", result.scene.duration, result.scene.marks)
+                path = f"{base}.png"
+                with open(path, "wb") as fh:
+                    fh.write(b.frame_png(t, args.quality, args.transparent))
+                print(f"kinemo: {path}")
+        elif args.format == "svg":
+            t = parse_time(args.at or "end", result.scene.duration, result.scene.marks)
+            path = f"{base}.svg"
+            with open(path, "w", encoding="utf-8") as fh:
+                fh.write(b.frame_svg(t, args.transparent))
+            print(f"kinemo: {path}")
+        elif args.format == "slides":
+            from ..export.slides import export
+
+            print(f"kinemo: {export(result.scene, args.out, args.quality)}")
+        else:
+            print(f"kinemo: format '{args.format}' is not supported yet")
+            status = 2
+    return status
+
+
+def parse_time(text: str, duration: float, marks: dict[str, float]) -> float:
+    text = text.strip()
+    if text == "end":
+        return max(0.0, duration - 1e-6)
+    if text in marks:
+        return marks[text]
+    return min(max(0.0, float(text)), duration)

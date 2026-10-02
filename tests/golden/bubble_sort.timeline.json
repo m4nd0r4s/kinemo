@@ -1,0 +1,395 @@
+{
+ "duration": 11.554061,
+ "timeline": [
+  [
+   0.0,
+   1.35,
+   "stagger(8 × grow(row[0]), ...)"
+  ],
+  [
+   1.35,
+   1.547196,
+   "row[0].rect.to(color), row[1].rect.to(color)"
+  ],
+  [
+   1.547196,
+   1.925667,
+   "row.reorder"
+  ],
+  [
+   1.925667,
+   2.107495,
+   "row[1].rect.to(color), row[0].rect.to(color)"
+  ],
+  [
+   2.107495,
+   2.28472,
+   "row[1].rect.to(color), row[2].rect.to(color)"
+  ],
+  [
+   2.457568,
+   2.626251,
+   "row[1].rect.to(color), row[2].rect.to(color)"
+  ],
+  [
+   2.626251,
+   2.790964,
+   "row[2].rect.to(color), row[3].rect.to(color)"
+  ],
+  [
+   2.790964,
+   3.109201,
+   "row.reorder"
+  ],
+  [
+   3.109201,
+   3.263053,
+   "row[3].rect.to(color), row[2].rect.to(color)"
+  ],
+  [
+   3.263053,
+   3.413597,
+   "row[3].rect.to(color), row[4].rect.to(color)"
+  ],
+  [
+   3.560971,
+   3.705306,
+   "row[3].rect.to(color), row[4].rect.to(color)"
+  ],
+  [
+   3.705306,
+   3.846725,
+   "row[4].rect.to(color), row[5].rect.to(color)"
+  ],
+  [
+   3.846725,
+   4.12127,
+   "row.reorder"
+  ],
+  [
+   4.12127,
+   4.254607,
+   "row[5].rect.to(color), row[4].rect.to(color)"
+  ],
+  [
+   4.254607,
+   4.385452,
+   "row[5].rect.to(color), row[6].rect.to(color)"
+  ],
+  [
+   4.385452,
+   4.640025,
+   "row.reorder"
+  ],
+  [
+   4.640025,
+   4.763922,
+   "row[6].rect.to(color), row[5].rect.to(color)"
+  ],
+  [
+   4.763922,
+   4.885665,
+   "row[6].rect.to(color), row[7].rect.to(color)"
+  ],
+  [
+   4.885665,
+   5.122976,
+   "row.reorder"
+  ],
+  [
+   5.122976,
+   5.238681,
+   "row[7].rect.to(color), row[6].rect.to(color)"
+  ],
+  [
+   5.238681,
+   5.352504,
+   "row[7].rect.to(color)"
+  ],
+  [
+   5.352504,
+   5.464507,
+   "row[0].rect.to(color), row[1].rect.to(color)"
+  ],
+  [
+   5.574745,
+   5.683274,
+   "row[0].rect.to(color), row[1].rect.to(color)"
+  ],
+  [
+   5.683274,
+   5.790147,
+   "row[1].rect.to(color), row[2].rect.to(color)"
+  ],
+  [
+   5.790147,
+   5.999118,
+   "row.reorder"
+  ],
+  [
+   5.999118,
+   6.101309,
+   "row[2].rect.to(color), row[1].rect.to(color)"
+  ],
+  [
+   6.101309,
+   6.20203,
+   "row[2].rect.to(color), row[3].rect.to(color)"
+  ],
+  [
+   6.301323,
+   6.399226,
+   "row[2].rect.to(color), row[3].rect.to(color)"
+  ],
+  [
+   6.399226,
+   6.49578,
+   "row[3].rect.to(color), row[4].rect.to(color)"
+  ],
+  [
+   6.49578,
+   6.68498,
+   "row.reorder"
+  ],
+  [
+   6.68498,
+   6.777697,
+   "row[4].rect.to(color), row[3].rect.to(color)"
+  ],
+  [
+   6.777697,
+   6.869202,
+   "row[4].rect.to(color), row[5].rect.to(color)"
+  ],
+  [
+   6.869202,
+   7.048699,
+   "row.reorder"
+  ],
+  [
+   7.048699,
+   7.13675,
+   "row[5].rect.to(color), row[4].rect.to(color)"
+  ],
+  [
+   7.13675,
+   7.223708,
+   "row[5].rect.to(color), row[6].rect.to(color)"
+  ],
+  [
+   7.223708,
+   7.394448,
+   "row.reorder"
+  ],
+  [
+   7.394448,
+   7.478281,
+   "row[6].rect.to(color), row[5].rect.to(color)"
+  ],
+  [
+   7.478281,
+   7.561122,
+   "row[6].rect.to(color)"
+  ],
+  [
+   7.561122,
+   7.642995,
+   "row[0].rect.to(color), row[1].rect.to(color)"
+  ],
+  [
+   7.642995,
+   7.803921,
+   "row.reorder"
+  ],
+  [
+   7.803921,
+   7.883018,
+   "row[1].rect.to(color), row[0].rect.to(color)"
+  ],
+  [
+   7.883018,
+   7.961231,
+   "row[1].rect.to(color), row[2].rect.to(color)"
+  ],
+  [
+   8.03858,
+   8.115084,
+   "row[1].rect.to(color), row[2].rect.to(color)"
+  ],
+  [
+   8.115084,
+   8.19076,
+   "row[2].rect.to(color), row[3].rect.to(color)"
+  ],
+  [
+   8.19076,
+   8.339702,
+   "row.reorder"
+  ],
+  [
+   8.339702,
+   8.413001,
+   "row[3].rect.to(color), row[2].rect.to(color)"
+  ],
+  [
+   8.413001,
+   8.48554,
+   "row[3].rect.to(color), row[4].rect.to(color)"
+  ],
+  [
+   8.557336,
+   8.628403,
+   "row[3].rect.to(color), row[4].rect.to(color)"
+  ],
+  [
+   8.628403,
+   8.698755,
+   "row[4].rect.to(color), row[5].rect.to(color)"
+  ],
+  [
+   8.698755,
+   8.837373,
+   "row.reorder"
+  ],
+  [
+   8.837373,
+   8.905666,
+   "row[5].rect.to(color), row[4].rect.to(color)"
+  ],
+  [
+   8.905666,
+   8.9733,
+   "row[5].rect.to(color)"
+  ],
+  [
+   8.9733,
+   9.040286,
+   "row[0].rect.to(color), row[1].rect.to(color)"
+  ],
+  [
+   9.106637,
+   9.172365,
+   "row[0].rect.to(color), row[1].rect.to(color)"
+  ],
+  [
+   9.172365,
+   9.237482,
+   "row[1].rect.to(color), row[2].rect.to(color)"
+  ],
+  [
+   9.301999,
+   9.365926,
+   "row[1].rect.to(color), row[2].rect.to(color)"
+  ],
+  [
+   9.365926,
+   9.429275,
+   "row[2].rect.to(color), row[3].rect.to(color)"
+  ],
+  [
+   9.492056,
+   9.554278,
+   "row[2].rect.to(color), row[3].rect.to(color)"
+  ],
+  [
+   9.554278,
+   9.615953,
+   "row[3].rect.to(color), row[4].rect.to(color)"
+  ],
+  [
+   9.615953,
+   9.737695,
+   "row.reorder"
+  ],
+  [
+   9.737695,
+   9.797781,
+   "row[4].rect.to(color), row[3].rect.to(color)"
+  ],
+  [
+   9.797781,
+   9.857356,
+   "row[4].rect.to(color)"
+  ],
+  [
+   9.857356,
+   9.916428,
+   "row[0].rect.to(color), row[1].rect.to(color)"
+  ],
+  [
+   9.975006,
+   10.033097,
+   "row[0].rect.to(color), row[1].rect.to(color)"
+  ],
+  [
+   10.033097,
+   10.090711,
+   "row[1].rect.to(color), row[2].rect.to(color)"
+  ],
+  [
+   10.147854,
+   10.204535,
+   "row[1].rect.to(color), row[2].rect.to(color)"
+  ],
+  [
+   10.204535,
+   10.26076,
+   "row[2].rect.to(color), row[3].rect.to(color)"
+  ],
+  [
+   10.316537,
+   10.371873,
+   "row[2].rect.to(color), row[3].rect.to(color)"
+  ],
+  [
+   10.371873,
+   10.426775,
+   "row[3].rect.to(color)"
+  ],
+  [
+   10.426775,
+   10.48125,
+   "row[0].rect.to(color), row[1].rect.to(color)"
+  ],
+  [
+   10.535305,
+   10.588945,
+   "row[0].rect.to(color), row[1].rect.to(color)"
+  ],
+  [
+   10.588945,
+   10.642177,
+   "row[1].rect.to(color), row[2].rect.to(color)"
+  ],
+  [
+   10.695007,
+   10.747442,
+   "row[1].rect.to(color), row[2].rect.to(color)"
+  ],
+  [
+   10.747442,
+   10.799487,
+   "row[2].rect.to(color)"
+  ],
+  [
+   10.799487,
+   10.851148,
+   "row[0].rect.to(color), row[1].rect.to(color)"
+  ],
+  [
+   10.90243,
+   10.953339,
+   "row[0].rect.to(color), row[1].rect.to(color)"
+  ],
+  [
+   10.953339,
+   11.003881,
+   "row[1].rect.to(color)"
+  ],
+  [
+   11.003881,
+   11.054061,
+   "row[0].rect.to(color)"
+  ]
+ ]
+}

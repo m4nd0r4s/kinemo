@@ -1,0 +1,92 @@
+name: ci
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  rust:
+    name: rust (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-14, windows-latest]
+    steps:
+      - uses: actions/checkout@v7
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy
+      - uses: Swatinem/rust-cache@v2
+      - uses: FedericoCarboni/setup-ffmpeg@v3
+      - run: cargo clippy --workspace --all-targets -- -D warnings
+      - run: cargo test --workspace
+
+  python:
+    name: python ${{ matrix.python }} (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, ubuntu-24.04-arm, macos-14, windows-latest]
+        python: ["3.11", "3.12", "3.13", "3.14"]
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: ${{ matrix.python }}
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - uses: FedericoCarboni/setup-ffmpeg@v3
+      - run: pip install maturin pytest numpy polars pyarrow pandas pyright
+      - run: maturin build --release --out dist
+      - run: pip install --find-links dist kinemo
+        shell: bash
+      - run: pytest -q
+        env:
+          # Golden PNGs are byte-identical on the reference CPU renderer; performance
+          # thresholds are checked on the dedicated job below.
+          KINEMO_SKIP_PERF: "1"
+      - run: pyright python/kinemo
+
+  performance:
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.13"
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - uses: FedericoCarboni/setup-ffmpeg@v3
+      - run: pip install maturin pytest numpy polars
+      - run: maturin build --release --out dist && pip install --find-links dist kinemo
+        shell: bash
+      - run: pytest -q tests/python/test_performance.py
+
+  # The website builds and type-checks (videos and timings are left to the Pages workflow).
+  website:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.13"
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - uses: FedericoCarboni/setup-ffmpeg@v3
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: website/package-lock.json
+      - name: Build kinemo
+        run: |
+          python -m venv .venv
+          .venv/bin/pip install maturin pytest
+          source .venv/bin/activate && maturin develop
+      - name: Type-check the site
+        working-directory: website
+        run: npm ci && npm run check
+      # Exports the data, builds the site into a temporary folder and checks every link.
+      - run: .venv/bin/python -m pytest -q tests/python/test_website.py

@@ -1,0 +1,66 @@
+name: website
+
+# Builds the site from the repository and publishes it to GitHub Pages: kinemo is compiled,
+# the export renders the examples and runs the real `kinemo check` commands, then SvelteKit
+# prerenders the pages. Rendered videos are cached by the examples' source.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.13"
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - uses: FedericoCarboni/setup-ffmpeg@v3
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: website/package-lock.json
+      - name: Build kinemo
+        run: |
+          python -m venv .venv
+          .venv/bin/pip install maturin
+          source .venv/bin/activate && maturin develop --release
+      - uses: actions/cache@v6
+        with:
+          path: website/.cache
+          key: renders-${{ hashFiles('examples/**', 'python/kinemo/__init__.py') }}
+          restore-keys: renders-
+      - name: Export and build the site
+        working-directory: website
+        run: |
+          npm ci
+          npm run export
+          npm run build
+      - uses: actions/configure-pages@v6
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: website/build
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v5

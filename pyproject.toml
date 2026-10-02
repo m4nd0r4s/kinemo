@@ -1,0 +1,64 @@
+[build-system]
+requires = ["maturin>=1.9,<2"]
+build-backend = "maturin"
+
+[project]
+name = "kinemo"
+version = "0.9.0"
+description = "Explanatory animations in Python with a native Rust core: a scrubbable timeline, errors that carry the fix, and a preview that edits your code"
+readme = "README.md"
+requires-python = ">=3.11"
+license = "MIT OR Apache-2.0"
+license-files = ["LICENSE-MIT", "LICENSE-APACHE", "THIRD_PARTY_LICENSES.md", "assets/fonts/LICENSE_DEJAVU"]
+keywords = ["animation", "math", "visualization", "explainer", "video", "manim", "education"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Education",
+    "Intended Audience :: Science/Research",
+    "Operating System :: MacOS",
+    "Operating System :: Microsoft :: Windows",
+    "Operating System :: POSIX :: Linux",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Programming Language :: Rust",
+    "Topic :: Multimedia :: Graphics",
+    "Topic :: Multimedia :: Video",
+    "Topic :: Scientific/Engineering :: Visualization",
+    "Typing :: Typed",
+]
+
+[project.urls]
+Homepage = "https://m4nd0r4s.github.io/kinemo/"
+Documentation = "https://m4nd0r4s.github.io/kinemo/docs/"
+Repository = "https://github.com/m4nd0r4s/kinemo"
+Issues = "https://github.com/m4nd0r4s/kinemo/issues"
+Changelog = "https://github.com/m4nd0r4s/kinemo/blob/main/CHANGELOG.md"
+
+[project.optional-dependencies]
+numpy = ["numpy>=1.26"]
+polars = ["polars>=1.0"]
+dev = ["pytest>=8", "pyright>=1.1.380", "numpy>=1.26"]
+
+[project.scripts]
+kinemo = "kinemo.cli.main:main"
+
+[tool.maturin]
+python-source = "python"
+module-name = "kinemo._core"
+manifest-path = "crates/kinemo-py/Cargo.toml"
+features = ["pyo3/extension-module"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests/python"]
+
+[tool.pyright]
+include = ["python/kinemo"]
+pythonVersion = "3.11"
+typeCheckingMode = "standard"
+venvPath = "."
+venv = ".venv"

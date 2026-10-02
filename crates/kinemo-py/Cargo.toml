@@ -1,0 +1,36 @@
+[package]
+name = "kinemo-py"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[lib]
+name = "_core"
+crate-type = ["cdylib"]
+test = false
+doctest = false
+
+[dependencies]
+kinemo-ir.workspace = true
+kinemo-eval.workspace = true
+kinemo-layout.workspace = true
+kinemo-resolve.workspace = true
+kinemo-text.workspace = true
+kinemo-math.workspace = true
+kinemo-render.workspace = true
+kinemo-encode.workspace = true
+serde_json.workspace = true
+kurbo.workspace = true
+i_overlay.workspace = true
+pyo3.workspace = true
+arrow-array.workspace = true
+arrow-schema.workspace = true
+arrow-cast.workspace = true
+serde.workspace = true
+kinemo-server.workspace = true
+
+[features]
+default = []
+# GPU (Vello) preview frames: `maturin develop --features gpu`.
+gpu = ["kinemo-server/gpu"]

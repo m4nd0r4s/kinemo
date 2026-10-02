@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 100">
+  <g id="motor" opacity="0.8">
+    <rect id="housing" x="0" y="0" width="80" height="100" fill="#4C9BE8"/>
+    <circle id="shaft" cx="40" cy="50" r="15" fill="#F2F2F2" stroke="#111216" stroke-width="4"/>
+  </g>
+  <path id="belt" d="M 80 50 L 200 50" fill="none" stroke="#E8645A" stroke-width="6"/>
+  <rect x="150" y="20" width="50" height="60" fill="#5CC489" fill-rule="evenodd"/>
+</svg>

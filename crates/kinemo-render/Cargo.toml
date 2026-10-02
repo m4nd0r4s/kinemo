@@ -1,0 +1,22 @@
+[package]
+name = "kinemo-render"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[dependencies]
+kinemo-ir.workspace = true
+kinemo-eval.workspace = true
+kinemo-layout.workspace = true
+kinemo-text.workspace = true
+kinemo-encode.workspace = true
+kurbo.workspace = true
+tiny-skia.workspace = true
+png.workspace = true
+image.workspace = true
+usvg.workspace = true
+base64.workspace = true
+rayon.workspace = true
+serde_json.workspace = true
+serde.workspace = true

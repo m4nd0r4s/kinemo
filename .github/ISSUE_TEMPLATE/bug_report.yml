@@ -1,0 +1,26 @@
+name: Bug report
+description: kinemo does something wrong, crashes, or a diagnostic is misleading.
+labels: [bug]
+body:
+  - type: textarea
+    id: scene
+    attributes:
+      label: Smallest scene that shows it
+      description: A complete scene file, as short as you can make it.
+      render: python
+    validations:
+      required: true
+  - type: textarea
+    id: what
+    attributes:
+      label: What happens, and what you expected
+      description: Paste the `kinemo check` output or the traceback if there is one.
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Versions
+      description: Output of `python -c "import kinemo, sys, platform; print(kinemo.__version__, sys.version.split()[0], platform.platform())"`
+    validations:
+      required: true

@@ -1,0 +1,145 @@
+//! Frame and video rendering with quality presets and parallel rasterization.
+
+use std::path::Path;
+
+use rayon::prelude::*;
+
+use kinemo_encode::{AudioClip, EncodeError, EncoderOptions, Format, VideoEncoder};
+use kinemo_ir::Scene;
+
+use crate::frame::{display_list, FrameSize};
+use crate::raster::{rasterize, Image, RenderBackend};
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum Quality {
+    /// 540p, 30 fps: the `dev` default.
+    Draft,
+    /// The scene's own resolution and fps.
+    Final,
+}
+
+#[derive(Clone, Debug, PartialEq)]
+pub struct RenderOptions {
+    pub width: u32,
+    pub height: u32,
+    pub fps: f64,
+    pub antialias: bool,
+    pub transparent: bool,
+}
+
+impl RenderOptions {
+    pub fn for_scene(scene: &Scene, quality: Quality) -> Self {
+        let c = &scene.config;
+        match quality {
+            Quality::Final => RenderOptions { width: c.width, height: c.height, fps: c.fps, antialias: true, transparent: false },
+            Quality::Draft => {
+                let k = (540.0 / c.height.min(c.width) as f64).min(1.0);
+                RenderOptions {
+                    width: even((c.width as f64 * k).round() as u32),
+                    height: even((c.height as f64 * k).round() as u32),
+                    fps: c.fps.min(30.0),
+                    antialias: true,
+                    transparent: false,
+                }
+            }
+        }
+    }
+
+    fn size(&self) -> FrameSize {
+        FrameSize { width: self.width, height: self.height }
+    }
+
+    pub fn frame_count(&self, duration: f64) -> usize {
+        ((duration * self.fps).ceil() as usize).max(1)
+    }
+}
+
+fn even(v: u32) -> u32 {
+    v + (v & 1)
+}
+
+pub fn render_frame(scene: &Scene, t: f64, opts: &RenderOptions) -> Image {
+    rasterize(&display_list(scene, t, opts.size(), opts.transparent), opts.antialias)
+}
+
+/// [`render_frame`] through an explicit rasterization backend (e.g. the GPU in preview).
+pub fn render_frame_with_backend(backend: &dyn RenderBackend, scene: &Scene, t: f64, opts: &RenderOptions) -> Image {
+    backend.rasterize(&display_list(scene, t, opts.size(), opts.transparent), opts.antialias)
+}
+
+#[derive(Debug)]
+pub enum RenderError {
+    Encode(EncodeError),
+}
+
+impl std::fmt::Display for RenderError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            RenderError::Encode(e) => write!(f, "{e}"),
+        }
+    }
+}
+
+impl std::error::Error for RenderError {}
+
+impl From<EncodeError> for RenderError {
+    fn from(e: EncodeError) -> Self {
+        RenderError::Encode(e)
+    }
+}
+
+/// Renders the whole scene to a video file. `progress(done, total)` is called per frame.
+pub fn render_video(
+    scene: &Scene,
+    path: &Path,
+    format: Format,
+    opts: &RenderOptions,
+    progress: &(dyn Fn(usize, usize) + Sync),
+) -> Result<(), RenderError> {
+    render_video_range(scene, path, format, opts, (0.0, scene.duration), progress)
+}
+
+/// Renders the interval `[start, end)` of the scene (slides render one file per section).
+pub fn render_video_range(
+    scene: &Scene,
+    path: &Path,
+    format: Format,
+    opts: &RenderOptions,
+    (start_time, end_time): (f64, f64),
+    progress: &(dyn Fn(usize, usize) + Sync),
+) -> Result<(), RenderError> {
+    let total = opts.frame_count((end_time - start_time).max(0.0));
+    let audio = scene
+        .audio
+        .iter()
+        .filter(|a| a.t >= start_time && a.t < end_time)
+        .map(|a| AudioClip { path: a.path.clone(), start: a.t - start_time, gain: a.gain })
+        .collect();
+    let enc_opts = EncoderOptions {
+        width: opts.width,
+        height: opts.height,
+        fps: opts.fps,
+        format,
+        transparent: opts.transparent,
+        crf: None,
+        audio,
+        duration: total as f64 / opts.fps,
+    };
+    let mut encoder = VideoEncoder::start(path, &enc_opts)?;
+    const BATCH: usize = 32;
+    let mut done = 0;
+    for start in (0..total).step_by(BATCH) {
+        let end = (start + BATCH).min(total);
+        let frames: Vec<Image> = (start..end)
+            .into_par_iter()
+            .map(|i| render_frame(scene, start_time + i as f64 / opts.fps, opts))
+            .collect();
+        for f in frames {
+            encoder.push_frame(&f.rgba)?;
+            done += 1;
+            progress(done, total);
+        }
+    }
+    encoder.finish()?;
+    Ok(())
+}

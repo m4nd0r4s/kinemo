@@ -1,0 +1,17 @@
+[package]
+name = "kinemo-math"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[dependencies]
+kurbo.workspace = true
+ttf-parser.workspace = true
+typst.workspace = true
+typst-layout.workspace = true
+typst-assets.workspace = true
+comemo.workspace = true
+mitex.workspace = true
+mitex-spec-gen.workspace = true
+fxhash.workspace = true

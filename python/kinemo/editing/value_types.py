@@ -9,6 +9,7 @@ name just contributes nothing.
 
 from __future__ import annotations
 
+import ast
 import builtins
 import inspect
 import sys
@@ -49,20 +50,6 @@ class _Unknown:
 _UNKNOWN = _Unknown()
 
 
-class _Names(dict[str, object]):
-    """Names for evaluating an annotation: its module first, then kinemo's public types."""
-
-    def __init__(self, module_globals: Mapping[str, object]) -> None:
-        super().__init__()
-        self.scopes: list[Mapping[str, object]] = [module_globals, *(_fallback_scopes())]
-
-    def __missing__(self, name: str) -> object:
-        for scope in self.scopes:
-            if name in scope:
-                return scope[name]
-        return _UNKNOWN
-
-
 def _fallback_scopes() -> list[Mapping[str, object]]:
     from ..anim import ease
     from ..objects import keywords
@@ -71,11 +58,30 @@ def _fallback_scopes() -> list[Mapping[str, object]]:
     return [vars(keywords), vars(aliases), vars(ease), vars(typing), vars(builtins)]
 
 
+def _lookup(name: str, scopes: list[Mapping[str, object]]) -> object:
+    for scope in scopes:
+        if name in scope:
+            return scope[name]
+    return _UNKNOWN
+
+
 def evaluate(annotation: object, module_globals: Mapping[str, object]) -> object:
+    """An annotation string evaluated with its module's names, then kinemo's public types.
+
+    Every name is resolved up front into a plain dict (an unknown one becomes a placeholder),
+    rather than through a mapping with `__missing__`, which `eval` does not consult on every
+    Python version."""
     if not isinstance(annotation, str):
         return annotation
     try:
-        return eval(annotation, {"__builtins__": {}}, _Names(module_globals))  # noqa: S307 - API annotations only
+        tree = ast.parse(annotation, mode="eval")
+    except SyntaxError:
+        return _UNKNOWN
+    scopes = [module_globals, *_fallback_scopes()]
+    names = {node.id: _lookup(node.id, scopes) for node in ast.walk(tree) if isinstance(node, ast.Name)}
+    try:
+        # Real builtins: on some versions `Union | None` imports internally.
+        return eval(compile(tree, "<annotation>", "eval"), {"__builtins__": builtins}, names)  # noqa: S307 - kinemo's own annotations
     except Exception:  # noqa: BLE001 - an annotation the runtime cannot evaluate is just unknown
         return _UNKNOWN
 

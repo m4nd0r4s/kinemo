@@ -45,11 +45,11 @@ pub fn decode_bitmap(encoded: Vec<u8>) -> Result<Bitmap, String> {
     let rgba = image::load_from_memory_with_format(&encoded, format).map_err(|e| e.to_string())?.to_rgba8();
     let (width, height) = rgba.dimensions();
     if width == 0 || height == 0 {
-        return Err("imagem vazia".into());
+        return Err("empty image".into());
     }
     let mut premultiplied = rgba.into_raw();
     let mut sums = [0u64; 4];
-    for px in premultiplied.chunks_exact_mut(4) {
+    for px in premultiplied.as_chunks_mut::<4>().0 {
         let a = px[3] as u32;
         for (sum, &channel) in sums.iter_mut().zip(px.iter()) {
             *sum += channel as u64;

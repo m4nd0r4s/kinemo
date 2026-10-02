@@ -65,7 +65,9 @@ impl ImageDifference {
 fn premultiplied(image: &Image) -> Vec<[u8; 4]> {
     image
         .rgba
-        .chunks_exact(4)
+        .as_chunks::<4>()
+        .0
+        .iter()
         .map(|px| {
             let alpha = px[3] as u32;
             let premultiply = |c: u8| ((c as u32 * alpha + 127) / 255) as u8;

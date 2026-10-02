@@ -13,9 +13,9 @@ fn padded_bytes_per_row(width: u32) -> u32 {
 /// Vello un-premultiplies with a tiny epsilon, so alpha-0 pixels can carry arbitrary
 /// color; tiny-skia stores them as 0,0,0,0.
 fn clear_color_of_transparent_pixels(rgba: &mut [u8]) {
-    for px in rgba.chunks_exact_mut(4) {
+    for px in rgba.as_chunks_mut::<4>().0 {
         if px[3] == 0 {
-            px.copy_from_slice(&[0, 0, 0, 0]);
+            *px = [0, 0, 0, 0];
         }
     }
 }

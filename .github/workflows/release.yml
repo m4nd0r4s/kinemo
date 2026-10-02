@@ -2,11 +2,13 @@ name: release
 
 # Push a tag `vX.Y.Z` matching the version in pyproject.toml. Wheels are built for each
 # platform, installed on a clean machine and tried on a scene, then published to PyPI through
-# trusted publishing (no token stored) and attached to a GitHub release.
+# trusted publishing (no token stored) and attached to a GitHub release. Run it by hand
+# (workflow_dispatch) to build and try the wheels without publishing.
 
 on:
   push:
     tags: ["v*"]
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -17,6 +19,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7
       - name: The tag matches the package version
+        if: startsWith(github.ref, 'refs/tags/')
         run: |
           version=$(sed -n 's/^version = "\(.*\)"/\1/p' pyproject.toml | head -1)
           test "v$version" = "$GITHUB_REF_NAME" || { echo "tag $GITHUB_REF_NAME, package $version"; exit 1; }
@@ -44,7 +47,9 @@ jobs:
         with:
           target: ${{ matrix.target }}
           args: --release --out dist
-          manylinux: auto
+          # glibc 2.28: tree-sitter's C code asks for _DEFAULT_SOURCE, which glibc < 2.19
+          # (manylinux2014) ignores, leaving le16toh undefined at import time.
+          manylinux: "2_28"
       - uses: actions/upload-artifact@v7
         with:
           name: wheels-${{ matrix.os }}-${{ matrix.target }}
@@ -94,6 +99,7 @@ jobs:
 
   publish:
     needs: [try, sdist]
+    if: startsWith(github.ref, 'refs/tags/v')
     runs-on: ubuntu-latest
     environment: pypi
     permissions:
@@ -107,6 +113,7 @@ jobs:
 
   github-release:
     needs: publish
+    if: startsWith(github.ref, 'refs/tags/v')
     runs-on: ubuntu-latest
     permissions:
       contents: write

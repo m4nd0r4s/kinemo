@@ -821,7 +821,7 @@ def rose(s: k.Scene):
     s.add(pa)
     s.play(k.draw(curve), duration=2)
 ```
-#### `ax.parametric(fx, fy, *, t=(0.0, 6.283185307179586), samples=300, color=None, **style) -> ParametricPlot`
+#### `ax.parametric(fx, fy, *, t=(0.0, 6.283185307179586), samples=300, color=None, enter_with_axes=True, **style) -> ParametricPlot`
 Parametric curve `(fx(t), fy(t))` for `t=(start, end)`; clipped to the visible ranges. Siblings: `ax.bars(xs, heights, width=)` (bars in data units) and `ax.scatter(xs, ys)`. See also: `ax.plot`, `k.Axes`.
 ```python
 def fx(t: float) -> float:
@@ -857,7 +857,7 @@ def number_line(s: k.Scene):
     s.play(k.draw(nl), k.fade_in(dot))
     s.play(x.to(2), duration=2)
 ```
-#### `ax.plot(fn, *, until=None, from_=None, domain=None, color=None, label=None, samples=160, **style) -> Plot`
+#### `ax.plot(fn, *, until=None, from_=None, domain=None, color=None, label=None, samples=160, enter_with_axes=True, **style) -> Plot`
 Draws the curve `y = fn(x)` on the axes, with adaptive sampling. `fn` uses `k` functions (`k.sin`, `k.max`...), so the same function works for floats and signals. `until=`/`from_=` accept signals: the curve grows as the signal moves. `label=` puts a label at the end of the curve. See also: `curve.point_at`, `ax.area`, `k.sin`.
 ```python
 def wave(x: float) -> float:
@@ -871,7 +871,7 @@ def wave_plot(s: k.Scene):
     s.play(k.draw(ax))
     s.play(t.to(10), duration=3, ease=k.ease.linear)
 ```
-#### `ax.area(f, *, between=None, domain=None, until=None, samples=200, **style) -> Area`
+#### `ax.area(f, *, between=None, domain=None, until=None, samples=200, enter_with_axes=True, **style) -> Area`
 Filled region under a curve (down to the x axis) or between two curves (`between=`). Accepts a curve from `ax.plot` or a function, plus style (`fill=`, `fill_opacity=`). See also: `ax.plot`.
 ```python
 def f(x: float) -> float:
@@ -885,7 +885,7 @@ def area(s: k.Scene):
     s.play(k.draw(ax))
     s.wait(0.5)
 ```
-#### `ax.vline(at, *, style="solid", **props) -> Line`
+#### `ax.vline(at, *, style="solid", enter_with_axes=True, **props) -> Line`
 Vertical line on the axes at `at=` (accepts a signal: the line moves with it); `style="dashed"` makes it dashed. See also: `ax.hline`, `ax.plot`.
 ```python
 @k.scene
@@ -896,7 +896,7 @@ def marker(s: k.Scene):
     s.play(k.draw(ax))
     s.play(hour.to(18), duration=2)
 ```
-#### `ax.hline(at, *, style="solid", **props) -> Line`
+#### `ax.hline(at, *, style="solid", enter_with_axes=True, **props) -> Line`
 Horizontal line on the axes at `at=` (accepts a signal); `style="dashed"` makes it dashed. Good for limits and targets. See also: `ax.vline`.
 ```python
 @k.scene
@@ -906,7 +906,7 @@ def limit(s: k.Scene):
     s.play(k.draw(ax))
     s.wait(0.5)
 ```
-#### `ax.scatter(xs, ys, *, radius=0.06, **props) -> Group[Dot]`
+#### `ax.scatter(xs, ys, *, radius=0.06, enter_with_axes=True, **props) -> Group[Dot]`
 Points `(xs[i], ys[i])` on the axes, as a group of `k.Dot`. Accepts lists, numpy arrays and Arrow columns (polars, pandas, pyarrow). See also: `ax.plot`, `k.Dot`.
 ```python
 @k.scene
@@ -952,8 +952,8 @@ def slide(s: k.Scene):
     s.play(k.draw(ax), k.fade_in(dot))
     s.play(x.to(2.5), duration=3)
 ```
-#### `curve.tangent_at(x, length=2.0, **style) -> Line`
-Tangent segment `length` units long, centered on the curve at `x`, reactive when `x` is a signal. It is added to the axes directly; accepts style (`stroke=`). See also: `curve.slope_at`, `curve.point_at`.
+#### `curve.tangent_at(x, length=2.0, *, enter_with_axes=True, **style) -> Line`
+Tangent segment `length` units long, centered on the curve at `x`, reactive when `x` is a signal. It belongs to the axes and enters with it; `enter_with_axes=False` keeps it hidden until a verb brings it in. Accepts style (`stroke=`). See also: `curve.slope_at`, `curve.point_at`.
 ```python
 @k.scene
 def tangent(s: k.Scene):

@@ -132,11 +132,12 @@ polaraxes.plot(
     theta: tuple[float, float] = (0.0, 6.283185307179586),
     samples: int = 360,
     color: ColorLike | None = None,
+    enter_with_axes: bool = True,
     **style: Unpack[PlotStyleKeywords],
 ) -> Path
 ```
 
-Curve `r = fn(theta)` (sampled at build, in the axes' coordinates).
+Curve `r = fn(theta)` (sampled at build, in the axes' coordinates). `enter_with_axes=False` keeps it hidden until a verb brings it in.
 
 **Parameters:**
 
@@ -146,6 +147,7 @@ Curve `r = fn(theta)` (sampled at build, in the axes' coordinates).
 | `theta` | `tuple[float, float]` | `(0.0, 6.283185307179586)` |   |
 | `samples` | `int` | `360` |   |
 | `color` | `ColorLike \| None` | `None` |   |
+| `enter_with_axes` | `bool` | `True` | `enter_with_axes=False` keeps it hidden until a verb brings it in. |
 | `**style` | `Unpack[PlotStyleKeywords]` | variadic | Keyword arguments (`PlotStyleKeywords`): `name: str \| None`, `key: str \| None`, `x: FloatVal`, `y: FloatVal`, `position: VecVal`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `fill: ColorVal`, `fill_opacity: FloatVal`, `stroke_width: FloatVal`, `dash: FloatsVal`. |
 
 <a id="k-axes"></a>
@@ -309,6 +311,7 @@ ax.plot(
     color: ColorLike | None = None,
     label: str | None = None,
     samples: int = 160,
+    enter_with_axes: bool = True,
     **style: Unpack[PlotStyleKeywords],
 ) -> Plot
 ```
@@ -326,6 +329,7 @@ Draws the curve `y = fn(x)` on the axes, with adaptive sampling. `fn` uses `k` f
 | `color` | `ColorLike \| None` | `None` |   |
 | `label` | `str \| None` | `None` | `label=` puts a label at the end of the curve. |
 | `samples` | `int` | `160` |   |
+| `enter_with_axes` | `bool` | `True` | `enter_with_axes=False` keeps it (and its label) hidden until a verb brings it in. |
 | `**style` | `Unpack[PlotStyleKeywords]` | variadic | Keyword arguments (`PlotStyleKeywords`): `name: str \| None`, `key: str \| None`, `x: FloatVal`, `y: FloatVal`, `position: VecVal`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `fill: ColorVal`, `fill_opacity: FloatVal`, `stroke_width: FloatVal`, `dash: FloatsVal`. |
 
 **Example:**
@@ -356,6 +360,7 @@ ax.area(
     domain: tuple[float, float] | None = None,
     until: FloatExpr | None = None,
     samples: int = 200,
+    enter_with_axes: bool = True,
     **style: Unpack[StyleKeywords],
 ) -> Area
 ```
@@ -371,6 +376,7 @@ Filled region under a curve (down to the x axis) or between two curves (`between
 | `domain` | `tuple[float, float] \| None` | `None` |   |
 | `until` | `FloatExpr \| None` | `None` |   |
 | `samples` | `int` | `200` |   |
+| `enter_with_axes` | `bool` | `True` |   |
 | `**style` | `Unpack[StyleKeywords]` | variadic | Keyword arguments (`StyleKeywords`): `name: str \| None`, `key: str \| None`, `x: FloatVal`, `y: FloatVal`, `position: VecVal`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `fill: ColorVal`, `fill_opacity: FloatVal`, `stroke: ColorVal`, `stroke_width: FloatVal`, `dash: FloatsVal`, `color: ColorVal`. |
 
 **Example:**
@@ -398,6 +404,7 @@ ax.vline(
     at: FloatVal,
     *,
     style: LineStyle = "solid",
+    enter_with_axes: bool = True,
     **props: Unpack[StyleKeywords],
 ) -> Line
 ```
@@ -410,6 +417,7 @@ Vertical line on the axes at `at=` (accepts a signal: the line moves with it); `
 | --- | --- | --- | --- |
 | `at` | `FloatVal` | required | Vertical line on the axes at `at=` (accepts a signal: the line moves with it); `style="dashed"` makes it dashed. |
 | `style` | `LineStyle` | `"solid"` | Vertical line on the axes at `at=` (accepts a signal: the line moves with it); `style="dashed"` makes it dashed. |
+| `enter_with_axes` | `bool` | `True` |   |
 | `**props` | `Unpack[StyleKeywords]` | variadic | Keyword arguments (`StyleKeywords`): `name: str \| None`, `key: str \| None`, `x: FloatVal`, `y: FloatVal`, `position: VecVal`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `fill: ColorVal`, `fill_opacity: FloatVal`, `stroke: ColorVal`, `stroke_width: FloatVal`, `dash: FloatsVal`, `color: ColorVal`. |
 
 **Example:**
@@ -434,6 +442,7 @@ ax.hline(
     at: FloatVal,
     *,
     style: LineStyle = "solid",
+    enter_with_axes: bool = True,
     **props: Unpack[StyleKeywords],
 ) -> Line
 ```
@@ -446,6 +455,7 @@ Horizontal line on the axes at `at=` (accepts a signal); `style="dashed"` makes 
 | --- | --- | --- | --- |
 | `at` | `FloatVal` | required | Horizontal line on the axes at `at=` (accepts a signal); `style="dashed"` makes it dashed. |
 | `style` | `LineStyle` | `"solid"` | Horizontal line on the axes at `at=` (accepts a signal); `style="dashed"` makes it dashed. |
+| `enter_with_axes` | `bool` | `True` |   |
 | `**props` | `Unpack[StyleKeywords]` | variadic | Keyword arguments (`StyleKeywords`): `name: str \| None`, `key: str \| None`, `x: FloatVal`, `y: FloatVal`, `position: VecVal`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `fill: ColorVal`, `fill_opacity: FloatVal`, `stroke: ColorVal`, `stroke_width: FloatVal`, `dash: FloatsVal`, `color: ColorVal`. |
 
 **Example:**
@@ -470,6 +480,7 @@ ax.scatter(
     ys: FloatColumn,
     *,
     radius: float = 0.06,
+    enter_with_axes: bool = True,
     **props: Unpack[UnplacedStyleKeywords],
 ) -> Group[Dot]
 ```
@@ -483,6 +494,7 @@ Points `(xs[i], ys[i])` on the axes, as a group of `k.Dot`. Accepts lists, numpy
 | `xs` | `FloatColumn` | required |   |
 | `ys` | `FloatColumn` | required |   |
 | `radius` | `float` | `0.06` |   |
+| `enter_with_axes` | `bool` | `True` |   |
 | `**props` | `Unpack[UnplacedStyleKeywords]` | variadic | Keyword arguments (`UnplacedStyleKeywords`): `name: str \| None`, `key: str \| None`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `fill: ColorVal`, `fill_opacity: FloatVal`, `stroke: ColorVal`, `stroke_width: FloatVal`, `dash: FloatsVal`, `color: ColorVal`. |
 
 **Example:**
@@ -509,6 +521,7 @@ ax.parametric(
     t: tuple[float, float] = (0.0, 6.283185307179586),
     samples: int = 300,
     color: ColorLike | None = None,
+    enter_with_axes: bool = True,
     **style: Unpack[PlotStyleKeywords],
 ) -> ParametricPlot
 ```
@@ -524,6 +537,7 @@ Parametric curve `(fx(t), fy(t))` for `t=(start, end)`; clipped to the visible r
 | `t` | `tuple[float, float]` | `(0.0, 6.283185307179586)` | Parametric curve `(fx(t), fy(t))` for `t=(start, end)`; clipped to the visible ranges. |
 | `samples` | `int` | `300` |   |
 | `color` | `ColorLike \| None` | `None` |   |
+| `enter_with_axes` | `bool` | `True` |   |
 | `**style` | `Unpack[PlotStyleKeywords]` | variadic | Keyword arguments (`PlotStyleKeywords`): `name: str \| None`, `key: str \| None`, `x: FloatVal`, `y: FloatVal`, `position: VecVal`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `fill: ColorVal`, `fill_opacity: FloatVal`, `stroke_width: FloatVal`, `dash: FloatsVal`. |
 
 **Example:**
@@ -554,6 +568,7 @@ ax.bars(
     heights: FloatColumn,
     *,
     width: float = 0.6,
+    enter_with_axes: bool = True,
     **props: Unpack[UnplacedStyleKeywords],
 ) -> Group[Node]
 ```
@@ -567,6 +582,7 @@ Vertical bars at data `xs` with data `heights` (from the x axis); `width` is in 
 | `xs` | `FloatColumn` | required | Vertical bars at data `xs` with data `heights` (from the x axis); `width` is in data units. |
 | `heights` | `FloatColumn` | required | Vertical bars at data `xs` with data `heights` (from the x axis); `width` is in data units. |
 | `width` | `float` | `0.6` | Vertical bars at data `xs` with data `heights` (from the x axis); `width` is in data units. |
+| `enter_with_axes` | `bool` | `True` |   |
 | `**props` | `Unpack[UnplacedStyleKeywords]` | variadic | Keyword arguments (`UnplacedStyleKeywords`): `name: str \| None`, `key: str \| None`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `fill: ColorVal`, `fill_opacity: FloatVal`, `stroke: ColorVal`, `stroke_width: FloatVal`, `dash: FloatsVal`, `color: ColorVal`. |
 
 <a id="axes-zoom_to"></a>
@@ -785,11 +801,13 @@ def slope(s: k.Scene):
 curve.tangent_at(
     x: FloatExpr,
     length: float = 2.0,
+    *,
+    enter_with_axes: bool = True,
     **style: Unpack[UnplacedStyleKeywords],
 ) -> Line
 ```
 
-Tangent segment `length` units long, centered on the curve at `x`, reactive when `x` is a signal. It is added to the axes directly; accepts style (`stroke=`).
+Tangent segment `length` units long, centered on the curve at `x`, reactive when `x` is a signal. It belongs to the axes and enters with it; `enter_with_axes=False` keeps it hidden until a verb brings it in. Accepts style (`stroke=`).
 
 **Parameters:**
 
@@ -797,6 +815,7 @@ Tangent segment `length` units long, centered on the curve at `x`, reactive when
 | --- | --- | --- | --- |
 | `x` | `FloatExpr` | required | Tangent segment `length` units long, centered on the curve at `x`, reactive when `x` is a signal. |
 | `length` | `float` | `2.0` | Tangent segment `length` units long, centered on the curve at `x`, reactive when `x` is a signal. |
+| `enter_with_axes` | `bool` | `True` | It belongs to the axes and enters with it; `enter_with_axes=False` keeps it hidden until a verb brings it in. |
 | `**style` | `Unpack[UnplacedStyleKeywords]` | variadic | Keyword arguments (`UnplacedStyleKeywords`): `name: str \| None`, `key: str \| None`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `fill: ColorVal`, `fill_opacity: FloatVal`, `stroke: ColorVal`, `stroke_width: FloatVal`, `dash: FloatsVal`, `color: ColorVal`. |
 
 **Example:**

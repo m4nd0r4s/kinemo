@@ -4,6 +4,13 @@ All notable changes to kinemo are listed here. The project follows
 [semantic versioning](https://semver.org/); until 1.0, a minor version may change the API, and
 `kinemo upgrade` rewrites the forms it replaces.
 
+## Unreleased
+
+- **Charts:** objects an axes creates (`plot`, `parametric`, `area`, `vline`, `hline`,
+  `scatter`, `bars`, `curve.tangent_at`, polar `plot`) take `enter_with_axes=False` to stay
+  hidden until their own verb brings them in. The derivative example no longer shows its
+  tangent twice.
+
 ## 0.9.0 — first public release
 
 The complete design of [docs/specs.md](docs/specs.md), up to its v1.0 milestone. The version

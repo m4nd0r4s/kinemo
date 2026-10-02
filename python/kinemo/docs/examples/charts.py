@@ -244,7 +244,8 @@ def slide(s: k.Scene):
         "Plot.tangent_at",
         "Charts",
         "Tangent segment `length` units long, centered on the curve at `x`, reactive when `x` is "
-        "a signal. It is added to the axes directly; accepts style (`stroke=`).",
+        "a signal. It belongs to the axes and enters with it; `enter_with_axes=False` keeps it "
+        "hidden until a verb brings it in. Accepts style (`stroke=`).",
         '''
 import kinemo as k
 

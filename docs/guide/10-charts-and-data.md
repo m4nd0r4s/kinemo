@@ -54,7 +54,7 @@ which are traced). `math.sin` fails with `K0310` as soon as something traces the
 | `curve.point_at(x)` | World position of the curve at `x`. Use it with `place(at=...)`. |
 | `curve.value_at(x)` | The y value at `x` |
 | `curve.slope_at(x)` | The numerical derivative at `x`. Read it with `curve.slope_at(x)()` inside a lambda. |
-| `curve.tangent_at(x, length=2.0, **style)` | A tangent segment centered on the curve, added to the axes |
+| `curve.tangent_at(x, length=2.0, enter_with_axes=True, **style)` | A tangent segment centered on the curve, added to the axes |
 | `ax.point(x, y)` | World position of a data point, for markers |
 
 All of them are reactive when `x` is a signal:
@@ -85,8 +85,19 @@ def derivative(s: k.Scene):
     s.wait(0.5)
 ```
 
-Objects that belong to the axes (plots, tangents, `vline`/`hline`, areas) are added to it
-directly and enter with it. Markers you create yourself, like `dot`, enter with a verb.
+Objects that belong to the axes (plots, tangents, `vline`/`hline`, areas, scatter points,
+bars) are added to it directly and enter with it. Markers you create yourself, like `dot`,
+enter with a verb.
+
+To introduce one of the axes' objects on its own, create it with `enter_with_axes=False`: it
+stays hidden while the axes appear, and enters with its own verb (or `s.add`). A plot's label
+comes in with the plot.
+
+```python
+tan = curve.tangent_at(x, length=3, stroke=k.RED, enter_with_axes=False)
+s.play(k.draw(ax))        # the axes and the curve, without the tangent
+s.play(k.fade_in(tan))    # now the tangent
+```
 
 ### Areas, lines and limits
 

@@ -27,9 +27,11 @@ class LifecycleMixin:
             self._exit(o, self.cursor)
 
     def _enter(self, node: "Node", t: float) -> None:
-        for n in [node, *node._descendants(t)]:
+        for n in [node, *node._entering_descendants(t)]:
             if not self._b.present(n._id, t):
                 self._b.set_presence(n._id, t, True)
+            for companion in n.__dict__.get("_companions", ()):
+                self._enter(companion, t)  # a curve's label, kept beside it in the axes
         for a in node._ancestors():
             if not self._b.present(a._id, t):
                 self._b.set_presence(a._id, t, True)
@@ -42,7 +44,7 @@ class LifecycleMixin:
 
     def _enter_rest(self, node: "Node", t: float) -> None:
         """Parts a component's `enter()` did not bring in appear when it ends."""
-        for n in node._descendants(t):
+        for n in node._entering_descendants(t):
             if not self._b.present(n._id, t):
                 self._b.set_presence(n._id, t, True)
 

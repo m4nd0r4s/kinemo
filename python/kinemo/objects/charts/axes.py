@@ -173,12 +173,15 @@ class Axes(Group):
     def _name_part(node: Node, part: str) -> None:
         object.__setattr__(node, "_part", part)
 
-    def _append(self, node: Node) -> Node:
-        """Add a child at the cursor (plots and markers created after the axes)."""
+    def _append(self, node: Node, enter_with_axes: bool = True) -> Node:
+        """Add a child at the cursor (plots and markers created after the axes). With
+        `enter_with_axes=False` it stays hidden until a verb or `s.add` brings it in."""
         self._adopt(node)
+        if not enter_with_axes:
+            object.__setattr__(node, "_enters_on_its_own", True)
         kids = self.children + [node]
         self._children_sig.set(kids)
-        if self._scene._b.present(self._id, self._scene.cursor):
+        if enter_with_axes and self._scene._b.present(self._id, self._scene.cursor):
             self._scene._enter(node, self._scene.cursor)
         return node
 
@@ -200,10 +203,12 @@ class Axes(Group):
         color: ColorLike | None = None,
         label: str | None = None,
         samples: int = 160,
+        enter_with_axes: bool = True,
         **style: Unpack[PlotStyleKeywords],
     ) -> Plot:
         """Curve of `fn` (also usable with floats). `until=`/`from_=` accept signals: the
-        curve grows while the signal moves."""
+        curve grows while the signal moves. `enter_with_axes=False` keeps it (and its label)
+        hidden until a verb brings it in."""
         x0, x1 = domain or tuple(self.x_range.now)
         y0, y1 = self.y_range.now
         segments = sample(fn, float(x0), float(x1), float(y1 - y0), samples)
@@ -213,7 +218,7 @@ class Axes(Group):
             stroke = stroke.resolve()
         plot_props: dict[str, Any] = {**style, "stroke": stroke, "stroke_width": style.get("stroke_width", 4.0)}
         curve = Plot(self, fn, segments, clip, **plot_props)
-        self._append(curve)
+        self._append(curve, enter_with_axes)
         _name_from_call(curve, "plot")
         if label:
             xe = float(x1)
@@ -222,7 +227,9 @@ class Axes(Group):
             object.__setattr__(curve, "label", tag)
             object.__setattr__(tag, "_part", "label")
             object.__setattr__(tag, "_parent_label", curve)
-            self._append(tag)
+            self._append(tag, enter_with_axes)
+            if not enter_with_axes:
+                object.__setattr__(curve, "_companions", [tag])
         return curve
 
     def _label_offset(self, y_data: float) -> float:
@@ -238,7 +245,7 @@ class Axes(Group):
         taken.append(local + offset)
         return offset
 
-    def area(self, f: Plot | PlotFunction, *, between: Plot | PlotFunction | None = None, domain: tuple[float, float] | None = None, until: FloatExpr | None = None, samples: int = 200, **style: Unpack[StyleKeywords]) -> Area:
+    def area(self, f: Plot | PlotFunction, *, between: Plot | PlotFunction | None = None, domain: tuple[float, float] | None = None, until: FloatExpr | None = None, samples: int = 200, enter_with_axes: bool = True, **style: Unpack[StyleKeywords]) -> Area:
         """Filled region under `f` (to the x axis) or between `f` and `between`."""
         top_fn = f.fn if isinstance(f, Plot) else f
         base_fn = between.fn if isinstance(between, Plot) else between
@@ -249,34 +256,34 @@ class Axes(Group):
         style.setdefault("fill", f._sig("stroke") if isinstance(f, Plot) else self._scene.theme.accent)
         clip = vec(-FAR, until if until is not None else FAR)
         region = Area(self, top, base, clip, **style)
-        self._append(region)
+        self._append(region, enter_with_axes)
         _name_from_call(region, "area")
         return region
 
-    def vline(self, at: FloatVal, *, style: LineStyle = "solid", **props: Unpack[StyleKeywords]) -> Line:
+    def vline(self, at: FloatVal, *, style: LineStyle = "solid", enter_with_axes: bool = True, **props: Unpack[StyleKeywords]) -> Line:
         h = self.size
         if style == "dashed":
             props.setdefault("dash", (12.0, 10.0))
         props.setdefault("stroke_width", 2.5)
         line = Line(start=vec(self.map_x(at), -h.y / 2), end=vec(self.map_x(at), h.y / 2), **props)
-        self._append(line)
+        self._append(line, enter_with_axes)
         return line
 
-    def hline(self, at: FloatVal, *, style: LineStyle = "solid", **props: Unpack[StyleKeywords]) -> Line:
+    def hline(self, at: FloatVal, *, style: LineStyle = "solid", enter_with_axes: bool = True, **props: Unpack[StyleKeywords]) -> Line:
         w = self.size
         if style == "dashed":
             props.setdefault("dash", (12.0, 10.0))
         props.setdefault("stroke_width", 2.5)
         line = Line(start=vec(-w.x / 2, self.map_y(at)), end=vec(w.x / 2, self.map_y(at)), **props)
-        self._append(line)
+        self._append(line, enter_with_axes)
         return line
 
-    def scatter(self, xs: FloatColumn, ys: FloatColumn, *, radius: float = 0.06, **props: Unpack[UnplacedStyleKeywords]) -> Group[Dot]:
+    def scatter(self, xs: FloatColumn, ys: FloatColumn, *, radius: float = 0.06, enter_with_axes: bool = True, **props: Unpack[UnplacedStyleKeywords]) -> Group[Dot]:
         from ...data.arrow import to_float_list
 
         dots = [Dot(r=radius, x=self.map_x(x), y=self.map_y(y), **props) for x, y in zip(to_float_list(xs), to_float_list(ys))]
         group = Group(*dots)
-        self._append(group)
+        self._append(group, enter_with_axes)
         return group
 
     def parametric(
@@ -287,6 +294,7 @@ class Axes(Group):
         t: tuple[float, float] = (0.0, 6.283185307179586),
         samples: int = 300,
         color: ColorLike | None = None,
+        enter_with_axes: bool = True,
         **style: Unpack[PlotStyleKeywords],
     ) -> "ParametricPlot":
         """Curve `(fx(t), fy(t))` for `t` in `t=(start, end)`; cut at the visible ranges."""
@@ -299,11 +307,11 @@ class Axes(Group):
             stroke = stroke.resolve()
         options: dict[str, Any] = dict(style)
         curve = ParametricPlot(self, fx, fy, [points], stroke=stroke, stroke_width=options.pop("stroke_width", 4.0), **options)
-        self._append(curve)
+        self._append(curve, enter_with_axes)
         _name_from_call(curve, "parametric")
         return curve
 
-    def bars(self, xs: FloatColumn, heights: FloatColumn, *, width: float = 0.6, **props: Unpack[UnplacedStyleKeywords]) -> Group[Node]:
+    def bars(self, xs: FloatColumn, heights: FloatColumn, *, width: float = 0.6, enter_with_axes: bool = True, **props: Unpack[UnplacedStyleKeywords]) -> Group[Node]:
         """Vertical bars at data `xs` with data `heights` (from the x axis); `width` is in
         data units. Bars follow the axes when it zooms."""
         from ...data.arrow import to_float_list
@@ -320,7 +328,7 @@ class Axes(Group):
             options: dict[str, Any] = {"fill": fill, "fill_opacity": 0.85, "stroke_width": 0.0, **options_in}
             bars.append(Rect(w=unit_w * width, h=abs(top - base), x=self.map_x(x), y=(top + base) / 2, **options))
         group = Group(*bars)
-        self._append(group)
+        self._append(group, enter_with_axes)
         _name_from_call(group, "bars")
         return group
 

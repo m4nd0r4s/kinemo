@@ -78,9 +78,11 @@ class PolarAxes(Group[Node]):
         theta: tuple[float, float] = (0.0, 2 * math.pi),
         samples: int = 360,
         color: ColorLike | None = None,
+        enter_with_axes: bool = True,
         **style: Unpack[PlotStyleKeywords],
     ) -> Path:
-        """Curve `r = fn(theta)` (sampled at build, in the axes' coordinates)."""
+        """Curve `r = fn(theta)` (sampled at build, in the axes' coordinates).
+        `enter_with_axes=False` keeps it hidden until a verb brings it in."""
         t0, t1 = theta
         r_max = self.r_max.now
         scale = self.radius.now / r_max
@@ -91,7 +93,7 @@ class PolarAxes(Group[Node]):
             pts.append((rr * math.cos(a), rr * math.sin(a)))
         options: dict[str, Any] = {"stroke": color if color is not None else self._scene.theme.accent, "stroke_width": 4.0, **style}
         curve = Path(pts, **options)
-        self._add_child(curve)
+        self._add_child(curve, enter_with_axes)
         from .axes import _name_from_call
 
         _name_from_call(curve, "plot")

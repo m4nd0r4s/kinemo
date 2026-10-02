@@ -80,8 +80,10 @@ class Plot(Shape):
         at: Expr[float] = lift(x)
         return (_apply(self.fn, at + h) - _apply(self.fn, at - h)) / (2 * h)
 
-    def tangent_at(self, x: FloatExpr, length: float = 2.0, **style: Unpack[UnplacedStyleKeywords]) -> Line:
-        """Tangent segment of `length` units centered on the curve at `x`."""
+    def tangent_at(self, x: FloatExpr, length: float = 2.0, *, enter_with_axes: bool = True, **style: Unpack[UnplacedStyleKeywords]) -> Line:
+        """Tangent segment of `length` units centered on the curve at `x`. It belongs to the
+        axes and enters with it; `enter_with_axes=False` keeps it hidden until you bring it in
+        with a verb (`k.fade_in(tan)`, `k.draw(tan)`) or `s.add(tan)`."""
         ax = self.axes
         p = ax.local_point(x, _apply(self.fn, x))
         sx = ax.size.x / (ax.x_range.y - ax.x_range.x)
@@ -91,7 +93,7 @@ class Plot(Shape):
         ux, uy = dx / norm * (length / 2), dy / norm * (length / 2)
         style.setdefault("stroke", self._sig("stroke"))
         line = Line(start=vec(p.x - ux, p.y - uy), end=vec(p.x + ux, p.y + uy), **style)
-        ax._append(line)
+        ax._append(line, enter_with_axes)
         from .axes import _name_from_call
 
         _name_from_call(line, "tangent_at")

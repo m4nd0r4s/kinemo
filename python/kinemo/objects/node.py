@@ -321,6 +321,15 @@ class Node(PlacementMixin):
             yield c
             yield from c._descendants(t)
 
+    def _entering_descendants(self, t: float) -> Iterator["Node"]:
+        """Descendants that enter with this node: a child marked to enter on its own (an axes
+        tangent made with `enter_with_axes=False`) waits for its own verb, with its subtree."""
+        for c in self._children_at(t):
+            if c.__dict__.get("_enters_on_its_own", False):
+                continue
+            yield c
+            yield from c._entering_descendants(t)
+
     def _ancestors(self) -> Iterator["Node"]:
         p = self._parent
         while p is not None:

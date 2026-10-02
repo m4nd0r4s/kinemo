@@ -81,12 +81,15 @@ class Group(Node, Generic[ChildT]):
         """Children a subclass builds itself (after its props exist)."""
         return []
 
-    def _add_child(self, node: Node) -> None:
-        """Append a child at the cursor (parts created after construction)."""
+    def _add_child(self, node: Node, enter_with_parent: bool = True) -> None:
+        """Append a child at the cursor (parts created after construction). With
+        `enter_with_parent=False` it stays hidden until a verb or `s.add` brings it in."""
         self._adopt(node)
+        if not enter_with_parent:
+            object.__setattr__(node, "_enters_on_its_own", True)
         self._children_sig.set(self._children_at(self._scene.cursor) + [node])
         s = self._scene
-        if s._b.present(self._id, s.cursor):
+        if enter_with_parent and s._b.present(self._id, s.cursor):
             s._enter(node, s.cursor)
 
     # ---- children at the cursor --------------------------------------------------

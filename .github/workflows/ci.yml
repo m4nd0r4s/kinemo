@@ -21,6 +21,12 @@ jobs:
       - uses: ./.github/actions/ffmpeg
       - run: cargo clippy --workspace --all-targets -- -D warnings
       - run: cargo test --workspace
+        if: runner.os != 'Windows'
+      # The optional GPU backend (not in the wheels) crashes inside wgpu on the Windows
+      # runner, which has no GPU and offers a software adapter; elsewhere its tests skip
+      # themselves when no adapter exists. Clippy above still checks it everywhere.
+      - run: cargo test --workspace --exclude kinemo-render-gpu
+        if: runner.os == 'Windows'
 
   python:
     name: python ${{ matrix.python }} (${{ matrix.os }})

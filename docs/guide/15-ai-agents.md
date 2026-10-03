@@ -161,6 +161,7 @@ Rules for an agent:
 | `position_source.kind` | `place` (a constraint, with its `placement`), `container` (a `Row`/`Grid`...), or `free` (plain `x`/`y`) |
 | `props` | Every prop at `t`, tagged by type: `{"Float": 1.0}`, `{"Vec2": [x, y]}`, `{"Color": [r, g, b, a]}` (0 to 1), `{"Str": "..."}`, `{"Bool": true}`, `{"List": [...]}` |
 | `prop_sources` | Where each prop's value comes from: `initial` (constructor), `animation` or `binding`, with the source line |
+| `drawn_glyphs` | Only on the runs that draw a text's glyphs: the indices of the glyphs this run draws at `t`. Each glyph of a text is drawn by exactly one run. |
 
 Typical checks: two `bbox` overlapping, a `bbox` outside `[-8, -4.5, 8, 4.5]`, a label that
 is not where the script intended. `--at` accepts seconds, a mark name or `end`.

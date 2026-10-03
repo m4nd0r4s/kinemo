@@ -21,7 +21,7 @@ pub fn object_json(layout: &Layout, object: ObjectId, t: f64) -> Json {
         props.insert(name.clone(), serde_json::to_value(value).unwrap_or(Json::Null));
         prop_sources.insert(name.clone(), prop_source(layout, signal, t));
     }
-    json!({
+    let mut snapshot = json!({
         "id": object,
         "kind": obj.kind,
         "name": obj.name,
@@ -33,7 +33,14 @@ pub fn object_json(layout: &Layout, object: ObjectId, t: f64) -> Json {
         "prop_sources": prop_sources,
         "position_source": placement_source(layout, object, t),
         "span": obj.span,
-    })
+    });
+    if obj.kind == "glyphs" && obj.children.is_none() {
+        // The glyphs this run draws (indices into its text's glyphs), sorted.
+        let mut drawn: Vec<usize> = layout.run_selection(object, t).into_iter().collect();
+        drawn.sort_unstable();
+        snapshot["drawn_glyphs"] = json!(drawn);
+    }
+    snapshot
 }
 
 /// Snapshots of every object in `scene` at `t`, in id order.

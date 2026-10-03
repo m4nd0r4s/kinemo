@@ -23,7 +23,8 @@
 //!   header has `selection`: `[{"id","pixel_bbox"}]` for the selected objects present at
 //!   that time; with `overlay`, it has `overlay`: `{"boxes","relations","safe"}`.
 //! - `{"type":"pick","id","t","x","y","object":{...}|null}`: the object snapshot
-//!   (`id`, `kind`, `label`, `props`, `prop_sources`, `position_source`, `bbox`, `span`);
+//!   (`id`, `kind`, `label`, `props`, `prop_sources`, `position_source`, `bbox`, `span`,
+//!   and `drawn_glyphs` on the runs that draw a text);
 //!   also the answer to `inspect` (without `x`, `y`).
 //! - `{"type":"scene","version":n,"meta":{...}}`: sent on connect and whenever a new
 //!   scene is published.

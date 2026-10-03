@@ -171,24 +171,23 @@ fn centroid(points: &[Point]) -> Point {
     Point::new(x / n, y / n)
 }
 
-/// Rotation of a closed contour's samples that best lines up with `reference`.
+/// Twice the signed area of a closed polygon (positive when counter-clockwise).
+fn signed_area(points: &[Point]) -> f64 {
+    points.iter().zip(points.iter().cycle().skip(1)).map(|(a, b)| a.x * b.y - b.x * a.y).sum()
+}
+
+/// Rotation of a closed contour's samples that best lines up with `reference`, traversed
+/// in the same direction (a contour blended against its reverse folds onto itself: a
+/// thin bar would vanish halfway).
 fn aligned(reference: &[Point], points: Vec<Point>) -> Vec<Point> {
     let n = points.len();
     let cost = |shift: usize, pts: &[Point]| -> f64 {
         (0..n).step_by(4).map(|i| reference[i].distance_squared(pts[(i + shift) % n])).sum()
     };
-    let reversed: Vec<Point> = points.iter().rev().copied().collect();
-    let mut best = (f64::INFINITY, 0, false);
-    for shift in 0..n {
-        for (rev, pts) in [(false, &points), (true, &reversed)] {
-            let c = cost(shift, pts);
-            if c < best.0 {
-                best = (c, shift, rev);
-            }
-        }
-    }
-    let source = if best.2 { reversed } else { points };
-    (0..n).map(|i| source[(i + best.1) % n]).collect()
+    let same_direction = signed_area(reference) * signed_area(&points) >= 0.0;
+    let source: Vec<Point> = if same_direction { points } else { points.iter().rev().copied().collect() };
+    let shift = (0..n).min_by(|&x, &y| cost(x, &source).total_cmp(&cost(y, &source))).unwrap_or(0);
+    (0..n).map(|i| source[(i + shift) % n]).collect()
 }
 
 fn blend_paths(a: &BezPath, b: &BezPath, p: f64) -> BezPath {
@@ -245,6 +244,14 @@ mod tests {
         let start = blend_paths(&a, &b, 0.0).bounding_box();
         let end = blend_paths(&a, &b, 1.0).bounding_box();
         assert!((start.x0 - 0.0).abs() < 1e-6 && (end.x0 - 20.0).abs() < 1e-6);
+    }
+
+    #[test]
+    fn a_thin_bar_keeps_its_area_halfway() {
+        let a = Rect::new(0.0, 0.0, 100.0, 1.0).to_path(0.1);
+        let b = Rect::new(10.0, 0.0, 120.0, 1.0).to_path(0.1);
+        let mid = blend_paths(&a, &b, 0.5);
+        assert!(mid.area().abs() > 50.0, "area {}", mid.area());
     }
 
     #[test]

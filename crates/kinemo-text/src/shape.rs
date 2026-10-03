@@ -24,6 +24,9 @@ pub(crate) fn shape_run(text: &str, first_char: usize, style: FontStyle, opts: &
     }
     let face = fonts().get(style);
     let s = scale(face, opts.size);
+    // A number's sign is drawn as a true minus (−), as wide as `+`, when the font has one.
+    let minus = face.glyph_index('\u{2212}').is_some();
+    let text: &str = &if opts.tabular_nums && minus { true_minus_signs(text) } else { text.to_string() };
     let mut buf = rustybuzz::UnicodeBuffer::new();
     buf.push_str(text);
     buf.guess_segment_properties();
@@ -94,4 +97,17 @@ fn is_number_sign(rest: &str) -> bool {
         Some('.') => chars.next().is_some_and(|c| c.is_ascii_digit()),
         _ => false,
     }
+}
+
+/// `-3` → `−3`: hyphen-minus signs of numbers become U+2212 (char indices are unchanged).
+fn true_minus_signs(text: &str) -> String {
+    let mut out = String::with_capacity(text.len());
+    for (index, c) in text.char_indices() {
+        if c == '-' && is_number_sign(&text[index..]) {
+            out.push('\u{2212}');
+        } else {
+            out.push(c);
+        }
+    }
+    out
 }

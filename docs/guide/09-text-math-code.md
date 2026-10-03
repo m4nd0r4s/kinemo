@@ -63,7 +63,7 @@ def parts(s: k.Scene):
     s.play(txt.words[0].to(color=k.TEAL))
     for part in txt.find_all("on"):
         s.play(k.indicate(part), duration=0.4)
-    s.play(txt.chars[0:6].to(scale=1.2))
+    s.play(txt.chars[0:6].to(scale=1.1))
     s.play(txt.lines[0].to(opacity=0.5))
     s.wait(0.5)
 ```

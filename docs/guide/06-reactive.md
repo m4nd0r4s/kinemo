@@ -263,7 +263,7 @@ import kinemo as k
 
 @k.scene
 def clocks(s: k.Scene):
-    pentagon = k.Polygon.regular(5, r=1).place(at="left", margin=3)
+    pentagon = k.Polygon.regular(5, r=1, x=-4)                # x keeps it turning in place
     pentagon.set(rotate=k.time * 90)                     # 90 degrees per second, forever
     hour = k.time.map(lambda t: k.min(t * 6, 24))        # 1 s of video = 6 h, capped at 24
     clock = k.Text(lambda: f"{k.floor(hour()):02.0f}:00", size=0.9).place(at="right", margin=3)

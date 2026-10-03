@@ -231,8 +231,8 @@ def narrated(s: k.Scene):
 When no provider is configured, the voice becomes **silence with an estimated duration**
 (150 words per minute), marks are spread over the estimate, and lint `W1401` warns. The
 scene can be timed, previewed and checked without a network or a model. The
-`# kinemo: allow W1401` comment above keeps `check --strict` passing while you write; remove
-it once a provider is set.
+`# kinemo: allow W1401` comment on the `with` line keeps `check --strict` passing while you
+write; remove it once a provider is set.
 
 ### Configuring a provider
 

@@ -233,7 +233,7 @@ def text_changes(s: k.Scene):
     txt = k.Text("Hello world, hello kinemo", size=0.6).place(at="center")
     s.play(k.write(txt))
     s.play(txt["world"].to(color=k.YELLOW))          # first occurrence
-    s.play(k.stagger([w.to(scale=1.2) for w in txt.words], lag=0.1))
+    s.play(k.stagger([w.to(scale=1.1) for w in txt.words], lag=0.1))
     s.play(*[p.to(color=k.TEAL) for p in txt.find_all("o")])
     s.play(txt.to(text="Goodbye world"))
     s.wait(0.5)

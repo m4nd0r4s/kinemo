@@ -280,10 +280,10 @@ class Hand(k.Component):
 @k.scene
 def clocks(s: k.Scene):
     hour = k.time.map(lambda t: t * 4)
-    slow = Hand().place(at="left", margin=4)                 # context default: k.time
+    slow = Hand().place(at="left", margin=2.5)               # context default: k.time
     with k.provide(Clock, hour):
         fast = Hand().place(at="center")                     # time = hour, via context
-        explicit = Hand(time=k.time * 2).place(at="right", margin=4)   # an argument wins
+        explicit = Hand(time=k.time * 2).place(at="right", margin=2.5)   # an argument wins
     s.add(slow, fast, explicit)
     s.wait(3)
 ```

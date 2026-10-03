@@ -31,6 +31,7 @@ k.Image(path, width=None, height=None, **props)
 - **Size.** Without a size, the image is 3 units tall. With `width=` or `height=`, the other
   side follows the file's aspect ratio. With both, the image is stretched to that box.
 - **Animatable size.** The size lives in the props `w` and `h`: `pic.to(w=6)` resizes it.
+  Setting one of them does not keep the aspect ratio; set both, or use `scale`, to keep it.
 - **Transform props** (`scale`, `rotate`, `opacity`, `x`, `y`) work as on any object.
 - **Layout and morphs** treat the image as its rectangle. `pic.pixel_size` gives the file's
   size in pixels.
@@ -175,7 +176,7 @@ import kinemo as k
 def venn(s: k.Scene):
     a = k.Circle(r=1.5, x=-0.8)
     b = k.Circle(r=1.5, x=0.8)
-    either = k.union(a, b, stroke=k.WHITE, fill_opacity=0)
+    either = k.union(a, b, stroke=k.WHITE, fill_opacity=0, z=1)   # the outline stays on top
     only_a = k.subtract(a, b, fill=k.BLUE, fill_opacity=0.5, stroke_width=0)
     both = k.intersect(a, b, fill=k.YELLOW, fill_opacity=0.8, stroke_width=0)
     s.play(k.draw(either))

@@ -195,6 +195,7 @@ class Grow(Verb):
         super().__init__(objs, duration, ease, delay, span)
         self.origin = _anchor(origin)
         self.entering = entering
+        self.name = "grow" if entering else "shrink"
 
     def _emit(self, s: "Scene", start: float, duration: float, ease: Ease) -> None:
         end = start + duration

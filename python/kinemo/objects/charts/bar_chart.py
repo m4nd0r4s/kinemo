@@ -96,6 +96,8 @@ class ChartBar(Group):
         fill = color if color is not None else accent(self._scene.theme)
         rect = Rect(w=self.bar_width, h=h, y=h / 2, fill=fill, fill_opacity=0.85, stroke_width=0.0)
         name = Text(category, size=label_size, y=-CATEGORY_GAP)
+        # `k.indicate(bar)` pulses the rectangle from the baseline; the labels stay put.
+        self._scene._push_set(rect._sig("_pulse_from"), (0.0, -1.0), rect._span)
         parts: list[Node] = [rect, name]
         for part, attr in ((rect, "rect"), (name, "category")):
             object.__setattr__(self, attr, part)
@@ -107,6 +109,9 @@ class ChartBar(Group):
             object.__setattr__(value_label, "_part", "value_label")
             parts.append(value_label)
         return parts
+
+    def _indicate_target(self) -> Node:
+        return self.rect
 
     def _grow_parts(self) -> tuple[list[Node], list[Node]]:
         faded: list[Node] = [self.category]
@@ -129,12 +134,12 @@ def _value_text(v: Expr[float], decimals: int) -> Callable[[], str]:
 class NewBarKeywords(TypedDict, total=False):
     value: float
     opacity: float
+    bar_width: float
 
 
 class ChartBarKeywords(NewBarKeywords, total=False):
     x: float
     y: float
-    bar_width: float
 
 
 class BarChart(Group):
@@ -215,8 +220,9 @@ class BarChart(Group):
         _, _, _, _, height, _, labels, _, _, label_size, decimals = self._chart_opts
         x, bar_width = self._slot(i, n)
         props.setdefault("value", row.value)
+        props.setdefault("bar_width", bar_width)
         bar = ChartBar(row.category, top=self.y_max, height=height, color=self._color_for(row.key), labels=labels,
-                       decimals=decimals, label_size=label_size, x=x, y=-height / 2, bar_width=bar_width, **props)
+                       decimals=decimals, label_size=label_size, x=x, y=-height / 2, **props)
         object.__setattr__(bar, "_part", f'["{row.key}"]')
         self._bars[row.key] = bar
         return bar
@@ -268,7 +274,8 @@ class BarChart(Group):
             x, bar_width = self._slot(i, n)
             bar = bars.get(row.key)
             if bar is None:
-                bar = self._new_bar(row, i, n, value=0.0, opacity=0.0)
+                # Grows in its slot from no width, so it does not cover bars that move.
+                bar = self._new_bar(row, i, n, value=0.0, opacity=0.0, bar_width=0.0)
                 entering.append(bar)
                 targets.append((bar._sig("opacity"), 1.0))
             elif self._categories[row.key] != row.category:
@@ -279,7 +286,7 @@ class BarChart(Group):
         if entering:
             Reorder(group, group._children_at(start) + entering, span, entering=entering)._emit(s, start, 0.0, ease)
         set_at(s, renamed, start, span)
-        targets += [(b._sig(p), 0.0) for b in leaving for p in ("value", "opacity")]
+        targets += [(b._sig(p), 0.0) for b in leaving for p in ("value", "opacity", "bar_width")]
         animate(s, targets, start, duration, ease, span)
         for b in leaving:
             s._exit(b, start + duration)

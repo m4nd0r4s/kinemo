@@ -106,6 +106,10 @@ def test_bar_chart_new_keys_enter_and_missing_keys_leave() -> None:
     assert not by_id(scene, 0.5)[entering]["present"]
     assert by_id(scene, 1.0)[entering]["present"]
     assert by_id(scene, 2.9)[leaving]["present"] and not by_id(scene, 3.1)[leaving]["present"]
+    # Entering bars grow from no width in their slot; leaving bars narrow away.
+    assert value_of(by_id(scene, 1.0)[entering], "bar_width") == 0.0
+    assert value_of(middle[entering], "bar_width") > 0.0
+    assert value_of(by_id(scene, 2.9)[leaving], "bar_width") < value_of(middle[leaving], "bar_width")
 
 
 def test_consecutive_transitions_chain_from_the_previous_state() -> None:

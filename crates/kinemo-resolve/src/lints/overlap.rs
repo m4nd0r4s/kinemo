@@ -33,6 +33,9 @@ impl VisualLint for TextOverlapLint {
             .collect();
         for (i, a) in texts.iter().enumerate() {
             for b in &texts[i + 1..] {
+                if a.text_owner == b.text_owner {
+                    continue;
+                }
                 let mut pair = vec![a.id, b.id];
                 pair.sort_unstable();
                 if self.found.contains(&pair) {

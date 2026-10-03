@@ -10,7 +10,7 @@ from ..anim.prop import PropTo
 from ..diagnostics import KinemoError
 from .node import Node
 from .props import PropSpec
-from .text import TEXT_STYLE, GlyphRun, TextLike
+from .text import TEXT_STYLE, GlyphRun, TextLike, TextPart
 
 if TYPE_CHECKING:
     from ..anim.ease import EaseLike
@@ -27,6 +27,21 @@ def _palette_for(theme: Theme) -> str:
 
 class CodeRun(GlyphRun):
     """A run of code glyphs: recoloring it overrides the syntax colors."""
+
+    PROPS = {"recolor": PropSpec("float", 0.0)}
+
+    if TYPE_CHECKING:
+        recolor: PropAccessor[float]
+
+    def _expand(self, props: Mapping[str, Any], *, for_write: bool) -> list[Any]:
+        out = super()._expand(props, for_write=for_write)
+        if "color" in props or "fill" in props:
+            out.append((self._sig("recolor"), 1.0))
+        return out
+
+
+class CodePart(TextPart):
+    """A part of a code block: recoloring it overrides the syntax colors of its glyphs."""
 
     PROPS = {"recolor": PropSpec("float", 0.0)}
 
@@ -68,9 +83,20 @@ class Code(TextLike):
         palette = _palette_for(current_scene().theme) if theme == "auto" else theme
         super().__init__(code=src.strip("\n"), lang=lang, line_numbers=line_numbers, size=size, palette=palette, **props)
 
-    def _new_run(self, rest: bool = False, indices: Sequence[int] = ()) -> GlyphRun:
-        bindings: dict[str, Any] = {p: self._sig(p) for p in self.STYLE_BINDINGS}
+    PART = CodePart
+
+    def _new_run(self, rest: bool = False, indices: Sequence[int] = (), style: Node | None = None) -> GlyphRun:
+        owner = style if style is not None else self
+        bindings: dict[str, Any] = {p: owner._sig(p) for p in self.STYLE_BINDINGS}
+        if isinstance(owner, CodePart):
+            bindings["recolor"] = owner._sig("recolor")
         return CodeRun(rest=rest, indices=[float(i) for i in indices], **bindings)
+
+    def _new_part(self, container: Node, indices: Sequence[int]) -> TextPart:
+        part = super()._new_part(container, indices)
+        if isinstance(container, CodePart):
+            part._scene._push_set(part._sig("recolor"), container._sig("recolor"), part._span)
+        return part
 
     def highlight(self, lines: Sequence[int] | None = None, *, duration: float | None = None, ease: EaseLike | None = None) -> Animation:
         """Dim every line except `lines` (1-based); `None` removes the highlight.

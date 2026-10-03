@@ -184,25 +184,38 @@ pub fn sample_frame(layout: &Layout, motion: &MotionIndex, reactive: &[SignalId]
     FrameSample { t, leaves, reactive_values }
 }
 
-/// A text leaf, or the `rest` run of a text-like group (parts split off are not judged
-/// separately, so a styled word does not count as text over its own text).
+/// A text leaf, or the `rest` run of a text-like group (parts split off, and the runs
+/// inside them, are not judged separately, so a styled word does not count as text over
+/// its own text).
 fn is_text_leaf(layout: &Layout, id: ObjectId, t: f64) -> bool {
-    match layout.scene().object(id).kind.as_str() {
+    let scene = layout.scene();
+    match scene.object(id).kind.as_str() {
         "text" => true,
-        "glyphs" => layout.prop_bool(id, "rest", t, false),
+        "glyphs" => {
+            let in_part = scene.object(id).parent.is_some_and(|p| scene.object(p).kind == "glyphs");
+            layout.prop_bool(id, "rest", t, false) && !in_part
+        }
         _ => false,
     }
 }
 
 fn text_owner(layout: &Layout, id: ObjectId, t: f64) -> ObjectId {
-    let obj = layout.scene().object(id);
-    match (obj.kind.as_str(), obj.parent) {
-        ("glyphs", Some(parent)) => match layout.prop(id, "source", t) {
-            Some(kinemo_ir::Value::Object(source)) => source,
-            _ => parent,
-        },
-        _ => id,
+    let scene = layout.scene();
+    if scene.object(id).kind != "glyphs" {
+        return id;
     }
+    if let Some(kinemo_ir::Value::Object(source)) = layout.prop(id, "source", t) {
+        return source;
+    }
+    // Parts nest: the owner is the first ancestor that is not a part.
+    let mut current = scene.object(id).parent;
+    while let Some(parent) = current {
+        if scene.object(parent).kind != "glyphs" {
+            return parent;
+        }
+        current = scene.object(parent).parent;
+    }
+    id
 }
 
 /// Present leaves at `t` in tree order, with whether every ancestor is `visible`.

@@ -12,7 +12,7 @@ from .._runtime.spans import user_span
 from ..diagnostics import KinemoError
 from .props import PropSpec
 from .node import Node
-from .text import TEXT_STYLE, GlyphRun, TextLike
+from .text import TEXT_STYLE, TextLike, TextPart
 
 if TYPE_CHECKING:
     from .keywords import StyleKeywords
@@ -59,7 +59,7 @@ class Math(TextLike):
         return json.loads(s._b.math_info(self.tex.now, self.size.now, self.display.now))
 
     @overload
-    def __getitem__(self, key: str) -> GlyphRun: ...
+    def __getitem__(self, key: str) -> TextPart: ...
     @overload
     def __getitem__(self, key: int) -> Node: ...
     def __getitem__(self, key: str | int) -> Node:
@@ -74,7 +74,7 @@ class Math(TextLike):
             )
         return self._run_for(("tex", key, 0), list(matches[0]))
 
-    def find_all(self, needle: str) -> list[GlyphRun]:
+    def find_all(self, needle: str) -> list[TextPart]:
         matches = self._scene._b.math_find(self.tex.now, needle, self.size.now, self.display.now)
         return [self._run_for(("tex", needle, i), list(m)) for i, m in enumerate(matches)]
 

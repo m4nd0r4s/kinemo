@@ -38,6 +38,19 @@ k.Text(text="", *, size=None, width=None, align="left", **props)
 
 Each part animates like any object: color, scale, opacity, `k.indicate`.
 
+Parts can overlap, and every glyph is still drawn once:
+
+- A part inside another one (`txt.chars[0:6]` inside `txt.words[0]`) nests in it. It starts
+  with that part's color, and follows its opacity, scale and position.
+- A part around others (`txt.lines[0]` around `txt["never"]`) takes them in. Its opacity
+  and transforms apply to them. A part that set its own color keeps it; the others take
+  the new part's color.
+- Two parts that share only some glyphs stay side by side, and the later one draws the
+  shared glyphs.
+
+After `txt.to(text=...)`, the old parts select nothing: look up parts again in the new
+string.
+
 ```python
 import kinemo as k
 

@@ -48,5 +48,6 @@ class TextChange(Animation):
         Morph(old, copy, None, None, None, 0.0, self.span)._emit(s, start, duration, ease)
         end = start + duration
         old._scene._push_set(old._sig("text"), self.new, self.span, t=end)
+        old._forget_parts(end, self.span)
         s._exit(copy, end)
         s._enter(old, end)

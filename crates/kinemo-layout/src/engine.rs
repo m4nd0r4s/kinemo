@@ -106,7 +106,11 @@ impl<'a> Layout<'a> {
             return *r;
         }
         let r = self.guarded(Query::Bbox, o, t, Rect::ZERO, || {
-            if self.scene().object(o).children.is_some() {
+            let kind = self.scene().object(o).kind.as_str();
+            if matches!(kind, "text" | "math" | "code") {
+                // A text's box is its text block: styled or moved parts do not reflow it.
+                self.source_box(o, t)
+            } else if self.scene().object(o).children.is_some() {
                 self.children(o, t)
                     .into_iter()
                     .filter(|&c| self.prop_bool(c, "visible", t, true))

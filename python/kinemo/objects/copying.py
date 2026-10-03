@@ -67,8 +67,8 @@ def copy_node(node: "Node", frozen: bool) -> "Node":
             clone._adopt(k)
         if "_runs" in node.__dict__:
             object.__setattr__(clone, "_runs", {})
-            if kids:
-                object.__setattr__(clone, "_rest", kids[0])
+        if "_rest" in node.__dict__ and kids:
+            object.__setattr__(clone, "_rest", kids[0])
     assert isinstance(clone, Node)
     if not node.__dict__.get("_copying_child"):
         from .charts.axes import _name_from_call

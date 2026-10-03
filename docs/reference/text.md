@@ -118,7 +118,7 @@ Like `Node.to`; a new `text=` string morphs the glyphs (equal characters travel)
 #### `k.Text.find_all` *(method)*
 
 ```python
-text.find_all(needle: str) -> list[GlyphRun]
+text.find_all(needle: str) -> list[TextPart]
 ```
 
 Every occurrence of `needle` (in the text without markup), as parts.
@@ -224,7 +224,7 @@ Inherited from [`k.Node`](object-state.md#k-node): [`set`](object-state.md#node-
 #### `k.Math.find_all` *(method)*
 
 ```python
-math.find_all(needle: str) -> list[GlyphRun]
+math.find_all(needle: str) -> list[TextPart]
 ```
 
 Every occurrence of `needle` (in the text without markup), as parts.
@@ -382,7 +382,7 @@ def code_highlight(s: k.Scene):
 #### `k.Code.find_all` *(method)*
 
 ```python
-code.find_all(needle: str) -> list[GlyphRun]
+code.find_all(needle: str) -> list[TextPart]
 ```
 
 Every occurrence of `needle` (in the text without markup), as parts.

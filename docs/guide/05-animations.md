@@ -27,8 +27,9 @@ Reference: [verbs](../reference/verbs.md) (for example [`k.morph`](../reference/
 | `k.follow(obj, path, rotate=)` | Motion | Travels along a path |
 | `k.sound(path, gain=)` | Audio | Plays a sound file at that instant |
 
-Every verb and every `.to()` lasts 1 s with `k.ease.smooth` and accepts `duration=`,
-`ease=` and `delay=`.
+Every verb and every `.to()` lasts 1 s with `k.ease.smooth`, except the two short
+accents: `k.flash` (0.6 s) and `k.squash` (0.4 s), both with `k.ease.out`. All of them
+accept `duration=`, `ease=` and `delay=`.
 
 ## Entrances and exits
 

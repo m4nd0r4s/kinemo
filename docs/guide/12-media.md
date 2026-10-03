@@ -79,9 +79,12 @@ PUMP = """
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 100">
   <g id="motor">
     <rect id="housing" x="0" y="20" width="80" height="60" fill="#4C9BE8"/>
-    <circle id="shaft" cx="40" cy="50" r="15" fill="#F2F2F2"/>
+    <g id="shaft">
+      <circle cx="40" cy="50" r="15" fill="#F2F2F2"/>
+      <rect x="38" y="37" width="4" height="26" fill="#4C9BE8"/>
+    </g>
   </g>
-  <path id="pipe" d="M 80 50 L 200 50" fill="none" stroke="#E8645A" stroke-width="6"/>
+  <path id="pipe" d="M 83 50 L 197 50" fill="none" stroke="#E8645A" stroke-width="6"/>
 </svg>
 """
 
@@ -91,7 +94,7 @@ def pump(s: k.Scene):
     art = k.SVG(PUMP, height=3).place(at="center")
     s.play(k.draw(art), duration=2)
     s.play(art["#pipe"].to(stroke=k.YELLOW), k.indicate(art["#motor"]))
-    s.play(art["#shaft"].to(rotate=180))
+    s.play(art["#shaft"].to(rotate=90))
     s.wait(0.5)
 ```
 

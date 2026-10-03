@@ -77,9 +77,9 @@ def derivative(s: k.Scene):
 
     x = k.signal(-2.0)
     dot = k.Dot(r=0.1, fill=k.RED).place(at=curve.point_at(x))
-    curve.tangent_at(x, length=2.5, stroke=k.RED)
+    tan = curve.tangent_at(x, length=2.5, stroke=k.RED, enter_with_axes=False)
     slope = k.Text(lambda: f"slope = {curve.slope_at(x)():.2f}", size=0.4).place(at="top", margin=0.5)
-    s.play(k.fade_in(dot, slope))
+    s.play(k.fade_in(dot, tan, slope))
     s.play(x.to(2), duration=3)
     s.play(ax.zoom_to(x=(0, 3), y=(0, 4)), duration=1.5)
     s.wait(0.5)
@@ -157,9 +157,9 @@ def fy(t: float) -> float:
 @k.scene
 def shapes(s: k.Scene):
     ax = k.Axes(x=(-1.5, 6, 1), y=(-1.5, 3, 1), width=10, height=5).place(at="center")
-    loop = ax.parametric(fx, fy, t=(0, 2 * k.pi), color=k.TEAL)
-    bars = ax.bars([2, 3, 4, 5], [1, 2.5, 1.5, 2], width=0.6, fill=k.PURPLE)
-    pts = ax.scatter([2, 3, 4, 5], [1.2, 2.7, 1.7, 2.2], radius=0.08, fill=k.YELLOW)
+    loop = ax.parametric(fx, fy, t=(0, 2 * k.pi), color=k.TEAL, enter_with_axes=False)
+    bars = ax.bars([2, 3, 4, 5], [1, 2.5, 1.5, 2], width=0.6, fill=k.PURPLE, enter_with_axes=False)
+    pts = ax.scatter([2, 3, 4, 5], [1.2, 2.7, 1.7, 2.2], radius=0.08, fill=k.YELLOW, enter_with_axes=False)
     s.play(k.draw(ax))
     s.play(k.draw(loop), k.stagger([k.grow(b, from_="bottom") for b in bars], lag=0.1))
     s.play(k.fade_in(pts))
@@ -283,9 +283,9 @@ k.Table(data, columns=None, *, size=0.32, header_color=None, rule=True)
 ```
 
 A table of `k.Text` with a highlighted header. `columns=` selects and orders the columns.
-`table.to(data=df2)` updates the cells: changed texts cross-fade to the new value, new rows
-fade in and removed rows fade out. `table.cells[r][c]` are the body cells and
-`table.header[c]` the header texts.
+`table.to(data=df2)` updates the cells: changed texts fade out and back in with the new
+value, new rows fade in while the table makes room, and removed rows fade out.
+`table.cells[r][c]` are the body cells and `table.header[c]` the header texts.
 
 ```python
 import pyarrow as pa

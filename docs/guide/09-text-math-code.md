@@ -214,7 +214,7 @@ outline to outline without a warning.
 
 Commands outside mathematical LaTeX, such as `\usepackage` or a TikZ environment, are
 `K0801`. The diagnostic suggests `engine="tex"`, but that option is not available yet
-yet (`K0105`, "not available in this installation yet"). Rewrite the formula with
+(`K0105`, "not available in this installation yet"). Rewrite the formula with
 mathematical commands, or draw the figure with kinemo shapes.
 
 ## `k.Code`

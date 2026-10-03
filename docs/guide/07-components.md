@@ -268,10 +268,13 @@ Clock = k.context("clock", default=k.time)
 
 class Hand(k.Component):
     time: k.Prop[float] = k.from_context(Clock)
-    length: float = 2.0
+    length: float = 1.2
 
     def build(self) -> k.Node:
-        return k.Line(start=(0, 0), end=(0, self.length), rotate=-self.time * 30, stroke_width=4)
+        dial = k.Circle(r=self.length, stroke_width=2, opacity=0.4)
+        # The hand turns about its start (anchor at the bottom of its box), in the dial's center.
+        hand = k.Line(start=(0, 0), end=(0, self.length), anchor=(0, -1), rotate=-self.time * 30, stroke_width=4)
+        return k.Group(dial, hand)
 
 
 @k.scene

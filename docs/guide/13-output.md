@@ -266,11 +266,10 @@ mytts = "kinemo_tts_mytts:Provider"
 An audio file is used as is: the block lasts as long as the file. Marked words are not
 available (there is no text to align), so use `s.mark` for sync points.
 
-The path is checked relative to the working directory, and a string is treated as a file
-only when it ends with an audio extension **and** the file exists. Otherwise it is read as
-text to speak, so a typo in the file name shows up as `W1401` (no TTS provider) or as the
-file name being spoken. Run `kinemo` from the folder that holds the audio, or pass an
-absolute path. The snippet below assumes a `narration.wav` in the working directory:
+A string that ends with an audio extension (`.wav`, `.mp3`, ...) is a file; any other
+string is text to speak. A relative path starts from the scene file's folder, like
+`k.Image`, and a missing file is `K0105` in `check`. The snippet below assumes a
+`narration.wav` next to the scene file:
 
 ```python
 import kinemo as k
@@ -298,8 +297,7 @@ the script, so it composes with other animations: `s.play(k.sound("click.wav"), 
 > | `K0105` | `--param` value out of range, not one of the `k.Choice` options, or an unknown parameter name. | Check the name and the range in `params=`. |
 > | `W0110` | `s.play(..., at=s.marks["x"])` does not move the cursor. | Write `s.start(..., at=...)`. |
 > | `W1001` | Objects outside the safe area after switching to `size="vertical"` or `"square"`. | The frame is 9 units wide there: use containers, `.fit(s.frame.safe)`, or smaller sizes. |
-> | `W1401` | `s.voice("narration.wav")` where the file does not exist (or the working directory is different): the string is read as text to speak. | Fix the path, run from the folder that holds the file, or pass an absolute path. |
-> | none (render error) | `k.sound("click.wav")` with a missing file passes `check`, but `render` stops with "audio file not found". | Check the path. Unlike `k.Image`, it is resolved from the working directory, not from the scene file's folder. |
+> | `K0105` | `s.voice("narration.wav")` or `k.sound("click.wav")` where the file does not exist. | Fix the path: relative paths start from the scene file's folder. |
 > | none (no alpha) | `--transparent` with `mp4` or `gif`. | Use `webm`, `mov` or `png`. |
 
 See also: [Output reference](../reference/output.md), [Parameters](../reference/parameters.md),

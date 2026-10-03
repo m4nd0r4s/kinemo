@@ -176,7 +176,7 @@ import kinemo as k
 @k.scene
 def tank(s: k.Scene):
     level = k.signal(0.0)
-    water = k.Rect(w=2, h=level * 3 + 0.01, fill=k.BLUE, fill_opacity=0.8).place(at="center")
+    water = k.Rect(w=2, h=level * 3 + 0.01, y=level * 1.5 - 1.5, fill=k.BLUE, fill_opacity=0.8)   # fills from y = -1.5
     full = k.EventSource(s, "full")
     k.when(level >= 1, full)
     s.add(water)

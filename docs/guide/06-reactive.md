@@ -157,7 +157,7 @@ def band(v: float) -> k.Color:
 @k.scene
 def conditions(s: k.Scene):
     hour = k.time * 6
-    price = k.Text(lambda: f"{hour():.0f} h: {tariff(hour()):.2f} per kWh").place(at="top", margin=0.8)
+    price = k.Text(lambda: f"{k.floor(hour()):.0f} h: {tariff(hour()):.2f} per kWh").place(at="top", margin=0.8)
     v = k.signal(0.0)
     lamp = k.Circle(r=1, fill=v.map(band), fill_opacity=1).place(at="center")
     word = k.Text(k.where(v > 2, "high", "normal"), size=0.5).place(below=lamp, gap=0.3)
@@ -263,11 +263,11 @@ import kinemo as k
 
 @k.scene
 def clocks(s: k.Scene):
-    star = k.Polygon.regular(5, r=1).place(at="left", margin=3)
-    star.set(rotate=k.time * 90)                         # 90 degrees per second, forever
+    pentagon = k.Polygon.regular(5, r=1).place(at="left", margin=3)
+    pentagon.set(rotate=k.time * 90)                     # 90 degrees per second, forever
     hour = k.time.map(lambda t: k.min(t * 6, 24))        # 1 s of video = 6 h, capped at 24
     clock = k.Text(lambda: f"{k.floor(hour()):02.0f}:00", size=0.9).place(at="right", margin=3)
-    s.add(star, clock)
+    s.add(pentagon, clock)
     s.wait(4)
 ```
 

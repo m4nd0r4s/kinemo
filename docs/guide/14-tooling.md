@@ -129,6 +129,7 @@ timeline that `check` prints.
 ```bash
 kinemo snap scene.py --at 0,2.5,end              # out/<scene>_0.png, out/<scene>_2.5.png, out/<scene>_end.png
 kinemo snap scene.py --at 3 --quality final --out shots
+kinemo snap scene.py --scene intro --at 3 --out shots/intro.png   # one scene, one instant: one file
 ```
 
 ## `kinemo dev`

@@ -6,6 +6,7 @@ import argparse
 import os
 
 from .loader import BuildResult, LoadError, build, find_scenes, load_module, select
+from .output_path import ensure_folder_of, single_file
 from .render import parse_time
 
 
@@ -22,17 +23,26 @@ def run(args: argparse.Namespace) -> int:
     except LoadError as e:
         print(e.diagnostic.render())
         return 1
-    os.makedirs(args.out, exist_ok=True)
     status = 0
-    for defn in select(find_scenes(module), args.scene):
+    scenes = select(find_scenes(module), args.scene)
+    instants = args.at.split(",")
+    single = single_file(args.out, ("png",))
+    if single is not None and len(scenes) * len(instants) != 1:
+        print(f"kinemo: --out {args.out} names one file, but {len(scenes) * len(instants)} frames would be written; pass one --scene and one --at")
+        return 2
+    if single is not None:
+        ensure_folder_of(single[0])
+    else:
+        os.makedirs(args.out, exist_ok=True)
+    for defn in scenes:
         result = build(defn, args.params)
         if result.scene is None:
             print("\n".join(d.render() for d in result.diagnostics))
             status = 1
             continue
-        for text in args.at.split(","):
+        for text in instants:
             _, png = snap_png(result, text, args.quality)
-            path = os.path.join(args.out, f"{defn.name}_{text.strip()}.png")
+            path = single[0] if single else os.path.join(args.out, f"{defn.name}_{text.strip()}.png")
             with open(path, "wb") as fh:
                 fh.write(png)
             print(path)

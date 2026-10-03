@@ -7,6 +7,7 @@ import os
 import sys
 
 from .loader import LoadError, build, find_scenes, load_module, select
+from .output_path import ensure_folder_of, single_file
 
 VIDEO = ("mp4", "webm", "mov", "gif")
 
@@ -31,16 +32,31 @@ def run(args: argparse.Namespace) -> int:
         print(e.diagnostic.render())
         return 1
     status = 0
-    os.makedirs(args.out, exist_ok=True)
     from ..movie import Movie
 
+    single = single_file(args.out, (*VIDEO, "png", "svg"))
+    if single is not None and args.format is not None and args.format != single[1]:
+        print(f"kinemo: --out {args.out} is a .{single[1]} file but --format is {args.format}")
+        return 2
+    args.format = args.format or (single[1] if single else "mp4")
+    if single is not None and args.frames:
+        print("kinemo: --frames writes a folder of PNGs; pass a folder to --out")
+        return 2
     movies = [m for m in vars(module).values() if isinstance(m, Movie)]
+    outputs = len(movies) if movies and args.scene is None else len(select(find_scenes(module), args.scene))
+    if single is not None and outputs != 1:
+        print(f"kinemo: --out {args.out} names one file, but {outputs} scenes would render; pass --scene NAME")
+        return 2
+    if single is not None:
+        ensure_folder_of(single[0])
+    else:
+        os.makedirs(args.out, exist_ok=True)
     if movies and args.scene is None and args.format not in VIDEO:
         print(f"kinemo: a movie renders to video ({', '.join(VIDEO)}); pass --scene NAME for --format {args.format}")
         return 2
     if movies and args.scene is None:
         for m in movies:
-            path = os.path.join(args.out, f"{m.name}.{args.format if args.format in VIDEO else 'mp4'}")
+            path = single[0] if single else os.path.join(args.out, f"{m.name}.{args.format if args.format in VIDEO else 'mp4'}")
             m.render(path, args.format if args.format in VIDEO else "mp4", args.quality, _progress(m.name))
             print(f"kinemo: {path}")
         return 0
@@ -51,7 +67,7 @@ def run(args: argparse.Namespace) -> int:
             status = 1
             continue
         b = result.scene.builder
-        base = os.path.join(args.out, defn.name)
+        base = os.path.splitext(single[0])[0] if single else os.path.join(args.out, defn.name)
         if args.format in VIDEO:
             path = f"{base}.{args.format}"
             b.render_video(path, args.format, args.quality, args.transparent, _progress(defn.name))

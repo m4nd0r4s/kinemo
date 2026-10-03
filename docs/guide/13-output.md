@@ -18,15 +18,16 @@ the scene the same way and fails on the same errors, so checking first is faster
 kinemo render scene.py                          # every scene in the file → out/<scene>.mp4
 kinemo render scene.py --scene intro            # one scene
 kinemo render scene.py --format gif --out docs/img
+kinemo render scene.py --scene intro --out docs/intro.gif   # one file: the format comes from its extension
 kinemo render scene.py --format png --at 2.5    # one frame
 ```
 
 | Option | Default | Meaning |
 | --- | --- | --- |
 | `--scene NAME` | every scene | Which `@k.scene` function to render |
-| `--format` | `mp4` | `mp4`, `webm`, `mov`, `gif`, `png`, `svg`, `slides` |
+| `--format` | `mp4` (or the `--out` file's extension) | `mp4`, `webm`, `mov`, `gif`, `png`, `svg`, `slides` |
 | `--quality` | `final` | `draft` or `final` (see [Quality](#quality-and-size)) |
-| `--out DIR` | `out` | Output folder, created if needed. Files are named after the scene. |
+| `--out PATH` | `out` | Output folder, created if needed; files are named after the scene. A path with an output extension (`intro.mp4`, `still.png`) is one file instead, for one scene. |
 | `--at T` | `end` | For `png`/`svg`: seconds, a mark name, or `end` |
 | `--frames` | off | For `png`: the whole sequence, `out/<scene>/00000.png`, ... |
 | `--transparent` | off | Transparent background where the format supports it |

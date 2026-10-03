@@ -133,7 +133,7 @@ kinemo snap [-h] [--scene SCENE] [--param NAME=VALUE] [--at AT] [--out OUT] [--q
 | `--scene SCENE` | str |   | scene name (default: all) |
 | `--param NAME=VALUE` | str |   | (repeatable) |
 | `--at AT` | str | `0,end` |   |
-| `--out OUT` | str | `out` |   |
+| `--out OUT` | str | `out` | a folder, or one file (shot.png) for one scene and one instant |
 | `--quality QUALITY` | `draft` \\| `final` | `draft` |   |
 
 Examples:
@@ -157,9 +157,9 @@ kinemo render [-h] [--scene SCENE] [--param NAME=VALUE] [--format {mp4,webm,mov,
 | `file` | str |   | (required) |
 | `--scene SCENE` | str |   | scene name (default: all) |
 | `--param NAME=VALUE` | str |   | (repeatable) |
-| `--format FORMAT` | `mp4` \\| `webm` \\| `mov` \\| `gif` \\| `png` \\| `svg` \\| `slides` | `mp4` |   |
+| `--format FORMAT` | `mp4` \\| `webm` \\| `mov` \\| `gif` \\| `png` \\| `svg` \\| `slides` |   | default: from the --out extension, else mp4 |
 | `--quality QUALITY` | `draft` \\| `final` | `final` |   |
-| `--out OUT` | str | `out` |   |
+| `--out OUT` | str | `out` | a folder (files named after the scene), or one file: clip.mp4, frame.png |
 | `--at AT` | str |   | time (png/svg): seconds, a mark name or 'end' |
 | `--frames` | flag |   | png: the whole sequence |
 | `--transparent` | flag |   |   |

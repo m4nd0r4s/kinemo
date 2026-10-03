@@ -45,6 +45,32 @@ impl<'a> Layout<'a> {
         a
     }
 
+    /// Box of a group during a change of its children (`row.insert`, a table's new rows):
+    /// between the box of the old children and the box of the new ones, so a placed group
+    /// slides instead of jumping. `None` outside such transitions.
+    pub(crate) fn reorder_bbox(&self, c: ObjectId, t: f64) -> Option<Rect> {
+        let Evaluated::Transition { from, to, alpha } = self.children_raw(c, t) else { return None };
+        let container = is_container(&self.scene().object(c).kind);
+        let bounds = |children: &[ObjectId]| -> Rect {
+            let slots = container.then(|| self.arrange(c, children, t));
+            children
+                .iter()
+                .filter(|&&child| self.prop_bool(child, "visible", t, true))
+                .map(|child| match &slots {
+                    Some(slots) => {
+                        let [x, y] = slots[child];
+                        self.shape_box(*child, t) + kurbo::Vec2::new(x, y)
+                    }
+                    None => self.parent_box(*child, t),
+                })
+                .reduce(|a, b| a.union(b))
+                .unwrap_or(Rect::ZERO)
+        };
+        let (a, b) = (bounds(&obj_list(&from)), bounds(&obj_list(&to)));
+        let mix = |p: f64, q: f64| p + (q - p) * alpha;
+        Some(Rect::new(mix(a.x0, b.x0), mix(a.y0, b.y0), mix(a.x1, b.x1), mix(a.y1, b.y1)))
+    }
+
     fn arrange(&self, c: ObjectId, children: &[ObjectId], t: f64) -> Arrangement {
         let kind = self.scene().object(c).kind.clone();
         let gap = self.prop_f(c, "gap", t, 0.25);

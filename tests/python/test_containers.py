@@ -5,7 +5,7 @@ from __future__ import annotations
 import pytest
 
 import kinemo as k
-from conftest import build, diagnostic_of, ir, position_at, presence, prop_at
+from conftest import build, diagnostic_of, ir, position_at, presence, prop_at, snapshot_of
 
 
 def test_row_indexing_reflects_order_and_lays_out_left_to_right() -> None:
@@ -109,6 +109,32 @@ def test_insert_enters_and_pop_leaves() -> None:
     assert seen == {"inserted": True, "len": 2}
     assert presence(scene, "middle") == [(0.0, True)]
     assert presence(scene, "first") == [(0.0, True), (2.0, False)]
+
+
+def test_pop_and_insert_animate_the_reflow() -> None:
+    @build
+    def scene(s: k.Scene) -> None:
+        first = k.Square()
+        last = k.Square()
+        row = k.Row(first, last, gap=0.5).place(at="center")
+        s.add(row)
+        s.play(row.pop(0), duration=1)
+        middle = k.Dot()
+        s.play(row.insert(0, middle), duration=1)
+
+    def world_x(t: float, name: str) -> float:
+        x0, _, x1, _ = snapshot_of(scene, t, name)["bbox"]
+        return (x0 + x1) / 2
+
+    # The leaving square stays in its slot while the other slides into the middle.
+    xs = [world_x(t, "last") for t in (0.0, 0.25, 0.5, 0.75, 1.0)]
+    assert xs == sorted(xs, reverse=True) and len({round(x, 6) for x in xs}) == 5
+    assert xs[-1] == pytest.approx(0.0)
+    assert world_x(0.5, "first") == pytest.approx(world_x(0.0, "first"))
+    assert presence(scene, "first") == [(0.0, True), (1.0, False)]
+    assert presence(scene, "middle") == [(1.0, True)]
+    # The row slides back while the dot makes room, with no jump when it enters.
+    assert world_x(1.0, "last") == pytest.approx(world_x(0.999, "last"), abs=1e-2)
 
 
 def test_overlapping_reorders_conflict_k0201() -> None:

@@ -110,6 +110,8 @@ impl<'a> Layout<'a> {
             if matches!(kind, "text" | "math" | "code") {
                 // A text's box is its text block: styled or moved parts do not reflow it.
                 self.source_box(o, t)
+            } else if let Some(r) = self.reorder_bbox(o, t) {
+                r
             } else if self.scene().object(o).children.is_some() {
                 self.children(o, t)
                     .into_iter()

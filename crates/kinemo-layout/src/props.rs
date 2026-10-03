@@ -53,10 +53,20 @@ impl<'a> Layout<'a> {
     }
 
     /// Children of a group at `t`. During a reorder transition, returns the target order.
+    /// Children at `t`. During a reorder, the new list followed by the children that are
+    /// leaving: they are still drawn (and still take space) until the transition ends.
     pub fn children(&self, obj: ObjectId, t: f64) -> Vec<ObjectId> {
         match self.children_raw(obj, t) {
             Evaluated::Value(v) => obj_list(&v),
-            Evaluated::Transition { to, .. } => obj_list(&to),
+            Evaluated::Transition { from, to, .. } => {
+                let mut out = obj_list(&to);
+                for leaving in obj_list(&from) {
+                    if !out.contains(&leaving) {
+                        out.push(leaving);
+                    }
+                }
+                out
+            }
         }
     }
 

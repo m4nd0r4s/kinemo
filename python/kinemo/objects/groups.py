@@ -201,8 +201,14 @@ class Reorder(Animation):
         for c in self.new:
             if c._parent is not g:
                 g._adopt(c)
+        from ..anim.verbs import _ramp, _set  # pyright: ignore[reportPrivateUsage]
+
         for c in self.entering:
             s._enter(c, start)
+            if duration > 0:
+                # Grows in while its neighbours make room.
+                _ramp(s, c, "_fade", start, duration, ease, 0.0, 1.0, self.span)
+                _ramp(s, c, "_grow", start, duration, ease, 0.0, 1.0, self.span)
         sig = g._children_sig
         src = {"k": "val", "v": encode(self.new, "objects")}
         if duration <= 0:
@@ -211,6 +217,12 @@ class Reorder(Animation):
             s._check_conflict(sig, start, start + duration, self.span)
             s._push_entry(sig, {"k": "anim", "t0": start, "t1": start + duration, "to": src, "ease": ease.ir(), "span": self.span.ir()}, src)
         for c in self.leaving:
+            if duration > 0:
+                # Shrinks away in its old slot while the others close the gap.
+                _ramp(s, c, "_fade", start, duration, ease, 1.0, 0.0, self.span)
+                _ramp(s, c, "_grow", start, duration, ease, 1.0, 0.0, self.span)
+                _set(s, c, "_fade", start + duration, 1.0, self.span)
+                _set(s, c, "_grow", start + duration, 1.0, self.span)
             s._exit(c, start + duration)
 
 

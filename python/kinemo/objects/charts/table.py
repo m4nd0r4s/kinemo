@@ -129,7 +129,11 @@ class Table(Group):
         entering = [cell for r in range(old, len(rows)) for cell in self._new_row(r, rows[r], opacity=0.0)]
         leaving = [cell for row in self.cells[len(rows):] for cell in row]
         if entering:
-            Reorder(self, self._children_at(start) + list(entering), span, entering=entering)._emit(s, start, 0.0, ease)
+            # Over the whole change, so a placed table makes room gradually.
+            for cell in entering:
+                self._adopt(cell)
+                s._enter(cell, start)
+            Reorder(self, self._children_at(start) + list(entering), span)._emit(s, start, duration, ease)
         fade_out = [(cell._sig("opacity"), 0.0) for cell, _ in changed] + [(cell._sig("opacity"), 0.0) for cell in leaving]
         animate(s, fade_out, start, half, ease, span)
         set_at(s, [(cell._sig("text"), text) for cell, text in changed], start + half, span)

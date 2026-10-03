@@ -36,13 +36,27 @@ pub(crate) fn shape_run(text: &str, first_char: usize, style: FontStyle, opts: &
     for (ci, (bi, _)) in text.char_indices().enumerate() {
         byte_to_char[bi] = ci;
     }
+    // With tabular numbers, the sign of a number takes the width of `+` too, so a value that
+    // changes sign does not shift the text around it.
+    let sign_width = opts
+        .tabular_nums
+        .then(|| face.glyph_index('+').and_then(|g| face.glyph_hor_advance(g)))
+        .flatten()
+        .map(|w| w as f64 * s);
     for (info, pos) in gb.glyph_infos().iter().zip(gb.glyph_positions()) {
+        let mut advance = pos.x_advance as f64 * s;
+        let mut x_off = pos.x_offset as f64 * s;
+        let is_sign = is_number_sign(&text[info.cluster as usize..]);
+        if let (true, Some(width)) = (is_sign, sign_width) {
+            x_off += (width - advance) / 2.0;
+            advance = width;
+        }
         out.push(Shaped {
             gid: info.glyph_id as u16,
             style,
             char_index: first_char + byte_to_char[info.cluster as usize],
-            advance: pos.x_advance as f64 * s,
-            x_off: pos.x_offset as f64 * s,
+            advance,
+            x_off,
             y_off: pos.y_offset as f64 * s,
         });
     }
@@ -67,4 +81,17 @@ pub(crate) fn shape_all(styled: &[(char, FontStyle)], opts: &TextOptions) -> Vec
         shape_run(&run, s, st, opts, &mut out);
     }
     out
+}
+
+/// `+`, `-` or `−` right before a number (`-3`, `+.5`): not a hyphen inside a word.
+fn is_number_sign(rest: &str) -> bool {
+    let mut chars = rest.chars();
+    if !matches!(chars.next(), Some('+' | '-' | '\u{2212}')) {
+        return false;
+    }
+    match chars.next() {
+        Some(c) if c.is_ascii_digit() => true,
+        Some('.') => chars.next().is_some_and(|c| c.is_ascii_digit()),
+        _ => false,
+    }
 }

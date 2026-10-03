@@ -106,3 +106,15 @@ fn deterministic_and_cached() {
         assert_eq!(x.path, y.path);
     }
 }
+
+#[test]
+fn signs_keep_the_width_of_a_number() {
+    let opts = TextOptions::default();
+    let plus = measure("+1.25 kW", &opts).width();
+    let minus = measure("-1.25 kW", &opts).width();
+    let true_minus = measure("\u{2212}1.25 kW", &opts).width();
+    assert!(approx(plus, minus), "{plus} vs {minus}");
+    assert!(approx(plus, true_minus), "{plus} vs {true_minus}");
+    // A hyphen inside a word keeps its own width.
+    assert!(measure("well-known", &opts).width() < measure("well+known", &opts).width());
+}

@@ -356,7 +356,8 @@ import kinemo as k
 def shake(s: k.Scene):
     box = k.Square(1.2, x=-4)
     s.add(box)
-    jitter = k.seq(*[box.to(x=0.15 * (-1) ** i, blend="add", duration=0.1) for i in range(8)])
+    steps = [0.15, -0.3, 0.3, -0.3, 0.3, -0.3, 0.3, -0.15]   # each step adds; they sum to 0
+    jitter = k.seq(*[box.to(x=dx, blend="add", duration=0.1) for dx in steps])
     s.play(box.to(x=4, duration=2), jitter.with_(delay=0.6))   # both write box.x
     s.wait(0.5)
 ```

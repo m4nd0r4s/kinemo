@@ -252,7 +252,9 @@ k.Stack(background, icon)                  # overlapping, centered (or align=)
 ```
 
 Changing children through the container's transitions animates the reflow. `swap`,
-`insert` and `pop` are sugar for `group.to(children=[...])`:
+`insert` and `pop` are sugar for `group.to(children=[...])`. Children that pass each other
+travel on opposite arcs instead of through each other; an inserted child grows in while
+its neighbours make room, and a popped one shrinks away in its slot:
 
 ```python
 import kinemo as k
@@ -292,8 +294,10 @@ def bubble(s: k.Scene):
             s.play(row[n - 1 - i].to(color=k.GREEN), duration=0.2)
 ```
 
-`group.fit(area, margin=0.0)` scales a group once, at the cursor, until it fits an area,
-usually the safe area:
+`group.fit(area, margin=0.0)` scales a group once, at the cursor, so it fills an area as
+far as its proportions allow: smaller groups grow, larger ones shrink. It sets `scale`, so
+a later `.to(scale=...)` is absolute (`scale=0.9` is 0.9 of the original size, not of the
+fitted one):
 
 ```python
 import kinemo as k
@@ -304,7 +308,7 @@ def fit(s: k.Scene):
     cards = [k.RoundedRect(w=3, h=2) for _ in range(12)]
     grid = k.Grid(*cards, cols=4, gap=0.4).place(at="center").fit(s.frame.safe)
     s.play(k.stagger([k.draw(c) for c in cards], lag=0.05))
-    s.play(grid.to(scale=0.9))       # fit() scaled it once; it can still animate
+    s.play(grid.to(scale=grid.scale.now * 0.9))   # 90% of the fitted size
     s.wait(0.5)
 ```
 

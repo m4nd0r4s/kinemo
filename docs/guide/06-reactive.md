@@ -211,8 +211,8 @@ def wobble(ts: np.ndarray) -> np.ndarray:
 
 @k.scene
 def explicit_cost(s: k.Scene):
-    a = k.Circle(r=k.time.map(k.python(opaque))).place(at="left", margin=3)
-    b = k.Circle(r=k.time.map(k.python(wobble, vectorized=True))).place(at="right", margin=3)
+    a = k.Circle(r=k.time.map(k.python(opaque)), x=-3)        # x/y keep the center fixed as r changes
+    b = k.Circle(r=k.time.map(k.python(wobble, vectorized=True)), x=3)
     s.add(a, b)
     s.wait(3)
 ```

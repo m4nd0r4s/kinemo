@@ -125,8 +125,11 @@ fn row_reorder_blends_positions_continuously() {
     let scene = b.build();
     with_layout(&scene, |l| {
         assert_v2(l.translation(items[0], 0.5), [-1.25, 0.0]);
-        assert_v2(l.translation(items[0], 1.5), [0.0, 0.0]);
-        assert_v2(l.translation(items[2], 1.5), [0.0, 0.0]);
+        // Halfway, the outer squares pass the middle one on opposite arcs.
+        let [x0, y0] = l.translation(items[0], 1.5);
+        let [x2, y2] = l.translation(items[2], 1.5);
+        assert!(x0.abs() < 1e-9 && x2.abs() < 1e-9);
+        assert!(y0 > 0.2 && y2 < -0.2, "arcs {y0} {y2}");
         assert_v2(l.translation(items[1], 1.5), [0.0, 0.0]);
         assert_v2(l.translation(items[0], 2.0), [1.25, 0.0]);
         assert_v2(l.translation(items[2], 2.5), [-1.25, 0.0]);

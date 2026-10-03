@@ -36,9 +36,31 @@ impl<'a> Layout<'a> {
         let a = match self.children_raw(c, t) {
             Evaluated::Value(v) => self.arrange(c, &obj_list(&v), t),
             Evaluated::Transition { from, to, alpha } => {
-                let a = self.arrange(c, &obj_list(&from), t);
-                let b = self.arrange(c, &obj_list(&to), t);
-                blend(&a, &b, alpha)
+                let (old, new) = (obj_list(&from), obj_list(&to));
+                let a = self.arrange(c, &old, t);
+                let b = self.arrange(c, &new, t);
+                let vertical = self.scene().object(c).kind == "column";
+                let across = |id: ObjectId| {
+                    let r = self.shape_box(id, t);
+                    if vertical { r.width() } else { r.height() }
+                };
+                let axis = usize::from(vertical);
+                let travel = |id: ObjectId| (b[&id][axis] - a[&id][axis]).abs();
+                // Each pair that passes clears exactly: they step aside by half their summed
+                // size, shared in proportion to how far each one travels.
+                let mut clearance: HashMap<ObjectId, f64> = HashMap::new();
+                for (x, y) in crossing(&old, &new) {
+                    let needed = (across(x) + across(y)) / 2.0;
+                    let total = travel(x) + travel(y);
+                    if total < 1e-9 {
+                        continue;
+                    }
+                    for (id, share) in [(x, travel(x) / total), (y, travel(y) / total)] {
+                        let entry = clearance.entry(id).or_insert(0.0);
+                        *entry = entry.max(needed * share);
+                    }
+                }
+                with_crossings_apart(blend(&a, &b, alpha), &a, &b, &clearance, alpha, vertical)
             }
         };
         self.store_arrangement(c, t, a.clone());
@@ -95,6 +117,48 @@ fn blend(a: &Arrangement, b: &Arrangement, alpha: f64) -> Arrangement {
     }
     for (id, pa) in a {
         out.entry(*id).or_insert(*pa);
+    }
+    out
+}
+
+/// Pairs of children whose relative order changes: they pass each other.
+fn crossing(old: &[ObjectId], new: &[ObjectId]) -> Vec<(ObjectId, ObjectId)> {
+    let rank = |list: &[ObjectId], id: ObjectId| list.iter().position(|&x| x == id);
+    let both: Vec<ObjectId> = old.iter().copied().filter(|id| new.contains(id)).collect();
+    let mut out = Vec::new();
+    for (i, &x) in both.iter().enumerate() {
+        for &y in &both[i + 1..] {
+            let before = rank(old, x) < rank(old, y);
+            let after = rank(new, x) < rank(new, y);
+            if before != after {
+                out.push((x, y));
+            }
+        }
+    }
+    out
+}
+
+/// Largest sideways step of a child passing another (units).
+const MAX_CLEARANCE: f64 = 1.6;
+
+/// Children that pass each other travel on opposite arcs (forward over, backward under)
+/// instead of through each other. `clearance` holds how far each one steps aside at the
+/// halfway point.
+fn with_crossings_apart(mut out: Arrangement, a: &Arrangement, b: &Arrangement, clearance: &HashMap<ObjectId, f64>, alpha: f64, vertical: bool) -> Arrangement {
+    let lift = (alpha * std::f64::consts::PI).sin();
+    for (id, &aside) in clearance {
+        let (Some(pa), Some(pb), Some(p)) = (a.get(id), b.get(id), out.get_mut(id)) else { continue };
+        let axis = if vertical { 1 } else { 0 };
+        let travel = pb[axis] - pa[axis];
+        if travel.abs() < 1e-9 {
+            continue;
+        }
+        let step = travel.signum() * aside.min(MAX_CLEARANCE) * lift;
+        if vertical {
+            p[0] -= step;
+        } else {
+            p[1] += step;
+        }
     }
     out
 }
@@ -198,6 +262,17 @@ mod tests {
         let p = grid(&[sq(1.0), sq(1.0), sq(1.0), sq(1.0)], 0.0, 2);
         assert_eq!(p[0], [-0.5, 0.5]);
         assert_eq!(p[3], [0.5, -0.5]);
+    }
+
+    #[test]
+    fn swapped_children_pass_on_opposite_arcs() {
+        let a: Arrangement = [(1, [0.0, 0.0]), (2, [2.0, 0.0]), (3, [4.0, 0.0])].into_iter().collect();
+        let b: Arrangement = [(1, [0.0, 0.0]), (2, [4.0, 0.0]), (3, [2.0, 0.0])].into_iter().collect();
+        let clearance: HashMap<ObjectId, f64> = crossing(&[1, 2, 3], &[1, 3, 2]).into_iter().flat_map(|(x, y)| [(x, 0.5), (y, 0.5)]).collect();
+        let mid = with_crossings_apart(blend(&a, &b, 0.5), &a, &b, &clearance, 0.5, false);
+        assert!((mid[&2][1] - 0.5).abs() < 1e-9 && (mid[&3][1] + 0.5).abs() < 1e-9);
+        assert_eq!(mid[&1], [0.0, 0.0]);
+        assert!(crossing(&[1, 2], &[1, 2, 3]).is_empty());
     }
 
     #[test]

@@ -145,7 +145,8 @@ const MAX_CLEARANCE: f64 = 1.6;
 /// instead of through each other. `clearance` holds how far each one steps aside at the
 /// halfway point.
 fn with_crossings_apart(mut out: Arrangement, a: &Arrangement, b: &Arrangement, clearance: &HashMap<ObjectId, f64>, alpha: f64, vertical: bool) -> Arrangement {
-    let lift = (alpha * std::f64::consts::PI).sin();
+    // Up quickly and level while the children overlap along the flow, then back down.
+    let lift = ((alpha * std::f64::consts::PI).sin() * 1.8).min(1.0);
     for (id, &aside) in clearance {
         let (Some(pa), Some(pb), Some(p)) = (a.get(id), b.get(id), out.get_mut(id)) else { continue };
         let axis = if vertical { 1 } else { 0 };

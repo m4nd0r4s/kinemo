@@ -183,10 +183,18 @@ class TextLike(Group):
             container = min(holders, key=lambda c: len(c._selection()))
 
     def _forget_parts(self, t: float, span: Any) -> None:
-        """After the string changes, parts select nothing: the text draws every glyph again
-        and later lookups make new parts."""
+        """After the string changes, the parts leave: the text draws every glyph again and
+        later lookups make new parts."""
+        from ..values.encode import encode
+
+        s = self._scene
         for part in self._runs.values():
-            self._scene._push_set(part._sig("indices"), [], span, t=t)
+            s._push_set(part._sig("indices"), [], span, t=t)
+        top = [c for c in self._children_at(t) if isinstance(c, TextPart)]
+        src = {"k": "val", "v": encode([self._rest], "objects")}
+        s._push_entry(self._children_sig, {"k": "set", "t": t, "src": src, "span": span.ir()}, src)
+        for part in top:
+            s._exit(part, t)
         self._runs.clear()
 
     def find_all(self, needle: str) -> list[TextPart]:

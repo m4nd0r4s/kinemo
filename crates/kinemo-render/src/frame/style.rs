@@ -6,7 +6,7 @@ use kinemo_eval::color;
 use kinemo_ir::ObjectId;
 use kinemo_layout::{Layout, PartRole};
 
-use super::reveal::{fill_fraction, glyph_progress, outline_fraction};
+use super::reveal::{arrow_part_progress, fill_fraction, glyph_progress, outline_fraction};
 use super::FrameSize;
 use crate::geom::trim;
 use crate::raster::{Cap, DrawItem, Fill, Join, Stroke};
@@ -101,11 +101,13 @@ pub(crate) fn painted_parts(layout: &Layout, leaf: ObjectId, t: f64, size: Frame
 
     let even_odd = layout.prop_str(leaf, "fill_rule", t).as_deref() == Some("evenodd");
     let parts = layout.parts(leaf, t);
+    let arrow = layout.scene().object(leaf).kind == "arrow";
     let mut items = Vec::with_capacity(parts.len());
     for part in &parts {
         let progress = match (reveal_mode, part.role) {
             (Reveal::Full, _) => 1.0,
             (_, PartRole::Glyph) => draw.min(glyph_progress(write, part.index, part.count)),
+            _ if arrow => arrow_part_progress(draw.min(write), part.index),
             _ => draw.min(write),
         };
         if progress <= 0.0 {

@@ -20,9 +20,29 @@ pub(super) fn glyph_progress(w: f64, i: usize, n: usize) -> f64 {
     ((w - start) / window).clamp(0.0, 1.0)
 }
 
+/// Draw progress of an arrow's part (0: the shaft, 1: the head): the shaft is traced
+/// first and the head closes the drawing.
+pub(super) fn arrow_part_progress(d: f64, index: usize) -> f64 {
+    if d >= 1.0 {
+        return 1.0;
+    }
+    match index {
+        0 => (d / 0.75).clamp(0.0, 1.0),
+        _ => ((d - 0.65) / 0.35).clamp(0.0, 1.0),
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn an_arrow_head_follows_its_shaft() {
+        assert_eq!(arrow_part_progress(0.5, 1), 0.0);
+        assert!(arrow_part_progress(0.5, 0) > 0.6);
+        assert_eq!(arrow_part_progress(0.75, 0), 1.0);
+        assert_eq!(arrow_part_progress(1.0, 1), 1.0);
+    }
 
     #[test]
     fn glyphs_finish_in_order() {

@@ -245,9 +245,11 @@ class Indicate(Animation):
         o = self.obj
         s._check_alive(o, start, self.span)
         # An object can hand the emphasis to one of its parts (a chart bar to its rectangle).
+        from ..objects.node import Node
+
         target = getattr(o, "_indicate_target", None)
-        if callable(target):
-            o = target()
+        if callable(target) and isinstance(part := target(), Node):
+            o = part
         if self.phase == "full" and (custom := _protocol(o, "indicate")) is not None:
             _emit_protocol(s, custom(), start, duration)
             return

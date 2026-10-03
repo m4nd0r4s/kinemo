@@ -79,6 +79,10 @@ Shapes add their own (`r` for `k.Circle`, `w`/`h` for `k.Rect`, `start`/`end` fo
 `k.Line`, `text` for `k.Text`, `value` for `k.Bar`...). Every constructor argument accepts a
 value, a signal or a lambda.
 
+Objects are drawn by `z` (higher on top); with equal `z`, the one that entered the scene
+later is on top, so `s.add(background, label)` puts the label above. Inside a group,
+children draw in their order.
+
 ### `set` and `to`
 
 - `obj.set(**props)` is an **instant** change at the cursor.
@@ -172,9 +176,9 @@ def positions(s: k.Scene):
     title = k.Text("Title").place(at="top", margin=0.6)
     label = k.Text("box", size=0.4).place(below=box, gap=0.3)
     note = k.Text("note", size=0.35).place(right_of=box, gap=0.4, align="top")
-    corner = k.Dot(r=0.12, fill=k.RED).place(inside=box, align="top", pad=0.2)
-    s.add(box, title, label, note, corner)
-    s.play(box.to(scale=1.5))      # label, note and corner follow the box
+    marker = k.Dot(r=0.12, fill=k.RED).place(inside=box, align="top", pad=0.2)
+    s.add(box, title, label, note, marker)
+    s.play(box.to(scale=1.5))      # label, note and marker follow the box
     s.wait(0.5)
 ```
 
@@ -332,9 +336,9 @@ to a second group is `K0103`.
 
 ## Changing parents: `k.reparent`
 
-`k.reparent(obj, new_parent)` is an animation that moves an object to another group at the
-scheduled time, keeping its world position; inside a container it takes its place in the
-flow:
+`k.reparent(obj, new_parent)` moves an object to another group at the scheduled time. The
+move is instant: outside a container the object keeps its world position; inside a
+container it takes its place in the flow at once.
 
 ```python
 import kinemo as k
@@ -346,14 +350,16 @@ def change_group(s: k.Scene):
     left = k.Row(dot, k.Square(0.8), gap=0.3).place(at="left", margin=2)
     right = k.Row(k.Square(0.8), gap=0.3).place(at="right", margin=2)
     s.add(left, right)
-    s.play(k.reparent(dot, right))
+    s.wait(0.5)
+    s.play(k.reparent(dot, right))   # the dot jumps into the right row
     s.wait(0.5)
 ```
 
 ## Copies
 
-`obj.copy()` creates a new identity. By default the copy **follows the original**: each of
-its props is bound to the original's, so changing the original changes the copy.
+`obj.copy()` creates a new identity with the same props. By default the copy **keeps the
+original's bindings**: a prop bound to a signal or a lambda follows the same values in
+both objects. Changes made later with `.to()` belong to the object they are made on.
 `obj.copy(frozen=True)` copies the values at the cursor, with no bindings:
 
 ```python
@@ -362,12 +368,13 @@ import kinemo as k
 
 @k.scene
 def copies(s: k.Scene):
-    original = k.Square(1.2, fill=k.TEAL, fill_opacity=0.5).place(at="left", margin=3)
+    angle = k.signal(0.0)
+    original = k.Square(1.2, fill=k.TEAL, fill_opacity=0.5, rotate=angle).place(at="left", margin=3)
     s.play(k.draw(original))
     mirror = original.copy().place(at="center")
     snapshot = original.copy(frozen=True).place(at="right", margin=3)
     s.add(mirror, snapshot)
-    s.play(original.to(color=k.RED, rotate=45))   # mirror follows, snapshot does not
+    s.play(angle.to(45), original.to(color=k.RED))   # the mirror turns too; the color is the original's own
     s.wait(0.5)
 ```
 

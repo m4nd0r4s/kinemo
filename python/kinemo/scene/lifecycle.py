@@ -30,11 +30,19 @@ class LifecycleMixin:
         for n in [node, *node._entering_descendants(t)]:
             if not self._b.present(n._id, t):
                 self._b.set_presence(n._id, t, True)
+                self._raise(n)
             for companion in n.__dict__.get("_companions", ()):
                 self._enter(companion, t)  # a curve's label, kept beside it in the axes
         for a in node._ancestors():
             if not self._b.present(a._id, t):
                 self._b.set_presence(a._id, t, True)
+                self._raise(a)
+
+    def _raise(self, node: "Node") -> None:
+        """With equal `z`, objects draw in the order they enter: `s.add(trail, dot)` puts the
+        dot on top."""
+        if node._parent is None:
+            self._b.raise_root(node._id)
 
     def _enter_shallow(self, node: "Node", t: float) -> None:
         """Enter only the node and its ancestors (its parts enter through its own animation)."""

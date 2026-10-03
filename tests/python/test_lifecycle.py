@@ -7,7 +7,7 @@ from typing import Callable
 import pytest
 
 import kinemo as k
-from conftest import build, diagnostic_of, line_of, presence, raises_code, snapshot_of
+from conftest import build, diagnostic_of, ir, line_of, presence, raises_code, snapshot_of
 
 
 def test_to_before_entering_is_k0101_with_entry_fixes() -> None:
@@ -201,3 +201,18 @@ def test_assigning_the_color_shorthand_is_k0105(make: Callable[[], k.Node]) -> N
     d = diagnostic_of(body, "K0105")
     instant, animated = (str(f.code) for f in d.fixes)
     assert instant.endswith(".set(color=...)") and animated.endswith(".to(color=...))")
+
+
+def test_objects_draw_in_the_order_they_enter() -> None:
+    @build
+    def scene(s: k.Scene) -> None:
+        back = k.Circle()
+        front = k.Square()
+        s.add(front)
+        s.add(back)
+        s.remove(front)
+        s.add(front)
+
+    data = ir(scene)
+    names = {o["id"]: o["name"] for o in data["objects"]}
+    assert [names[r] for r in data["roots"]] == ["back", "front"]

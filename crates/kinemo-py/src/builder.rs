@@ -112,6 +112,14 @@ impl Builder {
         }
     }
 
+    /// Move a root to the end of the draw order (objects entering later draw on top).
+    fn raise_root(&mut self, obj: u32) {
+        if let Some(index) = self.scene.roots.iter().position(|r| *r == obj) {
+            let root = self.scene.roots.remove(index);
+            self.scene.roots.push(root);
+        }
+    }
+
     fn set_presence(&mut self, obj: u32, t: f64, present: bool) {
         let presence = &mut self.scene.objects[obj as usize].presence;
         // Keep toggles sorted; same-time toggles keep insertion order.

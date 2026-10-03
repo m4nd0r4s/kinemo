@@ -100,7 +100,9 @@ impl<'a> Layout<'a> {
         }
         let pulse = self.prop_f(o, "_pulse", t, 1.0);
         if pulse != 1.0 {
-            let c = self.local_bbox(o, t).center().to_vec2();
+            // About the box center, or the point `_pulse_from` names (a bar pulses from its base).
+            let from = self.prop_v2(o, "_pulse_from", t, [0.0, 0.0]);
+            let c = unit_point(self.local_bbox(o, t), from).to_vec2();
             a = a * Affine::translate(c) * Affine::scale(pulse) * Affine::translate(-c);
         }
         if g != 1.0 {

@@ -83,6 +83,7 @@ HIDDEN: dict[str, PropSpec] = {
     "_tint": PropSpec("color", fg, "step_end"),
     "_tint_amount": PropSpec("float", 0.0),
     "_pulse": PropSpec("float", 1.0),
+    "_pulse_from": PropSpec("vec2", (0.0, 0.0), "step_end"),
     "_squash": PropSpec("float", 0.0),
 }
 

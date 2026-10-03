@@ -243,6 +243,10 @@ class Indicate(Animation):
     def _emit(self, s: "Scene", start: float, duration: float, ease: Ease) -> None:
         o = self.obj
         s._check_alive(o, start, self.span)
+        # An object can hand the emphasis to one of its parts (a chart bar to its rectangle).
+        target = getattr(o, "_indicate_target", None)
+        if callable(target):
+            o = target()
         if self.phase == "full" and (custom := _protocol(o, "indicate")) is not None:
             _emit_protocol(s, custom(), start, duration)
             return

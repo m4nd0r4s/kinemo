@@ -4,12 +4,48 @@ All notable changes to kinemo are listed here. The project follows
 [semantic versioning](https://semver.org/); until 1.0, a minor version may change the API, and
 `kinemo upgrade` rewrites the forms it replaces.
 
-## Unreleased
+## 0.10.0
+
+A round of fixes from rendering every example of the guide and checking the frames.
+
+**Added**
 
 - **Charts:** objects an axes creates (`plot`, `parametric`, `area`, `vline`, `hline`,
   `scatter`, `bars`, `curve.tangent_at`, polar `plot`) take `enter_with_axes=False` to stay
-  hidden until their own verb brings them in. The derivative example no longer shows its
-  tangent twice.
+  hidden until their own verb brings them in.
+- **Output:** `--out` of `kinemo render` and `kinemo snap` can name one file
+  (`--out intro.gif`); the format comes from its extension.
+- **Tooling:** `kinemo inspect` lists the glyphs each text run draws (`drawn_glyphs`).
+- **Tests:** every complete example of the guide passes `kinemo check --strict` in CI.
+
+**Changed**
+
+- **Text parts nest.** A part addressed inside another (`txt.chars[0:6]` inside
+  `txt.words[0]`) nests in it and starts with its style; a part around others
+  (`txt.lines[0]`) takes them in, so its opacity and transforms apply to them. Every glyph is
+  drawn once, and after `txt.to(text=...)` the old parts select nothing. Styling or scaling a
+  part no longer moves the text.
+- **Draw order:** with equal `z`, an object that enters the scene later is drawn on top
+  (`s.add(trail, dot)` puts the dot above the trail).
+- **Containers:** children that swap places pass on opposite arcs; `insert` grows the new
+  child in while its neighbours make room, `pop` shrinks the leaving one in its slot, and a
+  placed container slides instead of jumping. A table makes room for new rows gradually.
+- **Charts:** new bars grow from no width in their slot and removed ones narrow away;
+  `k.indicate(chart.bar(key))` pulses the bar from its baseline.
+- **Drawing:** an arrow's shaft is traced first and its head last.
+- **Text:** the sign of a number is drawn as a true minus (−), as wide as `+`, so a readout
+  does not shift when the sign flips. `k.Bar` labels round to two decimals.
+
+**Fixed**
+
+- Overlapping text parts drew their glyphs twice and lost the colors set earlier.
+- `row.pop` removed the child at once and snapped the others into place.
+- A formula morph could make a thin bar (a square root's) vanish halfway.
+- The preview's inspector bound the arguments of objects made by a method (`ax.vline(4)`)
+  to the constructor of the object, offering a vector editor for a number.
+- The preview now follows changes of the URL hash on an open page.
+- Guide: examples and text aligned with how kinemo behaves (copies, `k.reparent`, recorded
+  narration paths, default verb durations, `fit`, and several examples).
 
 ## 0.9.0 — first public release
 

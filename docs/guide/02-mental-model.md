@@ -89,7 +89,7 @@ import kinemo as k
 
 @k.scene
 def decide(s: k.Scene):
-    bar = k.Bar(3, label=True).place(at="center")
+    bar = k.Bar(3, label=True, y=-1.5)
     s.play(k.grow(bar, from_="bottom"))
     s.play(bar.to(value=7))
     if bar.value.now > 5:          # 7 at this point of the script

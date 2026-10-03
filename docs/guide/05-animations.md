@@ -70,7 +70,7 @@ import kinemo as k
 @k.scene
 def state_changes(s: k.Scene):
     square = k.Square(1.5, x=-3)
-    bar = k.Bar(2, label=True).place(at="right", margin=3)
+    bar = k.Bar(2, label=True, x=3, y=-1.5)
     s.add(square, bar)
     s.play(square.to(x=0, rotate=45, color=k.RED, fill_opacity=0.4))
     s.play(bar.to(value=6), square.to(scale=0.6), duration=1.5)

@@ -17,7 +17,9 @@ if TYPE_CHECKING:
 
 
 class Bar(Group):
-    """`k.Bar(5, label=True)`. `bar.value` is a signal; the bar's base stays fixed."""
+    """`k.Bar(5, label=True)`. `bar.value` is a signal; the bar grows up from its base,
+    which stays where `x=`/`y=` put it (`place` aligns the whole bar, so a placed bar
+    moves as it grows). The label shows the value rounded to two decimals."""
 
     PROPS = {"value": PropSpec("float", 0.0)}
 
@@ -41,7 +43,7 @@ class Bar(Group):
         object.__setattr__(rect, "_part", "rect")
         parts: list[Node] = [rect]
         if label:
-            text = Text(lambda: f"{v():g}", size=0.32).place(below=rect, gap=0.12)
+            text = Text(lambda: f"{round(v(), 2):g}", size=0.32).place(below=rect, gap=0.12)
             object.__setattr__(self, "label", text)
             object.__setattr__(text, "_part", "label")
             parts.append(text)

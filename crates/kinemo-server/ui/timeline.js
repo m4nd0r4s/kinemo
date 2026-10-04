@@ -1,4 +1,5 @@
-// The timeline: one bar per play/start (hover shows the code), marks, scrubbing, zoom
+// The timeline: one bar per play/start (hover shows the code), marks (names stacked so they
+// never overlap), zero-length entries as ticks in their own row, scrubbing, zoom
 // (Ctrl/⌘ + wheel, or the buttons) and bars from one statement in a loop grouped into one.
 // Clicking a bar selects it: its objects are boxed and its arguments appear in the inspector.
 "use strict";
@@ -58,6 +59,46 @@ function packLanes(bars) {
   });
 }
 
+/** Line height of a row of mark names, in pixels. */
+const MARK_ROW = 13;
+
+/** Marks at one instant share one label (`B01.end · B02`). */
+function markGroups() {
+  const groups = [];
+  for (const mark of [...state.meta.marks].sort((a, b) => a.t - b.t)) {
+    const last = groups[groups.length - 1];
+    if (last && Math.abs(last.t - mark.t) < 1e-6) last.marks.push(mark);
+    else groups.push({ t: mark.t, marks: [mark] });
+  }
+  return groups;
+}
+
+/** Mark names in rows: each goes into the first row where it does not overlap the previous one. */
+function renderMarks(total) {
+  const width = view.timelineContent.getBoundingClientRect().width || 1;
+  const rowEnds = [];
+  const labels = [];
+  const lines = [];
+  for (const group of markGroups()) {
+    const names = group.marks.map((m) => m.name || "◆");
+    const text = names.join(" · ");
+    const x = (group.t / Math.max(total, 1e-9)) * width;
+    let row = rowEnds.findIndex((end) => end <= x);
+    if (row < 0) {
+      row = rowEnds.length;
+      rowEnds.push(0);
+    }
+    rowEnds[row] = x + text.length * 6.2 + 10;
+    const title = group.marks.map((m) => `${m.name || "mark"} @ ${m.t.toFixed(2)} s`).join("\n");
+    const unnamed = group.marks.every((m) => !m.name);
+    labels.push(el("div", { class: `mark-label${unnamed ? " unnamed" : ""}`, style: `left:${percent(group.t)};top:${row * MARK_ROW}px`, title }, text));
+    lines.push(el("div", { class: `mark${unnamed ? " unnamed" : ""}`, style: `left:${percent(group.t)}`, title }));
+  }
+  view.markLabels.style.height = `${Math.max(1, rowEnds.length) * MARK_ROW + 2}px`;
+  view.markLabels.replaceChildren(...labels);
+  view.marks.replaceChildren(...lines);
+}
+
 function renderTimeline() {
   if (!state.meta) return;
   view.timelineContent.style.width = `${100 * state.zoom}%`;
@@ -66,12 +107,11 @@ function renderTimeline() {
   const ticks = [];
   for (let t = 0; t <= total + 1e-9; t += step) ticks.push(el("div", { class: "tick", style: `left:${percent(t)}` }, `${+t.toFixed(2)}s`));
   view.ruler.replaceChildren(...ticks);
-  view.marks.replaceChildren(
-    ...state.meta.marks.map((m) =>
-      el("div", { class: `mark${m.name ? "" : " unnamed"}`, style: `left:${percent(m.t)}`, title: `${m.name || "mark"} @ ${m.t.toFixed(2)} s` }, el("span", {}, m.name || "◆"))
-    )
-  );
-  const bars = displayedBars();
+  renderMarks(total);
+  const all = displayedBars();
+  const isInstant = (bar) => bar.end - bar.start <= 1e-9;
+  view.instants.replaceChildren(...all.filter(isInstant).map(barNode));
+  const bars = all.filter((bar) => !isInstant(bar));
   const lanes = packLanes(bars);
   const laneNodes = [];
   bars.forEach((bar, i) => {
@@ -115,7 +155,7 @@ function barNode(bar) {
 
 function updateBars() {
   view.playhead.style.left = percent(state.t);
-  for (const bar of view.lanes.querySelectorAll(".bar")) {
+  for (const bar of view.timelineContent.querySelectorAll(".bar")) {
     bar.classList.toggle("active", state.t >= +bar.dataset.start && state.t < +bar.dataset.end);
   }
 }
@@ -172,6 +212,8 @@ function installScrubbing() {
 export function installTimeline() {
   installScrubbing();
   listen("scene", renderTimeline);
+  // Mark names are stacked by their width on screen.
+  window.addEventListener("resize", renderTimeline);
   listen("selection", renderTimeline);
   listen("time", updateBars);
 }

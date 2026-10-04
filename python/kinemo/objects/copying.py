@@ -19,7 +19,9 @@ IDENTITY_ATTRS = (
 )
 
 
-def copy_node(node: "Node", frozen: bool) -> "Node":
+def copy_node(node: "Node", frozen: bool, descendant: bool = False) -> "Node":
+    """A new node with `node`'s props (bound or frozen). The copied root starts where the
+    original is in the world; its descendants keep their positions in their parent."""
     from .groups import Group
     from .node import Node
 
@@ -40,7 +42,7 @@ def copy_node(node: "Node", frozen: bool) -> "Node":
     s._nodes.append(clone)
     # The copy starts where the original is (in world coordinates when it had a parent),
     # free of any placement; other props keep the original's bindings (or freeze).
-    world = node._parent is not None
+    world = node._parent is not None and not descendant
     position = {
         axis: json.loads(s._b.derived(node._id, axis, s.cursor, world))["Float"] for axis in ("x", "y")
     }
@@ -57,7 +59,7 @@ def copy_node(node: "Node", frozen: bool) -> "Node":
         s._push_entry(new, {"k": "set", "t": s.cursor, "src": src, "span": span.ir()}, src)
     if isinstance(node, Group):
         assert isinstance(clone, Group)
-        kids = [copy_node(c, frozen) for c in node.children]
+        kids = [copy_node(c, frozen, descendant=True) for c in node.children]
         sid = s._b.add_signal(json.dumps(encode(kids, "objects")), "layout", (clone._id, "children"), json.dumps(span.ir()))
         s._b.set_children_signal(clone._id, sid)
         from ..reactive.signal import Signal

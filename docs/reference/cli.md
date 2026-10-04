@@ -108,7 +108,7 @@ kinemo inspect [-h] [--scene SCENE] [--param NAME=VALUE] [--at AT] [--json] [--a
 | `file` | str |   | (required) |
 | `--scene SCENE` | str |   | scene name (default: all) |
 | `--param NAME=VALUE` | str |   | (repeatable) |
-| `--at AT` | str | `0` |   |
+| `--at AT` | str | `0` | comma-separated: seconds, 'end', a mark, 'mark+1.5', 'mark+50%', or 'marks' (every mark); the scene is built once |
 | `--json` | flag |   |   |
 | `--all` | flag |   | include objects not in the scene |
 

@@ -10,7 +10,7 @@ from typing import Any
 from ..values.color import Color
 from .loader import BuildResult, LoadError, build, find_scenes, load_module, select
 from .output import emit_json
-from .instants import parse_time
+from .instants import instants_of, parse_time
 
 
 def _fmt(v: Any) -> str:
@@ -67,18 +67,22 @@ def object_labels(result: BuildResult) -> dict[int, str]:
 
 
 def inspect_payload(result: BuildResult, at: str, include_absent: bool = False) -> dict[str, Any]:
-    """The `kinemo inspect --json` payload of a built scene at instant `at` (seconds, mark or 'end')."""
+    """The `kinemo inspect --json` payload of a built scene at `at`: one instant (seconds, a
+    mark, `mark+50%`, 'end') gives `{scene, t, objects}`; several (`0,B03,end`, `marks`) give
+    `{scene, instants: [{at, t, objects}]}`, from one build."""
     assert result.scene is not None
-    t = parse_time(at, result.scene.duration, result.scene.marks)
-    objects = json.loads(result.scene.builder.inspect(t))
     names = object_labels(result)
-    for o in objects:
-        o["label"] = names.get(o["id"])
-    return {
-        "scene": result.definition.name,
-        "t": t,
-        "objects": [o for o in objects if o["present"] or include_absent],
-    }
+    instants = instants_of(at, result.scene.marks)
+    entries = []
+    for text in instants:
+        t = parse_time(text, result.scene.duration, result.scene.marks)
+        objects = json.loads(result.scene.builder.inspect(t))
+        for o in objects:
+            o["label"] = names.get(o["id"])
+        entries.append({"at": text, "t": t, "objects": [o for o in objects if o["present"] or include_absent]})
+    if len(entries) == 1 and "," not in at and at.strip() != "marks":
+        return {"scene": result.definition.name, "t": entries[0]["t"], "objects": entries[0]["objects"]}
+    return {"scene": result.definition.name, "instants": entries}
 
 
 def run(args: argparse.Namespace) -> int:
@@ -92,11 +96,12 @@ def run(args: argparse.Namespace) -> int:
         if result.scene is None:
             print("\n".join(d.render() for d in result.diagnostics))
             return 1
-        payload = inspect_payload(result, str(args.at), include_absent=True)
+        payload = inspect_payload(result, str(args.at), include_absent=args.all)
         if args.json:
-            if not args.all:
-                payload["objects"] = [o for o in payload["objects"] if o["present"]]
             emit_json(payload)
+        elif "instants" in payload:
+            names = object_labels(result)
+            print("\n\n".join(f"── {entry['at']} ({entry['t']:.2f} s)\n" + text_report(entry["objects"], names, entry["t"]) for entry in payload["instants"]))
         else:
             print(text_report(payload["objects"], object_labels(result), payload["t"]))
     return 0

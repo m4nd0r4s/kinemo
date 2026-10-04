@@ -107,6 +107,7 @@ kinemo inspect scene.py --at part2      # a mark name
 kinemo inspect scene.py --at end        # the last frame
 kinemo inspect scene.py --at 2.5 --json # every prop and its source (see the AI agents guide)
 kinemo inspect scene.py --at 2.5 --all  # also objects not in the scene at that instant
+kinemo inspect scene.py --at "0,B03+50%,end"  # several instants, one build
 ```
 
 ```

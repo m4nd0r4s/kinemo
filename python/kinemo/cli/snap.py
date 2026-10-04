@@ -7,7 +7,7 @@ import os
 
 from .loader import BuildResult, LoadError, build, find_scenes, load_module, select
 from .output_path import ensure_folder_of, single_file
-from .instants import InstantError, parse_time
+from .instants import InstantError, instants_of, parse_time
 
 
 def snap_png(result: BuildResult, at: str, quality: str = "draft") -> tuple[float, bytes]:
@@ -15,14 +15,6 @@ def snap_png(result: BuildResult, at: str, quality: str = "draft") -> tuple[floa
     assert result.scene is not None
     t = parse_time(at, result.scene.duration, result.scene.marks)
     return t, result.scene.builder.frame_png(t, quality)
-
-
-def instants_of(at: str, marks: dict[str, float]) -> list[str]:
-    """The `--at` list, with `marks` standing for every mark of the scene in time order."""
-    out: list[str] = []
-    for text in (t.strip() for t in at.split(",")):
-        out += sorted(marks, key=lambda name: marks[name]) if text == "marks" else [text]
-    return out
 
 
 def run(args: argparse.Namespace) -> int:

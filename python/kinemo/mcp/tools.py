@@ -26,7 +26,7 @@ SCENE_FILE_PROPERTIES: dict[str, Any] = {
     "scene": {"type": "string", "description": "Scene name (@k.scene function). Default: every scene in the file."},
     "params": {"type": "object", "description": "Values for the scene's params=, like --param NAME=VALUE.", "additionalProperties": True},
 }
-INSTANT_DESCRIPTION = "Instant: seconds, a mark name or 'end'."
+INSTANT_DESCRIPTION = "Instant: seconds, a mark name, 'end', 'mark+1.5' or 'mark+50%'; inspect also takes several, comma-separated, or 'marks'."
 
 
 class ToolInputError(Exception):

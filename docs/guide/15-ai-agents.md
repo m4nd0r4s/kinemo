@@ -166,7 +166,14 @@ Rules for an agent:
 | `drawn_glyphs` | Only on the runs that draw a text's glyphs: the indices of the glyphs this run draws at `t`. Each glyph of a text is drawn by exactly one run. |
 
 Typical checks: two `bbox` overlapping, a `bbox` outside `[-8, -4.5, 8, 4.5]`, a label that
-is not where the script intended. `--at` accepts seconds, a mark name or `end`.
+is not where the script intended. `--at` accepts seconds, a mark name, `end`, a shifted mark
+(`B03+1.5`, `B03+50%`) or `marks` (every mark). Several instants, comma-separated, come from
+one build: the payload is then `{"scene", "instants": [{"at", "t", "objects"}]}`, one entry
+per instant in the order given:
+
+```bash
+kinemo inspect scene.py --at "0,B03,B03+50%,end" --json
+```
 
 ## The MCP server
 
@@ -176,7 +183,7 @@ stdio. Every tool runs in strict mode, so warnings are failures.
 | Tool | Arguments | Returns |
 | --- | --- | --- |
 | `check` | `file`, optional `scene`, `params` | The `check --json` payload plus top-level `ok` and `strict` |
-| `inspect` | `file`, `at`, optional `scene`, `params`, `all` | One `inspect` payload per scene, with its diagnostics |
+| `inspect` | `file`, `at` (one instant or several, `"0,B03,end"`), optional `scene`, `params`, `all` | One `inspect` payload per scene, with its diagnostics |
 | `snap` | `file`, `at` (`"0,2.5,end"` or a list), optional `quality`, `scene`, `params` | PNG images plus a JSON index of the frames |
 | `docs` | `symbol` (`"k.morph"`, `"ax.plot"`) | The documentation entry; unknown symbols return suggestions |
 | `explain` | `code` (`"K0401"`) | The long explanation |

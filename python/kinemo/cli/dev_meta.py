@@ -3,6 +3,7 @@ object tree, diagnostics and the editable call sites."""
 
 from __future__ import annotations
 
+import functools
 import os
 import time
 from typing import Any, Mapping
@@ -91,6 +92,101 @@ def _excerpt(sources: Mapping[str, SourceFile], span: Any) -> str:
     return text if len(text) <= CODE_EXCERPT_CHARS else text[: CODE_EXCERPT_CHARS - 1] + "…"
 
 
+def audio_tracks(result: BuildResult, ir: Mapping[str, Any]) -> list[dict[str, Any]]:
+    """Clips of the Narration, Sounds and Music tracks. `index` is the clip's place in the
+    scene's audio (the page plays `/audio/<version>/<index>`); narration still estimated has
+    no audio, so no index. A narration clip carries its text, beat, words and sources."""
+    s = result.scene
+    if s is None:
+        return []
+    lines = list(s.__dict__.get("_narration", []))
+    unmatched = list(lines)
+    tracks: list[dict[str, Any]] = []
+    for index, clip in enumerate(ir.get("audio", [])):
+        role, start, path = clip.get("role", "sound"), float(clip["t"]), clip["path"]
+        line = next((n for n in unmatched if role == "voice" and n.audio is not None and _same_file(n.audio, path) and abs(n.start - start) < 1e-6), None)
+        if line is not None:
+            unmatched.remove(line)
+            tracks.append(_narration_clip(line, index, clip))
+            continue
+        length = _length(path)
+        end = s.duration if role == "music" else start + length
+        if role == "music" and length > 0:
+            end = min(s.duration, start + length)
+        tracks.append(
+            {
+                "index": index,
+                "role": role,
+                "start": start,
+                "end": max(start, end),
+                "label": os.path.basename(path),
+                "file": path,
+                "gain": clip.get("gain", 1.0),
+                "duck": clip.get("duck", 0.0),
+                "fade": clip.get("fade", 0.0),
+                "span": _audio_verb_span(s, role, path, start),
+                "narration": None,
+            }
+        )
+    tracks.extend(_narration_clip(line, None, None) for line in unmatched)
+    return sorted(tracks, key=lambda c: (c["start"], c["role"]))
+
+
+def _narration_clip(line: Any, index: int | None, clip: Mapping[str, Any] | None) -> dict[str, Any]:
+    span = line.span
+    return {
+        "index": index,
+        "role": "voice",
+        "start": line.start,
+        "end": line.end,
+        "label": f"{line.beat} · {line.text}" if line.beat else line.text,
+        "file": line.audio,
+        "gain": clip.get("gain", 1.0) if clip else 1.0,
+        "duck": 0.0,
+        "fade": 0.0,
+        "span": {"file": os.path.abspath(span.file), "line": span.line} if span is not None else None,
+        "narration": {
+            "text": line.text,
+            "beat": line.beat,
+            "voice": line.voice,
+            "timing": line.timing,
+            "words": [list(w) for w in line.words],
+            "script": {"file": os.path.abspath(line.script[0]), "line": line.script[1]} if line.script else None,
+        },
+    }
+
+
+def _same_file(a: str, b: str) -> bool:
+    return os.path.abspath(a) == os.path.abspath(b)
+
+
+def _length(path: str) -> float:
+    """Seconds of an audio file (0 when it cannot be read)."""
+    try:
+        return _cached_length(path, os.stat(path).st_mtime)
+    except (OSError, ValueError, RuntimeError):
+        return 0.0
+
+
+@functools.lru_cache(maxsize=256)
+def _cached_length(path: str, mtime: float) -> float:
+    from ..audio.voice import audio_duration
+
+    try:
+        return audio_duration(path)
+    except Exception:  # noqa: BLE001 - an unreadable file shows as a tick, never a failed build
+        return 0.0
+
+
+def _audio_verb_span(s: Any, role: str, path: str, start: float) -> dict[str, Any] | None:
+    """The `k.sound`/`k.music` call that scheduled a clip, from the timeline log."""
+    wanted = f"{'music' if role == 'music' else 'sound'}({os.path.basename(path)})"
+    for entry in s._log:  # pyright: ignore[reportPrivateUsage]
+        if abs(entry.start - start) < 1e-6 and wanted in entry.label:
+            return {"file": os.path.abspath(entry.span.file), "line": entry.span.line}
+    return None
+
+
 def scene_marks(result: BuildResult) -> list[dict[str, Any]]:
     s = result.scene
     if s is None:
@@ -149,6 +245,7 @@ def preview_meta(
         "scene_fps": s.config.fps,
         "timeline": timeline_bars(result, ir, sources),
         "marks": scene_marks(result),
+        "tracks": audio_tracks(result, ir),
         "diagnostics": diagnostics_json(result.diagnostics),
         "objects": object_tree(result, ir),
         "sources": editable,

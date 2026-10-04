@@ -17,6 +17,7 @@ export function pickAt(x, y) {
 export function selectObject(id) {
   state.selectedIds = [id];
   state.selectedBar = null;
+  state.selectedClip = null;
   emit("selection");
   inspectNow();
 }
@@ -25,8 +26,21 @@ export function selectBar(index) {
   const bar = state.meta && state.meta.timeline[index];
   if (!bar) return;
   state.selectedBar = index;
+  state.selectedClip = null;
   state.selectedIds = [...bar.objects];
   state.pickedObject = null;
+  emit("selection");
+  emit("inspector");
+}
+
+/** An audio clip of the tracks (narration, sound, music). */
+export function selectClip(index) {
+  if (!state.meta || !state.meta.tracks || !state.meta.tracks[index]) return;
+  state.selectedClip = index;
+  state.selectedBar = null;
+  state.selectedIds = [];
+  state.pickedObject = null;
+  state.boxes = new Map();
   emit("selection");
   emit("inspector");
 }
@@ -34,6 +48,7 @@ export function selectBar(index) {
 export function clearSelection() {
   state.selectedIds = [];
   state.selectedBar = null;
+  state.selectedClip = null;
   state.pickedObject = null;
   state.boxes = new Map();
   emit("selection");
@@ -65,6 +80,7 @@ function onPick(msg) {
   if (!isInspect) {
     state.selectedIds = [object.id];
     state.selectedBar = null;
+    state.selectedClip = null;
     state.boxes = new Map([[object.id, object.pixel_bbox]]);
     emit("selection");
   }
@@ -81,6 +97,12 @@ export function installSelection() {
     if (!state.editing) clearSelection();
   });
   listen("scene", () => {
+    if (state.selectedClip !== null) {
+      // The clip list is rebuilt: keep the same line selected if it is still there.
+      if (!(state.meta.tracks || [])[state.selectedClip]) state.selectedClip = null;
+      emit("inspector");
+      return;
+    }
     if (state.selectedBar !== null && !(state.meta.timeline[state.selectedBar])) state.selectedBar = null;
     if (state.selectedBar !== null) {
       state.selectedIds = [...state.meta.timeline[state.selectedBar].objects];

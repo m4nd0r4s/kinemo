@@ -25,7 +25,16 @@ export function play() {
   requestAnimationFrame(tick);
 }
 
+/** Play from `start` and pause at `end` (one narration line). */
+export function playRange(start, end) {
+  pause();
+  setTime(start, true);
+  state.stopAt = end;
+  play();
+}
+
 export function pause() {
+  state.stopAt = null;
   const was = state.playing;
   state.playing = false;
   view.play.textContent = "▶";
@@ -35,6 +44,11 @@ export function pause() {
 function tick(now) {
   if (!state.playing) return;
   let t = playStartedT + ((now - playStartedAt) / 1000) * state.speed;
+  if (state.stopAt !== null && t >= state.stopAt) {
+    setTime(state.stopAt);
+    pause();
+    return;
+  }
   const end = lastFrameTime();
   if (t > end) {
     if (view.loop.checked) {

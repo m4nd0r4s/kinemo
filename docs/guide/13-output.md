@@ -382,6 +382,30 @@ seconds), the marks are exact; otherwise the words are aligned to the audio (see
 like any provider's; changing the command makes new audio. A command that fails is `K1401`,
 with the end of its error output.
 
+A model that takes long to load should make **every line in one run**: with `{lines_file}`
+in the command, kinemo writes one UTF-8 JSON file listing the lines and runs the command once,
+and `kinemo voice` makes all its missing lines that way:
+
+```toml
+[tts]
+provider = "command"
+command = [".venv-voice/bin/python", "tools/voice.py", "{lines_file}"]
+```
+
+```python
+# tools/voice.py: load the model once, then write every line.
+import json
+import sys
+
+lines = json.load(open(sys.argv[1], encoding="utf-8"))  # [{"text", "out", "voice"}, ...]
+model = load_model()
+for line in lines:
+    model.speak(line["text"], voice=line["voice"]).save(line["out"])  # optionally out + ".json"
+```
+
+A line whose file is missing when the program exits is `K1401`, naming it. A build that needs
+one line runs the same command with a list of one.
+
 `wpm` (words per minute, 150 by default) is the speaking rate of the silent estimate used
 when there is no audio yet: set it to your voice's rate so drafts are timed like the final.
 

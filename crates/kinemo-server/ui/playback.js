@@ -21,6 +21,7 @@ export function play() {
   playStartedAt = performance.now();
   playStartedT = state.t;
   view.play.textContent = "❚❚";
+  emit("playing", state.t);
   requestAnimationFrame(tick);
 }
 
@@ -40,6 +41,10 @@ function tick(now) {
       playStartedAt = now;
       playStartedT = 0;
       t = 0;
+      setTime(t);
+      emit("playing", t);
+      requestAnimationFrame(tick);
+      return;
     } else {
       setTime(end);
       pause();
@@ -56,6 +61,7 @@ function setSpeed(speed) {
     playStartedAt = performance.now();
   }
   state.speed = speed;
+  if (state.playing) emit("playing", state.t);
 }
 
 export function step(frames) {

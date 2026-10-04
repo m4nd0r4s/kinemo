@@ -99,6 +99,13 @@ impl PreviewState {
         let publication = {
             let mut current = self.current.write().expect("scene lock");
             let version = current.as_ref().map_or(1, |p| p.version + 1);
+            // Narration and sounds, served by `/audio/<version>/<index>` for the page to play.
+            meta["audio"] = json!(scene
+                .audio
+                .iter()
+                .enumerate()
+                .map(|(index, clip)| json!({"url": format!("/audio/{version}/{index}"), "t": clip.t, "gain": clip.gain}))
+                .collect::<Vec<_>>());
             let segments = kinemo_render::segments::segments(&scene);
             let publication = Arc::new(ScenePublication { version, scene: Arc::new(scene), render_options, segments, meta });
             *current = Some(publication.clone());

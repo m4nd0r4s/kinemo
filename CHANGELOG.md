@@ -4,6 +4,52 @@ All notable changes to kinemo are listed here. The project follows
 [semantic versioning](https://semver.org/); until 1.0, a minor version may change the API, and
 `kinemo upgrade` rewrites the forms it replaces.
 
+## 0.11.0
+
+Narration and tooling: a narrated video made from a script, timed by its words, mixed and
+subtitled, and a CLI that agents and editors can drive.
+
+**Added**
+
+- **`k.Voice`:** `with s.voice(...) as v` gives the line: `v.at(0.5)` and `v.at("the slope")`
+  wait for a point of the line, `v.time(...)` gives the instant, and `v.start`, `v.end`,
+  `v.words` say when it is spoken. `W1403` warns when a block's animations outlast its
+  narration.
+- **`k.Script`:** narration in its own Markdown (or JSON) file, beat by beat. A beat uses
+  `audio/<id>.wav` next to the script when it exists, adds the marks `<id>` and `<id>.end`,
+  and `W1404` reports a beat whose audio was made from another text.
+- **`kinemo voice`:** makes only the narration that has no audio yet or a stale one
+  (`--check`, `--force B03`), with the configured provider.
+- **`[tts] provider = "command"`** runs any program for each line (`{text_file}`, `{out}`,
+  `{voice}`), so a voice can live in another environment; `[tts] wpm` sets the speaking rate
+  of the silent estimate. Failures are `K1401`.
+- **Word times for recorded audio:** with `pip install "kinemo[align]"`, words are aligned to
+  the audio by speech recognition (`[align] model`); without it, they are estimated from
+  syllables. `kinemo check --json` lists each line's `narration`, with its `timing`.
+- **Audio mix:** `k.music(path, gain, duck, fade)` is lowered while a voice speaks; voices,
+  sounds and music are mixed in groups and limited. `[audio] loudness` normalizes the track
+  (LUFS) and `[audio] trim_silence` cuts the silence around each line.
+- **Subtitles:** `kinemo render --subtitles` writes `.srt` and `.vtt` next to the video,
+  timed by the words.
+- **The dev preview plays the audio** (narration, sounds, music), with a mute button.
+- **`kinemo snap`:** `--at` takes marks shifted by seconds or by a share of the beat
+  (`B01+1.5`, `B01+50%`) and `marks` (every mark); `--sheet` writes one labelled contact sheet.
+  `kinemo check --json` lists each scene's `marks`.
+- **`--progress json`** on `render` and `voice`: one JSON object per line on stderr.
+- **`bleed=True`** declares an object cropped by the frame on purpose; it and objects entirely
+  offstage are left out of `W1001`.
+
+**Changed**
+
+- Timeline entries are labelled with the calls as written in the scene.
+- A curve's label (`ax.plot(..., label=...)`) fades in as a growing curve reaches its end.
+- Contrast and size checks skip objects in the middle of a fade, and `W1005` reports only
+  objects that are never seen again.
+
+**Fixed**
+
+- The CLI reference showed argparse's `%%` escape.
+
 ## 0.10.1
 
 Fixes, plus what a first production client (narrated series) ran into.

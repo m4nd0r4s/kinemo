@@ -70,6 +70,8 @@ def _toml_rows() -> list[tuple[str, str, str, str]]:
          "Integrated loudness of rendered audio, in LUFS (e.g. `-16`). Without it, the mix keeps its level."),
         (code("[audio] trim_silence"), code("bool"), code(default_text(defaults["audio_trim_silence"])),
          "Cut the silence around each narration line when it is measured."),
+        (code("[align] model"), code("str"), code(default_text(defaults["align_model"])),
+         "Speech model that aligns words to narration audio, with `pip install \"kinemo[align]\"`."),
         (code("[cache] dir"), code("str"), code(default_text(defaults["cache_dir"])),
          "Cache directory (generated audio, ...), relative to the project root."),
         (code("[editor] command"), code("str"), code(default_text(defaults["editor"])),

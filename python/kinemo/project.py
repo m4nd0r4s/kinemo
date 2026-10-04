@@ -24,6 +24,8 @@ class ProjectConfig:
     audio_loudness: float | None = None
     #: `[audio] trim_silence`: trim the silence around each narration line.
     audio_trim_silence: bool = False
+    #: `[align] model`: the speech model that aligns words to narration audio (`kinemo[align]`).
+    align_model: str = "base.en"
     cache_dir: str = ".kinemo-cache"
     editor: str = "vscode"
     python_workers_threshold: float = 2.0
@@ -59,6 +61,7 @@ def load(start: str) -> ProjectConfig:
         tts_wpm=float(tts.get("wpm", 150.0)),
         audio_loudness=float(data["audio"]["loudness"]) if "loudness" in data.get("audio", {}) else None,
         audio_trim_silence=bool(data.get("audio", {}).get("trim_silence", False)),
+        align_model=str(data.get("align", {}).get("model", "base.en")),
         cache_dir=os.path.join(root, cache.get("dir", ".kinemo-cache")),
         editor=data.get("editor", {}).get("command", "vscode"),
         python_workers_threshold=float(data.get("python", {}).get("workers_threshold", 2.0)),

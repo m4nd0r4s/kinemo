@@ -42,6 +42,8 @@ Changelog = "https://github.com/m4nd0r4s/kinemo/blob/main/CHANGELOG.md"
 [project.optional-dependencies]
 numpy = ["numpy>=1.26"]
 polars = ["polars>=1.0"]
+# Word times for recorded narration (speech recognition; downloads a model on first use).
+align = ["faster-whisper>=1.1", "numpy>=1.26"]
 dev = ["pytest>=8", "pyright>=1.1.380", "numpy>=1.26"]
 
 [project.scripts]
@@ -55,6 +57,7 @@ features = ["pyo3/extension-module"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests/python"]
+markers = ["align: uses speech recognition (kinemo[align]); runs with KINEMO_TEST_ALIGN=1"]
 
 [tool.pyright]
 include = ["python/kinemo"]

@@ -287,6 +287,21 @@ narrates a beat:
 
 An unknown id is an error that suggests the closest one.
 
+### Word times of recorded audio
+
+Marks, `v.at("phrase")` and subtitles need to know when each word is said. TTS providers
+can give it; for a recording, or a provider that gives none, kinemo finds it:
+
+- With the optional extra, `pip install "kinemo[align]"` (faster-whisper, CPU), the audio is
+  transcribed with word timestamps and matched to the known text, so a misheard word only
+  blurs itself. The model (`[align] model`, `base.en` by default) downloads on first use;
+  results are cached by audio and text.
+- Without it, the times are estimated from each word's syllables and the pauses its
+  punctuation implies.
+
+`kinemo check --json` tells which was used for each line (`timing`: `provider`, `aligned`,
+`syllables`, or `estimated` when there is no audio yet).
+
 ### Making the audio: `kinemo voice`
 
 `kinemo voice scene.py` builds the scenes without synthesizing, lists their narration lines,
@@ -300,7 +315,7 @@ kinemo voice scene.py --force B03    # make a beat again (or --force all)
 ```
 
 A script beat is written next to the script: `audio/B03.wav`, its word times in
-`audio/B03.wav.json` (from the provider, or spread over the audio), and its text hash in
+`audio/B03.wav.json` (from the provider, or aligned to the audio), and its text hash in
 `audio/manifest.json`. A line written in the scene goes to the cache, where builds find it.
 `--progress json` reports progress as JSON lines, and `kinemo check --json` lists each scene's
 `narration`: start, end, text, beat, audio and where its word times come from (`timing`).
@@ -356,7 +371,7 @@ wpm = 170
 For each line, kinemo writes the text to a UTF-8 file and runs the command from the project
 root, replacing `{text_file}`, `{out}` (the WAV to write) and `{voice}` (`voice=`, or empty).
 If the program also writes `{out}.json` with `{"word_times": [...]}` (each word's start, in
-seconds), the marks are exact; otherwise they are spread over the audio. The audio is cached
+seconds), the marks are exact; otherwise the words are aligned to the audio (see below). The audio is cached
 like any provider's; changing the command makes new audio. A command that fails is `K1401`,
 with the end of its error output.
 
@@ -366,7 +381,7 @@ when there is no audio yet: set it to your voice's rate so drafts are timed like
 ### Recorded narration
 
 An audio file is used as is: the block lasts as long as the file. Pass what it says as
-`text=` to give its words times (spread over the file), `[word]{name}` marks and phrases for
+`text=` to give its words times (aligned to the file), `[word]{name}` marks and phrases for
 `v.at(...)`: `s.voice("audio/B03.wav", text="...")`.
 
 A string that ends with an audio extension (`.wav`, `.mp3`, ...) is a file; any other

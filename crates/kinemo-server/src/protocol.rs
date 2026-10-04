@@ -11,6 +11,9 @@
 //!   (`x`, `y`) of the rendered frame (frame pixels, y-down, origin top-left).
 //! - `{"type":"inspect","object":3,"t":1.25,"id":9}`: snapshot of a known object (the
 //!   selection, as it moves); answered like `pick`.
+//! - `{"type":"open","file":"/abs/scene.py","line":12}`: open a source line in the editor of
+//!   `[editor] command`, when it is a command the page cannot open by URL. Queued for the
+//!   Python side like an edit.
 //! - `{"type":"edit","id":10,"live":false,"changes":[{"site":"<span key>","target":"r","value":"0.5"}]}`:
 //!   change the scene's source. Queued for the Python side (`take_edits`), which answers
 //!   with an `edit_result` push; `live` edits rebuild from the edited text without writing
@@ -65,6 +68,12 @@ pub enum ClientMessage {
         #[serde(default)]
         live: bool,
         changes: Json,
+    },
+    /// Open a source line in the configured editor (run by the Python side).
+    Open {
+        file: String,
+        #[serde(default)]
+        line: u32,
     },
     /// Snapshot of a known object at `t`.
     Inspect {
@@ -122,6 +131,10 @@ mod tests {
         assert_eq!(
             parse_client_message(r#"{"type":"pick","x":1,"y":2,"t":0,"id":3}"#),
             Ok(ClientMessage::Pick { x: 1.0, y: 2.0, t: 0.0, id: Some(3) })
+        );
+        assert_eq!(
+            parse_client_message(r#"{"type":"open","file":"/a/s.py","line":3}"#),
+            Ok(ClientMessage::Open { file: "/a/s.py".into(), line: 3 })
         );
         assert!(parse_client_message(r#"{"type":"nope"}"#).is_err());
     }

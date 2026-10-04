@@ -5,7 +5,7 @@
 
 import { pause, setTime } from "./playback.js";
 import { selectBar } from "./selection.js";
-import { basename, duration, editorUrl, el, listen, state, view } from "./state.js";
+import { basename, duration, el, listen, openInEditor, state, view } from "./state.js";
 
 const MAX_ZOOM = 64;
 const percent = (t) => `${(100 * t) / Math.max(duration(), 1e-9)}%`;
@@ -101,7 +101,7 @@ function barNode(bar) {
   node.addEventListener("pointerdown", (e) => {
     if (e.metaKey || e.ctrlKey) {
       e.stopPropagation();
-      window.location.href = editorUrl(bar.file, bar.line);
+      openInEditor(bar.file, bar.line);
     }
   });
   node.addEventListener("click", () => selectBar(bar.indices[0]));

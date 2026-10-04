@@ -167,6 +167,10 @@ The page has three panes: the **outliner** (every object as a tree), the **frame
   The selection box and the props follow the object while the scene plays.
 - Clicking a timeline bar selects the objects it animates and shows the arguments of its
   call (`box.to(rotate=30)`) and of the `play` that scheduled it (`duration=`, `ease=`).
+- Source links (and Ctrl/⌘ + click on a bar) open the line in the editor of `[editor] command`
+  in kinemo.toml: `vscode` (the default), `cursor`, `zed`, `idea`, `pycharm`, `sublime` and
+  others open by URL; any other value is a command `kinemo dev` runs, with `{file}` and
+  `{line}` replaced (`command = "emacsclient -n +{line} {file}"`).
 - If the build fails, the preview keeps the last good version and shows the error as an
   overlay.
 - `--debug layout` draws object boxes and constraint relations; `--debug safe` draws the

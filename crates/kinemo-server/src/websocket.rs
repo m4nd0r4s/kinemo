@@ -68,6 +68,10 @@ async fn answer(state: &Arc<PreviewState>, body: &str) -> Option<Message> {
         state.queue_edit(serde_json::json!({"id": id, "live": live, "changes": changes}));
         return None;
     }
+    if let ClientMessage::Open { file, line } = request {
+        state.queue_edit(serde_json::json!({"type": "open", "file": file, "line": line}));
+        return None;
+    }
     let Some(publication) = state.current() else {
         return Some(text(&notice_message("no scene yet")));
     };
@@ -92,7 +96,7 @@ async fn answer(state: &Arc<PreviewState>, body: &str) -> Option<Message> {
             let object = picked_object_json(&publication, x, y, t);
             text(&serde_json::json!({"type": "pick", "id": id, "t": t, "x": x, "y": y, "object": object}))
         }
-        ClientMessage::Edit { .. } => unreachable!("edits are queued above"),
+        ClientMessage::Edit { .. } | ClientMessage::Open { .. } => unreachable!("queued above"),
     });
     Some(work.await.unwrap_or_else(|e| text(&notice_message(&format!("render failed: {e}")))))
 }

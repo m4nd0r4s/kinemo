@@ -4,6 +4,33 @@ All notable changes to kinemo are listed here. The project follows
 [semantic versioning](https://semver.org/); until 1.0, a minor version may change the API, and
 `kinemo upgrade` rewrites the forms it replaces.
 
+## 0.10.1
+
+Fixes, plus what a first production client (narrated series) ran into.
+
+**Fixed**
+
+- `k.reparent` and `group.copy()` placed the children of the moved or copied group at their
+  world position used as a local one.
+- `txt.to(text=...)` between strings with no characters in common reported `W0801` (morph
+  without matches); a crossfade is the expected result of a text change.
+- Synthesized narration is reused from the cache instead of being synthesized again on every
+  build, as the guide describes.
+- A `[tts] provider` that is not installed is reported as `W1402` with the installed
+  providers, instead of `W1401` (no provider).
+- Empty children (an empty group, an emptied text part) no longer stretch a group's box.
+- Paths imported with `k.SVG` keep their stroke caps and joins (`line_cap`, `line_join`);
+  SVG's defaults are butt and miter.
+- Objects made by factories (`k.Polygon.regular`, `ax.plot`, `ax.vline`, ...) carry their
+  variable name into the scene, so `kinemo inspect` and diagnostics see it.
+
+**Docs and CI**
+
+- The guide's API signatures are fenced `python signature`; every `python` block of the guide
+  is checked to be valid Python.
+- CI tests the wheel built from the branch (it could pick the PyPI release of the same
+  version) and runs once per pull request.
+
 ## 0.10.0
 
 A round of fixes from rendering every example of the guide and checking the frames.

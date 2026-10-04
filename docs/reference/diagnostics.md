@@ -22,7 +22,7 @@ Every problem kinemo reports has a stable code: `K` codes are errors, `W` codes 
 | [K11xx](#range-11) | Names from other libraries (Manim) | 6 |
 | [K12xx](#range-12) | Data and interoperability (Arrow, arrays) | 4 |
 | [W13xx](#range-13) | Parameters and export | 2 |
-| [W14xx](#range-14) | Audio and voice | 4 |
+| [W14xx](#range-14) | Audio and voice | 5 |
 
 <a id="range-00"></a>
 ## K00xx: General
@@ -457,10 +457,22 @@ s.play(c.to(x=2))
 
 | Code | Severity | Title |
 | --- | --- | --- |
+| [`K1401`](#k1401) | error | TTS command failed |
 | [`W1401`](#w1401) | warning (lint) | voice without a TTS provider |
 | [`W1402`](#w1402) | warning (lint) | unknown TTS provider |
 | [`W1403`](#w1403) | warning (lint) | content runs past the narration |
 | [`W1404`](#w1404) | warning (lint) | stale narration |
+
+<a id="k1401"></a>
+### K1401: TTS command failed
+
+*Error.* The command provider (`[tts] provider = "command"`) has no command, could not start, exited with an error or wrote no audio. The message quotes the end of its error output.
+
+Fix:
+
+```python
+Run the command by hand with a short text; check `[tts] command` in kinemo.toml.
+```
 
 <a id="w1401"></a>
 ### W1401: voice without a TTS provider

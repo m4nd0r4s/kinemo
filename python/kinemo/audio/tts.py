@@ -28,9 +28,9 @@ class TTSProvider(Protocol):
     def synthesize(self, text: str, voice: str | None, out_path: str) -> Speech: ...
 
 
-def estimate(words: list[str]) -> Speech:
-    """Silence with the duration a narrator would take (150 words/min)."""
-    per_word = 60.0 / WORDS_PER_MINUTE
+def estimate(words: list[str], wpm: float = WORDS_PER_MINUTE) -> Speech:
+    """Silence with the duration a narrator would take (`wpm` words per minute)."""
+    per_word = 60.0 / wpm
     return Speech(None, max(per_word, len(words) * per_word), [i * per_word for i in range(len(words))])
 
 

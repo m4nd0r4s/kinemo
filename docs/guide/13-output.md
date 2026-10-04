@@ -323,10 +323,33 @@ package exposes a factory in the `kinemo.tts` entry-point group:
 mytts = "kinemo_tts_mytts:Provider"
 ```
 
+### A voice from another program: `provider = "command"`
+
+A voice that lives outside kinemo's environment (another Python, a large model) is run as a
+command, with no package to install:
+
+```toml
+[tts]
+provider = "command"
+command = [".venv-voice/bin/python", "tools/voice.py", "{text_file}", "{out}", "{voice}"]
+wpm = 170
+```
+
+For each line, kinemo writes the text to a UTF-8 file and runs the command from the project
+root, replacing `{text_file}`, `{out}` (the WAV to write) and `{voice}` (`voice=`, or empty).
+If the program also writes `{out}.json` with `{"word_times": [...]}` (each word's start, in
+seconds), the marks are exact; otherwise they are spread over the audio. The audio is cached
+like any provider's; changing the command makes new audio. A command that fails is `K1401`,
+with the end of its error output.
+
+`wpm` (words per minute, 150 by default) is the speaking rate of the silent estimate used
+when there is no audio yet: set it to your voice's rate so drafts are timed like the final.
+
 ### Recorded narration
 
-An audio file is used as is: the block lasts as long as the file. Marked words are not
-available (there is no text to align), so use `s.mark` for sync points.
+An audio file is used as is: the block lasts as long as the file. Pass what it says as
+`text=` to give its words times (spread over the file), `[word]{name}` marks and phrases for
+`v.at(...)`: `s.voice("audio/B03.wav", text="...")`.
 
 A string that ends with an audio extension (`.wav`, `.mp3`, ...) is a file; any other
 string is text to speak. A relative path starts from the scene file's folder, like
@@ -356,6 +379,7 @@ the script, so it composes with other animations: `s.play(k.sound("click.wav"), 
 > | --- | --- | --- |
 > | `W1401` | `s.voice("...")` with no TTS provider: silence with an estimated duration. | Configure `[tts] provider` in `kinemo.toml`, or add `# kinemo: allow W1401` while drafting. |
 > | `W1402` | `[tts] provider` names a provider that is not installed (a typo, or the package is missing): silence with an estimated duration. | Fix the name (the message lists the installed providers) or install `kinemo-tts-<name>`. |
+> | `K1401` | The `command` TTS provider failed: no command, it could not start, it exited with an error or wrote no audio. | Run the command by hand with a short text; check `[tts] command`. |
 > | `W1403` | The animations of a voice block run past its narration: the next line starts late, after a silence. | Shorten or speed up the animations, sync them with `v.at(...)`, or lengthen the line. |
 > | `W1404` | A script beat's audio was made from a different text: the script changed after the audio was made. | Make the audio again for that beat. |
 > | `W1301` | A parameter read with `.now`, so its value is frozen at build time. | Pass the signal itself to props and lambdas. |

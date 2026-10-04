@@ -122,6 +122,12 @@ CATALOG: dict[str, Entry] = {
     "K1202": Entry("missing column", "The table has no column with that name; check `x=`, `y=` and `key=`."),
     "K1203": Entry("column with the wrong type", "Chart values need a numeric column (int, float or decimal)."),
     "K1204": Entry("duplicate key", "Each row of a chart needs a unique key (`key=`); aggregate the data or pick another column."),
+    "K1401": Entry(
+        "TTS command failed",
+        "The command provider (`[tts] provider = \"command\"`) has no command, could not start, exited with an "
+        "error or wrote no audio. The message quotes the end of its error output.",
+        fix="Run the command by hand with a short text; check `[tts] command` in kinemo.toml.",
+    ),
     # --- warnings ------------------------------------------------------------------
     "W0110": Entry("play with at=", "`play(..., at=)` does not move the cursor; use `s.start(..., at=)` to make that explicit."),
     "W0310": Entry("lambda in a loop", "The lambda captures the loop variable by reference; use `lambda i=i:` or `.map`."),

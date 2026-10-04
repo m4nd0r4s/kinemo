@@ -39,6 +39,15 @@ impl Builder {
 
 #[pymethods]
 impl Builder {
+    /// PNG bytes of a contact sheet: the frames at `times`, labelled, in `columns` columns.
+    #[pyo3(signature = (times, labels, columns = 3))]
+    fn contact_sheet_png<'py>(&self, py: Python<'py>, times: Vec<f64>, labels: Vec<String>, columns: usize) -> PyResult<Bound<'py, PyBytes>> {
+        let scene = &self.scene;
+        let frames: Vec<(f64, String)> = times.into_iter().zip(labels).collect();
+        let png = py.detach(|| raster::encode_png(&kinemo_render::sheet::contact_sheet(scene, &frames, columns)));
+        Ok(PyBytes::new(py, &png))
+    }
+
     /// PNG bytes of the frame at `t`.
     #[pyo3(signature = (t, quality = "final", transparent = false))]
     fn frame_png<'py>(&self, py: Python<'py>, t: f64, quality: &str, transparent: bool) -> PyResult<Bound<'py, PyBytes>> {

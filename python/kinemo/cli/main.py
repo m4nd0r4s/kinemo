@@ -7,6 +7,7 @@ import sys
 from typing import Any, Callable
 
 from . import check, dev, docs_cmd, inspect, mcp_cmd, new, render, snap, upgrade_cmd
+from .instants import InstantError
 
 
 def _params(items: list[str] | None) -> dict[str, Any]:
@@ -68,8 +69,10 @@ def parser() -> argparse.ArgumentParser:
 
     p = sub.add_parser("snap", help="PNGs of the requested times")
     _scene_args(p)
-    p.add_argument("--at", default="0,end")
+    p.add_argument("--at", default="0,end", help="comma-separated: seconds, 'end', a mark, 'mark+1.5', 'mark+50%%' (between mark and mark.end), or 'marks' (every mark)")
     p.add_argument("--out", default="out", help="a folder, or one file (shot.png) for one scene and one instant")
+    p.add_argument("--sheet", action="store_true", help="one labelled contact sheet per scene instead of one PNG per instant")
+    p.add_argument("--columns", type=int, default=3, help="columns of the contact sheet")
     p.add_argument("--quality", choices=["draft", "final"], default="draft")
     p.set_defaults(run=snap.run)
 
@@ -118,7 +121,11 @@ def main(argv: list[str] | None = None) -> int:
     args = parser().parse_args(argv)
     args.params = _params(getattr(args, "param_items", None))
     run: Callable[[argparse.Namespace], int] = args.run
-    return run(args)
+    try:
+        return run(args)
+    except InstantError as error:
+        print(f"kinemo: {error}")
+        return 2
 
 
 if __name__ == "__main__":

@@ -6,6 +6,7 @@ import argparse
 import os
 
 from .loader import LoadError, build, find_scenes, load_module, select
+from .instants import parse_time
 from .output_path import ensure_folder_of, single_file
 from .progress import finished, reporter
 
@@ -90,12 +91,3 @@ def run(args: argparse.Namespace) -> int:
             print(f"kinemo: format '{args.format}' is not supported yet")
             status = 2
     return status
-
-
-def parse_time(text: str, duration: float, marks: dict[str, float]) -> float:
-    text = text.strip()
-    if text == "end":
-        return max(0.0, duration - 1e-6)
-    if text in marks:
-        return marks[text]
-    return min(max(0.0, float(text)), duration)

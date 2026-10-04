@@ -8,6 +8,7 @@ pub mod raster;
 mod movie;
 mod renderer;
 pub mod segments;
+pub mod sheet;
 mod svg;
 
 pub use frame::{display_list, morph_parts, FrameSize, MorphPart};

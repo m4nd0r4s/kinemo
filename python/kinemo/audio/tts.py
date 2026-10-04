@@ -34,6 +34,11 @@ def estimate(words: list[str]) -> Speech:
     return Speech(None, max(per_word, len(words) * per_word), [i * per_word for i in range(len(words))])
 
 
+def installed_providers() -> list[str]:
+    """Names of the TTS providers installed (`kinemo.tts` entry points)."""
+    return sorted(ep.name for ep in metadata.entry_points(group="kinemo.tts"))
+
+
 def load_provider(name: str | None) -> TTSProvider | None:
     if not name:
         return None

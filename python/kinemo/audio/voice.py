@@ -9,7 +9,7 @@ import wave
 from contextlib import contextmanager
 from typing import TYPE_CHECKING, Any, Iterator
 
-from .tts import Speech, cache_path, estimate, load_provider, read_cached, write_cached
+from .tts import Speech, cache_path, estimate, installed_providers, load_provider, read_cached, write_cached
 
 if TYPE_CHECKING:
     from ..scene.scene import Scene
@@ -53,6 +53,14 @@ def synthesize(s: "Scene", text: str, voice: str | None) -> Speech:
     cfg = project_config()
     provider = load_provider(cfg.tts_provider)
     _, words, _ = parse(text)
+    if provider is None and cfg.tts_provider:
+        installed = installed_providers()
+        s.lints.warn(
+            "W1402",
+            f"TTS provider {cfg.tts_provider!r} is not installed: the voice becomes silence with an estimated duration",
+            fixes=[(f"installed providers: {', '.join(installed)}" if installed else f"install the package kinemo-tts-{cfg.tts_provider}", None)],
+        )
+        return estimate(words)
     if provider is None:
         s.lints.warn(
             "W1401",

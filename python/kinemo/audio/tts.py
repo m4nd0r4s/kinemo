@@ -4,6 +4,7 @@ exposing an entry point in the `kinemo.tts` group, chosen in `kinemo.toml`."""
 from __future__ import annotations
 
 import hashlib
+import json
 import os
 from dataclasses import dataclass, field
 from importlib import metadata
@@ -47,3 +48,28 @@ def cache_path(cache_dir: str, provider: str, voice: str | None, text: str) -> s
     key = hashlib.sha256(f"{provider}\0{voice}\0{text}".encode()).hexdigest()[:24]
     os.makedirs(cache_dir, exist_ok=True)
     return os.path.join(cache_dir, f"{key}.wav")
+
+
+def _record(path: str) -> str:
+    return f"{path}.json"
+
+
+def read_cached(path: str) -> Speech | None:
+    """The speech synthesized earlier for this cache entry, if it finished (its record is
+    written after the audio)."""
+    try:
+        with open(_record(path), encoding="utf-8") as fh:
+            data = json.load(fh)
+    except (OSError, ValueError):
+        return None
+    audio = data.get("path")
+    if not isinstance(audio, str) or not os.path.exists(audio):
+        return None
+    return Speech(audio, float(data["duration"]), [float(t) for t in data.get("word_times", [])])
+
+
+def write_cached(path: str, speech: Speech) -> None:
+    if speech.path is None:
+        return
+    with open(_record(path), "w", encoding="utf-8") as fh:
+        json.dump({"path": speech.path, "duration": speech.duration, "word_times": speech.word_times}, fh)

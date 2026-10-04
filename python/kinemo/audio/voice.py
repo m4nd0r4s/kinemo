@@ -9,7 +9,7 @@ import wave
 from contextlib import contextmanager
 from typing import TYPE_CHECKING, Any, Iterator
 
-from .tts import Speech, cache_path, estimate, load_provider
+from .tts import Speech, cache_path, estimate, load_provider, read_cached, write_cached
 
 if TYPE_CHECKING:
     from ..scene.scene import Scene
@@ -62,7 +62,12 @@ def synthesize(s: "Scene", text: str, voice: str | None) -> Speech:
         return estimate(words)
     plain, _, _ = parse(text)
     path = cache_path(cfg.cache_dir, provider.name, voice, plain)
-    return provider.synthesize(plain, voice, path)
+    cached = read_cached(path)
+    if cached is not None:
+        return cached
+    speech = provider.synthesize(plain, voice, path)
+    write_cached(path, speech)
+    return speech
 
 
 class VoiceMixin:

@@ -14,7 +14,7 @@ so the output is identical on every machine.
 
 ## `k.Text`
 
-```python
+```python signature
 k.Text(text="", *, size=None, width=None, align="left", **props)
 ```
 
@@ -131,7 +131,7 @@ def mixed(s: k.Scene):
 
 ## `k.Math`
 
-```python
+```python signature
 k.Math(tex, *, size=0.6, display=True, engine="builtin", **props)
 ```
 
@@ -219,7 +219,7 @@ mathematical commands, or draw the figure with kinemo shapes.
 
 ## `k.Code`
 
-```python
+```python signature
 k.Code(src, lang="python", *, theme="auto", line_numbers=False, size=0.32, **props)
 ```
 

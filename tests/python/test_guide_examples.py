@@ -1,9 +1,11 @@
 """Every complete example of the guide (a `python` block with `import kinemo` and a
-`@k.scene`) passes `kinemo check --strict`. Blocks that read media files get small stand-ins
+`@k.scene`) passes `kinemo check --strict`, and every `python` block is valid Python (API
+signatures are fenced `python signature`). Blocks that read media files get small stand-ins
 next to them (a PNG, an SVG with the ids the guide uses, a WAV)."""
 
 from __future__ import annotations
 
+import ast
 import re
 import struct
 import wave
@@ -72,3 +74,13 @@ def test_guide_example_passes_strict_check(name: str, code: str, tmp_path: Path,
 
 def test_the_guide_has_examples() -> None:
     assert len(EXAMPLES) > 90
+
+
+def test_python_blocks_of_the_guide_are_python() -> None:
+    """API signatures (`k.Text(text="", *, size=None, ...)`) are fenced `python signature`."""
+    for chapter in sorted((ROOT / "docs" / "guide").glob("*.md")):
+        for index, match in enumerate(BLOCK.finditer(chapter.read_text(encoding="utf-8")), 1):
+            try:
+                ast.parse(match.group(1))
+            except SyntaxError as error:
+                raise AssertionError(f"{chapter.name} block {index}: {error}; fence signatures as `python signature`") from error

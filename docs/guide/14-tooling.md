@@ -162,7 +162,8 @@ The page has three panes: the **outliner** (every object as a tree), the **frame
   in on a stretch of time. The speed menu plays at 0.25× to 2×.
 - Narration (`s.voice`) and sounds (`k.sound`) play with the scene, in sync with the
   playhead, at the playback speed. The speaker button (or `M`) mutes them; the choice is
-  remembered. Lines without audio yet (the silent estimate) are silent.
+  remembered. Lines without audio yet (the silent estimate) are silent. Music is mixed as in
+  the video: it fades in and out and drops to its `duck` level while a voice speaks.
 - Under the animations, the **Narration**, **Sounds** and **Music** tracks show each clip
   over the time it sounds; a line without audio yet is dashed. Clicking a narration line
   shows its full text (click a word to move the playhead to it), its beat with a link to the

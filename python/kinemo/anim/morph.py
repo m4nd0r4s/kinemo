@@ -118,6 +118,10 @@ def pair_parts(a: list[Part], b: list[Part], match: MorphMatch | None = None, st
 
 
 class Morph(Animation):
+    #: `W0801` when nothing matches. A text change turns it off: a crossfade between two
+    #: strings with no characters in common is the expected result, not a mistake.
+    warns_without_matches = True
+
     def __init__(self, a: "Node", b: "Node", match: MorphMatch | None, duration: float | None, ease: EaseLike | None, delay: float, span: Span) -> None:
         super().__init__(duration, ease, delay, span)
         self.a, self.b = _nodes([a, b], "morph")
@@ -135,7 +139,7 @@ class Morph(Animation):
         pa, pb = _parts(s, self.a, start), _parts(s, self.b, start)
         structural = _math_pairs(s, self.a, self.b, start, self.match)
         pairs = pair_parts(pa, pb, None if structural else self.match, structural)
-        if not pairs:
+        if not pairs and self.warns_without_matches:
             s.lints.warn(
                 "W0801",
                 f"morph found no matches between {self.a._label()} and {self.b._label()}: falling back to a crossfade",

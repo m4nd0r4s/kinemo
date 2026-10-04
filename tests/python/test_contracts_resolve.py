@@ -159,6 +159,17 @@ def test_row_18_morph_without_correspondences_is_crossfade_with_w0801() -> None:
     assert "W0801" in lints_of(scene)
 
 
+def test_a_text_change_without_shared_characters_is_not_w0801() -> None:
+    @build
+    def scene(s: k.Scene) -> None:
+        mark = k.Text("?")
+        s.add(mark)
+        for value in ("6", "100", "-3", "42"):
+            s.play(mark.to(text=value), duration=0.3)
+
+    assert "W0801" not in lints_of(scene)
+
+
 def test_row_19_repeated_terms_pair_by_relative_position() -> None:
     from kinemo.anim.morph import pair_parts
 

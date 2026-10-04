@@ -108,7 +108,11 @@ class Square(Rect):
         corners = [(ax, ay), (bx, by), (bx + nx, by + ny), (ax + nx, ay + ny)]
         cx = sum(p[0] for p in corners) / 4
         cy = sum(p[1] for p in corners) / 4
-        return Polygon(*corners, x=cx, y=cy, **props)
+        from .node import name_from_factory
+
+        square = Polygon(*corners, x=cx, y=cy, **props)
+        name_from_factory(square, "on")
+        return square
 
 
 def _points(pts: Sequence[VecLike]) -> list[tuple[float, float]]:

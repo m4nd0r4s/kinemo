@@ -200,7 +200,7 @@ obj.unbind("x")                      # removes the binding; current value is kep
 | --- | --- |
 | Transform | `x`, `y`, `position`, `rotate` (degrees), `scale`, `scale_x`, `scale_y`, `anchor` (pivot point, default `"center"`) |
 | Style | `color` (shorthand for stroke and fill), `fill`, `fill_opacity`, `stroke`, `stroke_width`, `dash`, `opacity` |
-| Composition | `z` (draw order; with equal `z`, later entrances draw on top), `visible`, `clip` |
+| Composition | `z` (draw order; with equal `z`, later entrances draw on top), `visible`, `clip`, `bleed` (cropped by the frame on purpose: exempt from W1001) |
 | Read-only (derived) | `width`, `height`, `bbox`, `left`, `right`, `top`, `bottom`, `center` |
 
 **Coordinates.** The default frame measures 16 × 9 units, origin at the center, y pointing up (math convention, as in Manim). `s.frame` exposes `left`, `right`, `top`, `bottom`, `center`, and `safe` (safe area with a 0.5 u margin). Every position prop is **local to the parent**; `obj.world.position` gives the global position.

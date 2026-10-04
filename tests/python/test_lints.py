@@ -90,6 +90,25 @@ def test_w1001_on_a_placed_object_fixes_the_place_call() -> None:
     assert edit.replacement.strip().startswith('badge.place(at="top", margin=0, clamp=True)')
 
 
+def test_w1001_not_reported_for_an_object_waiting_offstage() -> None:
+    def scene(s: k.Scene) -> None:
+        arrow = k.Arrow(start=(-0.7, 0), end=(0.7, 0), x=9.0)   # entirely right of the frame
+        s.add(arrow)
+        s.wait(0.5)
+        s.play(arrow.to(x=4.0))
+
+    assert lints_of(build(scene), "W1001") == []
+
+
+def test_w1001_not_reported_for_a_bleeding_object() -> None:
+    def scene(s: k.Scene) -> None:
+        earth = k.Circle(r=3, y=-5, bleed=True)
+        s.add(earth)
+        s.wait(1)
+
+    assert lints_of(build(scene), "W1001") == []
+
+
 def test_w1001_inline_allow() -> None:
     def scene(s: k.Scene) -> None:
         box = k.Rect(w=1, h=1, x=7.8)  # kinemo: allow W1001

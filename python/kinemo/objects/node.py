@@ -73,6 +73,7 @@ class Node(PlacementMixin):
         opacity: PropAccessor[float]
         z: PropAccessor[float]
         visible: PropAccessor[bool]
+        bleed: PropAccessor[bool]
         width: DerivedAccessor[float]
         height: DerivedAccessor[float]
         left: DerivedAccessor[float]

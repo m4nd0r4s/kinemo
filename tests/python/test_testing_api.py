@@ -47,7 +47,7 @@ def broken(s: k.Scene):
 @k.scene
 def out_of_safe_area(s: k.Scene):
     far = k.Text("longe")
-    far.set(x=9.5, y=0)
+    far.set(x=7.8, y=0)   # cut by the right edge
     s.play(k.write(far))
 
 

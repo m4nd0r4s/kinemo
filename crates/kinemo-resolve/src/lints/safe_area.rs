@@ -1,4 +1,5 @@
-//! W1001: a visible object at rest extends past the safe area (frame inset 0.5 u).
+//! W1001: a visible object at rest extends past the safe area (frame inset 0.5 u). Objects
+//! entirely outside the frame (offstage) and objects with `bleed=True` are left alone.
 
 use kurbo::Rect;
 
@@ -40,6 +41,11 @@ fn edge_name(edge: FrameEdge) -> &'static str {
     }
 }
 
+/// Whether `b` lies entirely outside `frame` (nothing of it is on screen).
+fn offstage(b: Rect, frame: Rect) -> bool {
+    b.x1 <= frame.x0 || b.x0 >= frame.x1 || b.y1 <= frame.y0 || b.y0 >= frame.y1
+}
+
 /// Whether `o` follows a constraint (`place`) at `t`.
 fn has_active_placement(scene: &Scene, o: ObjectId, t: f64) -> bool {
     scene.object(o).place.iter().rev().find(|e| e.t <= t).is_some_and(|e| e.p.is_some())
@@ -59,10 +65,16 @@ fn suggested_fix(scene: &Scene, leaf: ObjectId, t: f64) -> SuggestedFix {
 }
 
 impl VisualLint for SafeAreaLint {
-    fn observe(&mut self, context: &LintContext, sample: &FrameSample, _layout: &Layout) {
+    fn observe(&mut self, context: &LintContext, sample: &FrameSample, layout: &Layout) {
         let area = safe_area(context.scene, context.options.safe_margin);
+        let frame = frame_rect(&context.scene.config);
         for leaf in &sample.leaves {
             if !leaf.at_rest || !leaf.is_visible(context.options.visible_opacity) || self.found.contains(&[leaf.id]) {
+                continue;
+            }
+            // Entirely outside the frame: offstage (waiting to slide in), not clipped.
+            // `bleed=True` up the tree: cropped by the edge on purpose.
+            if offstage(leaf.world_bbox, frame) || ancestry(context.scene, leaf.id).any(|o| layout.prop_bool(o, "bleed", sample.t, false)) {
                 continue;
             }
             let (edge, overshoot) = largest_overshoot(leaf.world_bbox, area);

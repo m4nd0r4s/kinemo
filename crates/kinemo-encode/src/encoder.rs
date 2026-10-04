@@ -45,7 +45,7 @@ pub(crate) fn build_args(path: &Path, opts: &EncoderOptions) -> Vec<String> {
     }
 
     let mut graph = formats::video_graph(opts);
-    let audio_graph = audio::mix_graph(clips, 1, opts.duration);
+    let audio_graph = audio::mix_graph(clips, 1, opts.duration, opts.loudness);
     if let Some(ag) = &audio_graph {
         graph.push(';');
         graph.push_str(ag);

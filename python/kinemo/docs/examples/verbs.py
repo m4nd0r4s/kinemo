@@ -187,4 +187,23 @@ def click(s: k.Scene):
         related=("Scene.voice",),
         assets=("click.wav",),
     ),
+    DocEntry(
+        "k.music",
+        "Verbs",
+        "Background music from the scheduled instant to the end of the scene: `gain=` sets its "
+        "level, `duck=` its level while a voice speaks (0.25 = a quarter; 1 = no ducking), and "
+        "`fade=` fades it in at its start and out at the end of the scene, in seconds.",
+        '''
+import kinemo as k
+
+@k.scene
+def theme(s: k.Scene):
+    s.play(k.music("click.wav", gain=0.3, duck=0.25, fade=0.5))
+    title = k.Text("Episode 1").place(at="center")
+    with s.voice("Welcome to the first episode."):  # kinemo: allow W1401
+        s.play(k.write(title))
+''',
+        related=("k.sound", "Scene.voice"),
+        assets=("click.wav",),
+    ),
 )

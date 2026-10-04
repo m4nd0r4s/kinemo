@@ -99,6 +99,20 @@ def with_word_times(speech: Speech, count: int) -> Speech:
     return Speech(speech.path, speech.duration, [speech.duration * i / max(1, count) for i in range(count)])
 
 
+def trimmed(speech: Speech) -> Speech:
+    """With `[audio] trim_silence`, the line without the silence around it (word times move
+    with the cut)."""
+    from ..project import project_config
+
+    cfg = project_config()
+    if not cfg.audio_trim_silence or speech.path is None:
+        return speech
+    from .trim import trim_silence
+
+    path, lead, duration = trim_silence(speech.path, cfg.cache_dir)
+    return Speech(path, duration, [max(0.0, t - lead) for t in speech.word_times])
+
+
 #: Content may run this far past the narration before W1403 (seconds).
 OVERRUN_TOLERANCE = 0.25
 
@@ -151,8 +165,9 @@ class VoiceMixin:
         else:
             _, words, marks = parse(source)
             speech = synthesize(s, source, voice)
+        speech = trimmed(speech)
         if speech.path:
-            s._b.add_audio(speech.path, start, float(gain))
+            s._b.add_audio(speech.path, start, float(gain), "voice")
         for name, index in marks.items():
             when = start + (speech.word_times[index] if index < len(speech.word_times) else speech.duration * index / max(1, len(words)))
             s._b.add_mark(when, name, False)

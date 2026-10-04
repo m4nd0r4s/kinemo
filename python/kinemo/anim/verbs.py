@@ -310,4 +310,16 @@ def sound(path: str, gain: float = 1.0) -> Animation:
     from ..objects.media_paths import resolve_media_path
 
     resolved = resolve_media_path(path, "k.sound")
-    return Instant(lambda s, t: s._b.add_audio(resolved, t, float(gain)), span=user_span())
+    return Instant(lambda s, t: s._b.add_audio(resolved, t, float(gain), "sound"), span=user_span())
+
+
+def music(path: str, gain: float = 0.3, duck: float = 0.25, fade: float = 1.0) -> Animation:
+    """Background music from the scheduled instant: `duck` is its level while a voice speaks
+    (0.25 = a quarter, 1 = no ducking), and it fades in over `fade` seconds and out at the end
+    of the scene."""
+    from ..objects.media_paths import resolve_media_path
+
+    resolved = resolve_media_path(path, "k.music")
+    level = float(duck)
+    ducking = level if 0.0 < level < 1.0 else 0.0  # 1 (or more) keeps the music at its level
+    return Instant(lambda s, t: s._b.add_audio(resolved, t, float(gain), "music", ducking, max(0.0, float(fade))), span=user_span())

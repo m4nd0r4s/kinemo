@@ -32,6 +32,8 @@ class SceneConfig:
     theme: Theme = DEFAULT_THEME
     camera: str = "2d"
     params: dict[str, Any] = field(default_factory=dict)
+    #: Integrated loudness of the audio track in LUFS (`[audio] loudness`); None keeps the mix.
+    loudness: float | None = None
 
     @property
     def frame_units(self) -> tuple[float, float]:
@@ -58,6 +60,7 @@ class SceneConfig:
             "background": self.background_color().components(),
             "frame_w": fw,
             "frame_h": fh,
+            "loudness": self.loudness,
         }
 
 

@@ -24,14 +24,30 @@ impl Format {
     }
 }
 
+/// What a clip is in the mix.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+pub enum ClipRole {
+    /// Narration: music ducks under it.
+    Voice,
+    #[default]
+    Sound,
+    /// Background music: ducked under the voice, faded in and out.
+    Music,
+}
+
 /// An audio file placed on the timeline.
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Default, PartialEq)]
 pub struct AudioClip {
     pub path: String,
     /// Start time in seconds on the video timeline.
     pub start: f64,
     /// Linear gain (1.0 = unchanged).
     pub gain: f64,
+    pub role: ClipRole,
+    /// Music only: level under the voice (0.25 = a quarter); 0 = no ducking.
+    pub duck: f64,
+    /// Music only: fade in at its start and out at the end, in seconds.
+    pub fade: f64,
 }
 
 #[derive(Clone, Debug, PartialEq)]
@@ -47,6 +63,8 @@ pub struct EncoderOptions {
     pub audio: Vec<AudioClip>,
     /// Total duration in seconds; audio is trimmed to it.
     pub duration: f64,
+    /// Integrated loudness target of the audio track in LUFS; `None` keeps the mixed level.
+    pub loudness: Option<f64>,
 }
 
 impl EncoderOptions {

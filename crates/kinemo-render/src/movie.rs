@@ -4,7 +4,7 @@ use std::path::Path;
 
 use rayon::prelude::*;
 
-use kinemo_encode::{AudioClip, EncoderOptions, Format, VideoEncoder};
+use kinemo_encode::{EncoderOptions, Format, VideoEncoder};
 use kinemo_ir::Scene;
 
 use crate::raster::Image;
@@ -85,7 +85,7 @@ pub fn render_movie(
     let audio = scenes
         .iter()
         .zip(&starts)
-        .flat_map(|(s, start)| s.audio.iter().map(move |a| AudioClip { path: a.path.clone(), start: start + a.t, gain: a.gain }))
+        .flat_map(|(s, start)| s.audio.iter().map(move |a| crate::renderer::audio_clip(a, start + a.t)))
         .collect();
     let enc = EncoderOptions {
         width: opts.width,
@@ -96,6 +96,8 @@ pub fn render_movie(
         crf: None,
         audio,
         duration: total as f64 / opts.fps,
+        // A movie takes the loudness of its first scene.
+        loudness: scenes[0].config.loudness,
     };
     let mut encoder = VideoEncoder::start(path, &enc)?;
     const BATCH: usize = 32;

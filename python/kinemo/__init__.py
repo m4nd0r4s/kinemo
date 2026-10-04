@@ -18,7 +18,7 @@ from .anim.clip import clip
 from .anim.ease import ease
 from .anim.morph import morph
 from .anim.motion import flash, follow, squash
-from .anim.verbs import draw, fade_in, fade_out, grow, indicate, shrink, sound, write
+from .anim.verbs import draw, fade_in, fade_out, grow, indicate, music, shrink, sound, write
 from .component.component import Component
 from .component.context import Context, context, from_context, provide
 from .component.declarations import Out, Prop, field, prop
@@ -128,6 +128,6 @@ __all__ = [
     "TimeSpan", "Triangle", "Val", "Vec", "Voice", "Script", "WHITE", "YELLOW", "atan2", "ceil", "clamp", "computed", "cos",
     "draw", "e", "ease", "exp", "fade_in", "fade_out", "floor", "grow", "indicate", "interp", "lerp", "log",
     "max", "min", "mix", "noise", "par", "pi", "piecewise", "python", "rgb", "scene", "seq", "shrink", "signal",
-    "sin", "smoothstep", "sound", "sqrt", "stagger", "tan", "tau", "theme", "themes", "time", "vec", "where",
+    "music", "sin", "smoothstep", "sound", "sqrt", "stagger", "tan", "tau", "theme", "themes", "time", "vec", "where",
     "write",
 ]

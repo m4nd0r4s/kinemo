@@ -17,6 +17,7 @@ Entrance, exit and emphasis animations (`k.draw`, `k.fade_out`, `k.indicate`, `k
 - [`k.squash`](#k-squash): Emphasis: an elastic squash against the object's base; `amount=` controls the intensity.
 - [`k.follow`](#k-follow): Motion: the object travels along a path (the outline of another object or a list of points, in world coordinates).
 - [`k.sound`](#k-sound): Audio: plays a sound file at the moment it is scheduled (zero duration in the script).
+- [`k.music`](#k-music): Background music from the scheduled instant to the end of the scene: `gain=` sets its level, `duck=` its level while a voice speaks (0.25 = a quarter; 1 = no ducking), and `fade=` fades it in at its start and out at the end of the scene, in seconds.
 - [`k.morph`](#k-morph): Swap: `a` leaves, `b` enters and the matching parts travel between them (identical characters and tokens slide; the rest fades out and in).
 
 Back to the [reference index](README.md).
@@ -429,6 +430,42 @@ def click(s: k.Scene):
 ```
 
 **See also:** [`s.voice`](scene.md#scene-voice).
+
+<a id="k-music"></a>
+### `k.music` *(function)*
+
+```python
+k.music(
+    path: str,
+    gain: float = 0.3,
+    duck: float = 0.25,
+    fade: float = 1.0,
+) -> Animation
+```
+
+Background music from the scheduled instant to the end of the scene: `gain=` sets its level, `duck=` its level while a voice speaks (0.25 = a quarter; 1 = no ducking), and `fade=` fades it in at its start and out at the end of the scene, in seconds.
+
+**Parameters:**
+
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `path` | `str` | required |   |
+| `gain` | `float` | `0.3` | Background music from the scheduled instant to the end of the scene: `gain=` sets its level, `duck=` its level while a voice speaks (0.25 = a quarter; 1 = no ducking), and `fade=` fades it in at its start and out at the end of the scene, in seconds. |
+| `duck` | `float` | `0.25` | Background music from the scheduled instant to the end of the scene: `gain=` sets its level, `duck=` its level while a voice speaks (0.25 = a quarter; 1 = no ducking), and `fade=` fades it in at its start and out at the end of the scene, in seconds. |
+| `fade` | `float` | `1.0` | Background music from the scheduled instant to the end of the scene: `gain=` sets its level, `duck=` its level while a voice speaks (0.25 = a quarter; 1 = no ducking), and `fade=` fades it in at its start and out at the end of the scene, in seconds. |
+
+**Example:**
+
+```python
+@k.scene
+def theme(s: k.Scene):
+    s.play(k.music("click.wav", gain=0.3, duck=0.25, fade=0.5))
+    title = k.Text("Episode 1").place(at="center")
+    with s.voice("Welcome to the first episode."):  # kinemo: allow W1401
+        s.play(k.write(title))
+```
+
+**See also:** [`k.sound`](#k-sound), [`s.voice`](scene.md#scene-voice).
 
 <a id="k-morph"></a>
 ### `k.morph` *(function)*

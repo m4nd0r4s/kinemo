@@ -62,6 +62,8 @@ TRANSFORM: dict[str, PropSpec] = {
     "opacity": PropSpec("float", 1.0),
     "z": PropSpec("float", 0.0),
     "visible": PropSpec("bool", True, "step_end"),
+    #: Cropped by the frame edge on purpose (a horizon, a planet): exempt from W1001.
+    "bleed": PropSpec("bool", False, "step_end"),
 }
 
 STYLE: dict[str, PropSpec] = {

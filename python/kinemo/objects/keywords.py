@@ -49,6 +49,7 @@ class ScaleKeywords(TypedDict, total=False):
 class VisibilityKeywords(TypedDict, total=False):
     opacity: FloatVal
     visible: BoolVal
+    bleed: BoolVal
 
 
 class PaintKeywords(TypedDict, total=False):
@@ -159,6 +160,7 @@ if TYPE_CHECKING:
         scale_y: FloatVal
         opacity: FloatVal
         visible: BoolVal
+        bleed: BoolVal
 
     class PropChanges(ExtensibleTypedDict, total=False, extra_items=object):
         """`obj.to(...)` / `obj.set(...)`: transform and style props are typed; the props of
@@ -175,6 +177,7 @@ if TYPE_CHECKING:
         scale_y: FloatVal
         opacity: FloatVal
         visible: BoolVal
+        bleed: BoolVal
         fill: ColorVal
         fill_opacity: FloatVal
         stroke: ColorVal
@@ -203,6 +206,7 @@ if TYPE_CHECKING:
         scale_y: FloatVal
         opacity: FloatVal
         visible: BoolVal
+        bleed: BoolVal
         fill: ColorVal
         fill_opacity: FloatVal
         stroke: ColorVal

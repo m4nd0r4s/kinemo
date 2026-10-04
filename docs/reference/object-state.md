@@ -51,6 +51,7 @@ Documented together with [`obj.to`](#node-to).
 | `opacity` | float | `1.0` | linear |
 | `z` | float | `0.0` | linear |
 | `visible` | bool | `True` | step_end |
+| `bleed` | bool | `False` | step_end |
 
 **Layout-derived props** (read-only, reactive, in the parent's coordinates): `obj.width`, `obj.height`, `obj.left`, `obj.right`, `obj.top`, `obj.bottom`, `obj.center`, `obj.bbox`, `obj.position`; `obj.world.position` and `obj.world.center` give global coordinates.
 

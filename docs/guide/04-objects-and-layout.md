@@ -72,7 +72,7 @@ They share a common set:
 | --- | --- |
 | Transform | `x`, `y`, `position`, `rotate` (degrees), `scale`, `scale_x`, `scale_y`, `anchor` |
 | Style | `color` (shorthand for `stroke` and `fill`), `fill`, `fill_opacity`, `stroke`, `stroke_width`, `dash`, `opacity` |
-| Composition | `z` (draw order), `visible` |
+| Composition | `z` (draw order), `visible`, `bleed` (cropped by the frame edge on purpose) |
 | Read-only (derived from layout) | `width`, `height`, `bbox`, `left`, `right`, `top`, `bottom`, `center` |
 
 Shapes add their own (`r` for `k.Circle`, `w`/`h` for `k.Rect`, `start`/`end` for
@@ -408,4 +408,4 @@ objects created without a direct assignment.
 > | `K0303 ... is derived from the layout and is read-only` | `.set`/`.to` on `width`, `left`, `center`... | Animate the source: `scale`, `w`/`h`, position. |
 > | `K0105 props are not assigned with '='` | `box.fill = k.RED`. | `box.set(fill=k.RED)` or `s.play(box.to(fill=k.RED))`. |
 > | `K0106 Circle has no prop 'fil'` | Unknown prop name. | Follow the "did you mean 'fill'?" suggestion; when there is no close match, the message lists every prop of the type (`k.Circle` uses `r`, not `radius`). |
-> | `W1001 ... leaves the safe area` | Part of an object is within 0.5 u of the frame edge. | More `margin=`, smaller size, `clamp=True`, or `.fit(s.frame.safe)`. |
+> | `W1001 ... leaves the safe area` | Part of an object is within 0.5 u of the frame edge. Objects entirely outside the frame (waiting to slide in) are not reported. | More `margin=`, smaller size, `clamp=True`, or `.fit(s.frame.safe)`. For an object cropped on purpose (a horizon, a planet), `bleed=True`. |

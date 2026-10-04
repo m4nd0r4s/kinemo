@@ -40,7 +40,7 @@ Text with minimal inline markup (`**bold**`, `*italic*`, `` `code` ``). `size=` 
 | `size` | `FloatVal \| None` | `None` | `size=` sets the size, `width=` wraps lines, `align=` aligns. |
 | `width` | `float \| None` | `None` | `size=` sets the size, `width=` wraps lines, `align=` aligns. |
 | `align` | `Align` | `"left"` | `size=` sets the size, `width=` wraps lines, `align=` aligns. |
-| `**props` | `Unpack[TextKeywords]` | variadic | Keyword arguments (`TextKeywords`): `name: str \| None`, `key: str \| None`, `x: FloatVal`, `y: FloatVal`, `position: VecVal`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `fill: ColorVal`, `fill_opacity: FloatVal`, `stroke: ColorVal`, `stroke_width: FloatVal`, `dash: FloatsVal`, `color: ColorVal`, `mono: BoolVal`. |
+| `**props` | `Unpack[TextKeywords]` | variadic | Keyword arguments (`TextKeywords`): `name: str \| None`, `key: str \| None`, `x: FloatVal`, `y: FloatVal`, `position: VecVal`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`, `fill: ColorVal`, `fill_opacity: FloatVal`, `stroke: ColorVal`, `stroke_width: FloatVal`, `dash: FloatsVal`, `color: ColorVal`, `mono: BoolVal`. |
 
 **Props** (animatable with `.to()`, settable with `.set()` or in the constructor):
 
@@ -57,7 +57,7 @@ Text with minimal inline markup (`**bold**`, `*italic*`, `` `code` ``). `size=` 
 | `align` | str | `"left"` | step_end |
 | `mono` | bool | `False` | step_end |
 
-Props inherited from [`k.Node`](object-state.md#k-node): `x`, `y`, `rotate`, `scale`, `scale_x`, `scale_y`, `anchor`, `opacity`, `z`, `visible`.
+Props inherited from [`k.Node`](object-state.md#k-node): `x`, `y`, `rotate`, `scale`, `scale_x`, `scale_y`, `anchor`, `opacity`, `z`, `visible`, `bleed`.
 
 **Example:**
 
@@ -180,7 +180,7 @@ Formula in LaTeX syntax, typeset by the built-in engine (no TeX installation nee
 | `size` | `float` | `0.6` |   |
 | `display` | `bool` | `True` |   |
 | `engine` | `str` | `"builtin"` |   |
-| `**props` | `Unpack[StyleKeywords]` | variadic | Keyword arguments (`StyleKeywords`): `name: str \| None`, `key: str \| None`, `x: FloatVal`, `y: FloatVal`, `position: VecVal`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `fill: ColorVal`, `fill_opacity: FloatVal`, `stroke: ColorVal`, `stroke_width: FloatVal`, `dash: FloatsVal`, `color: ColorVal`. |
+| `**props` | `Unpack[StyleKeywords]` | variadic | Keyword arguments (`StyleKeywords`): `name: str \| None`, `key: str \| None`, `x: FloatVal`, `y: FloatVal`, `position: VecVal`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`, `fill: ColorVal`, `fill_opacity: FloatVal`, `stroke: ColorVal`, `stroke_width: FloatVal`, `dash: FloatsVal`, `color: ColorVal`. |
 
 **Props** (animatable with `.to()`, settable with `.set()` or in the constructor):
 
@@ -195,7 +195,7 @@ Formula in LaTeX syntax, typeset by the built-in engine (no TeX installation nee
 | `size` | float | `0.6` | linear |
 | `display` | bool | `True` | step_end |
 
-Props inherited from [`k.Node`](object-state.md#k-node): `x`, `y`, `rotate`, `scale`, `scale_x`, `scale_y`, `anchor`, `opacity`, `z`, `visible`.
+Props inherited from [`k.Node`](object-state.md#k-node): `x`, `y`, `rotate`, `scale`, `scale_x`, `scale_y`, `anchor`, `opacity`, `z`, `visible`, `bleed`.
 
 **Example:**
 
@@ -288,7 +288,7 @@ Code with syntax highlighting (tree-sitter) and stable tokens: `lang=`, `line_nu
 | `theme` | `str` | `"auto"` | Code with syntax highlighting (tree-sitter) and stable tokens: `lang=`, `line_numbers=True`, `size=`, `theme="auto"` (follows the scene background). |
 | `line_numbers` | `bool` | `False` | Code with syntax highlighting (tree-sitter) and stable tokens: `lang=`, `line_numbers=True`, `size=`, `theme="auto"` (follows the scene background). |
 | `size` | `float` | `0.32` | Code with syntax highlighting (tree-sitter) and stable tokens: `lang=`, `line_numbers=True`, `size=`, `theme="auto"` (follows the scene background). |
-| `**props` | `Unpack[StyleKeywords]` | variadic | Keyword arguments (`StyleKeywords`): `name: str \| None`, `key: str \| None`, `x: FloatVal`, `y: FloatVal`, `position: VecVal`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `fill: ColorVal`, `fill_opacity: FloatVal`, `stroke: ColorVal`, `stroke_width: FloatVal`, `dash: FloatsVal`, `color: ColorVal`. |
+| `**props` | `Unpack[StyleKeywords]` | variadic | Keyword arguments (`StyleKeywords`): `name: str \| None`, `key: str \| None`, `x: FloatVal`, `y: FloatVal`, `position: VecVal`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`, `fill: ColorVal`, `fill_opacity: FloatVal`, `stroke: ColorVal`, `stroke_width: FloatVal`, `dash: FloatsVal`, `color: ColorVal`. |
 
 **Props** (animatable with `.to()`, settable with `.set()` or in the constructor):
 
@@ -307,7 +307,7 @@ Code with syntax highlighting (tree-sitter) and stable tokens: `lang=`, `line_nu
 | `highlight` | floats | `()` | step_start |
 | `highlight_amount` | float | `0.0` | linear |
 
-Props inherited from [`k.Node`](object-state.md#k-node): `x`, `y`, `rotate`, `scale`, `scale_x`, `scale_y`, `anchor`, `opacity`, `z`, `visible`.
+Props inherited from [`k.Node`](object-state.md#k-node): `x`, `y`, `rotate`, `scale`, `scale_x`, `scale_y`, `anchor`, `opacity`, `z`, `visible`, `bleed`.
 
 **Example:**
 

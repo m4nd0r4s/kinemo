@@ -54,7 +54,7 @@ Polar axes (rings and spokes): `r=(0, r_max, step)`, `radius=` in units, `spokes
 | `radius` | `float` | `3.0` | Polar axes (rings and spokes): `r=(0, r_max, step)`, `radius=` in units, `spokes=`. |
 | `spokes` | `int` | `12` | Polar axes (rings and spokes): `r=(0, r_max, step)`, `radius=` in units, `spokes=`. |
 | `labels` | `bool` | `True` |   |
-| `**props` | `Unpack[UnplacedKeywords]` | variadic | Keyword arguments (`UnplacedKeywords`): `name: str \| None`, `key: str \| None`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`. |
+| `**props` | `Unpack[UnplacedKeywords]` | variadic | Keyword arguments (`UnplacedKeywords`): `name: str \| None`, `key: str \| None`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`. |
 
 **Props** (animatable with `.to()`, settable with `.set()` or in the constructor):
 
@@ -63,7 +63,7 @@ Polar axes (rings and spokes): `r=(0, r_max, step)`, `radius=` in units, `spokes
 | `r_max` | float | `1.0` | linear |
 | `radius` | float | `3.0` | linear |
 
-Props inherited from [`k.Node`](object-state.md#k-node): `x`, `y`, `rotate`, `scale`, `scale_x`, `scale_y`, `anchor`, `opacity`, `z`, `visible`.
+Props inherited from [`k.Node`](object-state.md#k-node): `x`, `y`, `rotate`, `scale`, `scale_x`, `scale_y`, `anchor`, `opacity`, `z`, `visible`, `bleed`.
 
 **Example:**
 
@@ -148,7 +148,7 @@ Curve `r = fn(theta)` (sampled at build, in the axes' coordinates). `enter_with_
 | `samples` | `int` | `360` |   |
 | `color` | `ColorLike \| None` | `None` |   |
 | `enter_with_axes` | `bool` | `True` | `enter_with_axes=False` keeps it hidden until a verb brings it in. |
-| `**style` | `Unpack[PlotStyleKeywords]` | variadic | Keyword arguments (`PlotStyleKeywords`): `name: str \| None`, `key: str \| None`, `x: FloatVal`, `y: FloatVal`, `position: VecVal`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `fill: ColorVal`, `fill_opacity: FloatVal`, `stroke_width: FloatVal`, `dash: FloatsVal`. |
+| `**style` | `Unpack[PlotStyleKeywords]` | variadic | Keyword arguments (`PlotStyleKeywords`): `name: str \| None`, `key: str \| None`, `x: FloatVal`, `y: FloatVal`, `position: VecVal`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`, `fill: ColorVal`, `fill_opacity: FloatVal`, `stroke_width: FloatVal`, `dash: FloatsVal`. |
 
 <a id="k-axes"></a>
 ### `k.Axes` *(class)*
@@ -180,7 +180,7 @@ Cartesian axes with ticks, labels and an optional grid: `x=(min, max, step)`, `y
 | `width` | `float` | `8.0` | Cartesian axes with ticks, labels and an optional grid: `x=(min, max, step)`, `y=(min, max)`, `labels=("x", "y")`, `width=`/`height=` in units. |
 | `height` | `float` | `4.5` | Cartesian axes with ticks, labels and an optional grid: `x=(min, max, step)`, `y=(min, max)`, `labels=("x", "y")`, `width=`/`height=` in units. |
 | `tick_labels` | `bool` | `True` |   |
-| `**props` | `Unpack[UnplacedKeywords]` | variadic | Keyword arguments (`UnplacedKeywords`): `name: str \| None`, `key: str \| None`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`. |
+| `**props` | `Unpack[UnplacedKeywords]` | variadic | Keyword arguments (`UnplacedKeywords`): `name: str \| None`, `key: str \| None`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`. |
 
 **Props** (animatable with `.to()`, settable with `.set()` or in the constructor):
 
@@ -190,7 +190,7 @@ Cartesian axes with ticks, labels and an optional grid: `x=(min, max, step)`, `y
 | `y_range` | vec2 | `(0.0, 1.0)` | linear |
 | `size` | vec2 | `(8.0, 4.5)` | linear |
 
-Props inherited from [`k.Node`](object-state.md#k-node): `x`, `y`, `rotate`, `scale`, `scale_x`, `scale_y`, `anchor`, `opacity`, `z`, `visible`.
+Props inherited from [`k.Node`](object-state.md#k-node): `x`, `y`, `rotate`, `scale`, `scale_x`, `scale_y`, `anchor`, `opacity`, `z`, `visible`, `bleed`.
 
 **Example:**
 
@@ -330,7 +330,7 @@ Draws the curve `y = fn(x)` on the axes, with adaptive sampling. `fn` uses `k` f
 | `label` | `str \| None` | `None` | `label=` puts a label at the end of the curve. |
 | `samples` | `int` | `160` |   |
 | `enter_with_axes` | `bool` | `True` | `enter_with_axes=False` keeps it (and its label) hidden until a verb brings it in. |
-| `**style` | `Unpack[PlotStyleKeywords]` | variadic | Keyword arguments (`PlotStyleKeywords`): `name: str \| None`, `key: str \| None`, `x: FloatVal`, `y: FloatVal`, `position: VecVal`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `fill: ColorVal`, `fill_opacity: FloatVal`, `stroke_width: FloatVal`, `dash: FloatsVal`. |
+| `**style` | `Unpack[PlotStyleKeywords]` | variadic | Keyword arguments (`PlotStyleKeywords`): `name: str \| None`, `key: str \| None`, `x: FloatVal`, `y: FloatVal`, `position: VecVal`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`, `fill: ColorVal`, `fill_opacity: FloatVal`, `stroke_width: FloatVal`, `dash: FloatsVal`. |
 
 **Example:**
 
@@ -377,7 +377,7 @@ Filled region under a curve (down to the x axis) or between two curves (`between
 | `until` | `FloatExpr \| None` | `None` |   |
 | `samples` | `int` | `200` |   |
 | `enter_with_axes` | `bool` | `True` |   |
-| `**style` | `Unpack[StyleKeywords]` | variadic | Keyword arguments (`StyleKeywords`): `name: str \| None`, `key: str \| None`, `x: FloatVal`, `y: FloatVal`, `position: VecVal`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `fill: ColorVal`, `fill_opacity: FloatVal`, `stroke: ColorVal`, `stroke_width: FloatVal`, `dash: FloatsVal`, `color: ColorVal`. |
+| `**style` | `Unpack[StyleKeywords]` | variadic | Keyword arguments (`StyleKeywords`): `name: str \| None`, `key: str \| None`, `x: FloatVal`, `y: FloatVal`, `position: VecVal`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`, `fill: ColorVal`, `fill_opacity: FloatVal`, `stroke: ColorVal`, `stroke_width: FloatVal`, `dash: FloatsVal`, `color: ColorVal`. |
 
 **Example:**
 
@@ -418,7 +418,7 @@ Vertical line on the axes at `at=` (accepts a signal: the line moves with it); `
 | `at` | `FloatVal` | required | Vertical line on the axes at `at=` (accepts a signal: the line moves with it); `style="dashed"` makes it dashed. |
 | `style` | `LineStyle` | `"solid"` | Vertical line on the axes at `at=` (accepts a signal: the line moves with it); `style="dashed"` makes it dashed. |
 | `enter_with_axes` | `bool` | `True` |   |
-| `**props` | `Unpack[StyleKeywords]` | variadic | Keyword arguments (`StyleKeywords`): `name: str \| None`, `key: str \| None`, `x: FloatVal`, `y: FloatVal`, `position: VecVal`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `fill: ColorVal`, `fill_opacity: FloatVal`, `stroke: ColorVal`, `stroke_width: FloatVal`, `dash: FloatsVal`, `color: ColorVal`. |
+| `**props` | `Unpack[StyleKeywords]` | variadic | Keyword arguments (`StyleKeywords`): `name: str \| None`, `key: str \| None`, `x: FloatVal`, `y: FloatVal`, `position: VecVal`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`, `fill: ColorVal`, `fill_opacity: FloatVal`, `stroke: ColorVal`, `stroke_width: FloatVal`, `dash: FloatsVal`, `color: ColorVal`. |
 
 **Example:**
 
@@ -456,7 +456,7 @@ Horizontal line on the axes at `at=` (accepts a signal); `style="dashed"` makes 
 | `at` | `FloatVal` | required | Horizontal line on the axes at `at=` (accepts a signal); `style="dashed"` makes it dashed. |
 | `style` | `LineStyle` | `"solid"` | Horizontal line on the axes at `at=` (accepts a signal); `style="dashed"` makes it dashed. |
 | `enter_with_axes` | `bool` | `True` |   |
-| `**props` | `Unpack[StyleKeywords]` | variadic | Keyword arguments (`StyleKeywords`): `name: str \| None`, `key: str \| None`, `x: FloatVal`, `y: FloatVal`, `position: VecVal`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `fill: ColorVal`, `fill_opacity: FloatVal`, `stroke: ColorVal`, `stroke_width: FloatVal`, `dash: FloatsVal`, `color: ColorVal`. |
+| `**props` | `Unpack[StyleKeywords]` | variadic | Keyword arguments (`StyleKeywords`): `name: str \| None`, `key: str \| None`, `x: FloatVal`, `y: FloatVal`, `position: VecVal`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`, `fill: ColorVal`, `fill_opacity: FloatVal`, `stroke: ColorVal`, `stroke_width: FloatVal`, `dash: FloatsVal`, `color: ColorVal`. |
 
 **Example:**
 
@@ -495,7 +495,7 @@ Points `(xs[i], ys[i])` on the axes, as a group of `k.Dot`. Accepts lists, numpy
 | `ys` | `FloatColumn` | required |   |
 | `radius` | `float` | `0.06` |   |
 | `enter_with_axes` | `bool` | `True` |   |
-| `**props` | `Unpack[UnplacedStyleKeywords]` | variadic | Keyword arguments (`UnplacedStyleKeywords`): `name: str \| None`, `key: str \| None`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `fill: ColorVal`, `fill_opacity: FloatVal`, `stroke: ColorVal`, `stroke_width: FloatVal`, `dash: FloatsVal`, `color: ColorVal`. |
+| `**props` | `Unpack[UnplacedStyleKeywords]` | variadic | Keyword arguments (`UnplacedStyleKeywords`): `name: str \| None`, `key: str \| None`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`, `fill: ColorVal`, `fill_opacity: FloatVal`, `stroke: ColorVal`, `stroke_width: FloatVal`, `dash: FloatsVal`, `color: ColorVal`. |
 
 **Example:**
 
@@ -538,7 +538,7 @@ Parametric curve `(fx(t), fy(t))` for `t=(start, end)`; clipped to the visible r
 | `samples` | `int` | `300` |   |
 | `color` | `ColorLike \| None` | `None` |   |
 | `enter_with_axes` | `bool` | `True` |   |
-| `**style` | `Unpack[PlotStyleKeywords]` | variadic | Keyword arguments (`PlotStyleKeywords`): `name: str \| None`, `key: str \| None`, `x: FloatVal`, `y: FloatVal`, `position: VecVal`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `fill: ColorVal`, `fill_opacity: FloatVal`, `stroke_width: FloatVal`, `dash: FloatsVal`. |
+| `**style` | `Unpack[PlotStyleKeywords]` | variadic | Keyword arguments (`PlotStyleKeywords`): `name: str \| None`, `key: str \| None`, `x: FloatVal`, `y: FloatVal`, `position: VecVal`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`, `fill: ColorVal`, `fill_opacity: FloatVal`, `stroke_width: FloatVal`, `dash: FloatsVal`. |
 
 **Example:**
 
@@ -583,7 +583,7 @@ Vertical bars at data `xs` with data `heights` (from the x axis); `width` is in 
 | `heights` | `FloatColumn` | required | Vertical bars at data `xs` with data `heights` (from the x axis); `width` is in data units. |
 | `width` | `float` | `0.6` | Vertical bars at data `xs` with data `heights` (from the x axis); `width` is in data units. |
 | `enter_with_axes` | `bool` | `True` |   |
-| `**props` | `Unpack[UnplacedStyleKeywords]` | variadic | Keyword arguments (`UnplacedStyleKeywords`): `name: str \| None`, `key: str \| None`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `fill: ColorVal`, `fill_opacity: FloatVal`, `stroke: ColorVal`, `stroke_width: FloatVal`, `dash: FloatsVal`, `color: ColorVal`. |
+| `**props` | `Unpack[UnplacedStyleKeywords]` | variadic | Keyword arguments (`UnplacedStyleKeywords`): `name: str \| None`, `key: str \| None`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`, `fill: ColorVal`, `fill_opacity: FloatVal`, `stroke: ColorVal`, `stroke_width: FloatVal`, `dash: FloatsVal`, `color: ColorVal`. |
 
 <a id="axes-zoom_to"></a>
 #### `k.Axes.zoom_to` *(method)*
@@ -640,11 +640,11 @@ A horizontal number line: a `k.Axes` with only the x axis. Use `nl.point(x, 0)` 
 | --- | --- | --- | --- |
 | `x` | `Sequence[float]` | `(0, 10, 1)` |   |
 | `width` | `float` | `10.0` |   |
-| `**props` | `Unpack[UnplacedKeywords]` | variadic | Keyword arguments (`UnplacedKeywords`): `name: str \| None`, `key: str \| None`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`. |
+| `**props` | `Unpack[UnplacedKeywords]` | variadic | Keyword arguments (`UnplacedKeywords`): `name: str \| None`, `key: str \| None`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`. |
 
 Props inherited from [`k.Axes`](#k-axes): `x_range`, `y_range`, `size`.
 
-Props inherited from [`k.Node`](object-state.md#k-node): `x`, `y`, `rotate`, `scale`, `scale_x`, `scale_y`, `anchor`, `opacity`, `z`, `visible`.
+Props inherited from [`k.Node`](object-state.md#k-node): `x`, `y`, `rotate`, `scale`, `scale_x`, `scale_y`, `anchor`, `opacity`, `z`, `visible`, `bleed`.
 
 **Example:**
 
@@ -687,7 +687,7 @@ A curve `y = fn(x)` of an axes. Grows with `until=`; follows the axes when it zo
 | `fn` | `PlotFunction` | required |   |
 | `segments` | `list[list[tuple[float, float]]]` | required |   |
 | `clip` | `Vec \| Expr[Vec]` | required |   |
-| `**props` | `Unpack[StyleKeywords]` | variadic | Keyword arguments (`StyleKeywords`): `name: str \| None`, `key: str \| None`, `x: FloatVal`, `y: FloatVal`, `position: VecVal`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `fill: ColorVal`, `fill_opacity: FloatVal`, `stroke: ColorVal`, `stroke_width: FloatVal`, `dash: FloatsVal`, `color: ColorVal`. |
+| `**props` | `Unpack[StyleKeywords]` | variadic | Keyword arguments (`StyleKeywords`): `name: str \| None`, `key: str \| None`, `x: FloatVal`, `y: FloatVal`, `position: VecVal`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`, `fill: ColorVal`, `fill_opacity: FloatVal`, `stroke: ColorVal`, `stroke_width: FloatVal`, `dash: FloatsVal`, `color: ColorVal`. |
 
 **Props** (animatable with `.to()`, settable with `.set()` or in the constructor):
 
@@ -704,7 +704,7 @@ A curve `y = fn(x)` of an axes. Grows with `until=`; follows the axes when it zo
 | `size` | vec2 | `(1.0, 1.0)` | linear |
 | `clip` | vec2 | `(-1e+300, 1e+300)` | linear |
 
-Props inherited from [`k.Node`](object-state.md#k-node): `x`, `y`, `rotate`, `scale`, `scale_x`, `scale_y`, `anchor`, `opacity`, `z`, `visible`.
+Props inherited from [`k.Node`](object-state.md#k-node): `x`, `y`, `rotate`, `scale`, `scale_x`, `scale_y`, `anchor`, `opacity`, `z`, `visible`, `bleed`.
 
 **Members:**
 
@@ -816,7 +816,7 @@ Tangent segment `length` units long, centered on the curve at `x`, reactive when
 | `x` | `FloatExpr` | required | Tangent segment `length` units long, centered on the curve at `x`, reactive when `x` is a signal. |
 | `length` | `float` | `2.0` | Tangent segment `length` units long, centered on the curve at `x`, reactive when `x` is a signal. |
 | `enter_with_axes` | `bool` | `True` | It belongs to the axes and enters with it; `enter_with_axes=False` keeps it hidden until a verb brings it in. |
-| `**style` | `Unpack[UnplacedStyleKeywords]` | variadic | Keyword arguments (`UnplacedStyleKeywords`): `name: str \| None`, `key: str \| None`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `fill: ColorVal`, `fill_opacity: FloatVal`, `stroke: ColorVal`, `stroke_width: FloatVal`, `dash: FloatsVal`, `color: ColorVal`. |
+| `**style` | `Unpack[UnplacedStyleKeywords]` | variadic | Keyword arguments (`UnplacedStyleKeywords`): `name: str \| None`, `key: str \| None`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`, `fill: ColorVal`, `fill_opacity: FloatVal`, `stroke: ColorVal`, `stroke_width: FloatVal`, `dash: FloatsVal`, `color: ColorVal`. |
 
 **Example:**
 
@@ -871,7 +871,7 @@ Bar chart from a table: `x=` is the category column, `y=` the value column and `
 | `grid` | `bool` | `False` |   |
 | `bar_ratio` | `float` | `0.7` |   |
 | `label_size` | `float` | `0.28` |   |
-| `**props` | `Unpack[ChartKeywords]` | variadic | Keyword arguments (`ChartKeywords`): `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `name: str \| None`. |
+| `**props` | `Unpack[ChartKeywords]` | variadic | Keyword arguments (`ChartKeywords`): `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`, `name: str \| None`. |
 
 **Props** (animatable with `.to()`, settable with `.set()` or in the constructor):
 
@@ -879,7 +879,7 @@ Bar chart from a table: `x=` is the category column, `y=` the value column and `
 | --- | --- | --- | --- |
 | `y_max` | float | `1.0` | linear |
 
-Props inherited from [`k.Node`](object-state.md#k-node): `x`, `y`, `rotate`, `scale`, `scale_x`, `scale_y`, `anchor`, `opacity`, `z`, `visible`.
+Props inherited from [`k.Node`](object-state.md#k-node): `x`, `y`, `rotate`, `scale`, `scale_x`, `scale_y`, `anchor`, `opacity`, `z`, `visible`, `bleed`.
 
 **Example:**
 
@@ -988,11 +988,11 @@ A `k.Axes` with one line per `y=` column (one or several), connecting the table'
 | `colors` | `Sequence[ColorLike] \| None` | `None` |   |
 | `dots` | `bool` | `False` |   |
 | `legend` | `bool` | `True` |   |
-| `**props` | `Unpack[UnplacedKeywords]` | variadic | Keyword arguments (`UnplacedKeywords`): `name: str \| None`, `key: str \| None`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`. |
+| `**props` | `Unpack[UnplacedKeywords]` | variadic | Keyword arguments (`UnplacedKeywords`): `name: str \| None`, `key: str \| None`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`. |
 
 Props inherited from [`k.Axes`](#k-axes): `x_range`, `y_range`, `size`.
 
-Props inherited from [`k.Node`](object-state.md#k-node): `x`, `y`, `rotate`, `scale`, `scale_x`, `scale_y`, `anchor`, `opacity`, `z`, `visible`.
+Props inherited from [`k.Node`](object-state.md#k-node): `x`, `y`, `rotate`, `scale`, `scale_x`, `scale_y`, `anchor`, `opacity`, `z`, `visible`, `bleed`.
 
 **Example:**
 
@@ -1060,9 +1060,9 @@ Table of `k.Text` with a highlighted header; `columns=` selects and orders the c
 | `size` | `float` | `0.32` | `k.Table(df, columns=["pais", "gwh"], size=0.32)`. |
 | `header_color` | `ColorLike \| None` | `None` |   |
 | `rule` | `bool` | `True` |   |
-| `**props` | `Unpack[TransformKeywords]` | variadic | Keyword arguments (`TransformKeywords`): `name: str \| None`, `key: str \| None`, `x: FloatVal`, `y: FloatVal`, `position: VecVal`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`. |
+| `**props` | `Unpack[TransformKeywords]` | variadic | Keyword arguments (`TransformKeywords`): `name: str \| None`, `key: str \| None`, `x: FloatVal`, `y: FloatVal`, `position: VecVal`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`. |
 
-Props inherited from [`k.Node`](object-state.md#k-node): `x`, `y`, `rotate`, `scale`, `scale_x`, `scale_y`, `anchor`, `opacity`, `z`, `visible`.
+Props inherited from [`k.Node`](object-state.md#k-node): `x`, `y`, `rotate`, `scale`, `scale_x`, `scale_y`, `anchor`, `opacity`, `z`, `visible`, `bleed`.
 
 **Example:**
 

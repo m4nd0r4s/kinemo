@@ -37,7 +37,7 @@ The only kind of reusable object: a subclass with props (`k.Prop[T]`, inputs), s
 | `name` | `str \| None` | `None` |   |
 | `**kwargs` | `object` | variadic |   |
 
-Props inherited from [`k.Node`](object-state.md#k-node): `x`, `y`, `rotate`, `scale`, `scale_x`, `scale_y`, `anchor`, `opacity`, `z`, `visible`.
+Props inherited from [`k.Node`](object-state.md#k-node): `x`, `y`, `rotate`, `scale`, `scale_x`, `scale_y`, `anchor`, `opacity`, `z`, `visible`, `bleed`.
 
 **Example:**
 

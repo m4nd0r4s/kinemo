@@ -15,6 +15,7 @@ Scenes, the timeline cursor and the blocks that shape time (`s.play`, `s.start`,
 - [`k.Scene`](scene.md#k-scene-class): Timeline of one scene.
 - [`k.TimeSpan`](scene.md#k-timespan): Where a `play`/`start` landed.
 - [`k.Voice`](scene.md#k-voice): A narration line: when it starts and ends in the scene, and when each word is said.
+- [`k.Script`](scene.md#k-script): Narration kept outside the code, by beat: a Markdown file with a heading per beat (`### B03 · Title`, the first word is the id) and its narration on `> ` lines, or JSON (`{"B03": "..."}`).
 - [`k.time`](scene.md#k-time): Global scene time in seconds, as a read-only signal.
 
 Methods:

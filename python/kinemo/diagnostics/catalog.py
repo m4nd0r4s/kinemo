@@ -140,6 +140,12 @@ CATALOG: dict[str, Entry] = {
     "W1301": Entry("parameter read with .now", "It is fixed at build time and does not become an interactive control."),
     "W1302": Entry("k.python depending on a parameter", "It cannot be precomputed for the interactive web player."),
     "W1401": Entry("voice without a TTS provider", "No provider configured: silence with an estimated duration."),
+    "W1404": Entry(
+        "stale narration",
+        "A beat of a `k.Script` has recorded audio made from a different text (per `audio/manifest.json`): "
+        "the script changed after the audio was made.",
+        fix="Make the audio again: `kinemo voice <scene file>` (only missing and stale beats), or `--force <id>`.",
+    ),
     "W1403": Entry(
         "content runs past the narration",
         "The animations inside a `with s.voice(...)` block last more than 0.25 s longer than its narration, "

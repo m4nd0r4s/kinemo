@@ -11,6 +11,7 @@ Scenes, the timeline cursor and the blocks that shape time (`s.play`, `s.start`,
 - [`k.Scene`](#k-scene-class): Timeline of one scene.
 - [`k.TimeSpan`](#k-timespan): Where a `play`/`start` landed.
 - [`k.Voice`](#k-voice): A narration line: when it starts and ends in the scene, and when each word is said.
+- [`k.Script`](#k-script): Narration kept outside the code, by beat: a Markdown file with a heading per beat (`### B03 · Title`, the first word is the id) and its narration on `> ` lines, or JSON (`{"B03": "..."}`).
 - [`k.time`](#k-time): Global scene time in seconds, as a read-only signal.
 
 **Methods in this area:**
@@ -498,7 +499,7 @@ def wait_for_it(s: k.Scene):
 
 ```python
 s.voice(
-    narration: str,
+    narration: str | ScriptLine,
     *,
     text: str | None = None,
     voice: str | None = None,
@@ -512,7 +513,7 @@ Narrated `with` block: takes text (TTS from the provider in `kinemo.toml`) or an
 
 | Name | Type | Default | Description |
 | --- | --- | --- | --- |
-| `narration` | `str` | required |   |
+| `narration` | `str \| ScriptLine` | required |   |
 | `text` | `str \| None` | `None` | Narrated `with` block: takes text (TTS from the provider in `kinemo.toml`) or an audio file (`text=` says what it says), and lasts at least as long as the audio. |
 | `voice` | `str \| None` | `None` |   |
 | `gain` | `float` | `1.0` |   |
@@ -657,6 +658,56 @@ Wait (move the cursor) until a point of the line; returns that instant. Already 
 | --- | --- | --- | --- |
 | `where` | `float \| str` | required |   |
 | `occurrence` | `int` | `1` |   |
+
+<a id="k-script"></a>
+### `k.Script` *(class)*
+
+```python
+k.Script(path: str)
+```
+
+Narration kept outside the code, by beat: a Markdown file with a heading per beat (`### B03 · Title`, the first word is the id) and its narration on `> ` lines, or JSON (`{"B03": "..."}`). `s.voice(script["B03"])` uses `audio/B03.wav` next to the script when it exists (else TTS or the estimate) and adds the marks `B03` and `B03.end`. Audio made from an older text is W1404.
+
+**Parameters:**
+
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `path` | `str` | required |   |
+
+**Attributes:**
+
+| Attribute | Type | Description |
+| --- | --- | --- |
+| `script.path` |   |   |
+
+**Example:**
+
+```python
+script = k.Script("script.md")
+
+@k.scene
+def triangle(s: k.Scene):
+    tri = k.Triangle.right(3, 4, scale=0.6).place(at="center")
+    with s.voice(script["B01"]) as v:  # kinemo: allow W1401
+        s.play(k.draw(tri))
+        v.at("relation")
+        s.play(k.indicate(tri), duration=0.5)
+```
+
+**See also:** [`s.voice`](#scene-voice).
+
+**Members:**
+
+- [`ids`](#script-ids): Beat ids in script order.
+
+<a id="script-ids"></a>
+#### `k.Script.ids` *(property)*
+
+```python
+script.ids: list[str]  # read-only
+```
+
+Beat ids in script order.
 
 <a id="k-time"></a>
 ### `k.time` *(constant)*

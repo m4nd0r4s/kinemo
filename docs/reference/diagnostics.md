@@ -22,7 +22,7 @@ Every problem kinemo reports has a stable code: `K` codes are errors, `W` codes 
 | [K11xx](#range-11) | Names from other libraries (Manim) | 6 |
 | [K12xx](#range-12) | Data and interoperability (Arrow, arrays) | 4 |
 | [W13xx](#range-13) | Parameters and export | 2 |
-| [W14xx](#range-14) | Audio and voice | 3 |
+| [W14xx](#range-14) | Audio and voice | 4 |
 
 <a id="range-00"></a>
 ## K00xx: General
@@ -460,6 +460,7 @@ s.play(c.to(x=2))
 | [`W1401`](#w1401) | warning (lint) | voice without a TTS provider |
 | [`W1402`](#w1402) | warning (lint) | unknown TTS provider |
 | [`W1403`](#w1403) | warning (lint) | content runs past the narration |
+| [`W1404`](#w1404) | warning (lint) | stale narration |
 
 <a id="w1401"></a>
 ### W1401: voice without a TTS provider
@@ -486,4 +487,15 @@ Fix:
 
 ```python
 Shorten or speed up the animations, sync them to the line with `v.at(...)`, or lengthen the narration.
+```
+
+<a id="w1404"></a>
+### W1404: stale narration
+
+*Warning (lint).* A beat of a `k.Script` has recorded audio made from a different text (per `audio/manifest.json`): the script changed after the audio was made.
+
+Fix:
+
+```python
+Make the audio again: `kinemo voice <scene file>` (only missing and stale beats), or `--force <id>`.
 ```

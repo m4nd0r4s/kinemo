@@ -259,6 +259,34 @@ A phrase that the line does not contain is an error that suggests the closest wo
 the animations of a block last longer than its narration, `W1403` warns: the next line would
 start late, with a silence.
 
+### Narration from a script: `k.Script`
+
+A narrated video is easier to write and review when the narration lives in its own file,
+beat by beat. `k.Script("script.md")` reads a Markdown file with one heading per beat (the
+first word is its id) and the beat's narration on `> ` lines; other lines are notes:
+
+```markdown
+### B01 · The claim (~4 s)
+
+> Every right triangle hides a relation between its sides.
+
+### B02 · The relation
+
+> The square on the long side equals the two other squares.
+```
+
+JSON works too: `{"B01": "...", "B02": "..."}`. In the scene, `s.voice(script["B01"])`
+narrates a beat:
+
+- When `audio/B01.wav` (or `.mp3`, ...) exists next to the script, it is used, with the
+  beat's text giving its words. Otherwise the beat is spoken by the TTS provider, or estimated.
+- The beat adds the marks `B01` (its start) and `B01.end` (the end of its narration), for
+  `kinemo snap --at B01+50%` and `s.start(..., at=s.marks["B01.end"])`.
+- `audio/manifest.json` records the text each audio was made from; when the script changes
+  afterwards, `W1404` reports the stale beat.
+
+An unknown id is an error that suggests the closest one.
+
 ### Without a TTS provider
 
 When no provider is configured, the voice becomes **silence with an estimated duration**
@@ -329,6 +357,7 @@ the script, so it composes with other animations: `s.play(k.sound("click.wav"), 
 > | `W1401` | `s.voice("...")` with no TTS provider: silence with an estimated duration. | Configure `[tts] provider` in `kinemo.toml`, or add `# kinemo: allow W1401` while drafting. |
 > | `W1402` | `[tts] provider` names a provider that is not installed (a typo, or the package is missing): silence with an estimated duration. | Fix the name (the message lists the installed providers) or install `kinemo-tts-<name>`. |
 > | `W1403` | The animations of a voice block run past its narration: the next line starts late, after a silence. | Shorten or speed up the animations, sync them with `v.at(...)`, or lengthen the line. |
+> | `W1404` | A script beat's audio was made from a different text: the script changed after the audio was made. | Make the audio again for that beat. |
 > | `W1301` | A parameter read with `.now`, so its value is frozen at build time. | Pass the signal itself to props and lambdas. |
 > | `K0105` | `--param` value out of range, not one of the `k.Choice` options, or an unknown parameter name. | Check the name and the range in `params=`. |
 > | `W0110` | `s.play(..., at=s.marks["x"])` does not move the cursor. | Write `s.start(..., at=...)`. |

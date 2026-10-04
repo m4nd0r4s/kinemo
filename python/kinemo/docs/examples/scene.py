@@ -224,6 +224,30 @@ def narrated(s: k.Scene):
         related=("Scene.mark", "k.sound"),
     ),
     DocEntry(
+        "k.Script",
+        "Scene",
+        "Narration kept outside the code, by beat: a Markdown file with a heading per beat "
+        "(`### B03 · Title`, the first word is the id) and its narration on `> ` lines, or JSON "
+        "(`{\"B03\": \"...\"}`). `s.voice(script[\"B03\"])` uses `audio/B03.wav` next to the script "
+        "when it exists (else TTS or the estimate) and adds the marks `B03` and `B03.end`. Audio "
+        "made from an older text is W1404.",
+        '''
+import kinemo as k
+
+script = k.Script("script.md")
+
+@k.scene
+def triangle(s: k.Scene):
+    tri = k.Triangle.right(3, 4, scale=0.6).place(at="center")
+    with s.voice(script["B01"]) as v:  # kinemo: allow W1401
+        s.play(k.draw(tri))
+        v.at("relation")
+        s.play(k.indicate(tri), duration=0.5)
+''',
+        related=("Scene.voice",),
+        assets=("script.md",),
+    ),
+    DocEntry(
         "k.time",
         "Scene",
         "Global scene time in seconds, as a read-only signal. It is the right way to express "

@@ -13,6 +13,7 @@ from .tts import Speech, cache_path, estimate, installed_providers, load_provide
 
 if TYPE_CHECKING:
     from ..scene.scene import Scene
+    from .voice_handle import Voice
 
 #: `[cateto]{c1}`: the word "cateto", whose instant becomes `s.marks["c1"]`.
 _MARKED = re.compile(r"\[([^\]]+)\]\{([A-Za-z_]\w*)\}")
@@ -78,23 +79,34 @@ def synthesize(s: "Scene", text: str, voice: str | None) -> Speech:
     return speech
 
 
+#: Content may run this far past the narration before W1403 (seconds).
+OVERRUN_TOLERANCE = 0.25
+
+
 class VoiceMixin:
     cursor: float
 
     @contextmanager
-    def voice(self, narration: str, *, voice: str | None = None, gain: float = 1.0) -> Iterator[None]:
-        """Narrate (TTS text or an audio file); the block lasts max(audio, content).
+    def voice(self, narration: str, *, text: str | None = None, voice: str | None = None, gain: float = 1.0) -> Iterator[Voice]:
+        """Narrate (TTS text or an audio file); the block lasts max(audio, content) and gives a
+        `Voice` to sync with what is said (`v.at(0.5)`, `v.at("the slope")`).
 
+        With an audio file, `text=` is what it says: its words get times and marks.
         Marked words `[cateto]{c1}` become marks at the instant they are spoken."""
+        from .._runtime.spans import user_span
+        from .voice_handle import Voice
+
         s: Any = self
+        span = user_span()
         start = s.cursor
         if narration.lower().endswith(AUDIO_EXTENSIONS):
             from ..objects.media_paths import resolve_media_path
 
             narration = resolve_media_path(narration, "s.voice")
-            speech = Speech(narration, audio_duration(narration))
-            marks: dict[str, int] = {}
-            words: list[str] = []
+            _, words, marks = parse(text) if text is not None else ("", [], {})
+            duration = audio_duration(narration)
+            # Spread over the audio until the words are aligned to it.
+            speech = Speech(narration, duration, [duration * i / max(1, len(words)) for i in range(len(words))])
         else:
             _, words, marks = parse(narration)
             speech = synthesize(s, narration, voice)
@@ -104,5 +116,14 @@ class VoiceMixin:
             when = start + (speech.word_times[index] if index < len(speech.word_times) else speech.duration * index / max(1, len(words)))
             s._b.add_mark(when, name, False)
             s._marks.append((name, when, False, s._b.log_position()))
-        yield
-        s.cursor = max(s.cursor, start + speech.duration)
+        line = Voice(s, start, speech.duration, words, speech.word_times, span)
+        yield line
+        overrun = s.cursor - line.end
+        if overrun > OVERRUN_TOLERANCE:
+            s.lints.warn(
+                "W1403",
+                f"the content of this voice block runs {overrun:.1f} s past its narration",
+                spans=[span],
+                fixes=[("shorten or speed up the animations, or lengthen the narration", None)],
+            )
+        s.cursor = max(s.cursor, line.end)

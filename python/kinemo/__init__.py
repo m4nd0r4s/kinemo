@@ -79,6 +79,7 @@ from .reactive.signal import Signal, computed, lerp, signal
 from .scene.decorator import SceneDef, scene
 from .scene.scene import Scene
 from .scene.timespan import TimeSpan
+from .audio.voice_handle import Voice
 from .theme import Theme, theme, themes
 from .values.color import (
     BLACK,
@@ -123,7 +124,7 @@ __all__ = [
     "Diagnostic", "Dot", "Ellipse", "Expr", "Float", "GRAY", "GREEN", "Grid", "Group", "IR_VERSION", "Int",
     "KinemoError", "Line", "Node", "ORANGE", "PINK", "PURPLE", "Path", "Polygon", "RED", "Rect", "RoundedRect",
     "Row", "Scene", "SceneDef", "Signal", "Square", "Stack", "Str", "TEAL", "TRANSPARENT", "Text", "Theme",
-    "TimeSpan", "Triangle", "Val", "Vec", "WHITE", "YELLOW", "atan2", "ceil", "clamp", "computed", "cos",
+    "TimeSpan", "Triangle", "Val", "Vec", "Voice", "WHITE", "YELLOW", "atan2", "ceil", "clamp", "computed", "cos",
     "draw", "e", "ease", "exp", "fade_in", "fade_out", "floor", "grow", "indicate", "interp", "lerp", "log",
     "max", "min", "mix", "noise", "par", "pi", "piecewise", "python", "rgb", "scene", "seq", "shrink", "signal",
     "sin", "smoothstep", "sound", "sqrt", "stagger", "tan", "tau", "theme", "themes", "time", "vec", "where",

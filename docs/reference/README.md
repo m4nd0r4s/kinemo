@@ -14,6 +14,7 @@ Scenes, the timeline cursor and the blocks that shape time (`s.play`, `s.start`,
 - [`k.SceneDef`](scene.md#k-scenedef): A scene function plus its configuration.
 - [`k.Scene`](scene.md#k-scene-class): Timeline of one scene.
 - [`k.TimeSpan`](scene.md#k-timespan): Where a `play`/`start` landed.
+- [`k.Voice`](scene.md#k-voice): A narration line: when it starts and ends in the scene, and when each word is said.
 - [`k.time`](scene.md#k-time): Global scene time in seconds, as a read-only signal.
 
 Methods:
@@ -27,7 +28,7 @@ Methods:
 - [`s.mark`](scene.md#scene-mark): Creates a time anchor at the cursor without moving it and returns the time.
 - [`s.during`](scene.md#scene-during): `with` block that applies state changes on entry and reverts them, animated, on exit.
 - [`s.tempo`](scene.md#scene-tempo): `with` block that multiplies the speed of everything inside: `s.tempo(4)` divides durations and waits by 4.
-- [`s.voice`](scene.md#scene-voice): Narrated `with` block: takes text (TTS from the provider in `kinemo.toml`) or an audio file, and lasts at least as long as the audio.
+- [`s.voice`](scene.md#scene-voice): Narrated `with` block: takes text (TTS from the provider in `kinemo.toml`) or an audio file (`text=` says what it says), and lasts at least as long as the audio.
 
 ## [Object state](object-state.md)
 

@@ -202,12 +202,13 @@ movie = k.movie([intro, body, outro], transitions=[k.morph_cut(0.6), k.crossfade
 ## Narration: `s.voice`
 
 ```python signature
-with s.voice(narration, *, voice=None, gain=1.0):
+with s.voice(narration, *, text=None, voice=None, gain=1.0) as v:
     ...
 ```
 
 A narrated block. `narration` is either text, spoken by the TTS provider configured for the
-project, or the path of an audio file (`.wav`, `.mp3`, `.ogg`, `.flac`, `.m4a`, `.aac`). The
+project, or the path of an audio file (`.wav`, `.mp3`, `.ogg`, `.flac`, `.m4a`, `.aac`), with
+`text=` saying what the file says (its words then get times and marks). The
 block lasts **at least as long as the audio**: if the animations inside are shorter, the
 cursor waits for the narration to finish.
 
@@ -226,6 +227,37 @@ def narrated(s: k.Scene):
     s.start(k.indicate(tri), at=s.marks["tri"])
     s.wait(0.5)
 ```
+
+### Syncing with the line: `k.Voice`
+
+`with s.voice(...) as v` gives the line as a `k.Voice`, so animations follow what is being
+said instead of hand-tuned waits:
+
+| Member | Meaning |
+| --- | --- |
+| `v.at(0.5)` | Wait until halfway through the line (the cursor moves; already past it, it stays) |
+| `v.at("the slope")` | Wait until the phrase starts (`occurrence=2` for its second appearance) |
+| `v.time(...)` | The same instant without waiting, for `s.start(..., at=...)` |
+| `v.start`, `v.end`, `v.duration` | When the line starts and ends, in scene seconds |
+| `v.words` | `(word, start, end)` of every word |
+
+```python
+import kinemo as k
+
+
+@k.scene
+def slope(s: k.Scene):
+    curve = k.Arc(r=2, angle=120).place(at="center")
+    with s.voice("A curve has a slope at every point, and the slope can change") as v:  # kinemo: allow W1401
+        s.play(k.draw(curve), duration=1.5)
+        v.at("the slope")
+        s.play(k.indicate(curve), duration=0.6)
+    s.wait(0.5)
+```
+
+A phrase that the line does not contain is an error that suggests the closest words. When
+the animations of a block last longer than its narration, `W1403` warns: the next line would
+start late, with a silence.
 
 ### Without a TTS provider
 
@@ -296,6 +328,7 @@ the script, so it composes with other animations: `s.play(k.sound("click.wav"), 
 > | --- | --- | --- |
 > | `W1401` | `s.voice("...")` with no TTS provider: silence with an estimated duration. | Configure `[tts] provider` in `kinemo.toml`, or add `# kinemo: allow W1401` while drafting. |
 > | `W1402` | `[tts] provider` names a provider that is not installed (a typo, or the package is missing): silence with an estimated duration. | Fix the name (the message lists the installed providers) or install `kinemo-tts-<name>`. |
+> | `W1403` | The animations of a voice block run past its narration: the next line starts late, after a silence. | Shorten or speed up the animations, sync them with `v.at(...)`, or lengthen the line. |
 > | `W1301` | A parameter read with `.now`, so its value is frozen at build time. | Pass the signal itself to props and lambdas. |
 > | `K0105` | `--param` value out of range, not one of the `k.Choice` options, or an unknown parameter name. | Check the name and the range in `params=`. |
 > | `W0110` | `s.play(..., at=s.marks["x"])` does not move the cursor. | Write `s.start(..., at=...)`. |

@@ -22,7 +22,7 @@ Every problem kinemo reports has a stable code: `K` codes are errors, `W` codes 
 | [K11xx](#range-11) | Names from other libraries (Manim) | 6 |
 | [K12xx](#range-12) | Data and interoperability (Arrow, arrays) | 4 |
 | [W13xx](#range-13) | Parameters and export | 2 |
-| [W14xx](#range-14) | Audio and voice | 2 |
+| [W14xx](#range-14) | Audio and voice | 3 |
 
 <a id="range-00"></a>
 ## K00xx: General
@@ -459,6 +459,7 @@ s.play(c.to(x=2))
 | --- | --- | --- |
 | [`W1401`](#w1401) | warning (lint) | voice without a TTS provider |
 | [`W1402`](#w1402) | warning (lint) | unknown TTS provider |
+| [`W1403`](#w1403) | warning (lint) | content runs past the narration |
 
 <a id="w1401"></a>
 ### W1401: voice without a TTS provider
@@ -474,4 +475,15 @@ Fix:
 
 ```python
 Install `kinemo-tts-<name>`, or use one of the installed providers the message lists.
+```
+
+<a id="w1403"></a>
+### W1403: content runs past the narration
+
+*Warning (lint).* The animations inside a `with s.voice(...)` block last more than 0.25 s longer than its narration, so the next line starts late and the silence shows.
+
+Fix:
+
+```python
+Shorten or speed up the animations, sync them to the line with `v.at(...)`, or lengthen the narration.
 ```

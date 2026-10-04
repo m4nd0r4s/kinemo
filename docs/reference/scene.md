@@ -10,6 +10,7 @@ Scenes, the timeline cursor and the blocks that shape time (`s.play`, `s.start`,
 - [`k.SceneDef`](#k-scenedef): A scene function plus its configuration.
 - [`k.Scene`](#k-scene-class): Timeline of one scene.
 - [`k.TimeSpan`](#k-timespan): Where a `play`/`start` landed.
+- [`k.Voice`](#k-voice): A narration line: when it starts and ends in the scene, and when each word is said.
 - [`k.time`](#k-time): Global scene time in seconds, as a read-only signal.
 
 **Methods in this area:**
@@ -23,7 +24,7 @@ Scenes, the timeline cursor and the blocks that shape time (`s.play`, `s.start`,
 - [`s.mark`](#scene-mark): Creates a time anchor at the cursor without moving it and returns the time.
 - [`s.during`](#scene-during): `with` block that applies state changes on entry and reverts them, animated, on exit.
 - [`s.tempo`](#scene-tempo): `with` block that multiplies the speed of everything inside: `s.tempo(4)` divides durations and waits by 4.
-- [`s.voice`](#scene-voice): Narrated `with` block: takes text (TTS from the provider in `kinemo.toml`) or an audio file, and lasts at least as long as the audio.
+- [`s.voice`](#scene-voice): Narrated `with` block: takes text (TTS from the provider in `kinemo.toml`) or an audio file (`text=` says what it says), and lasts at least as long as the audio.
 
 Back to the [reference index](README.md).
 
@@ -164,7 +165,7 @@ Documented together with [`s.play`](#scene-play).
 - [`add`](#scene-add): Puts objects in the scene instantly, at the cursor.
 - [`remove`](#scene-remove): Takes objects out of the scene instantly, at the cursor.
 - [`wait_for`](#scene-wait_for): Moves the main cursor to the time of an event (the `count`-th firing after the cursor) and returns the `EventInfo`.
-- [`voice`](#scene-voice): Narrated `with` block: takes text (TTS from the provider in `kinemo.toml`) or an audio file, and lasts at least as long as the audio.
+- [`voice`](#scene-voice): Narrated `with` block: takes text (TTS from the provider in `kinemo.toml`) or an audio file (`text=` says what it says), and lasts at least as long as the audio.
 
 <a id="scene-builder"></a>
 #### `k.Scene.builder` *(property)*
@@ -499,18 +500,20 @@ def wait_for_it(s: k.Scene):
 s.voice(
     narration: str,
     *,
+    text: str | None = None,
     voice: str | None = None,
     gain: float = 1.0,
-) -> Iterator[None]
+) -> Iterator[Voice]
 ```
 
-Narrated `with` block: takes text (TTS from the provider in `kinemo.toml`) or an audio file, and lasts at least as long as the audio. Words marked `[word]{name}` become `s.marks[name]` at the moment they are spoken. Without a TTS provider, the voice becomes silence with an estimated duration and lint W1401 warns.
+Narrated `with` block: takes text (TTS from the provider in `kinemo.toml`) or an audio file (`text=` says what it says), and lasts at least as long as the audio. It gives a `k.Voice`: `v.at(0.5)` / `v.at("phrase")` wait until that point of the line, `v.time(...)` gives the instant, `v.words` lists `(word, start, end)`. Words marked `[word]{name}` become `s.marks[name]`. Without a TTS provider, the voice becomes silence with an estimated duration and lint W1401 warns; content longer than the line is W1403.
 
 **Parameters:**
 
 | Name | Type | Default | Description |
 | --- | --- | --- | --- |
 | `narration` | `str` | required |   |
+| `text` | `str \| None` | `None` | Narrated `with` block: takes text (TTS from the provider in `kinemo.toml`) or an audio file (`text=` says what it says), and lasts at least as long as the audio. |
 | `voice` | `str \| None` | `None` |   |
 | `gain` | `float` | `1.0` |   |
 
@@ -520,9 +523,10 @@ Narrated `with` block: takes text (TTS from the provider in `kinemo.toml`) or an
 @k.scene
 def narrated(s: k.Scene):
     tri = k.Triangle.right(3, 4, scale=0.6).place(at="center")
-    with s.voice("Every right [triangle]{tri} hides a relation."):  # kinemo: allow W1401
+    with s.voice("Every right triangle hides a relation.") as v:  # kinemo: allow W1401
         s.play(k.draw(tri))
-    s.start(k.indicate(tri), at=s.marks["tri"])
+        v.at("relation")
+        s.play(k.indicate(tri), duration=0.4)
 ```
 
 **See also:** [`s.mark`](#scene-mark), [`k.sound`](verbs.md#k-sound).
@@ -567,6 +571,92 @@ timespan.done: EventSource[None]  # read-only
 ```
 
 Event fired at the end of the span (`s.wait_for(h.done)`).
+
+<a id="k-voice"></a>
+### `k.Voice` *(class)*
+
+```python
+k.Voice(
+    scene: Any,
+    start: float,
+    duration: float,
+    words: list[str],
+    word_times: list[float],
+    span: Span,
+)
+```
+
+A narration line: when it starts and ends in the scene, and when each word is said.
+
+`v.at(...)` waits until a point of the line; `v.time(...)` gives the same instant without waiting. A point is a fraction of the line (`0.5`) or a phrase (`"the slope"`).
+
+Documented together with [`s.voice`](#scene-voice).
+
+**Parameters:**
+
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `scene` | `Any` | required |   |
+| `start` | `float` | required |   |
+| `duration` | `float` | required |   |
+| `words` | `list[str]` | required |   |
+| `word_times` | `list[float]` | required |   |
+| `span` | `Span` | required |   |
+
+**Attributes:**
+
+| Attribute | Type | Description |
+| --- | --- | --- |
+| `voice.duration` |   | Length of the narration in seconds. |
+| `voice.start` |   | When the line starts, in scene seconds. |
+| `voice.words` | list[tuple[str, float, float]] | `(word, start, end)` of every word, in scene seconds. |
+
+**Members:**
+
+- [`end`](#voice-end): When the narration ends, in scene seconds.
+- [`time`](#voice-time): The instant of a point of the line: a fraction (`0.5`) or a phrase (`"the slope"`, its `occurrence`-th appearance).
+- [`at`](#voice-at): Wait (move the cursor) until a point of the line; returns that instant.
+
+<a id="voice-end"></a>
+#### `k.Voice.end` *(property)*
+
+```python
+voice.end: float  # read-only
+```
+
+When the narration ends, in scene seconds.
+
+<a id="voice-time"></a>
+#### `k.Voice.time` *(method)*
+
+```python
+voice.time(where: float | str, occurrence: int = 1) -> float
+```
+
+The instant of a point of the line: a fraction (`0.5`) or a phrase (`"the slope"`, its `occurrence`-th appearance).
+
+**Parameters:**
+
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `where` | `float \| str` | required |   |
+| `occurrence` | `int` | `1` | The instant of a point of the line: a fraction (`0.5`) or a phrase (`"the slope"`, its `occurrence`-th appearance). |
+
+<a id="voice-at"></a>
+#### `k.Voice.at` *(method)*
+
+```python
+voice.at(where: float | str, occurrence: int = 1) -> float
+```
+
+Wait (move the cursor) until a point of the line; returns that instant. Already past it, the cursor stays.
+
+**Parameters:**
+
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `where` | `float \| str` | required |   |
+| `occurrence` | `int` | `1` |   |
 
 <a id="k-time"></a>
 ### `k.time` *(constant)*

@@ -205,18 +205,21 @@ def speed_up(s: k.Scene):
         "Scene.voice",
         "Scene",
         "Narrated `with` block: takes text (TTS from the provider in `kinemo.toml`) or an audio "
-        "file, and lasts at least as long as the audio. Words marked `[word]{name}` become "
-        "`s.marks[name]` at the moment they are spoken. Without a TTS provider, the voice becomes "
-        "silence with an estimated duration and lint W1401 warns.",
+        "file (`text=` says what it says), and lasts at least as long as the audio. It gives a "
+        "`k.Voice`: `v.at(0.5)` / `v.at(\"phrase\")` wait until that point of the line, "
+        "`v.time(...)` gives the instant, `v.words` lists `(word, start, end)`. Words marked "
+        "`[word]{name}` become `s.marks[name]`. Without a TTS provider, the voice becomes silence "
+        "with an estimated duration and lint W1401 warns; content longer than the line is W1403.",
         '''
 import kinemo as k
 
 @k.scene
 def narrated(s: k.Scene):
     tri = k.Triangle.right(3, 4, scale=0.6).place(at="center")
-    with s.voice("Every right [triangle]{tri} hides a relation."):  # kinemo: allow W1401
+    with s.voice("Every right triangle hides a relation.") as v:  # kinemo: allow W1401
         s.play(k.draw(tri))
-    s.start(k.indicate(tri), at=s.marks["tri"])
+        v.at("relation")
+        s.play(k.indicate(tri), duration=0.4)
 ''',
         related=("Scene.mark", "k.sound"),
     ),

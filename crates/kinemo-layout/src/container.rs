@@ -77,7 +77,7 @@ impl<'a> Layout<'a> {
             let slots = container.then(|| self.arrange(c, children, t));
             children
                 .iter()
-                .filter(|&&child| self.prop_bool(child, "visible", t, true))
+                .filter(|&&child| self.takes_space(child, t))
                 .map(|child| match &slots {
                     Some(slots) => {
                         let [x, y] = slots[child];

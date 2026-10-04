@@ -56,6 +56,17 @@ fn group_bbox_includes_transformed_children() {
 }
 
 #[test]
+fn empty_children_do_not_stretch_a_group_box() {
+    let mut b = SceneBuilder::new();
+    let square = b.rect(1.0, 1.0);
+    b.prop_f(square, "x", 3.0);
+    let empty = b.parent_of("group", &[]);
+    let group = b.parent_of("group", &[square, empty]);
+    let scene = b.build();
+    with_layout(&scene, |l| assert_rect(l.local_bbox(group, 0.0), [2.5, -0.5, 3.5, 0.5]));
+}
+
+#[test]
 fn world_bbox_of_nested_groups_composes_transforms() {
     let mut b = SceneBuilder::new();
     let leaf = b.rect(1.0, 1.0);

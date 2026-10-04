@@ -100,6 +100,16 @@ impl<'a> Layout<'a> {
     }
 
     /// Bounding box in the object's own coordinates (visible children included, transformed).
+    /// Whether a child counts in its group's box: visible and not empty (an empty group or
+    /// an emptied text part would otherwise add the point (0, 0) to the box).
+    pub(crate) fn takes_space(&self, child: ObjectId, t: f64) -> bool {
+        if !self.prop_bool(child, "visible", t, true) {
+            return false;
+        }
+        let own = self.local_bbox(child, t);
+        own.width() > 0.0 || own.height() > 0.0
+    }
+
     pub fn local_bbox(&self, o: ObjectId, t: f64) -> Rect {
         let key = (o, t.to_bits());
         if let Some(r) = self.bbox.borrow().get(&key) {
@@ -115,7 +125,7 @@ impl<'a> Layout<'a> {
             } else if self.scene().object(o).children.is_some() {
                 self.children(o, t)
                     .into_iter()
-                    .filter(|&c| self.prop_bool(c, "visible", t, true))
+                    .filter(|&c| self.takes_space(c, t))
                     .map(|c| self.parent_box(c, t))
                     .reduce(|a, b| a.union(b))
                     .unwrap_or(Rect::ZERO)

@@ -5,7 +5,7 @@
 import { positionEditor } from "./canvas.js";
 import { pointEditor, propEditor, runsBadge, siteByKey, siteFor, valueEditor } from "./editing.js";
 import { selectObject, clearSelection } from "./selection.js";
-import { basename, editorUrl, el, formatValue, listen, objectName, sourceLink, state, view } from "./state.js";
+import { basename, editorLink, el, formatValue, listen, objectName, sourceLink, state, view } from "./state.js";
 
 function sourceCell(source) {
   if (!source) return el("td", { class: "source" }, "");
@@ -136,7 +136,7 @@ function renderBar(bar) {
   }
   fill(
     head(bar.label, "animation"),
-    el("div", { class: "object-where" }, el("a", { href: editorUrl(bar.file, bar.line) }, `${basename(bar.file)}:${bar.line}`), `  · ${bar.start.toFixed(2)}–${bar.end.toFixed(2)} s`),
+    el("div", { class: "object-where" }, editorLink(bar.file, bar.line, `${basename(bar.file)}:${bar.line}`), `  · ${bar.start.toFixed(2)}–${bar.end.toFixed(2)} s`),
     el("pre", { class: "code" }, bar.code),
     ...sections,
     bar.objects.length ? el("div", { class: "section-title" }, "Objects") : null,

@@ -14,7 +14,9 @@ from ..editing.call_sites import SourceFile
 from ..editing.overrides import source_overrides
 from ..editing.scene_index import SceneIndex, easing_names, index_scene
 from ..editing.source_edit import Change, EditError, apply_changes, bound_argument
+from ..project import load as load_project
 from .dev_meta import diagnostics_json, preview_meta
+from .editor_links import editor_meta, open_in_editor
 from .loader import BuildResult, LoadError, build, find_scenes, load_module
 
 if TYPE_CHECKING:
@@ -115,6 +117,7 @@ class Session:
         meta["debug"] = list(self.debug)
         meta["palette"] = {"colors": (self.index or index).colors, "eases": easing_names()}
         meta["live"] = live
+        meta["editor"] = editor_meta(load_project(os.path.dirname(os.path.abspath(self.path))).editor)
         version = self.server.set_scene(result.scene.builder, json.dumps(meta))
         if not live:
             self._report(result, version)
@@ -163,9 +166,19 @@ class Session:
         """Applies queued edits in order. A live edit followed by any other edit is stale
         (the drag moved on), so only the last live one is built."""
         for i, request in enumerate(requests):
+            if request.get("type") == "open":
+                self.open_in_editor(str(request.get("file", "")), int(request.get("line") or 1))
+                continue
             if request.get("live") and i < len(requests) - 1:
                 continue
             self.apply_edit(request)
+
+    def open_in_editor(self, file: str, line: int) -> None:
+        """A click on a source link, for an `[editor] command` the page cannot open by URL."""
+        cfg = load_project(os.path.dirname(os.path.abspath(self.path)))
+        error = open_in_editor(cfg.editor, file, line, cfg.root)
+        if error is not None:
+            print(f"kinemo dev: {error}", flush=True)
 
     def apply_edit(self, request: dict[str, Any]) -> bool:
         live = bool(request.get("live"))

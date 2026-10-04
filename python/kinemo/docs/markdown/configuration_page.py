@@ -80,7 +80,9 @@ def _toml_rows() -> list[tuple[str, str, str, str]]:
         (code("[cache] dir"), code("str"), code(default_text(defaults["cache_dir"])),
          "Cache directory (generated audio, ...), relative to the project root."),
         (code("[editor] command"), code("str"), code(default_text(defaults["editor"])),
-         "Editor the preview opens when an object is clicked (`vscode`, `idea` or a command)."),
+         "Editor the preview opens on source links: `vscode`, `vscode-insiders`, `cursor`, `windsurf`, "
+         "`zed`, `idea`, `pycharm` or `sublime` (opened by URL), or a command that `kinemo dev` runs with "
+         "`{file}` and `{line}` replaced, such as `emacsclient -n +{line} {file}`. Read when `kinemo dev` starts."),
         (code("[python] workers_threshold"), code("float"), code(default_text(defaults["python_workers_threshold"])),
          "Seconds of `k.python` computation above which a worker pool is used."),
     ]

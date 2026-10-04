@@ -2,7 +2,7 @@
 // JSON messages are dispatched by `type`; binary messages are frames.
 "use strict";
 
-import { emit, view } from "./state.js";
+import { emit, listen, view } from "./state.js";
 
 let socket = null;
 let nextId = 1;
@@ -18,6 +18,9 @@ export function send(message) {
   }
   return false;
 }
+
+// Editors that have no URL scheme are opened by `kinemo dev` (`[editor] command`).
+listen("open-in-editor", ({ file, line }) => send({ type: "open", file, line }));
 
 export function connect() {
   socket = new WebSocket(`ws://${location.host}/ws`);

@@ -96,14 +96,37 @@ export function basename(path) {
   return (path || "").split(/[\\/]/).pop();
 }
 
+/** Link to `file:line` in the editor of `[editor] command`: its URL scheme, or null when it is a
+ *  command that `kinemo dev` runs (see `openInEditor`). */
 export function editorUrl(file, line) {
-  return `vscode://file/${encodeURI(file)}:${line || 1}`;
+  const editor = (state.meta && state.meta.editor) || { url: "vscode://file/{path}:{line}" };
+  if (!editor.url) return null;
+  return editor.url
+    .replace("{path_query}", encodeURIComponent(file))
+    .replace("{path}", encodeURI(file))
+    .replace("{line}", String(line || 1));
+}
+
+/** Open `file:line` in the configured editor: by URL, or by asking `kinemo dev` to run it. */
+export function openInEditor(file, line) {
+  const url = editorUrl(file, line);
+  if (url) window.location.href = url;
+  else emit("open-in-editor", { file, line: line || 1 });
+}
+
+/** An `<a>` that opens `file:line` in the editor. */
+export function editorLink(file, line, label, attrs = {}) {
+  const link = el("a", { href: editorUrl(file, line) || "#", title: `${file}:${line}`, ...attrs }, label);
+  link.addEventListener("click", (event) => {
+    event.preventDefault();
+    openInEditor(file, line);
+  });
+  return link;
 }
 
 export function sourceLink(span, text) {
   if (!span || !span.file) return el("span", {}, text || "—");
-  const label = text || `${basename(span.file)}:${span.line}`;
-  return el("a", { href: editorUrl(span.file, span.line), title: `${span.file}:${span.line}` }, label);
+  return editorLink(span.file, span.line, text || `${basename(span.file)}:${span.line}`);
 }
 
 /** Key of a span, as `kinemo.editing.scene_index.span_key` computes it. */

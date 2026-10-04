@@ -2,12 +2,12 @@
 
 from __future__ import annotations
 
-from typing import Callable
+from typing import Any, Callable
 
 import pytest
 
 import kinemo as k
-from conftest import build, diagnostic_of, ir, line_of, presence, raises_code, snapshot_of
+from conftest import build, diagnostic_of, inspect, ir, line_of, presence, raises_code, snapshot_of
 
 
 def test_to_before_entering_is_k0101_with_entry_fixes() -> None:
@@ -216,3 +216,41 @@ def test_objects_draw_in_the_order_they_enter() -> None:
     data = ir(scene)
     names = {o["id"]: o["name"] for o in data["objects"]}
     assert [names[r] for r in data["roots"]] == ["back", "front"]
+
+
+def _world_center(scene: Any, t: float, node: k.Node) -> tuple[float, float]:
+    entry = next(o for o in inspect(scene, t) if o["id"] == node._id)
+    x0, y0, x1, y1 = entry["bbox"]
+    return (x0 + x1) / 2, (y0 + y1) / 2
+
+
+def test_reparent_keeps_the_children_of_a_moved_group_in_place() -> None:
+    seen: dict[str, k.Node] = {}
+
+    @build
+    def scene(s: k.Scene) -> None:
+        inner = k.Dot(r=0.2, x=1)
+        card = k.Group(k.Square(1), inner, x=3, y=1)
+        holder = k.Group(x=-2)
+        s.add(card, holder)
+        s.wait(0.5)
+        s.play(k.reparent(card, holder))
+        seen["inner"] = inner
+
+    assert _world_center(scene, 1.0, seen["inner"]) == pytest.approx((4.0, 1.0))
+
+
+def test_a_copied_group_keeps_its_children_in_place() -> None:
+    seen: dict[str, k.Node] = {}
+
+    @build
+    def scene(s: k.Scene) -> None:
+        inner = k.Dot(r=0.2, x=1)
+        card = k.Group(k.Square(1), inner, x=3, y=1)
+        s.add(card)
+        twin = card.copy()
+        s.add(twin)
+        seen["inner"] = inner
+        seen["twin_inner"] = twin.children[1]
+
+    assert _world_center(scene, 0.0, seen["twin_inner"]) == pytest.approx(_world_center(scene, 0.0, seen["inner"]))

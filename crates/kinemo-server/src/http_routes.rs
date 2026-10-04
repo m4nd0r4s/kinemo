@@ -34,6 +34,7 @@ const SCRIPTS: &[(&str, &str)] = &[
     ("audio.js", include_str!("../ui/audio.js")),
     ("tracks.js", include_str!("../ui/tracks.js")),
     ("clip_inspector.js", include_str!("../ui/clip_inspector.js")),
+    ("resizer.js", include_str!("../ui/resizer.js")),
 ];
 
 fn asset(content_type: &'static str, body: &'static str) -> Response {

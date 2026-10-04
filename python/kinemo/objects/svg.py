@@ -23,12 +23,19 @@ if TYPE_CHECKING:
 
 
 class SVGPath(Path):
-    """A path imported from an SVG file: a `k.Path` that also keeps the SVG fill rule."""
+    """A path imported from an SVG file: a `k.Path` that also keeps the SVG fill rule and
+    the ends and corners of its stroke (`line_cap`, `line_join`)."""
 
-    PROPS: ClassVar[dict[str, PropSpec]] = {"fill_rule": PropSpec("str", "nonzero", "step_end", ("nonzero", "evenodd"))}
+    PROPS: ClassVar[dict[str, PropSpec]] = {
+        "fill_rule": PropSpec("str", "nonzero", "step_end", ("nonzero", "evenodd")),
+        "line_cap": PropSpec("str", "round", "step_end", ("butt", "round", "square")),
+        "line_join": PropSpec("str", "round", "step_end", ("miter", "round", "bevel")),
+    }
 
     if TYPE_CHECKING:
         fill_rule: PropAccessor[str]
+        line_cap: PropAccessor[str]
+        line_join: PropAccessor[str]
 
 
 def _read_source(source: Any) -> tuple[bytes, str]:
@@ -51,6 +58,8 @@ def _path_props(node: dict[str, Any]) -> dict[str, Any]:
     if stroke is not None:
         props["stroke"] = tuple(stroke)
         props["stroke_width"] = node["stroke_width"]
+        props["line_cap"] = node["line_cap"]
+        props["line_join"] = node["line_join"]
     else:
         props["stroke_width"] = 0.0
     return props

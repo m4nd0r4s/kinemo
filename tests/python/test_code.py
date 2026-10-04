@@ -33,10 +33,10 @@ def test_highlight_of_a_missing_line_is_k0105() -> None:
 
 def test_an_unknown_language_is_k0802_with_the_supported_ones() -> None:
     def body(s: k.Scene) -> None:
-        s.add(k.Code("public class A {}", lang="java"))
+        s.add(k.Code("DISPLAY 'HI'.", lang="cobol"))
 
     d = diagnostic_of(body, "K0802")
-    assert "'java'" in d.message and "python" in d.message and "cpp" in d.message
+    assert "'cobol'" in d.message and "python" in d.message and "cpp" in d.message
     assert any(fix.code == 'lang="text"' for fix in d.fixes)
 
 
@@ -54,6 +54,18 @@ def test_aliases_and_case_are_accepted() -> None:
         s.add(k.Code("x = 1", lang="Py"), k.Code("int x;", lang="c++"), k.Code("anything", lang="text"))
 
     assert scene.duration >= 0
+
+
+def test_java_draws_with_colors() -> None:
+    widths: list[float] = []
+
+    @build
+    def scene(s: k.Scene) -> None:
+        code = k.Code("public class A { int x = 1; }", lang="java")
+        s.add(code)
+        widths.append(code.width.now)
+
+    assert widths[0] > 0
 
 
 def test_a_language_set_later_that_is_unknown_shows_plain_text() -> None:

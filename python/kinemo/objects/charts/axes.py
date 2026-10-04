@@ -49,7 +49,7 @@ def _name_from_call(node: Node, factory: Callable[..., Any]) -> None:
         return
     match = re.match(rf"^\s*([A-Za-z_]\w*)\s*=\s*[\w.\[\]]+\.{factory.__name__}\(", node._span.source_line())
     if match:
-        object.__setattr__(node, "_name", match.group(1))
+        node._rename(match.group(1))
 
 
 def _range(spec: Sequence[float]) -> tuple[float, float, float | None]:

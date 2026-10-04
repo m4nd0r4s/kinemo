@@ -413,6 +413,11 @@ class Node(PlacementMixin):
                 return f"{parent._label()}[{kids.index(self)}]"
         return f"{type(self).__name__.lower()}#{self._id}"
 
+    def _rename(self, name: str) -> None:
+        """Name the object after the fact (a factory's result): in labels and in the IR."""
+        object.__setattr__(self, "_name", name)
+        self._scene._b.set_name(self._id, name)
+
     def copy(self, frozen: bool = False) -> Self:
         """A new identity with the same props: the same reactive bindings as this object
         (or, with `frozen=True`, the values at the cursor). The copy starts where this
@@ -440,7 +445,7 @@ def name_from_factory(node: "Node", factory: str) -> None:
         return
     match = re.match(rf"^\s*([A-Za-z_]\w*)\s*=\s*[\w.\[\]]*\b{factory}\(", node._span.source_line())
     if match:
-        object.__setattr__(node, "_name", match.group(1))
+        node._rename(match.group(1))
 
 
 def _variable_name(span: Span, cls: type) -> str | None:

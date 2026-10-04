@@ -75,16 +75,34 @@ fn other_languages_tokenize() {
         ("c", "int main(void) { return 0; }", "return"),
         ("cpp", "class A { public: int x; };", "class"),
         ("json", "{\"key\": [1, true]}", "true"),
+        ("java", "public class A { int x = 1; }", "class"),
+        ("kotlin", "fun main() { val x = 1 }", "fun"),
+        ("go", "func main() { return }", "func"),
+        ("csharp", "public class A { int x = 1; }", "class"),
+        ("swift", "func f() -> Int { return 1 }", "func"),
+        ("ruby", "def f\n  return 1\nend", "def"),
+        ("haskell", "main = putStrLn \"hi\"", "\"hi\""),
+        ("bash", "if true; then echo hi; fi", "if"),
+        ("sql", "SELECT name FROM users WHERE id = 1", "SELECT"),
+        ("html", "<p class=\"x\">hi</p>", "p"),
+        ("css", "p { color: red; }", "color"),
+        ("yaml", "name: kinemo\nversion: 1", "1"),
+        ("toml", "[tool]\nname = \"kinemo\"", "\"kinemo\""),
     ];
     for (language, source, expected) in samples {
         let tokens = tokenize(source, language).unwrap();
         let token = find(&tokens, expected);
         assert_ne!(token.kind, TokenKind::Plain, "{language}: {token:?}");
     }
-    assert_eq!(
-        find(&tokenize("{\"key\": 1}", "json").unwrap(), "\"key\"").kind,
-        TokenKind::String
-    );
+    // JSON keys and string values get different colors.
+    let json = tokenize("{\"key\": \"value\"}", "json").unwrap();
+    assert_eq!(find(&json, "key").kind, TokenKind::Variable);
+    assert_eq!(find(&json, "\"value\"").kind, TokenKind::String);
+    let sql = tokenize("-- top\nSELECT 1", "sql").unwrap();
+    assert_eq!(find(&sql, "-- top").kind, TokenKind::Comment);
+    for alias in ["kt", "golang", "c#", "sh", "zsh", "yml", "rb", "hs", "htm"] {
+        assert!(tokenize("x", alias).is_ok(), "{alias}");
+    }
 }
 
 #[test]

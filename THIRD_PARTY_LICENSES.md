@@ -397,15 +397,28 @@ The DejaVu fonts in `assets/fonts/` (embedded in the wheels) follow
 - **tracing** 0.1.44, MIT: [text 3](#text-3). Copyright (c) 2019 Tokio Contributors
 - **tracing-core** 0.1.36, MIT: [text 3](#text-3). Copyright (c) 2019 Tokio Contributors
 - **tree-sitter** 0.25.10, MIT: no license file, see the SPDX expression
+- **tree-sitter-bash** 0.25.1, MIT: [text 6](#text-6). Copyright (c) 2017 Max Brunsfeld
 - **tree-sitter-c** 0.24.2, MIT: [text 6](#text-6). Copyright (c) 2014 Max Brunsfeld
+- **tree-sitter-c-sharp** 0.23.5, MIT: [text 6](#text-6). Copyright (c) 2014-2023 Max Brunsfeld, Damien Guard, Amaan Qureshi, and contributors.
 - **tree-sitter-cpp** 0.23.4, MIT: no license file, see the SPDX expression
+- **tree-sitter-css** 0.25.0, MIT: [text 6](#text-6). Copyright (c) 2018 Max Brunsfeld
+- **tree-sitter-go** 0.25.0, MIT: [text 6](#text-6). Copyright (c) 2014 Max Brunsfeld
+- **tree-sitter-haskell** 0.24.1, MIT: [text 6](#text-6). Copyright (c) 2014 Max Brunsfeld
 - **tree-sitter-highlight** 0.25.10, MIT: no license file, see the SPDX expression
+- **tree-sitter-html** 0.23.2, MIT: no license file, see the SPDX expression
+- **tree-sitter-java** 0.23.5, MIT: no license file, see the SPDX expression
 - **tree-sitter-javascript** 0.25.0, MIT: [text 6](#text-6). Copyright (c) 2014 Max Brunsfeld
 - **tree-sitter-json** 0.24.8, MIT: no license file, see the SPDX expression
+- **tree-sitter-kotlin-ng** 1.1.0, MIT: no license file, see the SPDX expression
 - **tree-sitter-language** 0.1.8, MIT: [text 6](#text-6). Copyright (c) 2018 Max Brunsfeld
 - **tree-sitter-python** 0.25.0, MIT: [text 6](#text-6). Copyright (c) 2016 Max Brunsfeld
+- **tree-sitter-ruby** 0.23.1, MIT: no license file, see the SPDX expression
 - **tree-sitter-rust** 0.24.2, MIT: [text 6](#text-6). Copyright (c) 2017 Maxim Sokolov
+- **tree-sitter-sequel** 0.3.11, MIT: no license file, see the SPDX expression
+- **tree-sitter-swift** 0.7.4, MIT: [text 11](#text-11). Copyright (c) 2021 alex-pinkus
+- **tree-sitter-toml-ng** 0.7.0, MIT: no license file, see the SPDX expression
 - **tree-sitter-typescript** 0.23.2, MIT: no license file, see the SPDX expression
+- **tree-sitter-yaml** 0.7.2, MIT: [text 3](#text-3). Copyright (c) 2024 tree-sitter-grammars contributors; Copyright (c) 2019-2021 Ika
 - **ttf-parser** 0.25.1, MIT OR Apache-2.0: [text 4](#text-4), [text 3](#text-3). Copyright (c) 2018 Yevhenii Reizner
 - **tungstenite** 0.29.0, MIT OR Apache-2.0: [text 4](#text-4), [text 3](#text-3). Copyright (c) 2017 Alexey Galakhov; Copyright (c) 2016 Jason Housley
 - **two-face** 0.4.5, MIT OR Apache-2.0: [text 4](#text-4), [text 11](#text-11). Copyright (c) 2023-2023 The `two-face` developers (https://github.com/CosmicHorrorDev/two-face).

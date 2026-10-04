@@ -42,6 +42,9 @@ class ScriptLine:
     text: str
     #: Folder of the script's audio (`audio/` next to the script).
     audio_folder: str
+    #: The script file and the line of the beat's heading (0 in a JSON script).
+    source: str | None = None
+    line: int = 0
 
     @property
     def audio(self) -> str | None:
@@ -74,7 +77,7 @@ class Script:
             source = fh.read()
         beats = _parse_json(source, self.path) if self.path.lower().endswith(".json") else _parse_markdown(source)
         folder = os.path.join(os.path.dirname(self.path), AUDIO_FOLDER)
-        self._lines = {beat: ScriptLine(beat, text, folder) for beat, text in beats.items()}
+        self._lines = {beat: ScriptLine(beat, text, folder, self.path, line) for beat, (text, line) in beats.items()}
 
     @property
     def ids(self) -> list[str]:
@@ -100,30 +103,33 @@ class Script:
         return len(self._lines)
 
 
-def _parse_markdown(source: str) -> dict[str, str]:
+def _parse_markdown(source: str) -> dict[str, tuple[str, int]]:
+    """Beat id → (narration, line of its heading)."""
     beats: dict[str, list[str]] = {}
+    headings: dict[str, int] = {}
     current: str | None = None
-    for raw in source.splitlines():
+    for number, raw in enumerate(source.splitlines(), 1):
         line = raw.strip()
         heading = _HEADING.match(line)
         if heading:
             current = str(heading["id"])
             beats.setdefault(current, [])
+            headings.setdefault(current, number)
             continue
         quote = _QUOTE.match(line)
         if quote and current is not None and quote["text"].strip():
             beats[current].append(quote["text"].strip())
-    return {beat: " ".join(lines) for beat, lines in beats.items() if lines}
+    return {beat: (" ".join(lines), headings[beat]) for beat, lines in beats.items() if lines}
 
 
-def _parse_json(source: str, path: str) -> dict[str, str]:
+def _parse_json(source: str, path: str) -> dict[str, tuple[str, int]]:
     try:
         data = json.loads(source)
     except ValueError as error:
         raise KinemoError.make("K0105", f"k.Script: {os.path.basename(path)} is not valid JSON: {error}", spans=[user_span()]) from error
     if not isinstance(data, dict) or not all(isinstance(v, str) for v in data.values()):
         raise KinemoError.make("K0105", 'k.Script: a JSON script maps beat ids to text: {"B01": "..."}', spans=[user_span()])
-    return {str(k): v for k, v in data.items()}
+    return {str(k): (v, 0) for k, v in data.items()}
 
 
 def read_manifest(audio_folder: str) -> dict[str, str]:

@@ -163,6 +163,11 @@ The page has three panes: the **outliner** (every object as a tree), the **frame
 - Narration (`s.voice`) and sounds (`k.sound`) play with the scene, in sync with the
   playhead, at the playback speed. The speaker button (or `M`) mutes them; the choice is
   remembered. Lines without audio yet (the silent estimate) are silent.
+- Under the animations, the **Narration**, **Sounds** and **Music** tracks show each clip
+  over the time it sounds; a line without audio yet is dashed. Clicking a narration line
+  shows its full text (click a word to move the playhead to it), its beat with a link to the
+  script, the audio file, where the word times come from, the warnings on its line
+  (`W1403`, `W1404`, ...) and a button that plays just that line.
 - Saving the file (or a local module it imports) rebuilds the scene, and the preview stays
   at the same instant.
 - Clicking an object, on the frame or in the outliner, shows its props and where each one

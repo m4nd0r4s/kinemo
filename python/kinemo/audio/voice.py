@@ -15,6 +15,7 @@ from ..diagnostics import KinemoError
 from .tts import Speech, TTSProvider, cache_path, estimate, installed_providers, load_provider, read_cached, write_cached
 
 if TYPE_CHECKING:
+    from .._runtime.spans import Span
     from ..project import ProjectConfig
     from ..scene.scene import Scene
     from .script import ScriptLine
@@ -85,6 +86,9 @@ class NarrationLine:
     audio_target: str | None = None
     #: `(word, start, end)` of every word, in scene seconds.
     words: tuple[tuple[str, float, float], ...] = ()
+    #: The `s.voice(...)` line in the scene, and the beat's heading in its script.
+    span: "Span | None" = None
+    script: tuple[str, int] | None = None
 
     def json(self) -> dict[str, Any]:
         return {"start": self.start, "end": self.end, "text": self.text, "beat": self.beat, "audio": self.audio, "voice": self.voice, "timing": self.timing}
@@ -248,7 +252,19 @@ class VoiceMixin:
             s._marks.append((name, when, False, s._b.log_position()))
         line = Voice(s, start, speech.duration, words, speech.word_times, span)
         s.__dict__.setdefault("_narration", []).append(
-            NarrationLine(line.start, line.end, " ".join(words), beat.id if beat else None, speech.path, voice, speech.timing, beat.audio_target if beat else None, tuple(line.words))
+            NarrationLine(
+                line.start,
+                line.end,
+                " ".join(words),
+                beat.id if beat else None,
+                speech.path,
+                voice,
+                speech.timing,
+                beat.audio_target if beat else None,
+                tuple(line.words),
+                span,
+                (beat.source, beat.line) if beat is not None and beat.source else None,
+            )
         )
         if beat is not None:
             for name, when in ((beat.id, line.start), (f"{beat.id}.end", line.end)):

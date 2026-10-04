@@ -2,6 +2,7 @@
 // the code wrote it as a literal), or the selected timeline bar's call arguments.
 "use strict";
 
+import { clipSections } from "./clip_inspector.js";
 import { positionEditor } from "./canvas.js";
 import { pointEditor, propEditor, runsBadge, siteByKey, siteFor, valueEditor } from "./editing.js";
 import { selectObject, clearSelection } from "./selection.js";
@@ -166,8 +167,17 @@ function show(visible) {
   view.inspectorEmpty.classList.toggle("hidden", visible);
 }
 
+function renderClip(clip) {
+  const kind = { voice: "narration", sound: "sound", music: "music" }[clip.role] || clip.role;
+  const words = clip.label.split(/\s+/);
+  const title = clip.narration && clip.narration.beat ? clip.narration.beat : words.length > 5 ? `${words.slice(0, 5).join(" ")}…` : clip.label;
+  fill(head(title, kind), ...clipSections(clip));
+  show(true);
+}
+
 function render(t) {
   if (state.editing) return;
+  if (state.selectedClip !== null && state.meta && state.meta.tracks) return renderClip(state.meta.tracks[state.selectedClip]);
   if (state.selectedBar !== null && state.meta) return renderBar(state.meta.timeline[state.selectedBar]);
   if (state.pickedObject && state.selectedIds.length) return renderObject(state.pickedObject, t);
   show(false);

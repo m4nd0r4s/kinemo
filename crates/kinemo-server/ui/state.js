@@ -36,6 +36,7 @@ export const view = {
   markLabels: $("mark-labels"),
   instants: $("instants"),
   lanes: $("lanes"),
+  tracks: $("tracks"),
   playhead: $("playhead"),
 };
 
@@ -47,6 +48,8 @@ export const state = {
   speed: 1,
   selectedIds: [], // objects whose boxes ride along with frames; the first is inspected
   selectedBar: null, // index into meta.timeline of the bar shown in the inspector
+  selectedClip: null, // index into meta.tracks of the audio clip shown in the inspector
+  stopAt: null, // playback pauses here (playing one narration line)
   boxes: new Map(), // object id → [x0, y0, x1, y1] in frame pixels, from the last frame
   overlay: null,
   pickedObject: null,

@@ -14,6 +14,7 @@ import { installProblems } from "./problems.js";
 import { installSelection, selectBar, selectObject } from "./selection.js";
 import { emit, lastFrameTime, listen, state } from "./state.js";
 import { installTimeline } from "./timeline.js";
+import { installTracks } from "./tracks.js";
 
 /**
  * The page can open on a given state, for links and screenshots:
@@ -48,6 +49,7 @@ installCanvas();
 installInspector();
 installOutliner();
 installTimeline();
+installTracks();
 installProblems();
 installAudio();
 listen("message:scene", onScene);

@@ -6,7 +6,7 @@ import argparse
 import sys
 from typing import Any, Callable
 
-from . import check, dev, docs_cmd, inspect, mcp_cmd, new, render, snap, upgrade_cmd
+from . import check, dev, docs_cmd, inspect, mcp_cmd, new, render, snap, upgrade_cmd, voice
 from .instants import InstantError
 
 
@@ -75,6 +75,13 @@ def parser() -> argparse.ArgumentParser:
     p.add_argument("--columns", type=int, default=3, help="columns of the contact sheet")
     p.add_argument("--quality", choices=["draft", "final"], default="draft")
     p.set_defaults(run=snap.run)
+
+    p = sub.add_parser("voice", help="make the narration lines that have no audio yet or changed")
+    _scene_args(p)
+    p.add_argument("--check", action="store_true", help="list missing and stale lines without making them (exit 1 if any)")
+    p.add_argument("--force", help="script beats to make again, comma-separated (or 'all')")
+    p.add_argument("--progress", choices=["bar", "json", "none"], default="bar", help="on stderr: a bar, one JSON object per line, or nothing")
+    p.set_defaults(run=voice.run)
 
     p = sub.add_parser("render", help="final output")
     _scene_args(p)

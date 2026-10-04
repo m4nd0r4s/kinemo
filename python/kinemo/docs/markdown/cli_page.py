@@ -18,6 +18,7 @@ EXAMPLES: dict[str, tuple[str, ...]] = {
     ),
     "inspect": ("kinemo inspect scene.py --at 2.5", "kinemo inspect scene.py --at end --json --all"),
     "snap": ("kinemo snap scene.py --at 0,2.5,end", "kinemo snap scene.py --at intro_done --quality final --out shots"),
+    "voice": ("kinemo voice scene.py --check", "kinemo voice scene.py", "kinemo voice scene.py --force B03,B04"),
     "render": (
         "kinemo render scene.py",
         "kinemo render scene.py --format gif --quality draft",

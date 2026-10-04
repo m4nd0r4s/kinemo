@@ -106,6 +106,7 @@ The payload has one entry per scene in the file:
 | `scenes[].duration` | Total duration in seconds (tail included), or `null` when the build failed |
 | `scenes[].marks` | Every mark of the scene, `{name: seconds}` in time order |
 | `scenes[].timeline` | Every scheduled animation, in time order, with the line that scheduled it |
+| `scenes[].narration` | Every narration line: `start`, `end`, `text`, `beat` (script id or null), `audio` (null while estimated), `voice`, `timing` (`provider`, `aligned`, `spread` or `estimated`) |
 | `diagnostics[].code` | Stable code (`K` errors, `W` warnings). Codes never change meaning. |
 | `diagnostics[].level` | `error`, `warning` or `hint` |
 | `diagnostics[].spans` | Where: the first span is the offending line; others are related lines (a constraint, an exit) |

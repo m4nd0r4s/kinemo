@@ -81,6 +81,7 @@ def parser() -> argparse.ArgumentParser:
     p.add_argument("--at", help="time (png/svg): seconds, a mark name or 'end'")
     p.add_argument("--frames", action="store_true", help="png: the whole sequence")
     p.add_argument("--transparent", action="store_true")
+    p.add_argument("--progress", choices=["bar", "json", "none"], default="bar", help="on stderr: a bar, one JSON object per line, or nothing")
     p.set_defaults(run=render.run)
 
     p = sub.add_parser("mcp", help="MCP server (stdio) with check, inspect, snap, docs and explain")

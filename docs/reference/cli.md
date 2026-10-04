@@ -149,7 +149,7 @@ kinemo snap scene.py --at intro_done --quality final --out shots
 Final output.
 
 ```text
-kinemo render [-h] [--scene SCENE] [--param NAME=VALUE] [--format {mp4,webm,mov,gif,png,svg,slides}] [--quality {draft,final}] [--out OUT] [--at AT] [--frames] [--transparent] file
+kinemo render [-h] [--scene SCENE] [--param NAME=VALUE] [--format {mp4,webm,mov,gif,png,svg,slides}] [--quality {draft,final}] [--out OUT] [--at AT] [--frames] [--transparent] [--progress {bar,json,none}] file
 ```
 
 | Argument | Type | Default | Description |
@@ -163,6 +163,7 @@ kinemo render [-h] [--scene SCENE] [--param NAME=VALUE] [--format {mp4,webm,mov,
 | `--at AT` | str |   | time (png/svg): seconds, a mark name or 'end' |
 | `--frames` | flag |   | png: the whole sequence |
 | `--transparent` | flag |   |   |
+| `--progress PROGRESS` | `bar` \\| `json` \\| `none` | `bar` | on stderr: a bar, one JSON object per line, or nothing |
 
 Examples:
 

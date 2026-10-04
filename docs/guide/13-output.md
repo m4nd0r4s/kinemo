@@ -31,6 +31,7 @@ kinemo render scene.py --format png --at 2.5    # one frame
 | `--at T` | `end` | For `png`/`svg`: seconds, a mark name, or `end` |
 | `--frames` | off | For `png`: the whole sequence, `out/<scene>/00000.png`, ... |
 | `--transparent` | off | Transparent background where the format supports it |
+| `--progress` | `bar` | On stderr: a progress bar, `json` (one object per line: `{"event": "progress", "scene", "done", "total"}`, then `{"event": "done", "scene", "path"}`) for tools, or `none` |
 | `--param NAME=VALUE` | parameter defaults | Scene parameters (repeatable) |
 
 ### Formats

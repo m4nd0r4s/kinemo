@@ -1,7 +1,8 @@
-"""`--out` of `kinemo render` and `kinemo snap`: a folder, or one file named by its extension."""
+"""`--out` of `kinemo render` and `kinemo snap` (a folder, or one file named by its extension), and `--progress`."""
 
 from __future__ import annotations
 
+import json
 from pathlib import Path
 
 import pytest
@@ -59,3 +60,12 @@ def test_a_folder_still_gets_files_named_after_scenes(scenes: Path, tmp_path: Pa
     folder = tmp_path / "frames"
     assert main(["snap", str(scenes), "--at", "0.1", "--out", str(folder)]) == 0
     assert sorted(p.name for p in folder.iterdir()) == ["first_0.1.png", "second_0.1.png"]
+
+
+def test_render_reports_progress_as_json_lines(scenes: Path, tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
+    still = tmp_path / "clip.gif"
+    assert main(["render", str(scenes), "--scene", "first", "--quality", "draft", "--progress", "json", "--out", str(still)]) == 0
+    events = [json.loads(line) for line in capsys.readouterr().err.splitlines() if line.startswith("{")]
+    assert events[0]["event"] == "progress" and events[0]["scene"] == "first"
+    assert events[-2]["done"] == events[-2]["total"]
+    assert events[-1] == {"event": "done", "scene": "first", "path": str(still)}

@@ -85,7 +85,7 @@ PUMP = """
       <rect x="38" y="37" width="4" height="26" fill="#4C9BE8"/>
     </g>
   </g>
-  <path id="pipe" d="M 83 50 L 197 50" fill="none" stroke="#E8645A" stroke-width="6"/>
+  <path id="pipe" d="M 80 50 L 200 50" fill="none" stroke="#E8645A" stroke-width="6"/>
 </svg>
 """
 

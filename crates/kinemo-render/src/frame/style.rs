@@ -100,6 +100,17 @@ pub(crate) fn painted_parts(layout: &Layout, leaf: ObjectId, t: f64, size: Frame
     let write = chain_min(layout, leaf, "_write", t);
 
     let even_odd = layout.prop_str(leaf, "fill_rule", t).as_deref() == Some("evenodd");
+    // Strokes are round unless the object says otherwise (paths imported from SVG do).
+    let cap = match layout.prop_str(leaf, "line_cap", t).as_deref() {
+        Some("butt") => Cap::Butt,
+        Some("square") => Cap::Square,
+        _ => Cap::Round,
+    };
+    let join = match layout.prop_str(leaf, "line_join", t).as_deref() {
+        Some("miter") => Join::Miter,
+        Some("bevel") => Join::Bevel,
+        _ => Join::Round,
+    };
     let parts = layout.parts(leaf, t);
     let arrow = layout.scene().object(leaf).kind == "arrow";
     let mut items = Vec::with_capacity(parts.len());
@@ -133,8 +144,8 @@ pub(crate) fn painted_parts(layout: &Layout, leaf: ObjectId, t: f64, size: Frame
                 color: stroke.unwrap(),
                 width: stroke_width,
                 dash: dash.clone(),
-                cap: Cap::Round,
-                join: Join::Round,
+                cap,
+                join,
             })
         } else if reveal && has_fill {
             // Shapes without a stroke are traced with their fill color while drawing.

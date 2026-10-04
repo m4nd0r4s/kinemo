@@ -44,6 +44,10 @@ pub enum SvgNodeKind {
         stroke: Option<[f64; 4]>,
         /// Stroke width in kinemo stroke units (pixels at 1080p).
         stroke_width: f64,
+        /// `stroke-linecap` (`butt`, `round`, `square`) and `stroke-linejoin` (`miter`,
+        /// `round`, `bevel`), SVG defaults `butt` and `miter`.
+        line_cap: &'static str,
+        line_join: &'static str,
         even_odd: bool,
     },
 }
@@ -143,12 +147,22 @@ fn convert_path(path: &usvg::Path, mapping: &Mapping) -> Option<SvgNode> {
         }
         None => (None, 0.0),
     };
+    let line_cap = match path.stroke().map(|s| s.linecap()) {
+        Some(usvg::LineCap::Round) => "round",
+        Some(usvg::LineCap::Square) => "square",
+        _ => "butt",
+    };
+    let line_join = match path.stroke().map(|s| s.linejoin()) {
+        Some(usvg::LineJoin::Round) => "round",
+        Some(usvg::LineJoin::Bevel) => "bevel",
+        _ => "miter",
+    };
     if fill.is_none() && stroke.is_none() {
         return None;
     }
     Some(SvgNode {
         id: non_empty(path.id()),
-        kind: SvgNodeKind::Path { d: d.to_svg(), fill, stroke, stroke_width, even_odd },
+        kind: SvgNodeKind::Path { d: d.to_svg(), fill, stroke, stroke_width, line_cap, line_join, even_odd },
     })
 }
 

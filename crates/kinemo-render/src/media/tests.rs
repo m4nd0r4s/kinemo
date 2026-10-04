@@ -59,7 +59,7 @@ type PathParts<'a> = (&'a str, Option<[f64; 4]>, Option<[f64; 4]>, f64, bool);
 
 fn path_parts(node: &SvgNode) -> PathParts<'_> {
     match &node.kind {
-        SvgNodeKind::Path { d, fill, stroke, stroke_width, even_odd } => (d, *fill, *stroke, *stroke_width, *even_odd),
+        SvgNodeKind::Path { d, fill, stroke, stroke_width, even_odd, .. } => (d, *fill, *stroke, *stroke_width, *even_odd),
         SvgNodeKind::Group { .. } => panic!("expected a path"),
     }
 }
@@ -88,6 +88,9 @@ fn imports_groups_paths_ids_and_styles() {
     assert_eq!(stroke, Some([0.0, 0.0, 1.0, 1.0]));
     // 2 SVG units = 0.12 scene units = 0.12 * 135 stroke px.
     assert!((width - 0.12 * 135.0).abs() < 1e-3);
+    // SVG's defaults for the ends and corners of a stroke.
+    let SvgNodeKind::Path { line_cap, line_join, .. } = &svg.children[1].kind else { panic!("wire is a path") };
+    assert_eq!((*line_cap, *line_join), ("butt", "miter"));
 
     let (d, fill, _, _, even_odd) = path_parts(&svg.children[2]);
     assert!(svg.children[2].id.is_none() && even_odd);
@@ -100,4 +103,22 @@ fn imports_groups_paths_ids_and_styles() {
 #[test]
 fn invalid_svg_is_an_error() {
     assert!(import_svg(b"<not-svg", 3.0, 135.0).is_err());
+}
+
+#[test]
+fn keeps_stroke_caps_and_joins() {
+    let svg = r##"<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10">
+  <path d="M1 5 L9 5" stroke="#000" stroke-linecap="round" stroke-linejoin="bevel" fill="none"/>
+  <path d="M1 2 L9 2" stroke="#000" stroke-linecap="square" fill="none"/>
+</svg>"##;
+    let imported = import_svg(svg.as_bytes(), 1.0, 135.0).unwrap();
+    let ends: Vec<(&str, &str)> = imported
+        .children
+        .iter()
+        .map(|node| match &node.kind {
+            SvgNodeKind::Path { line_cap, line_join, .. } => (*line_cap, *line_join),
+            SvgNodeKind::Group { .. } => panic!("expected a path"),
+        })
+        .collect();
+    assert_eq!(ends, vec![("round", "bevel"), ("square", "miter")]);
 }

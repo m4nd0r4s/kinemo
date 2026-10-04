@@ -129,6 +129,35 @@ def test_svg_inline_markup() -> None:
     assert pixel_at(scene, 0.0, 0.0, 0.0)[0] > 240
 
 
+def test_svg_strokes_keep_their_caps() -> None:
+    seen: dict[str, Any] = {}
+    line = '<path id="{id}" d="M 30 {y} L 70 {y}" stroke="#ff0000" stroke-width="4" stroke-linecap="{cap}" fill="none"/>'
+    markup = (
+        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 40">'
+        # A faint backdrop fixes the drawing's box: 10 x 4 units, strokes 0.4 units thick.
+        + '<rect width="100" height="40" fill="#000000" fill-opacity="0.01"/>'
+        + line.format(id="butt", y=10, cap="butt")
+        + line.format(id="round", y=30, cap="round")
+        + "</svg>"
+    )
+
+    @build
+    def scene(s: k.Scene) -> None:
+        art = k.SVG(markup, height=4)
+        s.add(art)
+        seen["caps"] = (art["#butt"].line_cap.now, art["#round"].line_cap.now)
+        for name in ("butt", "round"):
+            part = art[f"#{name}"]
+            seen[name] = (part.right.now, (part.top.now + part.bottom.now) / 2)
+
+    assert seen["caps"] == ("butt", "round")
+    # Just past the right end of each line, on its axis.
+    for name, painted in (("butt", False), ("round", True)):
+        right, middle = seen[name]
+        red = pixel_at(scene, 0.0, right + 0.1, middle)[0]
+        assert (red > 200) is painted, (name, red)
+
+
 # ---- k.Brace ------------------------------------------------------------------------------
 
 def test_brace_follows_a_moving_target() -> None:

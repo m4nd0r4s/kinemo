@@ -79,7 +79,8 @@ def _arguments_table(sub: argparse.ArgumentParser) -> list[str]:
         if isinstance(action, argparse._HelpAction):
             continue
         kind, default, notes = _argument_details(action)
-        description = (action.help or "") + (f" ({notes})" if notes else "")
+        # argparse help escapes % as %%.
+        description = (action.help or "").replace("%%", "%") + (f" ({notes})" if notes else "")
         rows.append((code(_argument_name(action)), kind, default, description.strip()))
     if not rows:
         return ["Takes no arguments.", ""]

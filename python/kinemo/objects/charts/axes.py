@@ -209,8 +209,8 @@ class Axes(Group):
         **style: Unpack[PlotStyleKeywords],
     ) -> Plot:
         """Curve of `fn` (also usable with floats). `until=`/`from_=` accept signals: the
-        curve grows while the signal moves. `enter_with_axes=False` keeps it (and its label)
-        hidden until a verb brings it in."""
+        curve grows while the signal moves, and its `label=` fades in as the curve reaches the
+        end. `enter_with_axes=False` keeps it (and its label) hidden until a verb brings it in."""
         x0, x1 = domain or tuple(self.x_range.now)
         y0, y1 = self.y_range.now
         segments = sample(fn, float(x0), float(x1), float(y1 - y0), samples)
@@ -226,6 +226,11 @@ class Axes(Group):
             xe = float(x1)
             ye = float(fn(xe)) if segments else 0.0
             tag = Text(label, size=0.28, fill=stroke, x=self.map_x(xe) + 0.5, y=self.map_y(ye) + self._label_offset(ye))
+            if isinstance(until, Expr):
+                # A curve that grows with `until=` shows its label as it reaches the end.
+                from ...reactive.native import smoothstep
+
+                tag.set(opacity=smoothstep(xe - (xe - float(x0)) * 0.05, xe, until))
             object.__setattr__(curve, "label", tag)
             object.__setattr__(tag, "_part", "label")
             object.__setattr__(tag, "_parent_label", curve)

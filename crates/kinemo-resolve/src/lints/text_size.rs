@@ -24,7 +24,7 @@ impl VisualLint for TextSizeLint {
         let options = context.options;
         let pixels_per_unit = scene.config.width as f64 / scene.config.frame_w;
         for leaf in &sample.leaves {
-            if !leaf.is_text || !leaf.at_rest || !leaf.is_visible(options.visible_opacity) {
+            if !leaf.is_text || !leaf.at_rest || leaf.fading || !leaf.is_visible(options.visible_opacity) {
                 continue;
             }
             if self.found.contains(&[leaf.id]) {

@@ -128,6 +128,9 @@ pub struct LeafSample {
     pub revealed: bool,
     /// See [`MotionIndex::is_at_rest`].
     pub at_rest: bool,
+    /// Its opacity is changing at this instant (a fade, including one driven by an
+    /// expression): contrast and size are not judged mid-fade.
+    pub fading: bool,
 }
 
 impl LeafSample {
@@ -178,6 +181,7 @@ pub fn sample_frame(layout: &Layout, motion: &MotionIndex, reactive: &[SignalId]
             shown,
             revealed: layout.prop_f(id, "_draw", t, 1.0).min(layout.prop_f(id, "_write", t, 1.0)) > 0.0,
             at_rest: motion.is_at_rest(scene, id, t),
+            fading: is_fading(layout, id, t),
         })
         .collect();
     let reactive_values = reactive.iter().map(|&s| (s, layout.evaluator().signal(s, t, layout))).collect();
@@ -216,6 +220,16 @@ fn text_owner(layout: &Layout, id: ObjectId, t: f64) -> ObjectId {
         current = scene.object(parent).parent;
     }
     id
+}
+
+/// Opacity changes between `t` and a frame either side (60 fps).
+fn is_fading(layout: &Layout, id: ObjectId, t: f64) -> bool {
+    const FRAME: f64 = 1.0 / 60.0;
+    let now = accumulated_opacity(layout, id, t);
+    [t - FRAME, t + FRAME]
+        .into_iter()
+        .filter(|&u| u >= 0.0)
+        .any(|u| (accumulated_opacity(layout, id, u) - now).abs() > 1e-3)
 }
 
 /// Present leaves at `t` in tree order, with whether every ancestor is `visible`.

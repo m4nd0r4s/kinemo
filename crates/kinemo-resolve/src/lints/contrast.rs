@@ -47,7 +47,7 @@ impl VisualLint for ContrastLint {
         let bg = context.scene.config.background;
         let background = [bg[0], bg[1], bg[2]];
         for leaf in &sample.leaves {
-            if !leaf.is_text || !leaf.at_rest || !leaf.is_visible(options.visible_opacity) {
+            if !leaf.is_text || !leaf.at_rest || leaf.fading || !leaf.is_visible(options.visible_opacity) {
                 continue;
             }
             if self.found.contains(&[leaf.id]) {

@@ -188,6 +188,17 @@ def test_w1003_fade_in_is_not_low_contrast() -> None:
     assert lints_of(build(scene), "W1003") == []
 
 
+def test_w1003_not_reported_mid_fade_driven_by_an_expression() -> None:
+    def scene(s: k.Scene) -> None:
+        level = k.signal(0.0)
+        title = k.Text("Hello", opacity=level)
+        s.add(title)
+        s.play(level.to(1.0), duration=2)
+        s.wait(1)
+
+    assert lints_of(build(scene), "W1003") == []
+
+
 def test_w1004_small_text_in_pixels() -> None:
     def scene(s: k.Scene) -> None:
         note = k.Text("footnote", size=0.1)
@@ -220,6 +231,17 @@ def test_w1005_not_reported_when_removed() -> None:
         s.add(ghost)
         s.play(k.fade_out(ghost, duration=0.5))
         s.wait(4)
+
+    assert lints_of(build(scene), "W1005") == []
+
+
+def test_w1005_not_reported_when_the_object_shows_later() -> None:
+    def scene(s: k.Scene) -> None:
+        reveal = k.signal(0.0)
+        label = k.Text("end", opacity=k.smoothstep(4.0, 4.5, reveal))
+        s.add(label)
+        s.play(reveal.to(5.0), duration=5, ease=k.ease.linear)
+        s.wait(1)
 
     assert lints_of(build(scene), "W1005") == []
 

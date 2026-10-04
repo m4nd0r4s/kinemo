@@ -134,7 +134,7 @@ CATALOG: dict[str, Entry] = {
     "W1002": Entry("text over text", "Two texts overlap by more than 10% of their area."),
     "W1003": Entry("low contrast", "Contrast between text and background is below 4.5:1."),
     "W1004": Entry("small text", "Text smaller than 18 px at the final resolution."),
-    "W1005": Entry("invisible object", "Object invisible for more than 3 s and never removed."),
+    "W1005": Entry("invisible object", "Object invisible for more than 3 s, never removed and not seen again."),
     "W1006": Entry("visual noise", "More than 12 short simultaneous animations."),
     "W1007": Entry("static scene", "More than 8 s without visual change."),
     "W1301": Entry("parameter read with .now", "It is fixed at build time and does not become an interactive control."),

@@ -350,7 +350,7 @@ s.play(c.to(x=2))
 <a id="w1005"></a>
 ### W1005: invisible object
 
-*Warning (lint).* Object invisible for more than 3 s and never removed.
+*Warning (lint).* Object invisible for more than 3 s, never removed and not seen again.
 
 <a id="w1006"></a>
 ### W1006: visual noise

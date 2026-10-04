@@ -43,6 +43,7 @@ DOCUMENTED_BY: dict[str, str] = {
     "Scene": "Scene.play",
     "SceneDef": "k.scene",
     "TimeSpan": "Scene.start",
+    "Voice": "Scene.voice",
     "Animation": "Animation.with_",
     "Node": "Node.to",
     "Signal": "k.signal",

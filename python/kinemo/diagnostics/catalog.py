@@ -140,6 +140,12 @@ CATALOG: dict[str, Entry] = {
     "W1301": Entry("parameter read with .now", "It is fixed at build time and does not become an interactive control."),
     "W1302": Entry("k.python depending on a parameter", "It cannot be precomputed for the interactive web player."),
     "W1401": Entry("voice without a TTS provider", "No provider configured: silence with an estimated duration."),
+    "W1403": Entry(
+        "content runs past the narration",
+        "The animations inside a `with s.voice(...)` block last more than 0.25 s longer than its narration, "
+        "so the next line starts late and the silence shows.",
+        fix="Shorten or speed up the animations, sync them to the line with `v.at(...)`, or lengthen the narration.",
+    ),
     "W1402": Entry(
         "unknown TTS provider",
         "`[tts] provider` in kinemo.toml names a provider that is not installed (a typo, or its package is missing): "

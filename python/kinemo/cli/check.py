@@ -6,6 +6,7 @@ import argparse
 import os
 from typing import Any
 
+from ..audio.voice import collecting_lines
 from ..diagnostics import Diagnostic
 from .fix import apply_fixes
 from .loader import BuildResult, LoadError, build, find_scenes, load_module, select
@@ -99,7 +100,9 @@ def run(args: argparse.Namespace) -> int:
         module = load_module(args.file)
     except LoadError as e:
         return _report_load_error(args, e.diagnostic)
-    results = [build(d, args.params) for d in select(find_scenes(module), args.scene)]
+    # A check never calls the voice model: lines without audio are estimated (W1405).
+    with collecting_lines():
+        results = [build(d, args.params) for d in select(find_scenes(module), args.scene)]
     if not results:
         print(f"kinemo: no scenes (@k.scene) in {args.file}")
         return 1

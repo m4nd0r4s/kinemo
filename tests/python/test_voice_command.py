@@ -142,7 +142,16 @@ def test_a_build_with_a_batch_command_makes_one_line_per_run(folder: Path) -> No
     from kinemo.cli.loader import build, find_scenes, load_module
 
     batch(folder)
+    (folder / "kinemo.toml").write_text((folder / "kinemo.toml").read_text(encoding="utf-8") + 'on_build = "synthesize"\n', encoding="utf-8")
     (folder / "scene.py").write_text('import kinemo as k\n\n\n@k.scene\ndef one(s: k.Scene):\n    with s.voice("Just one line"):\n        s.wait(0.2)\n', encoding="utf-8")
     result = build(find_scenes(load_module(str(folder / "scene.py")))[0], {})
     assert result.scene is not None and result.scene.duration > 1.5
     assert (folder / "runs.log").read_text(encoding="utf-8").split() == ["1"]
+
+
+def test_render_makes_the_missing_lines_in_one_run_first(folder: Path, capsys: pytest.CaptureFixture[str]) -> None:
+    batch(folder)
+    assert main(["render", "scene.py", "--format", "png", "--progress", "none", "--out", str(folder / "frame.png")]) == 0
+    assert (folder / "runs.log").read_text(encoding="utf-8").split() == ["3"]
+    assert "made 3 narration line(s)" in capsys.readouterr().out
+    assert (folder / "audio" / "B01.wav").exists()

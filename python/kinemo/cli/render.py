@@ -6,10 +6,13 @@ import argparse
 from typing import Any
 import os
 
+from ..diagnostics import KinemoError
+from ..project import load as load_project
 from .loader import LoadError, build, find_scenes, load_module, select
 from .instants import parse_time
 from .output_path import ensure_folder_of, single_file
 from .progress import finished, reporter
+from .voice import make_missing
 
 VIDEO = ("mp4", "webm", "mov", "gif")
 
@@ -66,7 +69,15 @@ def run(args: argparse.Namespace) -> int:
             finished(args.progress, m.name, path)
             print(f"kinemo: {path}")
         return 0
+    cfg = load_project(os.path.dirname(os.path.abspath(args.file)))
     for defn in select(find_scenes(module), args.scene):
+        try:
+            made = make_missing(defn, args.params, cfg, reporter(args.progress, f"{defn.name} narration"))
+        except KinemoError as error:
+            print(error.diagnostic.render())
+            return 1
+        if made:
+            print(f"kinemo: made {len(made)} narration line(s)")
         result = build(defn, args.params)
         if result.scene is None:
             print("\n".join(d.render() for d in result.diagnostics))

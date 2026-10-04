@@ -21,6 +21,7 @@ from ..audio.voice import NarrationLine, collecting_lines, configured_provider, 
 from ..diagnostics import KinemoError
 from ..project import ProjectConfig
 from ..project import load as load_project
+from ..scene.decorator import SceneDef
 from .loader import LoadError, build, find_scenes, load_module, select
 from .progress import finished, reporter
 
@@ -104,6 +105,20 @@ def _record(line: NarrationLine, target: str, speech: Speech) -> None:
     manifest = read_manifest(folder)
     manifest[line.beat] = text_hash(line.text)
     write_manifest(folder, manifest)
+
+
+def make_missing(defn: SceneDef, params: dict[str, object], cfg: ProjectConfig, progress: Callable[[int, int], object] | None = None) -> list[str]:
+    """Make the lines of a scene that have no audio yet, in one call to the provider, so a
+    render does not load a voice model per line. Stale beats are left alone: their audio may
+    be a recording, and W1404 reports them."""
+    if not cfg.tts_provider:
+        return []
+    with collecting_lines():
+        result = build(defn, params)
+    if result.scene is None:
+        return []
+    todo = [item for item in plan(list(result.scene.__dict__.get("_narration", [])), set()) if item.state == "missing"]
+    return make(todo, cfg, progress) if todo else []
 
 
 def run(args: argparse.Namespace) -> int:

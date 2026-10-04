@@ -110,7 +110,8 @@ def configured_provider(cfg: "ProjectConfig | None" = None) -> TTSProvider | Non
 
 
 def synthesize(s: "Scene", text: str, voice: str | None) -> Speech:
-    from ..project import project_config
+    from .._runtime.spans import user_span
+    from ..project import project_config, synthesizes_on_build
 
     cfg = project_config()
     _, words, _ = parse(text)
@@ -135,7 +136,15 @@ def synthesize(s: "Scene", text: str, voice: str | None) -> Speech:
     cached = read_cached(path)
     if cached is not None:
         return cached
-    if _collecting.get():
+    if _collecting.get() or not synthesizes_on_build(cfg):
+        span = user_span()
+        s.lints.warn(
+            "W1405",
+            "this narration has no audio yet: its length is estimated",
+            spans=[span],
+            fixes=[("make the missing narration", f"kinemo voice {os.path.basename(span.file)}")],
+            level="hint",
+        )
         return estimate(words, cfg.tts_wpm)
     speech = with_word_times(provider.synthesize(plain, voice, path), words)
     write_cached(path, speech)

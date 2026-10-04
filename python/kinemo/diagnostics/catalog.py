@@ -11,6 +11,8 @@ class Entry:
     explanation: str
     example: str = ""
     fix: str = ""
+    #: `hint` for a diagnostic that never fails `--strict`; otherwise taken from the code.
+    level: str = ""
 
 
 CATALOG: dict[str, Entry] = {
@@ -158,6 +160,13 @@ CATALOG: dict[str, Entry] = {
         "The animations inside a `with s.voice(...)` block last more than 0.25 s longer than its narration, "
         "so the next line starts late and the silence shows.",
         fix="Shorten or speed up the animations, sync them to the line with `v.at(...)`, or lengthen the narration.",
+    ),
+    "W1405": Entry(
+        "narration without audio yet",
+        "A line has no audio and this build does not make it (`kinemo check` never does; `[tts] on_build = "
+        "\"estimate\"`, the default for the command provider): its length is estimated from `[tts] wpm`.",
+        fix="`kinemo voice <scene file>` makes every missing line in one run; `kinemo render` makes them before rendering.",
+        level="hint",
     ),
     "W1402": Entry(
         "unknown TTS provider",

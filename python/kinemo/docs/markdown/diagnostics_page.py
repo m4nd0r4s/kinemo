@@ -21,6 +21,11 @@ def _ranges() -> list[tuple[str, str, str]]:
 
 
 def _severity(code_name: str) -> str:
+    from ...diagnostics import CATALOG
+
+    entry = CATALOG.get(code_name)
+    if entry is not None and entry.level == "hint":
+        return "hint (does not fail `--strict`)"
     return "error" if code_name.startswith("K") else "warning (lint)"
 
 

@@ -314,6 +314,12 @@ kinemo voice scene.py                # make them
 kinemo voice scene.py --force B03    # make a beat again (or --force all)
 ```
 
+Builds call the voice only when it is cheap. `kinemo check` never does: a line without audio
+is estimated and hint `W1405` names it. With the `command` provider, `kinemo dev` estimates
+too (`[tts] on_build = "synthesize"` changes that), and `kinemo render` first makes every
+missing line in one run, then renders. Stale beats are left to `kinemo voice`, since their
+audio may be a recording.
+
 A script beat is written next to the script: `audio/B03.wav`, its word times in
 `audio/B03.wav.json` (from the provider, or aligned to the audio), and its text hash in
 `audio/manifest.json`. A line written in the scene goes to the cache, where builds find it.
@@ -509,6 +515,7 @@ one again, and the marks, the waits on `v.at(...)` and the subtitles follow the 
 > | `W1401` | `s.voice("...")` with no TTS provider: silence with an estimated duration. | Configure `[tts] provider` in `kinemo.toml`, or add `# kinemo: allow W1401` while drafting. |
 > | `W1402` | `[tts] provider` names a provider that is not installed (a typo, or the package is missing): silence with an estimated duration. | Fix the name (the message lists the installed providers) or install `kinemo-tts-<name>`. |
 > | `K1401` | The `command` TTS provider failed: no command, it could not start, it exited with an error or wrote no audio. | Run the command by hand with a short text; check `[tts] command`. |
+> | `W1405` (hint) | A line has no audio yet, and this build does not make it (`check`, or `dev` with the `command` provider). | `kinemo voice scene.py`; `kinemo render` makes missing lines before rendering. |
 > | `W1403` | The animations of a voice block run past its narration: the next line starts late, after a silence. | Shorten or speed up the animations, sync them with `v.at(...)`, or lengthen the line. |
 > | `W1404` | A script beat's audio was made from a different text: the script changed after the audio was made. | Make the audio again for that beat. |
 > | `W1301` | A parameter read with `.now`, so its value is frozen at build time. | Pass the signal itself to props and lambdas. |

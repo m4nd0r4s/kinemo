@@ -22,7 +22,7 @@ Every problem kinemo reports has a stable code: `K` codes are errors, `W` codes 
 | [K11xx](#range-11) | Names from other libraries (Manim) | 6 |
 | [K12xx](#range-12) | Data and interoperability (Arrow, arrays) | 4 |
 | [W13xx](#range-13) | Parameters and export | 2 |
-| [W14xx](#range-14) | Audio and voice | 5 |
+| [W14xx](#range-14) | Audio and voice | 6 |
 
 <a id="range-00"></a>
 ## K00xx: General
@@ -468,6 +468,7 @@ s.play(c.to(x=2))
 | [`W1402`](#w1402) | warning (lint) | unknown TTS provider |
 | [`W1403`](#w1403) | warning (lint) | content runs past the narration |
 | [`W1404`](#w1404) | warning (lint) | stale narration |
+| [`W1405`](#w1405) | hint (does not fail `--strict`) | narration without audio yet |
 
 <a id="k1401"></a>
 ### K1401: TTS command failed
@@ -516,4 +517,15 @@ Fix:
 
 ```python
 Make the audio again: `kinemo voice <scene file>` (only missing and stale beats), or `--force <id>`.
+```
+
+<a id="w1405"></a>
+### W1405: narration without audio yet
+
+*Hint (does not fail `--strict`).* A line has no audio and this build does not make it (`kinemo check` never does; `[tts] on_build = "estimate"`, the default for the command provider): its length is estimated from `[tts] wpm`.
+
+Fix:
+
+```python
+`kinemo voice <scene file>` makes every missing line in one run; `kinemo render` makes them before rendering.
 ```

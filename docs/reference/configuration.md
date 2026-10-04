@@ -41,6 +41,7 @@ allow = []
 | `[lints] allow` | `list[str]` | `[]` | Lint codes allowed in the whole project (see [diagnostics](diagnostics.md)). |
 | `[tts] provider` | `str` | `None` | Text-to-speech provider for `s.voice`. Without one, `s.voice` is silent with an estimated duration and lint W1401 is reported. `"command"` runs `[tts] command`. |
 | `[tts] command` | `list[str]` | `[]` | Command of the `command` provider, run from the project root for each line: `{text_file}`, `{out}` and `{voice}` are replaced. With `{lines_file}` instead (a JSON list of `{text, out, voice}`), it runs once for every line. A string is split like a shell command. |
+| `[tts] on_build` | `str` | `None` | `"synthesize"`: a build makes the audio of lines that have none; `"estimate"`: they stay estimated (W1405) until `kinemo voice` or `kinemo render` makes them. Unset: `estimate` for the `command` provider, `synthesize` for the others. `kinemo check` always estimates. |
 | `[tts] wpm` | `float` | `150.0` | Speaking rate (words per minute) of the silent estimate used when a line has no audio. |
 | `[audio] loudness` | `float` | `None` | Integrated loudness of rendered audio, in LUFS (e.g. `-16`). Without it, the mix keeps its level. |
 | `[audio] trim_silence` | `bool` | `False` | Cut the silence around each narration line when it is measured. |

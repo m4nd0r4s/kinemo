@@ -65,6 +65,10 @@ def _toml_rows() -> list[tuple[str, str, str, str]]:
          "Command of the `command` provider, run from the project root for each line: `{text_file}`, "
          "`{out}` and `{voice}` are replaced. With `{lines_file}` instead (a JSON list of "
          "`{text, out, voice}`), it runs once for every line. A string is split like a shell command."),
+        (code("[tts] on_build"), code("str"), code("None"),
+         "`\"synthesize\"`: a build makes the audio of lines that have none; `\"estimate\"`: they stay "
+         "estimated (W1405) until `kinemo voice` or `kinemo render` makes them. Unset: `estimate` for the "
+         "`command` provider, `synthesize` for the others. `kinemo check` always estimates."),
         (code("[tts] wpm"), code("float"), code(default_text(defaults["tts_wpm"])),
          "Speaking rate (words per minute) of the silent estimate used when a line has no audio."),
         (code("[audio] loudness"), code("float"), code(default_text(defaults["audio_loudness"])),

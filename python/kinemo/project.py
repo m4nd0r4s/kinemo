@@ -20,6 +20,10 @@ class ProjectConfig:
     tts_command: tuple[str, ...] = ()
     #: Speaking rate of the estimate used when there is no audio (`[tts] wpm`).
     tts_wpm: float = 150.0
+    #: `[tts] on_build`: `synthesize` (lines without audio are made while the scene builds) or
+    #: `estimate` (they stay estimated until `kinemo voice` or `kinemo render` makes them).
+    #: Unset: `estimate` for the command provider (a model load per line), else `synthesize`.
+    tts_on_build: str | None = None
     #: `[audio] loudness`: integrated loudness target of rendered audio, in LUFS.
     audio_loudness: float | None = None
     #: `[audio] trim_silence`: trim the silence around each narration line.
@@ -42,6 +46,13 @@ def find_root(start: str) -> str | None:
         path = parent
 
 
+def synthesizes_on_build(cfg: ProjectConfig) -> bool:
+    """Whether a build makes the audio of lines that have none (`[tts] on_build`)."""
+    if cfg.tts_on_build is not None:
+        return cfg.tts_on_build != "estimate"
+    return cfg.tts_provider != "command"
+
+
 @lru_cache(maxsize=8)
 def load(start: str) -> ProjectConfig:
     root = find_root(start)
@@ -59,6 +70,7 @@ def load(start: str) -> ProjectConfig:
         tts_provider=tts.get("provider"),
         tts_command=_argv(tts.get("command", ())),
         tts_wpm=float(tts.get("wpm", 150.0)),
+        tts_on_build=tts.get("on_build"),
         audio_loudness=float(data["audio"]["loudness"]) if "loudness" in data.get("audio", {}) else None,
         audio_trim_silence=bool(data.get("audio", {}).get("trim_silence", False)),
         align_model=str(data.get("align", {}).get("model", "base.en")),

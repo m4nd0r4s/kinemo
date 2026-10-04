@@ -49,7 +49,7 @@ def built(scene: Path):  # type: ignore[no-untyped-def]
 def command(*argv: str) -> str:
     """The `[tts]` lines of a command provider (JSON strings are valid TOML strings, and escape
     the backslashes of Windows paths)."""
-    return 'provider = "command"\ncommand = ' + json.dumps([sys.executable, *argv])
+    return 'provider = "command"\non_build = "synthesize"\ncommand = ' + json.dumps([sys.executable, *argv])
 
 
 def test_the_command_makes_the_narration_with_its_word_times(tmp_path: Path) -> None:
@@ -77,3 +77,19 @@ def test_wpm_sets_the_rate_of_the_estimate(tmp_path: Path) -> None:
     scene.write_text(SCENE, encoding="utf-8")
     result = built(scene)
     assert result.scene.marks["three"] == pytest.approx(2 * 0.5)  # 120 wpm: 0.5 s per word
+
+
+def test_by_default_a_build_estimates_command_narration_as_a_hint(tmp_path: Path) -> None:
+    scene = project(tmp_path, 'provider = "command"\ncommand = ' + json.dumps([sys.executable, "voice.py", "{text_file}", "{out}"]))
+    result = built(scene)
+    assert not list(tmp_path.glob(".kinemo-cache/*.wav"))
+    hint = next(d for d in result.diagnostics if d.code == "W1405")
+    assert hint.level == "hint" and "kinemo voice scene.py" in hint.fixes[0].code
+
+
+def test_check_never_runs_the_voice(tmp_path: Path) -> None:
+    from kinemo.cli.main import main
+
+    scene = project(tmp_path, command("voice.py", "{text_file}", "{out}", "--times"))
+    assert main(["check", "--strict", str(scene)]) == 0
+    assert not list(tmp_path.glob(".kinemo-cache/*.wav"))

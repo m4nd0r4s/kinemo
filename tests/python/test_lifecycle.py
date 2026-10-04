@@ -254,3 +254,16 @@ def test_a_copied_group_keeps_its_children_in_place() -> None:
         seen["twin_inner"] = twin.children[1]
 
     assert _world_center(scene, 0.0, seen["twin_inner"]) == pytest.approx(_world_center(scene, 0.0, seen["inner"]))
+
+
+def test_objects_from_factories_carry_their_name_into_the_scene() -> None:
+    @build
+    def scene(s: k.Scene) -> None:
+        hexagon = k.Polygon.regular(6)
+        ax = k.Axes(x=(0, 4, 1), y=(0, 4, 1))
+        curve = ax.plot(lambda x: x)
+        limit = ax.vline(2)
+        s.add(hexagon, ax)
+
+    for name in ("hexagon", "curve", "limit"):
+        assert presence(scene, name) == [(0.0, True)], name

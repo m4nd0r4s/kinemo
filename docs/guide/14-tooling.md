@@ -40,13 +40,14 @@ kinemo check scene.py --fix           # apply safe fixes, then check again
 kinemo check scene.py --json          # machine-readable (see the AI agents guide)
 ```
 
-The text report has a header, the timeline (each scheduled animation with its source line,
-repeated firings grouped as `×n`), then errors and lints:
+The text report has a header, the timeline (each scheduled animation as it is written, with
+its source line; a call that runs in a loop shows each run's objects, and repeated firings
+are grouped as `×n`), then errors and lints:
 
 ```
 edge.py — scene 'edge' — 1.5 s — ok with 1 warning
 timeline
-   0.00– 1.00  write(title)                             edge.py:7
+   0.00– 1.00  k.write(title)                           edge.py:7
 lints
   W1001 1.00 s  title leaves the safe area (top, 0.4 u)   :6
         fix: title = k.Text("A long title near the top", size=0.6).place(at="top", margin=0.1, clamp=True)

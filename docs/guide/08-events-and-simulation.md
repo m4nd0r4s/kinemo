@@ -68,7 +68,7 @@ def thermostat(s: k.Scene):
 6.2 s), and the `flash` fires once:
 
 ```
-   0.00– 3.00  Signal#0(float).to(value)                thermostat.py:14
+   0.00– 3.00  temp.to(90)                              thermostat.py:14
    1.58– 2.58  indicate(gauge)                          :12
    2.01– 2.61  flash(lamp)                              :11
    ...

@@ -113,8 +113,8 @@ kinemo check hello.py
 ```
 hello.py — scene 'hello' — 3.5 s — ok
 timeline
-   0.00– 1.00  write(title)                             hello.py:7
-   1.00– 2.00  title.to(fill, scale)                    :8
+   0.00– 1.00  k.write(title)                           hello.py:7
+   1.00– 2.00  title.to(color=k.BLUE, scale=1.5)        :8
 ```
 
 `check` runs the scene code, resolves the timeline and runs every lint, but draws nothing,

@@ -104,6 +104,7 @@ The payload has one entry per scene in the file:
 | --- | --- |
 | `scenes[].ok` | `true` when the scene built **without errors**. Warnings do not change it, even with `--strict`. |
 | `scenes[].duration` | Total duration in seconds (tail included), or `null` when the build failed |
+| `scenes[].marks` | Every mark of the scene, `{name: seconds}` in time order |
 | `scenes[].timeline` | Every scheduled animation, in time order, with the line that scheduled it |
 | `diagnostics[].code` | Stable code (`K` errors, `W` warnings). Codes never change meaning. |
 | `diagnostics[].level` | `error`, `warning` or `hint` |

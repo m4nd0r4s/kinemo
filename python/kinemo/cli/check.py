@@ -34,6 +34,7 @@ def scene_report(result: BuildResult, strict: bool = False) -> dict[str, Any]:
         "ok": result.scene is not None and not any(d.level in failing for d in result.diagnostics),
         "duration": result.scene.duration if result.scene else None,
         "timeline": timeline_entries(result),
+        "marks": dict(sorted(result.scene.marks.items(), key=lambda m: m[1])) if result.scene else {},
         "diagnostics": [d.json() for d in result.diagnostics],
     }
 

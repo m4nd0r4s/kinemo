@@ -10,7 +10,7 @@ from typing import Any
 from ..values.color import Color
 from .loader import BuildResult, LoadError, build, find_scenes, load_module, select
 from .output import emit_json
-from .render import parse_time
+from .instants import parse_time
 
 
 def _fmt(v: Any) -> str:

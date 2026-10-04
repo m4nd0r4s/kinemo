@@ -131,7 +131,15 @@ timeline that `check` prints.
 kinemo snap scene.py --at 0,2.5,end              # out/<scene>_0.png, out/<scene>_2.5.png, out/<scene>_end.png
 kinemo snap scene.py --at 3 --quality final --out shots
 kinemo snap scene.py --scene intro --at 3 --out shots/intro.png   # one scene, one instant: one file
+kinemo snap scene.py --at "B03,B03+65%,B03.end-0.5"   # marks, shifted marks, a fraction of B03 → B03.end
+kinemo snap scene.py --at marks --sheet               # every mark, as one labelled contact sheet
 ```
+
+`--at` takes seconds, `end`, a mark name, a mark shifted by seconds (`intro+1.5`), or a
+percentage of the stretch between a mark and the mark of the same name with `.end`
+(`B03+65%`); `marks` stands for every mark in time order. `--sheet` writes one contact sheet
+per scene (`<scene>_sheet.png`, `--columns 3` by default) with each frame labelled, drawn by
+kinemo itself.
 
 ## `kinemo dev`
 

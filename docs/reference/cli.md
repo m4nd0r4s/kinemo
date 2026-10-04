@@ -124,7 +124,7 @@ kinemo inspect scene.py --at end --json --all
 PNGs of the requested times.
 
 ```text
-kinemo snap [-h] [--scene SCENE] [--param NAME=VALUE] [--at AT] [--out OUT] [--quality {draft,final}] file
+kinemo snap [-h] [--scene SCENE] [--param NAME=VALUE] [--at AT] [--out OUT] [--sheet] [--columns COLUMNS] [--quality {draft,final}] file
 ```
 
 | Argument | Type | Default | Description |
@@ -132,8 +132,10 @@ kinemo snap [-h] [--scene SCENE] [--param NAME=VALUE] [--at AT] [--out OUT] [--q
 | `file` | str |   | (required) |
 | `--scene SCENE` | str |   | scene name (default: all) |
 | `--param NAME=VALUE` | str |   | (repeatable) |
-| `--at AT` | str | `0,end` |   |
+| `--at AT` | str | `0,end` | comma-separated: seconds, 'end', a mark, 'mark+1.5', 'mark+50%%' (between mark and mark.end), or 'marks' (every mark) |
 | `--out OUT` | str | `out` | a folder, or one file (shot.png) for one scene and one instant |
+| `--sheet` | flag |   | one labelled contact sheet per scene instead of one PNG per instant |
+| `--columns COLUMNS` | int | `3` | columns of the contact sheet |
 | `--quality QUALITY` | `draft` \\| `final` | `draft` |   |
 
 Examples:

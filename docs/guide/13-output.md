@@ -320,6 +320,13 @@ A script beat is written next to the script: `audio/B03.wav`, its word times in
 `--progress json` reports progress as JSON lines, and `kinemo check --json` lists each scene's
 `narration`: start, end, text, beat, audio and where its word times come from (`timing`).
 
+### Subtitles
+
+`kinemo render scene.py --subtitles` also writes `scene.srt` and `scene.vtt` next to the video,
+from the narration: cues of at most two lines of 42 characters, timed by the words (so they
+follow the audio when its word times were aligned), and a sentence end closes a cue. A scene
+without narration writes none.
+
 ### Without a TTS provider
 
 When no provider is configured, the voice becomes **silence with an estimated duration**

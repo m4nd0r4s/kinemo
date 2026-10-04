@@ -294,6 +294,7 @@ the script, so it composes with other animations: `s.play(k.sound("click.wav"), 
 > | Diagnostic | What happened | Fix |
 > | --- | --- | --- |
 > | `W1401` | `s.voice("...")` with no TTS provider: silence with an estimated duration. | Configure `[tts] provider` in `kinemo.toml`, or add `# kinemo: allow W1401` while drafting. |
+> | `W1402` | `[tts] provider` names a provider that is not installed (a typo, or the package is missing): silence with an estimated duration. | Fix the name (the message lists the installed providers) or install `kinemo-tts-<name>`. |
 > | `W1301` | A parameter read with `.now`, so its value is frozen at build time. | Pass the signal itself to props and lambdas. |
 > | `K0105` | `--param` value out of range, not one of the `k.Choice` options, or an unknown parameter name. | Check the name and the range in `params=`. |
 > | `W0110` | `s.play(..., at=s.marks["x"])` does not move the cursor. | Write `s.start(..., at=...)`. |

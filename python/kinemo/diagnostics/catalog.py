@@ -140,6 +140,12 @@ CATALOG: dict[str, Entry] = {
     "W1301": Entry("parameter read with .now", "It is fixed at build time and does not become an interactive control."),
     "W1302": Entry("k.python depending on a parameter", "It cannot be precomputed for the interactive web player."),
     "W1401": Entry("voice without a TTS provider", "No provider configured: silence with an estimated duration."),
+    "W1402": Entry(
+        "unknown TTS provider",
+        "`[tts] provider` in kinemo.toml names a provider that is not installed (a typo, or its package is missing): "
+        "the voice becomes silence with an estimated duration.",
+        fix="Install `kinemo-tts-<name>`, or use one of the installed providers the message lists.",
+    ),
 }
 
 

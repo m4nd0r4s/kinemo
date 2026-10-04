@@ -22,7 +22,7 @@ Every problem kinemo reports has a stable code: `K` codes are errors, `W` codes 
 | [K11xx](#range-11) | Names from other libraries (Manim) | 6 |
 | [K12xx](#range-12) | Data and interoperability (Arrow, arrays) | 4 |
 | [W13xx](#range-13) | Parameters and export | 2 |
-| [W14xx](#range-14) | Audio and voice | 1 |
+| [W14xx](#range-14) | Audio and voice | 2 |
 
 <a id="range-00"></a>
 ## K00xx: General
@@ -458,8 +458,20 @@ s.play(c.to(x=2))
 | Code | Severity | Title |
 | --- | --- | --- |
 | [`W1401`](#w1401) | warning (lint) | voice without a TTS provider |
+| [`W1402`](#w1402) | warning (lint) | unknown TTS provider |
 
 <a id="w1401"></a>
 ### W1401: voice without a TTS provider
 
 *Warning (lint).* No provider configured: silence with an estimated duration.
+
+<a id="w1402"></a>
+### W1402: unknown TTS provider
+
+*Warning (lint).* `[tts] provider` in kinemo.toml names a provider that is not installed (a typo, or its package is missing): the voice becomes silence with an estimated duration.
+
+Fix:
+
+```python
+Install `kinemo-tts-<name>`, or use one of the installed providers the message lists.
+```

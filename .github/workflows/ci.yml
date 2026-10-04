@@ -46,7 +46,9 @@ jobs:
       - uses: ./.github/actions/ffmpeg
       - run: pip install maturin pytest numpy polars pyarrow pandas pyright
       - run: maturin build --release --out dist
-      - run: pip install --find-links dist kinemo
+      # The wheel file itself: `--find-links dist kinemo` may pick the PyPI release of the
+      # same version instead of this build.
+      - run: pip install --force-reinstall dist/*.whl
         shell: bash
       - run: pytest -q
         env:
@@ -66,7 +68,7 @@ jobs:
       - uses: Swatinem/rust-cache@v2
       - uses: ./.github/actions/ffmpeg
       - run: pip install maturin pytest numpy polars
-      - run: maturin build --release --out dist && pip install --find-links dist kinemo
+      - run: maturin build --release --out dist && pip install --force-reinstall dist/*.whl
         shell: bash
       - run: pytest -q tests/python/test_performance.py
 

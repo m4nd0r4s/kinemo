@@ -110,6 +110,7 @@ CATALOG: dict[str, Entry] = {
     "K0703": Entry("event already happened", "The event happened before the cursor; use `s.start` instead of the earlier `play`."),
     # --- K08xx: text ---------------------------------------------------------------
     "K0801": Entry("unsupported LaTeX command", "Use `engine=\"tex\"` for packages the built-in engine does not cover."),
+    "K0802": Entry("unknown code language", "`k.Code` highlights the languages listed in the message; `lang=\"text\"` shows any code without colors."),
     # --- K11xx: Manim names --------------------------------------------------------
     "K1101": Entry("Manim name", "Manim verbs have a direct equivalent in `k.` (see the Manim → kinemo table)."),
     "K1102": Entry("Manim `.animate`", "In kinemo, an animated state change is `s.play(obj.to(...))`."),

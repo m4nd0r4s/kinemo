@@ -1617,7 +1617,7 @@ Codes:
 - `K0501` event loop
 - `K0601` signal in a static field · `K0602` unassigned out
 - `K0702` event did not happen before the timeout · `K0703` event already happened
-- `K0801` unsupported LaTeX command
+- `K0801` unsupported LaTeX command · `K0802` unknown code language
 - `K1101` Manim name · `K1102` Manim `.animate` · `K1103` Manim `self.play` · `K1104` Manim ValueTracker · `K1105` Manim updater · `K1106` Manim direction constant
 - `K1201` data without Arrow · `K1202` missing column · `K1203` column with the wrong type · `K1204` duplicate key
 - `K1401` TTS command failed

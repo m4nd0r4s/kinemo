@@ -15,6 +15,7 @@ doctest = false
 kinemo-ir.workspace = true
 kinemo-eval.workspace = true
 kinemo-layout.workspace = true
+kinemo-code.workspace = true
 kinemo-resolve.workspace = true
 kinemo-text.workspace = true
 kinemo-math.workspace = true

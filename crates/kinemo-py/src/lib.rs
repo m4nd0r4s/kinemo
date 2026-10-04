@@ -6,6 +6,7 @@
 mod arrow;
 mod boolean;
 mod builder;
+mod code;
 mod errors;
 mod inspect;
 mod lints;
@@ -21,6 +22,8 @@ fn _core(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add("IR_VERSION", kinemo_ir::IR_VERSION)?;
     m.add_class::<builder::Builder>()?;
     m.add_class::<server::PreviewServer>()?;
+    m.add_function(wrap_pyfunction!(code::code_language, m)?)?;
+    m.add_function(wrap_pyfunction!(code::code_languages, m)?)?;
     m.add_function(wrap_pyfunction!(output::ffmpeg_available, m)?)?;
     m.add_function(wrap_pyfunction!(output::measure_text, m)?)?;
     m.add_function(wrap_pyfunction!(output::render_movie, m)?)?;

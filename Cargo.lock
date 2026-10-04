@@ -1999,6 +1999,7 @@ dependencies = [
  "arrow-cast",
  "arrow-schema",
  "i_overlay",
+ "kinemo-code",
  "kinemo-encode",
  "kinemo-eval",
  "kinemo-ir",

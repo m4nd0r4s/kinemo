@@ -223,7 +223,9 @@ mathematical commands, or draw the figure with kinemo shapes.
 k.Code(src, lang="python", *, theme="auto", line_numbers=False, size=0.32, **props)
 ```
 
-- Highlighting uses tree-sitter. `lang=` selects the grammar.
+- Highlighting uses tree-sitter. `lang=` selects the grammar: `python`, `rust`, `javascript`,
+  `typescript`, `tsx`, `c`, `cpp` and `json` (aliases such as `py`, `js`, `c++` work), or
+  `text` for any code without colors. Another name is an error (`K0802`).
 - `theme="auto"` picks a light or dark palette from the scene background; `"light"` and
   `"dark"` force one.
 - Leading and trailing blank lines of `src` are stripped, so a triple-quoted string that
@@ -280,6 +282,7 @@ def refactor(s: k.Scene):
 > | none (renders literally) | `k.Text("area $x^2$")`: `$...$` is not markup. | Put the formula in a `k.Math` beside the text, in a `k.Row`. |
 > | `K0105` | `txt["word"]` or `eq["..."]` does not appear (or is not a node of the formula). | Check the spelling. In math, name the part with `\id{name}{...}` and look up `eq["name"]`. |
 > | `K0801` | A command the built-in engine does not support (`\usepackage`, TikZ). | Use mathematical LaTeX only. `engine="tex"` is not available yet (`K0105`). |
+> | `K0802` | `k.Code(src, lang="java")`: a language kinemo does not highlight. | A supported language, or `lang="text"` (no colors). |
 > | `K0102` | `s.play(t.to(text=...), t.to(color=...))`: the text morph takes `t` out of the scene for its duration. | One call: `t.to(text="...", color=k.RED)`. |
 > | `W0801` | `k.morph(a, b)` found no common glyphs or tokens. | Add `match={"x": "y"}`, name parts with `\id`, or use `k.fade_out(a)` + `k.write(b)`. |
 > | `W1002` | Two texts overlap, often two versions of a formula both in the scene. | Morph between them (only one is present at a time), or place one `below=` the other. |

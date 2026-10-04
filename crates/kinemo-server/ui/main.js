@@ -1,6 +1,7 @@
 // kinemo dev preview page: wires the modules together and connects to the server.
 "use strict";
 
+import { installAudio } from "./audio.js";
 import { installCanvas } from "./canvas.js";
 import { installColorPicker } from "./colorpicker.js";
 import { connect } from "./connection.js";
@@ -48,6 +49,7 @@ installInspector();
 installOutliner();
 installTimeline();
 installProblems();
+installAudio();
 listen("message:scene", onScene);
 window.addEventListener("hashchange", () => {
   if (!state.meta) return;

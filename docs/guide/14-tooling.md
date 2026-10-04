@@ -157,6 +157,9 @@ The page has three panes: the **outliner** (every object as a tree), the **frame
   involved. Bars from one statement in a loop are grouped into one (`group repeats`;
   double-click a group to expand it). Ctrl/⌘ + wheel, or the `−` `fit` `+` buttons, zoom
   in on a stretch of time. The speed menu plays at 0.25× to 2×.
+- Narration (`s.voice`) and sounds (`k.sound`) play with the scene, in sync with the
+  playhead, at the playback speed. The speaker button (or `M`) mutes them; the choice is
+  remembered. Lines without audio yet (the silent estimate) are silent.
 - Saving the file (or a local module it imports) rebuilds the scene, and the preview stays
   at the same instant.
 - Clicking an object, on the frame or in the outliner, shows its props and where each one

@@ -31,6 +31,7 @@ const SCRIPTS: &[(&str, &str)] = &[
     ("timeline.js", include_str!("../ui/timeline.js")),
     ("outliner.js", include_str!("../ui/outliner.js")),
     ("problems.js", include_str!("../ui/problems.js")),
+    ("audio.js", include_str!("../ui/audio.js")),
 ];
 
 fn asset(content_type: &'static str, body: &'static str) -> Response {
@@ -49,8 +50,33 @@ pub fn router(state: Arc<PreviewState>) -> Router {
         .route("/", get(|| async { asset("text/html; charset=utf-8", INDEX_HTML) }))
         .route("/style.css", get(|| async { asset("text/css; charset=utf-8", STYLE_CSS) }))
         .route("/ui/{file}", get(script))
+        .route("/audio/{version}/{index}", get(audio))
         .route("/ws", get(upgrade))
         .with_state(state)
+}
+
+/// An audio clip of the current scene (only clips the scene uses are served).
+async fn audio(Path((version, index)): Path<(u64, usize)>, State(state): State<Arc<PreviewState>>) -> Response {
+    let Some(publication) = state.current() else { return StatusCode::NOT_FOUND.into_response() };
+    if publication.version != version {
+        return StatusCode::NOT_FOUND.into_response();
+    }
+    let Some(clip) = publication.scene.audio.get(index) else { return StatusCode::NOT_FOUND.into_response() };
+    match std::fs::read(&clip.path) {
+        Ok(bytes) => ([(header::CONTENT_TYPE, audio_type(&clip.path)), (header::CACHE_CONTROL, "max-age=3600")], bytes).into_response(),
+        Err(_) => StatusCode::NOT_FOUND.into_response(),
+    }
+}
+
+fn audio_type(path: &str) -> &'static str {
+    match std::path::Path::new(path).extension().and_then(|e| e.to_str()).map(str::to_ascii_lowercase).as_deref() {
+        Some("mp3") => "audio/mpeg",
+        Some("ogg") => "audio/ogg",
+        Some("flac") => "audio/flac",
+        Some("m4a") => "audio/mp4",
+        Some("aac") => "audio/aac",
+        _ => "audio/wav",
+    }
 }
 
 async fn upgrade(ws: WebSocketUpgrade, State(state): State<Arc<PreviewState>>) -> Response {
@@ -60,6 +86,13 @@ async fn upgrade(ws: WebSocketUpgrade, State(state): State<Arc<PreviewState>>) -
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn audio_files_get_their_media_type() {
+        assert_eq!(audio_type("voice/B03.wav"), "audio/wav");
+        assert_eq!(audio_type("music.MP3"), "audio/mpeg");
+        assert_eq!(audio_type("line.m4a"), "audio/mp4");
+    }
 
     #[test]
     fn every_ui_module_is_served() {

@@ -190,6 +190,7 @@ a:hover { text-decoration: underline; }
 .time { font-family: var(--mono); font-size: 14px; min-width: 70px; text-align: right; }
 .time-dim { font-family: var(--mono); font-size: 12px; color: var(--text-dim); }
 .option { color: var(--text-dim); font-size: 12px; display: flex; align-items: center; gap: 4px; }
+.mute { width: 32px; padding: 2px 0; }
 .zoom { display: flex; gap: 2px; }
 .zoom button { padding: 2px 8px; }
 .speed {

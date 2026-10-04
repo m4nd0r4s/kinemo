@@ -1,5 +1,7 @@
-//! W1005: an object that is in the scene but cannot be seen for more than 3 s, and is
-//! never removed (a leftover: forgotten `fade_out`, moved off-frame, `opacity=0`).
+//! W1005: an object that is in the scene but cannot be seen for more than 3 s, is never
+//! removed and is not seen again (a leftover: forgotten `fade_out`, moved off-frame,
+//! `opacity=0`). An object that waits invisible and then shows (a label fading in when a
+//! curve reaches it) is not a leftover.
 //!
 //! Invisible means: hidden (`visible=False` up the tree), accumulated opacity at or
 //! below 0.01 (or nothing drawn yet), or a world box entirely outside the frame.
@@ -96,9 +98,9 @@ impl VisualLint for InvisibleObjectLint {
             .filter(|(o, _)| !still_invisible.contains_key(o))
             .map(|(o, r)| (*o, *r))
             .collect();
-        for (o, run) in ended {
+        // Seen again: it was waiting, not forgotten.
+        for (o, _) in ended {
             self.open_runs.remove(&o);
-            self.close(context, o, run);
         }
         for (o, reason) in still_invisible {
             self.open_runs

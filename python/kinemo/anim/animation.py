@@ -202,12 +202,16 @@ class Stagger(Composite):
 class Instant(Animation):
     """A zero-length action (used for `k.sound`, `s.add` inside compositions)."""
 
-    def __init__(self, action: Callable[["Scene", float], object], span: Span | None = None) -> None:
+    def __init__(self, action: Callable[["Scene", float], object], span: Span | None = None, label: str = "instant") -> None:
         super().__init__(duration=0.0, span=span)
         self.action = action
+        self.label = label
 
     def _emit(self, s: "Scene", start: float, duration: float, ease: Ease) -> None:
         self.action(s, start)
+
+    def describe(self) -> str:
+        return self.label
 
 
 def not_an_animation(value: object) -> KinemoError:

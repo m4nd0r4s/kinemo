@@ -6,6 +6,7 @@ end. Effects run on render-only props, so they never disturb layout dependents.
 
 from __future__ import annotations
 
+import os
 from typing import TYPE_CHECKING, Any, Sequence
 
 from .._runtime.spans import Span, user_span
@@ -310,7 +311,7 @@ def sound(path: str, gain: float = 1.0) -> Animation:
     from ..objects.media_paths import resolve_media_path
 
     resolved = resolve_media_path(path, "k.sound")
-    return Instant(lambda s, t: s._b.add_audio(resolved, t, float(gain), "sound"), span=user_span())
+    return Instant(lambda s, t: s._b.add_audio(resolved, t, float(gain), "sound"), span=user_span(), label=f"sound({os.path.basename(path)})")
 
 
 def music(path: str, gain: float = 0.3, duck: float = 0.25, fade: float = 1.0) -> Animation:
@@ -322,4 +323,8 @@ def music(path: str, gain: float = 0.3, duck: float = 0.25, fade: float = 1.0) -
     resolved = resolve_media_path(path, "k.music")
     level = float(duck)
     ducking = level if 0.0 < level < 1.0 else 0.0  # 1 (or more) keeps the music at its level
-    return Instant(lambda s, t: s._b.add_audio(resolved, t, float(gain), "music", ducking, max(0.0, float(fade))), span=user_span())
+    return Instant(
+        lambda s, t: s._b.add_audio(resolved, t, float(gain), "music", ducking, max(0.0, float(fade))),
+        span=user_span(),
+        label=f"music({os.path.basename(path)})",
+    )

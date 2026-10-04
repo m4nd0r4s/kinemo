@@ -128,7 +128,7 @@ changes.
 
 ## `k.Brace`
 
-```python
+```python signature
 k.Brace(target, direction="down", label=None, gap=0.1, *, depth=0.25, color=None, label_gap=0.12, **props)
 ```
 

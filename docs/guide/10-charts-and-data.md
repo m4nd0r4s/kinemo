@@ -17,7 +17,7 @@ cases. kinemo does not import any of these libraries itself.
 
 ## Axes
 
-```python
+```python signature
 k.Axes(x=(0, 10), y=(0, 5), *, labels=None, grid=False, width=8.0, height=4.5, tick_labels=True)
 ```
 
@@ -219,7 +219,7 @@ that does not is `K1201`, and the fix suggests a conversion such as `pl.from_pan
 
 ### `k.BarChart`
 
-```python
+```python signature
 k.BarChart(data, x, y, *, key=None, width=8.0, height=4.5, color=None, labels=True, grid=False, bar_ratio=0.7, label_size=0.28)
 ```
 
@@ -250,7 +250,7 @@ def generation(s: k.Scene):
 
 ### `k.LineChart`
 
-```python
+```python signature
 k.LineChart(data, x, y, *, x_range=None, y_range=None, width=8.0, height=4.5, colors=None, dots=False, legend=True)
 ```
 
@@ -278,7 +278,7 @@ def day(s: k.Scene):
 
 ### `k.Table`
 
-```python
+```python signature
 k.Table(data, columns=None, *, size=0.32, header_color=None, rule=True)
 ```
 

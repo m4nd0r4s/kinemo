@@ -17,7 +17,7 @@ They are ordinary objects. They enter with `k.draw`/`k.fade_in`, accept `.place`
 
 ## `k.Points`
 
-```python
+```python signature
 k.Points(xy=None, radius=0.02, color=None, *, x=None, y=None, **props)
 ```
 
@@ -161,7 +161,7 @@ point per frame), and it is `K0310`.
 
 ## `k.VectorField`
 
-```python
+```python signature
 k.VectorField(fn, density=30, *, length=0.8, x_range=None, y_range=None, color=None)
 ```
 
@@ -197,7 +197,7 @@ def colored(s: k.Scene):
 
 ## `k.StreamLines`
 
-```python
+```python signature
 k.StreamLines(field, seeds=200, *, step=0.05, steps=60, progress=1.0, tail=1.0, fade=0.0, x_range=None, y_range=None, color=None)
 ```
 

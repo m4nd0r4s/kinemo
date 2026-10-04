@@ -96,7 +96,7 @@ j)`, `row.insert(i, obj)`, `row.pop(i)`, `ax.zoom_to(x=..., y=...)`,
 
 ## Easing
 
-```python
+```python signature
 k.ease.linear       k.ease.smooth (default)   k.ease.in_     k.ease.out    k.ease.in_out
 k.ease.out_back     k.ease.out_elastic        k.ease.spring(stiffness=100, damping=10)
 k.ease.steps(n)     k.ease.custom(fn)         k.ease.reverse(e)

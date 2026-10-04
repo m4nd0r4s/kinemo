@@ -200,7 +200,7 @@ movie = k.movie([intro, body, outro], transitions=[k.morph_cut(0.6), k.crossfade
 
 ## Narration: `s.voice`
 
-```python
+```python signature
 with s.voice(narration, *, voice=None, gain=1.0):
     ...
 ```

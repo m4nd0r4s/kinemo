@@ -23,7 +23,10 @@ impl<'a> Layout<'a> {
     fn code_layout(&self, o: ObjectId, t: f64) -> Option<std::sync::Arc<kinemo_code::CodeLayout>> {
         let src = self.prop_str(o, "code", t).unwrap_or_default();
         let lang = self.prop_str(o, "lang", t).unwrap_or_else(|| "text".into());
-        layout_code(&src, &lang, &self.code_options(o, t)).ok()
+        let options = self.code_options(o, t);
+        // `k.Code` rejects unknown languages; one set later (a signal) shows as plain text
+        // rather than nothing.
+        layout_code(&src, &lang, &options).or_else(|_| layout_code(&src, "text", &options)).ok()
     }
 
     fn palette(&self, o: ObjectId, t: f64) -> Palette {

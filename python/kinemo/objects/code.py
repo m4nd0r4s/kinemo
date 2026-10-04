@@ -55,6 +55,25 @@ class CodePart(TextPart):
         return out
 
 
+def _known_language(lang: str) -> str:
+    """`lang` as given, or K0802 naming the supported languages and the closest one."""
+    from difflib import get_close_matches
+
+    from .._core import code_language, code_languages
+
+    if code_language(lang) is not None:
+        return lang
+    supported = code_languages()
+    closest = get_close_matches(lang.lower(), supported, n=1)
+    fixes: list[tuple[str, str | None]] = [(f"did you mean {closest[0]!r}?", f'lang="{closest[0]}"')] if closest else []
+    fixes.append(("show it without colors", 'lang="text"'))
+    raise KinemoError.make(
+        "K0802",
+        f"k.Code does not know the language {lang!r}; supported: {', '.join(supported)}",
+        fixes=fixes,
+    )
+
+
 class Code(TextLike):
     """`k.Code(src, lang="python", theme="auto", line_numbers=True)`."""
 
@@ -80,6 +99,8 @@ class Code(TextLike):
     def __init__(self, src: str, lang: str = "python", *, theme: str = "auto", line_numbers: bool = False, size: float = 0.32, **props: Unpack[StyleKeywords]) -> None:
         from .._runtime.context import current_scene
 
+        if isinstance(lang, str):
+            lang = _known_language(lang)
         palette = _palette_for(current_scene().theme) if theme == "auto" else theme
         super().__init__(code=src.strip("\n"), lang=lang, line_numbers=line_numbers, size=size, palette=palette, **props)
 

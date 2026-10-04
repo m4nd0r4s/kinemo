@@ -16,7 +16,7 @@ Every problem kinemo reports has a stable code: `K` codes are errors, `W` codes 
 | [K05xx](#range-05) | Resolution (loops, convergence) | 1 |
 | [K06xx / W06xx](#range-06) | Components | 2 |
 | [K07xx / W07xx](#range-07) | Events | 3 |
-| [K08xx / W08xx](#range-08) | Text and math | 2 |
+| [K08xx / W08xx](#range-08) | Text and math | 3 |
 | [W09xx](#range-09) | Performance | 1 |
 | [W10xx](#range-10) | Visual legibility | 7 |
 | [K11xx](#range-11) | Names from other libraries (Manim) | 6 |
@@ -291,6 +291,7 @@ s.play(c.to(x=2))
 | --- | --- | --- |
 | [`K0801`](#k0801) | error | unsupported LaTeX command |
 | [`W0801`](#w0801) | warning (lint) | morph without matches |
+| [`K0802`](#k0802) | error | unknown code language |
 
 <a id="k0801"></a>
 ### K0801: unsupported LaTeX command
@@ -301,6 +302,11 @@ s.play(c.to(x=2))
 ### W0801: morph without matches
 
 *Warning (lint).* The shapes have nothing in common; the morph does a warp + crossfade.
+
+<a id="k0802"></a>
+### K0802: unknown code language
+
+*Error.* `k.Code` highlights the languages listed in the message; `lang="text"` shows any code without colors.
 
 <a id="range-09"></a>
 ## W09xx: Performance

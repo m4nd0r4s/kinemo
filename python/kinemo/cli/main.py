@@ -62,7 +62,7 @@ def parser() -> argparse.ArgumentParser:
 
     p = sub.add_parser("inspect", help="scene graph at time t")
     _scene_args(p)
-    p.add_argument("--at", default="0")
+    p.add_argument("--at", default="0", help="comma-separated: seconds, 'end', a mark, 'mark+1.5', 'mark+50%%', or 'marks' (every mark); the scene is built once")
     p.add_argument("--json", action="store_true")
     p.add_argument("--all", action="store_true", help="include objects not in the scene")
     p.set_defaults(run=inspect.run)

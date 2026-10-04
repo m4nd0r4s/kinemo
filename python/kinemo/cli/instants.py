@@ -38,3 +38,11 @@ def parse_time(text: str, duration: float, marks: dict[str, float]) -> float:
     except ValueError:
         names = ", ".join(sorted(marks)) or "none"
         raise InstantError(f"unknown instant {text!r}: use seconds, 'end', a mark, 'mark+1.5' or 'mark+50%' (marks: {names})") from None
+
+
+def instants_of(at: str, marks: dict[str, float]) -> list[str]:
+    """The `--at` list, with `marks` standing for every mark of the scene in time order."""
+    out: list[str] = []
+    for text in (t.strip() for t in at.split(",")):
+        out += sorted(marks, key=lambda name: marks[name]) if text == "marks" else [text]
+    return out

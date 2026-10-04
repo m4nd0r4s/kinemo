@@ -38,6 +38,7 @@ fn opts(format: Format) -> EncoderOptions {
         crf: None,
         audio: vec![],
         duration: N as f64 / 10.0,
+        loudness: None,
     }
 }
 
@@ -118,8 +119,8 @@ fn mp4_with_audio() {
     assert!(st.success());
     let mut o = opts(Format::Mp4);
     o.audio = vec![
-        AudioClip { path: wav.to_string_lossy().into(), start: 0.2, gain: 0.5 },
-        AudioClip { path: wav.to_string_lossy().into(), start: 0.0, gain: 1.0 },
+        AudioClip { path: wav.to_string_lossy().into(), start: 0.2, gain: 0.5, ..AudioClip::default() },
+        AudioClip { path: wav.to_string_lossy().into(), start: 0.0, gain: 1.0, ..AudioClip::default() },
     ];
     let a = tmp("audio_a.mp4");
     let b = tmp("audio_b.mp4");
@@ -129,6 +130,31 @@ fn mp4_with_audio() {
     let out = Command::new(find_ffmpeg().unwrap()).arg("-i").arg(&a).output().unwrap();
     let info = String::from_utf8_lossy(&out.stderr);
     assert!(info.contains("Audio: aac"), "{info}");
+}
+
+#[test]
+fn voice_over_ducked_music_normalized() {
+    need_ffmpeg!();
+    let tone = |name: &str, frequency: u32| {
+        let path = tmp(name);
+        let st = Command::new(find_ffmpeg().unwrap())
+            .args(["-v", "error", "-y", "-f", "lavfi", "-i", &format!("sine=frequency={frequency}:duration=1"), "-ac", "1"])
+            .arg(&path)
+            .status()
+            .unwrap();
+        assert!(st.success());
+        path.to_string_lossy().into_owned()
+    };
+    let mut o = opts(Format::Mp4);
+    o.audio = vec![
+        AudioClip { path: tone("voice.wav", 300), start: 0.2, gain: 1.0, role: ClipRole::Voice, ..AudioClip::default() },
+        AudioClip { path: tone("bed.wav", 600), start: 0.0, gain: 0.5, role: ClipRole::Music, duck: 0.25, fade: 0.3 },
+    ];
+    o.loudness = Some(-16.0);
+    let out = tmp("ducked.mp4");
+    encode(&out, &o);
+    let probe = Command::new(find_ffmpeg().unwrap()).arg("-i").arg(&out).output().unwrap();
+    assert!(String::from_utf8_lossy(&probe.stderr).contains("Audio: aac"));
 }
 
 #[test]

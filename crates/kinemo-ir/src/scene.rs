@@ -34,6 +34,9 @@ pub struct SceneConfig {
     /// Frame size in scene units (16 x 9 by default; 9 on the short side).
     pub frame_w: f64,
     pub frame_h: f64,
+    /// Integrated loudness of the audio track in LUFS (`[audio] loudness`), or as mixed.
+    #[serde(default)]
+    pub loudness: Option<f64>,
 }
 
 impl Default for SceneConfig {
@@ -48,6 +51,7 @@ impl Default for SceneConfig {
             background: [0.07, 0.07, 0.09, 1.0],
             frame_w: 16.0,
             frame_h: 9.0,
+            loudness: None,
         }
     }
 }
@@ -58,6 +62,24 @@ pub struct Audio {
     pub t: f64,
     #[serde(default = "one")]
     pub gain: f64,
+    /// What the clip is in the mix: narration, a sound effect, or background music.
+    #[serde(default)]
+    pub role: AudioRole,
+    /// Music only: its level under the voice (0.25 = a quarter), 0 = no ducking.
+    #[serde(default)]
+    pub duck: f64,
+    /// Music only: fade in at its start and out at the end of the scene, in seconds.
+    #[serde(default)]
+    pub fade: f64,
+}
+
+#[derive(Serialize, Deserialize, Clone, Copy, Debug, Default, PartialEq, Eq)]
+#[serde(rename_all = "snake_case")]
+pub enum AudioRole {
+    Voice,
+    #[default]
+    Sound,
+    Music,
 }
 
 fn one() -> f64 {

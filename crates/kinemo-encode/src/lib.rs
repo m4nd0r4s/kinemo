@@ -14,4 +14,4 @@ mod options;
 pub use encoder::VideoEncoder;
 pub use error::EncodeError;
 pub use ffmpeg::{ffmpeg_available, find_ffmpeg};
-pub use options::{AudioClip, EncoderOptions, Format};
+pub use options::{AudioClip, ClipRole, EncoderOptions, Format};

@@ -4,8 +4,8 @@ use pyo3::prelude::*;
 
 use kinemo_eval::Evaluator;
 use kinemo_ir::{
-    Audio, Entry, Expr, Lerp, Mark, Object, PlaceEntry, Scene, SceneConfig, Signal, Span, Table,
-    Value,
+    Audio, AudioRole, Entry, Expr, Lerp, Mark, Object, PlaceEntry, Scene, SceneConfig, Signal, Span,
+    Table, Value,
 };
 use kinemo_layout::Layout;
 
@@ -157,9 +157,14 @@ impl Builder {
         self.log.push(Op::Mark { index: self.scene.marks.len() - 1 });
     }
 
-    #[pyo3(signature = (path, t, gain = 1.0))]
-    fn add_audio(&mut self, path: String, t: f64, gain: f64) {
-        self.scene.audio.push(Audio { path, t, gain });
+    #[pyo3(signature = (path, t, gain = 1.0, role = "sound", duck = 0.0, fade = 0.0))]
+    fn add_audio(&mut self, path: String, t: f64, gain: f64, role: &str, duck: f64, fade: f64) {
+        let role = match role {
+            "voice" => AudioRole::Voice,
+            "music" => AudioRole::Music,
+            _ => AudioRole::Sound,
+        };
+        self.scene.audio.push(Audio { path, t, gain, role, duck, fade });
         self.log.push(Op::Audio { index: self.scene.audio.len() - 1 });
     }
 

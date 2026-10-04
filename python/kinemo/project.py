@@ -20,6 +20,10 @@ class ProjectConfig:
     tts_command: tuple[str, ...] = ()
     #: Speaking rate of the estimate used when there is no audio (`[tts] wpm`).
     tts_wpm: float = 150.0
+    #: `[audio] loudness`: integrated loudness target of rendered audio, in LUFS.
+    audio_loudness: float | None = None
+    #: `[audio] trim_silence`: trim the silence around each narration line.
+    audio_trim_silence: bool = False
     cache_dir: str = ".kinemo-cache"
     editor: str = "vscode"
     python_workers_threshold: float = 2.0
@@ -53,6 +57,8 @@ def load(start: str) -> ProjectConfig:
         tts_provider=tts.get("provider"),
         tts_command=_argv(tts.get("command", ())),
         tts_wpm=float(tts.get("wpm", 150.0)),
+        audio_loudness=float(data["audio"]["loudness"]) if "loudness" in data.get("audio", {}) else None,
+        audio_trim_silence=bool(data.get("audio", {}).get("trim_silence", False)),
         cache_dir=os.path.join(root, cache.get("dir", ".kinemo-cache")),
         editor=data.get("editor", {}).get("command", "vscode"),
         python_workers_threshold=float(data.get("python", {}).get("workers_threshold", 2.0)),

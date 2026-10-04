@@ -42,6 +42,8 @@ allow = []
 | `[tts] provider` | `str` | `None` | Text-to-speech provider for `s.voice`. Without one, `s.voice` is silent with an estimated duration and lint W1401 is reported. `"command"` runs `[tts] command`. |
 | `[tts] command` | `list[str]` | `[]` | Command of the `command` provider, run from the project root for each line: `{text_file}`, `{out}` and `{voice}` are replaced. A string is split like a shell command. |
 | `[tts] wpm` | `float` | `150.0` | Speaking rate (words per minute) of the silent estimate used when a line has no audio. |
+| `[audio] loudness` | `float` | `None` | Integrated loudness of rendered audio, in LUFS (e.g. `-16`). Without it, the mix keeps its level. |
+| `[audio] trim_silence` | `bool` | `False` | Cut the silence around each narration line when it is measured. |
 | `[cache] dir` | `str` | `".kinemo-cache"` | Cache directory (generated audio, ...), relative to the project root. |
 | `[editor] command` | `str` | `"vscode"` | Editor the preview opens when an object is clicked (`vscode`, `idea` or a command). |
 | `[python] workers_threshold` | `float` | `2.0` | Seconds of `k.python` computation above which a worker pool is used. |

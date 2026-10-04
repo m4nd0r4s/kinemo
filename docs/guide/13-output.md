@@ -373,6 +373,24 @@ def narrated_file(s: k.Scene):
 `k.sound(path, gain=1.0)` plays a file at the instant it is scheduled. It takes no time in
 the script, so it composes with other animations: `s.play(k.sound("click.wav"), k.indicate(button))`.
 
+### Music and the final mix
+
+`k.music(path, gain=0.3, duck=0.25, fade=1.0)` plays background music from the scheduled
+instant to the end of the scene. While a voice speaks, the music drops to `duck` of its level
+(`1` keeps it as is), and it fades in over `fade` seconds and out at the end of the scene.
+
+The audio track is mixed in groups (voices, sounds, music) and limited so overlapping clips
+never clip. Two project settings finish it:
+
+```toml
+[audio]
+loudness = -16        # LUFS: normalize the track (web platforms use -14 to -16)
+trim_silence = true   # cut the silence TTS models and recordings leave around each line
+```
+
+`trim_silence` works when a line is measured, so the line's length, its marks and the next
+line's start all follow the trimmed audio.
+
 ## Common mistakes
 
 > | Diagnostic | What happened | Fix |

@@ -15,7 +15,7 @@ mod value;
 pub use expr::{BinOp, Expr, UnOp};
 pub use object::Object;
 pub use placement::{PlaceEntry, Placement, Side};
-pub use scene::{Audio, Mark, Scene, SceneConfig, Table};
+pub use scene::{Audio, AudioRole, Mark, Scene, SceneConfig, Table};
 pub use span::Span;
 pub use timeline::{Blend, Ease, Entry, Lerp, Signal, Src};
 pub use value::Value;

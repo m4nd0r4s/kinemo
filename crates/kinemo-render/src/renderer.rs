@@ -4,7 +4,7 @@ use std::path::Path;
 
 use rayon::prelude::*;
 
-use kinemo_encode::{AudioClip, EncodeError, EncoderOptions, Format, VideoEncoder};
+use kinemo_encode::{AudioClip, ClipRole, EncodeError, EncoderOptions, Format, VideoEncoder};
 use kinemo_ir::Scene;
 
 use crate::frame::{display_list, FrameSize};
@@ -67,6 +67,16 @@ pub fn render_frame_with_backend(backend: &dyn RenderBackend, scene: &Scene, t: 
     backend.rasterize(&display_list(scene, t, opts.size(), opts.transparent), opts.antialias)
 }
 
+/// The encoder's view of an audio clip of the scene, starting at `start` in the output.
+pub(crate) fn audio_clip(audio: &kinemo_ir::Audio, start: f64) -> AudioClip {
+    let role = match audio.role {
+        kinemo_ir::AudioRole::Voice => ClipRole::Voice,
+        kinemo_ir::AudioRole::Sound => ClipRole::Sound,
+        kinemo_ir::AudioRole::Music => ClipRole::Music,
+    };
+    AudioClip { path: audio.path.clone(), start, gain: audio.gain, role, duck: audio.duck, fade: audio.fade }
+}
+
 #[derive(Debug)]
 pub enum RenderError {
     Encode(EncodeError),
@@ -113,7 +123,7 @@ pub fn render_video_range(
         .audio
         .iter()
         .filter(|a| a.t >= start_time && a.t < end_time)
-        .map(|a| AudioClip { path: a.path.clone(), start: a.t - start_time, gain: a.gain })
+        .map(|a| audio_clip(a, a.t - start_time))
         .collect();
     let enc_opts = EncoderOptions {
         width: opts.width,
@@ -124,6 +134,7 @@ pub fn render_video_range(
         crf: None,
         audio,
         duration: total as f64 / opts.fps,
+        loudness: scene.config.loudness,
     };
     let mut encoder = VideoEncoder::start(path, &enc_opts)?;
     const BATCH: usize = 32;

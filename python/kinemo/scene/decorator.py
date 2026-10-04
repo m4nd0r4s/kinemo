@@ -113,7 +113,8 @@ def scene(fn: SceneFn | None = None, **kwargs: Any) -> SceneDef | Callable[[Scen
         from ..theme.tokens import DEFAULT, themes
 
         # Precedence: decorator > kinemo.toml [scene] > defaults (the CLI overrides at build).
-        project = project_config().scene
+        config = project_config()
+        project = config.scene
         merged = {**project, **kwargs}
         theme = merged.get("theme") or DEFAULT
         if isinstance(theme, str):
@@ -128,6 +129,7 @@ def scene(fn: SceneFn | None = None, **kwargs: Any) -> SceneDef | Callable[[Scen
             theme=theme,
             camera=merged.get("camera", "2d"),
             params=dict(kwargs.get("params") or {}),
+            loudness=config.audio_loudness,
         )
         return SceneDef(f, cfg)
 

@@ -43,6 +43,9 @@ kinemo render hello.py     # MP4 (also webm, mov, gif, png, slides)
   and `k.morph` between versions.
 - **Charts and data.** `k.Axes`, plots that grow with a signal, animated zoom; data via
   Arrow (polars, pandas, pyarrow, duckdb) without copying.
+- **Narration.** `s.voice` speaks with a TTS provider, any voice program or recorded audio,
+  beat by beat from a script (`k.Script`); animations follow the words (`v.at("the slope")`),
+  music ducks under the voice, and `kinemo render --subtitles` writes SRT and WebVTT.
 - **Stable diagnostics.** Every error has a code (`K0401`), line, instant and fix;
   `kinemo check --fix` applies the safe ones. Manim names (`Create`, `.animate`) are
   recognized and translated.
@@ -56,6 +59,7 @@ pip install kinemo
 ```
 
 Wheels for Linux, macOS and Windows, Python ≥ 3.11. Video output needs `ffmpeg` on your path.
+`pip install "kinemo[align]"` adds word timing for recorded narration (speech recognition).
 `kinemo new hello` starts a project.
 
 ### From source

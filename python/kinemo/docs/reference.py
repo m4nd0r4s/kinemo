@@ -28,7 +28,7 @@ AGENT_LOOP = (
     "`kinemo check scene.py --json --strict`. If there are errors, apply the fixes (or `--fix`) and repeat.",
     "`kinemo inspect scene.py --at <t> --json` at the key instants (end of each `play`) to "
     "confirm positions.",
-    "Optional: `kinemo snap scene.py --at 0,2.5,end` and a visual review.",
+    "Optional: `kinemo snap scene.py --at 0,2.5,end` (or `--at marks --sheet`: one contact sheet, a frame per mark) and a visual review.",
     "`kinemo render scene.py`.",
 )
 
@@ -62,6 +62,11 @@ CONVENTIONS = (
     "Geometry on edges: `tri.sides` (at the cursor) and `k.Square.on(side, outward=True)`.",
     "Lint fixes point to objects by variable name (`curve.label`); use `name=` to name "
     "objects created without a direct assignment.",
+    "An object cropped by the frame on purpose (a horizon, a planet) takes `bleed=True`; objects "
+    "entirely offstage (waiting to slide in) are not reported by W1001.",
+    "Narration: `with s.voice(script[\"B01\"]) as v` and `v.at(\"phrase\")` instead of hand-tuned "
+    "waits; `kinemo voice scene.py` makes the missing audio and `kinemo check --json` lists each "
+    "scene's `marks` and `narration`.",
     "`k.Math` accepts mathematical LaTeX (fractions, roots, sums, integrals, matrices, "
     "`\\left…\\right`, accents, Greek letters, `\\text{}`); document-level commands (`\\section`, `tabular`, TikZ) give K0801.",
 )

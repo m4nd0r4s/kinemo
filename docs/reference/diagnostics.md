@@ -330,7 +330,7 @@ s.play(c.to(x=2))
 <a id="w1001"></a>
 ### W1001: outside the safe area
 
-*Warning (lint).* The object extends beyond the frame's safe area.
+*Warning (lint).* The object extends beyond the frame's safe area. Objects entirely offstage are not reported; for one cropped on purpose, `bleed=True`.
 
 <a id="w1002"></a>
 ### W1002: text over text

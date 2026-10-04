@@ -21,6 +21,15 @@ from kinemo.scene.scene import Scene
 SceneBody = Callable[[k.Scene], None]
 
 
+@pytest.fixture(autouse=True)
+def _no_speech_recognition(request: pytest.FixtureRequest, monkeypatch: pytest.MonkeyPatch) -> None:
+    """Word times come from the syllable estimate in tests, so results do not depend on
+    whether `kinemo[align]` is installed and no model is downloaded. Tests marked `align`
+    use it, and run only with KINEMO_TEST_ALIGN=1."""
+    if request.node.get_closest_marker("align") is None:
+        monkeypatch.setattr("kinemo.audio.align.aligner_available", lambda: False)
+
+
 def build(fn: SceneBody | None = None, **config: Any) -> Any:
     """Wrap `fn` with `@k.scene(**config)` and build it. Usable as `build(fn)` or `@build`."""
 

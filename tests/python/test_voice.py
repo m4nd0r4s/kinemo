@@ -10,6 +10,7 @@ from typing import Any
 import pytest
 
 import kinemo as k
+from kinemo.audio.align import estimate_by_syllables
 from conftest import build, diagnostic_of, lint_codes
 
 #: The silent estimate speaks 150 words per minute: 0.4 s per word.
@@ -91,7 +92,9 @@ def test_an_audio_file_with_its_text_gets_words_and_marks(tmp_path: Path) -> Non
             seen["voice"] = v
             seen["relation"] = v.time("relation")
 
+    # Without speech recognition, word times follow the syllables of the text.
+    starts = estimate_by_syllables("Every right triangle hides a relation".split(), 2.0)
     assert seen["voice"].duration == pytest.approx(2.0)
     assert len(seen["voice"].words) == 6
-    assert seen["relation"] == pytest.approx(2.0 * 5 / 6)
-    assert scene.marks["tri"] == pytest.approx(2.0 * 2 / 6)
+    assert seen["relation"] == pytest.approx(starts[5])
+    assert scene.marks["tri"] == pytest.approx(starts[2])

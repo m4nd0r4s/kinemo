@@ -70,7 +70,7 @@ def make(item: Plan, cfg: ProjectConfig) -> str:
     if line.beat is not None and line.audio_target is not None:
         target = line.audio_target
         os.makedirs(os.path.dirname(target), exist_ok=True)
-        speech = with_word_times(provider.synthesize(line.text, line.voice, target), len(words))
+        speech = with_word_times(provider.synthesize(line.text, line.voice, target), words)
         with open(f"{target}.json", "w", encoding="utf-8") as fh:
             json.dump({"word_times": speech.word_times}, fh)
         folder = os.path.dirname(target)
@@ -80,7 +80,7 @@ def make(item: Plan, cfg: ProjectConfig) -> str:
         return target
     path = cache_path(cfg.cache_dir, provider.name, line.voice, line.text)
     if read_cached(path) is None:
-        speech = with_word_times(provider.synthesize(line.text, line.voice, path), len(words))
+        speech = with_word_times(provider.synthesize(line.text, line.voice, path), words)
         write_cached(path, speech)
     return path
 

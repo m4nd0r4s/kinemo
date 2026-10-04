@@ -135,7 +135,7 @@ def synthesize(s: "Scene", text: str, voice: str | None) -> Speech:
         return cached
     if _collecting.get():
         return estimate(words, cfg.tts_wpm)
-    speech = with_word_times(provider.synthesize(plain, voice, path), len(words))
+    speech = with_word_times(provider.synthesize(plain, voice, path), words)
     write_cached(path, speech)
     return speech
 
@@ -151,11 +151,17 @@ def recorded_word_times(audio: str) -> list[float]:
         return []
 
 
-def with_word_times(speech: Speech, count: int) -> Speech:
-    """Providers that give no word times get them spread over the audio."""
-    if len(speech.word_times) >= count:
+def with_word_times(speech: Speech, words: list[str]) -> Speech:
+    """Audio without word times (a recording, a provider that gives none) gets them by
+    alignment (`kinemo[align]`), or estimated from the words' syllables."""
+    if len(speech.word_times) >= len(words) or speech.path is None:
         return speech
-    return Speech(speech.path, speech.duration, [speech.duration * i / max(1, count) for i in range(count)], "spread")
+    from ..project import project_config
+    from .align import word_times
+
+    cfg = project_config()
+    times, how = word_times(speech.path, words, speech.duration, cfg.cache_dir, cfg.align_model)
+    return Speech(speech.path, speech.duration, times, "aligned" if how == "aligned" else "syllables")
 
 
 def trimmed(speech: Speech) -> Speech:
@@ -218,7 +224,7 @@ class VoiceMixin:
 
             source = resolve_media_path(source, "s.voice")
             _, words, marks = parse(text) if text is not None else ("", [], {})
-            speech = with_word_times(Speech(source, audio_duration(source), recorded_word_times(source)), len(words))
+            speech = with_word_times(Speech(source, audio_duration(source), recorded_word_times(source)), words)
         else:
             _, words, marks = parse(source)
             speech = synthesize(s, source, voice)

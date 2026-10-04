@@ -44,6 +44,7 @@ allow = []
 | `[tts] wpm` | `float` | `150.0` | Speaking rate (words per minute) of the silent estimate used when a line has no audio. |
 | `[audio] loudness` | `float` | `None` | Integrated loudness of rendered audio, in LUFS (e.g. `-16`). Without it, the mix keeps its level. |
 | `[audio] trim_silence` | `bool` | `False` | Cut the silence around each narration line when it is measured. |
+| `[align] model` | `str` | `"base.en"` | Speech model that aligns words to narration audio, with `pip install "kinemo[align]"`. |
 | `[cache] dir` | `str` | `".kinemo-cache"` | Cache directory (generated audio, ...), relative to the project root. |
 | `[editor] command` | `str` | `"vscode"` | Editor the preview opens when an object is clicked (`vscode`, `idea` or a command). |
 | `[python] workers_threshold` | `float` | `2.0` | Seconds of `k.python` computation above which a worker pool is used. |

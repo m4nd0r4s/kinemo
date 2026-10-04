@@ -20,8 +20,8 @@ class Speech:
     path: str | None
     duration: float
     word_times: list[float] = field(default_factory=list)
-    #: Where the word times come from: `provider`, `aligned`, `spread` (evenly over the audio)
-    #: or `estimated` (no audio: the speaking rate).
+    #: Where the word times come from: `provider`, `aligned` (speech recognition), `syllables`
+    #: (estimated over the audio) or `estimated` (no audio: the speaking rate).
     timing: str = "provider"
 
 

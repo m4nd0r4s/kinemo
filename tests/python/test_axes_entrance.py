@@ -6,7 +6,7 @@ from __future__ import annotations
 from typing import Any
 
 import kinemo as k
-from conftest import build, ir
+from conftest import build, inspect, ir
 
 NODES: dict[str, k.Node] = {}
 
@@ -111,3 +111,21 @@ def test_a_polar_plot_kept_out_waits_for_its_verb() -> None:
         s.play(k.draw(rose))
 
     assert presence(scene, "rose") == [(1.0, True)]
+
+
+def test_the_label_of_a_growing_curve_fades_in_at_its_end() -> None:
+    @build
+    def scene(s: k.Scene) -> None:
+        ax = k.Axes(x=(0, 10, 2), y=(0, 5, 1))
+        t = k.signal(0.0)
+        curve = ax.plot(lambda x: x / 2, until=t, label="half")
+        keep(label=curve.label)
+        s.play(k.draw(ax))
+        s.play(t.to(10), duration=4, ease=k.ease.linear)
+
+    def opacity(t: float) -> float:
+        entry = next(o for o in inspect(scene, t) if o["id"] == NODES["label"]._id)
+        return float(entry["props"]["opacity"]["Float"])
+
+    assert opacity(2.0) == 0.0          # the curve is halfway
+    assert opacity(5.0) == 1.0          # it reached the end

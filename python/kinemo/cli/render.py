@@ -4,25 +4,12 @@ from __future__ import annotations
 
 import argparse
 import os
-import sys
 
 from .loader import LoadError, build, find_scenes, load_module, select
 from .output_path import ensure_folder_of, single_file
+from .progress import finished, reporter
 
 VIDEO = ("mp4", "webm", "mov", "gif")
-
-
-def _progress(name: str):  # type: ignore[no-untyped-def]
-    def report(done: int, total: int) -> None:
-        if done == total or done % 10 == 0:
-            width = 30
-            filled = int(width * done / total)
-            sys.stderr.write(f"\r  {name} [{'#' * filled}{'.' * (width - filled)}] {done}/{total}")
-            if done == total:
-                sys.stderr.write("\n")
-            sys.stderr.flush()
-
-    return report
 
 
 def run(args: argparse.Namespace) -> int:
@@ -57,7 +44,8 @@ def run(args: argparse.Namespace) -> int:
     if movies and args.scene is None:
         for m in movies:
             path = single[0] if single else os.path.join(args.out, f"{m.name}.{args.format if args.format in VIDEO else 'mp4'}")
-            m.render(path, args.format if args.format in VIDEO else "mp4", args.quality, _progress(m.name))
+            m.render(path, args.format if args.format in VIDEO else "mp4", args.quality, reporter(args.progress, m.name))
+            finished(args.progress, m.name, path)
             print(f"kinemo: {path}")
         return 0
     for defn in select(find_scenes(module), args.scene):
@@ -70,7 +58,8 @@ def run(args: argparse.Namespace) -> int:
         base = os.path.splitext(single[0])[0] if single else os.path.join(args.out, defn.name)
         if args.format in VIDEO:
             path = f"{base}.{args.format}"
-            b.render_video(path, args.format, args.quality, args.transparent, _progress(defn.name))
+            b.render_video(path, args.format, args.quality, args.transparent, reporter(args.progress, defn.name))
+            finished(args.progress, defn.name, path)
             print(f"kinemo: {path}")
         elif args.format == "png":
             if args.frames:

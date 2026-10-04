@@ -1,7 +1,8 @@
 """Every complete example of the guide (a `python` block with `import kinemo` and a
 `@k.scene`) passes `kinemo check --strict`, and every `python` block is valid Python (API
 signatures are fenced `python signature`). Blocks that read media files get small stand-ins
-next to them (a PNG, an SVG with the ids the guide uses, a WAV)."""
+next to them (a PNG, an SVG with the ids the guide uses, a WAV, a
+narration script)."""
 
 from __future__ import annotations
 
@@ -24,6 +25,15 @@ MACHINE_SVG = """<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 120">
 <circle id="shaft" cx="50" cy="60" r="20" fill="#F2F2F2"/>
 <path id="belt" d="M50 40 L150 40 M50 80 L150 80" stroke="#CCCCCC" stroke-width="4" fill="none"/>
 </svg>"""
+
+SCRIPT = """### B01 · The claim
+
+> Every right [triangle]{tri} hides a relation between its sides.
+
+### B02 · The relation
+
+> The square on the long side equals the two other squares.
+"""
 
 
 def _examples() -> list[tuple[str, str]]:
@@ -66,6 +76,7 @@ def test_guide_example_passes_strict_check(name: str, code: str, tmp_path: Path,
     _png(tmp_path / "photo.png")
     (tmp_path / "machine.svg").write_text(MACHINE_SVG, encoding="utf-8")
     _wav(tmp_path / "narration.wav")
+    (tmp_path / "script.md").write_text(SCRIPT, encoding="utf-8")
     scene = tmp_path / "example.py"
     scene.write_text(code, encoding="utf-8")
     status = main(["check", "--strict", str(scene)])

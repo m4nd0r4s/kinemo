@@ -431,6 +431,53 @@ trim_silence = true   # cut the silence TTS models and recordings leave around e
 `trim_silence` works when a line is measured, so the line's length, its marks and the next
 line's start all follow the trimmed audio.
 
+### A narrated video, end to end
+
+The pieces above make one workflow. The narration lives in `script.md`, next to the scene:
+
+```markdown
+### B01 · The claim
+
+> Every right [triangle]{tri} hides a relation between its sides.
+
+### B02 · The relation
+
+> The square on the long side equals the two other squares.
+```
+
+The scene narrates beat by beat and follows the words:
+
+```python
+import kinemo as k
+
+script = k.Script("script.md")
+
+
+@k.scene
+def pythagoras(s: k.Scene):
+    tri = k.Triangle.right(3, 4, scale=0.6).place(at="center")
+    with s.voice(script["B01"]):  # kinemo: allow W1401
+        s.play(k.draw(tri))
+    s.start(k.indicate(tri), at=s.marks["tri"])
+    with s.voice(script["B02"]) as v:  # kinemo: allow W1401
+        v.at("the two other squares")
+        s.play(k.indicate(tri), duration=0.6)
+    s.wait(0.5)
+```
+
+While drafting there is no audio: every line is estimated, so the timing is already close.
+Then:
+
+```bash
+kinemo voice scene.py --check                      # which beats have no audio, or a stale one
+kinemo voice scene.py                              # make them (or record audio/B01.wav, ...)
+kinemo snap scene.py --at marks --sheet            # one contact sheet, a frame per mark
+kinemo render scene.py --quality final --subtitles # the video, scene.srt and scene.vtt
+```
+
+Editing a line of `script.md` marks its beat stale (`W1404`); `kinemo voice` makes only that
+one again, and the marks, the waits on `v.at(...)` and the subtitles follow the new audio.
+
 ## Common mistakes
 
 > | Diagnostic | What happened | Fix |

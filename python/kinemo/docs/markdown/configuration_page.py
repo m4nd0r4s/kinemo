@@ -60,7 +60,12 @@ def _toml_rows() -> list[tuple[str, str, str, str]]:
          "Lint codes allowed in the whole project (see [diagnostics](diagnostics.md))."),
         (code("[tts] provider"), code("str"), code(default_text(defaults["tts_provider"])),
          "Text-to-speech provider for `s.voice`. Without one, `s.voice` is silent with an estimated "
-         "duration and lint W1401 is reported."),
+         "duration and lint W1401 is reported. `\"command\"` runs `[tts] command`."),
+        (code("[tts] command"), code("list[str]"), code("[]"),
+         "Command of the `command` provider, run from the project root for each line: `{text_file}`, "
+         "`{out}` and `{voice}` are replaced. A string is split like a shell command."),
+        (code("[tts] wpm"), code("float"), code(default_text(defaults["tts_wpm"])),
+         "Speaking rate (words per minute) of the silent estimate used when a line has no audio."),
         (code("[cache] dir"), code("str"), code(default_text(defaults["cache_dir"])),
          "Cache directory (generated audio, ...), relative to the project root."),
         (code("[editor] command"), code("str"), code(default_text(defaults["editor"])),

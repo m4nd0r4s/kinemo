@@ -10,7 +10,7 @@ from contextlib import contextmanager
 from typing import TYPE_CHECKING, Any, Iterator
 
 from ..diagnostics import KinemoError
-from .tts import Speech, cache_path, estimate, installed_providers, load_provider, read_cached, write_cached
+from .tts import Speech, TTSProvider, cache_path, estimate, installed_providers, load_provider, read_cached, write_cached
 
 if TYPE_CHECKING:
     from ..scene.scene import Scene
@@ -54,8 +54,19 @@ def synthesize(s: "Scene", text: str, voice: str | None) -> Speech:
     from ..project import project_config
 
     cfg = project_config()
-    provider = load_provider(cfg.tts_provider)
     _, words, _ = parse(text)
+    if cfg.tts_provider == "command":
+        if not cfg.tts_command:
+            raise KinemoError.make(
+                "K1401",
+                '[tts] provider = "command" needs a command',
+                fixes=[("add it to kinemo.toml", '[tts] command = ["python", "voice.py", "{text_file}", "{out}"]')],
+            )
+        from .command_provider import CommandProvider
+
+        provider: TTSProvider | None = CommandProvider(cfg.tts_command, cfg.root)
+    else:
+        provider = load_provider(cfg.tts_provider)
     if provider is None and cfg.tts_provider:
         installed = installed_providers()
         s.lints.warn(
@@ -63,22 +74,29 @@ def synthesize(s: "Scene", text: str, voice: str | None) -> Speech:
             f"TTS provider {cfg.tts_provider!r} is not installed: the voice becomes silence with an estimated duration",
             fixes=[(f"installed providers: {', '.join(installed)}" if installed else f"install the package kinemo-tts-{cfg.tts_provider}", None)],
         )
-        return estimate(words)
+        return estimate(words, cfg.tts_wpm)
     if provider is None:
         s.lints.warn(
             "W1401",
             "no TTS provider: the voice becomes silence with an estimated duration",
             fixes=[("install and configure a provider", 'kinemo.toml: [tts] provider = "piper"')],
         )
-        return estimate(words)
+        return estimate(words, cfg.tts_wpm)
     plain, _, _ = parse(text)
     path = cache_path(cfg.cache_dir, provider.name, voice, plain)
     cached = read_cached(path)
     if cached is not None:
         return cached
-    speech = provider.synthesize(plain, voice, path)
+    speech = with_word_times(provider.synthesize(plain, voice, path), len(words))
     write_cached(path, speech)
     return speech
+
+
+def with_word_times(speech: Speech, count: int) -> Speech:
+    """Providers that give no word times get them spread over the audio."""
+    if len(speech.word_times) >= count:
+        return speech
+    return Speech(speech.path, speech.duration, [speech.duration * i / max(1, count) for i in range(count)])
 
 
 #: Content may run this far past the narration before W1403 (seconds).

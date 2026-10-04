@@ -16,6 +16,10 @@ class ProjectConfig:
     render: dict[str, Any] = field(default_factory=dict)
     lints_allow: tuple[str, ...] = ()
     tts_provider: str | None = None
+    #: `[tts] command` of the command provider, as an argv list.
+    tts_command: tuple[str, ...] = ()
+    #: Speaking rate of the estimate used when there is no audio (`[tts] wpm`).
+    tts_wpm: float = 150.0
     cache_dir: str = ".kinemo-cache"
     editor: str = "vscode"
     python_workers_threshold: float = 2.0
@@ -47,10 +51,21 @@ def load(start: str) -> ProjectConfig:
         render=dict(data.get("render", {})),
         lints_allow=tuple(data.get("lints", {}).get("allow", ())),
         tts_provider=tts.get("provider"),
+        tts_command=_argv(tts.get("command", ())),
+        tts_wpm=float(tts.get("wpm", 150.0)),
         cache_dir=os.path.join(root, cache.get("dir", ".kinemo-cache")),
         editor=data.get("editor", {}).get("command", "vscode"),
         python_workers_threshold=float(data.get("python", {}).get("workers_threshold", 2.0)),
     )
+
+
+def _argv(command: Any) -> tuple[str, ...]:
+    """`command` as written in kinemo.toml: a list of arguments, or one string split like a shell."""
+    if isinstance(command, str):
+        import shlex
+
+        return tuple(shlex.split(command))
+    return tuple(str(part) for part in command)
 
 
 def project_config() -> ProjectConfig:

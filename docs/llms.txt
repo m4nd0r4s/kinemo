@@ -175,6 +175,19 @@ def narrated(s: k.Scene):
         v.at("relation")
         s.play(k.indicate(tri), duration=0.4)
 ```
+#### `k.Script(path)`
+Narration kept outside the code, by beat: a Markdown file with a heading per beat (`### B03 · Title`, the first word is the id) and its narration on `> ` lines, or JSON (`{"B03": "..."}`). `s.voice(script["B03"])` uses `audio/B03.wav` next to the script when it exists (else TTS or the estimate) and adds the marks `B03` and `B03.end`. Audio made from an older text is W1404. See also: `s.voice`.
+```python
+script = k.Script("script.md")
+
+@k.scene
+def triangle(s: k.Scene):
+    tri = k.Triangle.right(3, 4, scale=0.6).place(at="center")
+    with s.voice(script["B01"]) as v:  # kinemo: allow W1401
+        s.play(k.draw(tri))
+        v.at("relation")
+        s.play(k.indicate(tri), duration=0.5)
+```
 #### `k.time  # read-only signal`
 Global scene time in seconds, as a read-only signal. It is the right way to express clocks and continuous motion, because it advances linearly and is never eased. Works at module level, in contexts and in components. See also: `k.signal`, `x.map`, `k.integrate`.
 ```python
@@ -1602,7 +1615,7 @@ Codes:
 - `W0901` too many individual objects
 - `W1001` outside the safe area · `W1002` text over text · `W1003` low contrast · `W1004` small text · `W1005` invisible object · `W1006` visual noise · `W1007` static scene
 - `W1301` parameter read with .now · `W1302` k.python depending on a parameter
-- `W1401` voice without a TTS provider · `W1402` unknown TTS provider · `W1403` content runs past the narration
+- `W1401` voice without a TTS provider · `W1402` unknown TTS provider · `W1403` content runs past the narration · `W1404` stale narration
 
 ## Manim → kinemo
 

@@ -9,10 +9,12 @@ import wave
 from contextlib import contextmanager
 from typing import TYPE_CHECKING, Any, Iterator
 
+from ..diagnostics import KinemoError
 from .tts import Speech, cache_path, estimate, installed_providers, load_provider, read_cached, write_cached
 
 if TYPE_CHECKING:
     from ..scene.scene import Scene
+    from .script import ScriptLine
     from .voice_handle import Voice
 
 #: `[cateto]{c1}`: the word "cateto", whose instant becomes `s.marks["c1"]`.
@@ -87,29 +89,50 @@ class VoiceMixin:
     cursor: float
 
     @contextmanager
-    def voice(self, narration: str, *, text: str | None = None, voice: str | None = None, gain: float = 1.0) -> Iterator[Voice]:
-        """Narrate (TTS text or an audio file); the block lasts max(audio, content) and gives a
-        `Voice` to sync with what is said (`v.at(0.5)`, `v.at("the slope")`).
+    def voice(self, narration: "str | ScriptLine", *, text: str | None = None, voice: str | None = None, gain: float = 1.0) -> Iterator[Voice]:
+        """Narrate (TTS text, an audio file, or a beat of a `k.Script`); the block lasts
+        max(audio, content) and gives a `Voice` to sync with what is said (`v.at(0.5)`,
+        `v.at("the slope")`).
 
-        With an audio file, `text=` is what it says: its words get times and marks.
+        With an audio file, `text=` is what it says: its words get times and marks. A script
+        beat uses its recorded audio when it exists and adds the marks `<id>` and `<id>.end`.
         Marked words `[cateto]{c1}` become marks at the instant they are spoken."""
         from .._runtime.spans import user_span
+        from .script import ScriptLine
         from .voice_handle import Voice
 
         s: Any = self
         span = user_span()
         start = s.cursor
-        if narration.lower().endswith(AUDIO_EXTENSIONS):
+        beat: ScriptLine | None = narration if isinstance(narration, ScriptLine) else None
+        if beat is not None:
+            if beat.is_stale():
+                s.lints.warn(
+                    "W1404",
+                    f"the audio of beat {beat.id} was made from a different text",
+                    spans=[span],
+                    fixes=[("make it again", f"kinemo voice <scene file> --force {beat.id}")],
+                )
+            text, source = beat.text, beat.audio or beat.text
+        elif isinstance(narration, str):
+            source = narration
+        else:
+            raise KinemoError.make(
+                "K0105",
+                f"s.voice takes text, an audio file or a script beat, got {type(narration).__name__}",
+                spans=[span],
+            )
+        if source.lower().endswith(AUDIO_EXTENSIONS):
             from ..objects.media_paths import resolve_media_path
 
-            narration = resolve_media_path(narration, "s.voice")
+            source = resolve_media_path(source, "s.voice")
             _, words, marks = parse(text) if text is not None else ("", [], {})
-            duration = audio_duration(narration)
+            duration = audio_duration(source)
             # Spread over the audio until the words are aligned to it.
-            speech = Speech(narration, duration, [duration * i / max(1, len(words)) for i in range(len(words))])
+            speech = Speech(source, duration, [duration * i / max(1, len(words)) for i in range(len(words))])
         else:
-            _, words, marks = parse(narration)
-            speech = synthesize(s, narration, voice)
+            _, words, marks = parse(source)
+            speech = synthesize(s, source, voice)
         if speech.path:
             s._b.add_audio(speech.path, start, float(gain))
         for name, index in marks.items():
@@ -117,6 +140,10 @@ class VoiceMixin:
             s._b.add_mark(when, name, False)
             s._marks.append((name, when, False, s._b.log_position()))
         line = Voice(s, start, speech.duration, words, speech.word_times, span)
+        if beat is not None:
+            for name, when in ((beat.id, line.start), (f"{beat.id}.end", line.end)):
+                s._b.add_mark(when, name, False)
+                s._marks.append((name, when, False, s._b.log_position()))
         yield line
         overrun = s.cursor - line.end
         if overrun > OVERRUN_TOLERANCE:

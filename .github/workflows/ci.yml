@@ -1,8 +1,11 @@
 name: ci
 
+# Pull requests run here; branch pushes would run the same commits a second time.
 on:
   push:
+    branches: [main]
   pull_request:
+  workflow_dispatch:
 
 jobs:
   rust:

@@ -159,7 +159,8 @@ The page has three panes: the **outliner** (every object as a tree), the **frame
   row of their own. Dragging it requests frames from the native server, so Python is not
   involved. Bars from one statement in a loop are grouped into one (`group repeats`;
   double-click a group to expand it). Ctrl/⌘ + wheel, or the `−` `fit` `+` buttons, zoom
-  in on a stretch of time. The speed menu plays at 0.25× to 2×.
+  in on a stretch of time. The speed menu plays at 0.25× to 2×. Drag the edge above the
+  transport to give the timeline more room (double-click it to fit the content again).
 - Narration (`s.voice`) and sounds (`k.sound`) play with the scene, in sync with the
   playhead, at the playback speed. The speaker button (or `M`) mutes them; the choice is
   remembered. Lines without audio yet (the silent estimate) are silent. Music is mixed as in

@@ -24,6 +24,7 @@ EXAMPLES: dict[str, tuple[str, ...]] = {
         "kinemo render scene.py --format gif --quality draft",
         "kinemo render scene.py --format png --at end --transparent",
         "kinemo render scene.py --format slides",
+        "kinemo render scene.py --subtitles",
     ),
     "mcp": ("kinemo mcp",),
     "docs": ("kinemo docs", "kinemo docs k.morph", "kinemo docs s.play --json", "kinemo docs --check"),

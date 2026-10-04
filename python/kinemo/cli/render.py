@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+from typing import Any
 import os
 
 from .loader import LoadError, build, find_scenes, load_module, select
@@ -11,6 +12,22 @@ from .output_path import ensure_folder_of, single_file
 from .progress import finished, reporter
 
 VIDEO = ("mp4", "webm", "mov", "gif")
+
+
+def write_subtitles(scene: Any, base: str) -> list[str]:
+    """`<base>.srt` and `<base>.vtt` from the scene's narration (nothing without narration)."""
+    from ..export.subtitles import srt, vtt
+
+    lines = scene.__dict__.get("_narration", [])
+    if not lines:
+        return []
+    written = []
+    for extension, text in (("srt", srt(lines)), ("vtt", vtt(lines))):
+        path = f"{base}.{extension}"
+        with open(path, "w", encoding="utf-8") as fh:
+            fh.write(text)
+        written.append(path)
+    return written
 
 
 def run(args: argparse.Namespace) -> int:
@@ -62,6 +79,9 @@ def run(args: argparse.Namespace) -> int:
             b.render_video(path, args.format, args.quality, args.transparent, reporter(args.progress, defn.name))
             finished(args.progress, defn.name, path)
             print(f"kinemo: {path}")
+            if args.subtitles:
+                for written in write_subtitles(result.scene, base):
+                    print(f"kinemo: {written}")
         elif args.format == "png":
             if args.frames:
                 os.makedirs(base, exist_ok=True)

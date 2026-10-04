@@ -178,7 +178,7 @@ kinemo voice scene.py --force B03,B04
 Final output.
 
 ```text
-kinemo render [-h] [--scene SCENE] [--param NAME=VALUE] [--format {mp4,webm,mov,gif,png,svg,slides}] [--quality {draft,final}] [--out OUT] [--at AT] [--frames] [--transparent] [--progress {bar,json,none}] file
+kinemo render [-h] [--scene SCENE] [--param NAME=VALUE] [--format {mp4,webm,mov,gif,png,svg,slides}] [--quality {draft,final}] [--out OUT] [--at AT] [--frames] [--transparent] [--progress {bar,json,none}] [--subtitles] file
 ```
 
 | Argument | Type | Default | Description |
@@ -193,6 +193,7 @@ kinemo render [-h] [--scene SCENE] [--param NAME=VALUE] [--format {mp4,webm,mov,
 | `--frames` | flag |   | png: the whole sequence |
 | `--transparent` | flag |   |   |
 | `--progress PROGRESS` | `bar` \\| `json` \\| `none` | `bar` | on stderr: a bar, one JSON object per line, or nothing |
+| `--subtitles` | flag |   | also write <scene>.srt and <scene>.vtt from the narration |
 
 Examples:
 
@@ -201,6 +202,7 @@ kinemo render scene.py
 kinemo render scene.py --format gif --quality draft
 kinemo render scene.py --format png --at end --transparent
 kinemo render scene.py --format slides
+kinemo render scene.py --subtitles
 ```
 
 <a id="mcp"></a>

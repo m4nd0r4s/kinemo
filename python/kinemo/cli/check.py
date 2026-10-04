@@ -9,6 +9,7 @@ from typing import Any
 from ..diagnostics import Diagnostic
 from .fix import apply_fixes
 from .loader import BuildResult, LoadError, build, find_scenes, load_module, select
+from ..scene.written_labels import written_labels
 from .output import emit_json, exit_code, summary_word
 
 
@@ -17,9 +18,10 @@ def timeline_entries(result: BuildResult) -> list[dict[str, Any]]:
     s = result.scene
     if s is None:
         return []
+    log = sorted(s._log, key=lambda e: (e.start, e.end))
     return [
-        {"start": e.start, "end": e.end, "label": e.label, "file": e.span.file, "line": e.span.line}
-        for e in sorted(s._log, key=lambda e: (e.start, e.end))
+        {"start": e.start, "end": e.end, "label": label, "file": e.span.file, "line": e.span.line}
+        for e, label in zip(log, written_labels(log))
     ]
 
 

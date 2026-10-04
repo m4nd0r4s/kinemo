@@ -10,6 +10,7 @@ from typing import Any, Mapping
 from ..diagnostics import Diagnostic
 from ..editing.call_sites import SourceFile
 from ..editing.scene_index import span_key
+from ..scene.written_labels import written_labels
 from .loader import BuildResult
 
 #: Longest code excerpt shown when hovering a timeline bar.
@@ -24,11 +25,12 @@ def timeline_bars(result: BuildResult, ir: Mapping[str, Any], sources: Mapping[s
         return []
     entries = _timed_entries(ir)
     bars: list[dict[str, Any]] = []
-    for e in sorted(s._log, key=lambda e: (e.start, e.end)):  # pyright: ignore[reportPrivateUsage]
+    log = sorted(s._log, key=lambda e: (e.start, e.end))  # pyright: ignore[reportPrivateUsage]
+    for e, label in zip(log, written_labels(log)):
         call = e.call or e.span
         bars.append(
             {
-                "label": e.label,
+                "label": label,
                 "start": e.start,
                 "end": e.end,
                 "file": os.path.abspath(e.span.file),

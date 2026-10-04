@@ -58,7 +58,7 @@ def test_build_returns_duration_timeline_and_diagnostics() -> None:
     built = build(hello)
     assert isinstance(built, BuiltScene)
     assert built.duration == pytest.approx(3.5)
-    assert [e["label"] for e in built.timeline] == ["write(title)", "title.to(fill, scale)"]
+    assert [e["label"] for e in built.timeline] == ["k.write(title)", "title.to(color=k.BLUE, scale=1.5)"]
     assert built.diagnostics == []
     assert built.scene.duration == built.duration
     assert built.report()["name"] == "hello"

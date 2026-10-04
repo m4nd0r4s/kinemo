@@ -70,7 +70,7 @@ The payload has one entry per scene in the file:
       "ok": true,
       "duration": 1.5,
       "timeline": [
-        {"start": 0.0, "end": 1.0, "label": "write(title)", "file": "/abs/path/edge.py", "line": 7}
+        {"start": 0.0, "end": 1.0, "label": "k.write(title)", "file": "/abs/path/edge.py", "line": 7}
       ],
       "diagnostics": [
         {

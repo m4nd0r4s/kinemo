@@ -14,6 +14,7 @@ from ..anim.prop import PropTo
 from ..diagnostics import KinemoError
 from ..diagnostics.manim import manim_attribute
 from ..values.encode import encode
+from .list_names import list_element_name
 from .placement import PlacementMixin
 from .props import DERIVED, HIDDEN, RESERVED, TRANSFORM, DerivedExpr, PropSignal, PropSpec, WorldView
 from .user_arguments import explicit_props, track
@@ -92,7 +93,7 @@ class Node(PlacementMixin):
         object.__setattr__(self, "_scene", s)
         object.__setattr__(self, "_span", span)
         object.__setattr__(self, "_key", key)
-        object.__setattr__(self, "_name", name or _variable_name(span, type(self)))
+        object.__setattr__(self, "_name", name or _variable_name(span, type(self)) or list_element_name(span, {c.__name__ for c in type(self).__mro__}, s))
         object.__setattr__(self, "_part", None)
         object.__setattr__(self, "_sigs", {})
         object.__setattr__(self, "_parent", None)
@@ -443,6 +444,11 @@ class Node(PlacementMixin):
 def name_from_factory(node: "Node", factory: str) -> None:
     """`hexagon = k.Polygon.regular(6)`: name an object returned by a factory function."""
     if node._name is not None:
+        return
+    # An element of a list first: `squares = [k.Square.on(side) for ...]` → `squares[0]`.
+    element = list_element_name(node._span, {factory}, node._scene)
+    if element is not None:
+        node._rename(element)
         return
     match = re.match(rf"^\s*([A-Za-z_]\w*)\s*=\s*[\w.\[\]]*\b{factory}\(", node._span.source_line())
     if match:

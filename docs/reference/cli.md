@@ -13,6 +13,7 @@ Explanatory animations in Python. Every subcommand takes `-h` / `--help`. Exit c
 | [`kinemo check`](#check) | build + resolve without rendering: errors, lints, timeline |
 | [`kinemo inspect`](#inspect) | scene graph at time t |
 | [`kinemo snap`](#snap) | PNGs of the requested times |
+| [`kinemo voice`](#voice) | make the narration lines that have no audio yet or changed |
 | [`kinemo render`](#render) | final output |
 | [`kinemo mcp`](#mcp) | MCP server (stdio) with check, inspect, snap, docs and explain |
 | [`kinemo docs`](#docs) | short offline docs with a canonical example |
@@ -143,6 +144,32 @@ Examples:
 ```sh
 kinemo snap scene.py --at 0,2.5,end
 kinemo snap scene.py --at intro_done --quality final --out shots
+```
+
+<a id="voice"></a>
+## `kinemo voice`
+
+Make the narration lines that have no audio yet or changed.
+
+```text
+kinemo voice [-h] [--scene SCENE] [--param NAME=VALUE] [--check] [--force FORCE] [--progress {bar,json,none}] file
+```
+
+| Argument | Type | Default | Description |
+| --- | --- | --- | --- |
+| `file` | str |   | (required) |
+| `--scene SCENE` | str |   | scene name (default: all) |
+| `--param NAME=VALUE` | str |   | (repeatable) |
+| `--check` | flag |   | list missing and stale lines without making them (exit 1 if any) |
+| `--force FORCE` | str |   | script beats to make again, comma-separated (or 'all') |
+| `--progress PROGRESS` | `bar` \\| `json` \\| `none` | `bar` | on stderr: a bar, one JSON object per line, or nothing |
+
+Examples:
+
+```sh
+kinemo voice scene.py --check
+kinemo voice scene.py
+kinemo voice scene.py --force B03,B04
 ```
 
 <a id="render"></a>

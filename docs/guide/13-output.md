@@ -287,6 +287,24 @@ narrates a beat:
 
 An unknown id is an error that suggests the closest one.
 
+### Making the audio: `kinemo voice`
+
+`kinemo voice scene.py` builds the scenes without synthesizing, lists their narration lines,
+and makes only those that have no audio yet or whose text changed since their audio was made,
+with the provider configured in `kinemo.toml`:
+
+```bash
+kinemo voice scene.py --check        # list missing and stale lines; exit 1 if any
+kinemo voice scene.py                # make them
+kinemo voice scene.py --force B03    # make a beat again (or --force all)
+```
+
+A script beat is written next to the script: `audio/B03.wav`, its word times in
+`audio/B03.wav.json` (from the provider, or spread over the audio), and its text hash in
+`audio/manifest.json`. A line written in the scene goes to the cache, where builds find it.
+`--progress json` reports progress as JSON lines, and `kinemo check --json` lists each scene's
+`narration`: start, end, text, beat, audio and where its word times come from (`timing`).
+
 ### Without a TTS provider
 
 When no provider is configured, the voice becomes **silence with an estimated duration**

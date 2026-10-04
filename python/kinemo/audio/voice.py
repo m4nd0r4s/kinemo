@@ -7,12 +7,15 @@ import re
 import subprocess
 import wave
 from contextlib import contextmanager
+from contextvars import ContextVar
+from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any, Iterator
 
 from ..diagnostics import KinemoError
 from .tts import Speech, TTSProvider, cache_path, estimate, installed_providers, load_provider, read_cached, write_cached
 
 if TYPE_CHECKING:
+    from ..project import ProjectConfig
     from ..scene.scene import Scene
     from .script import ScriptLine
     from .voice_handle import Voice
@@ -50,23 +53,66 @@ def audio_duration(path: str) -> float:
     return float(out.stdout.strip())
 
 
+#: While `kinemo voice` collects the lines of a scene, nothing is synthesized: lines without
+#: audio are estimated, and the command makes their audio afterwards.
+_collecting: ContextVar[bool] = ContextVar("kinemo_voice_collecting", default=False)
+
+
+@contextmanager
+def collecting_lines() -> Iterator[None]:
+    token = _collecting.set(True)
+    try:
+        yield
+    finally:
+        _collecting.reset(token)
+
+
+@dataclass(frozen=True)
+class NarrationLine:
+    """A narration line of a built scene, as `check --json` and `kinemo voice` list it."""
+
+    start: float
+    end: float
+    text: str
+    #: The `k.Script` beat it narrates, if any.
+    beat: str | None
+    #: The audio it plays (None while it is estimated).
+    audio: str | None
+    voice: str | None
+    #: Where its word times come from (see `Speech.timing`).
+    timing: str
+    #: Where `kinemo voice` writes a script beat's audio.
+    audio_target: str | None = None
+
+    def json(self) -> dict[str, Any]:
+        return {"start": self.start, "end": self.end, "text": self.text, "beat": self.beat, "audio": self.audio, "voice": self.voice, "timing": self.timing}
+
+
+def configured_provider(cfg: "ProjectConfig | None" = None) -> TTSProvider | None:
+    """The TTS provider `kinemo.toml` selects (the command provider, or an installed one); the
+    configuration of the scene being built unless `cfg` is given."""
+    from ..project import project_config
+
+    cfg = cfg or project_config()
+    if cfg.tts_provider != "command":
+        return load_provider(cfg.tts_provider)
+    if not cfg.tts_command:
+        raise KinemoError.make(
+            "K1401",
+            '[tts] provider = "command" needs a command',
+            fixes=[("add it to kinemo.toml", '[tts] command = ["python", "voice.py", "{text_file}", "{out}"]')],
+        )
+    from .command_provider import CommandProvider
+
+    return CommandProvider(cfg.tts_command, cfg.root)
+
+
 def synthesize(s: "Scene", text: str, voice: str | None) -> Speech:
     from ..project import project_config
 
     cfg = project_config()
     _, words, _ = parse(text)
-    if cfg.tts_provider == "command":
-        if not cfg.tts_command:
-            raise KinemoError.make(
-                "K1401",
-                '[tts] provider = "command" needs a command',
-                fixes=[("add it to kinemo.toml", '[tts] command = ["python", "voice.py", "{text_file}", "{out}"]')],
-            )
-        from .command_provider import CommandProvider
-
-        provider: TTSProvider | None = CommandProvider(cfg.tts_command, cfg.root)
-    else:
-        provider = load_provider(cfg.tts_provider)
+    provider = configured_provider(cfg)
     if provider is None and cfg.tts_provider:
         installed = installed_providers()
         s.lints.warn(
@@ -87,16 +133,29 @@ def synthesize(s: "Scene", text: str, voice: str | None) -> Speech:
     cached = read_cached(path)
     if cached is not None:
         return cached
+    if _collecting.get():
+        return estimate(words, cfg.tts_wpm)
     speech = with_word_times(provider.synthesize(plain, voice, path), len(words))
     write_cached(path, speech)
     return speech
+
+
+def recorded_word_times(audio: str) -> list[float]:
+    """Word times saved next to an audio file (`B03.wav.json`, written by `kinemo voice`)."""
+    import json
+
+    try:
+        with open(f"{audio}.json", encoding="utf-8") as fh:
+            return [float(t) for t in json.load(fh).get("word_times", [])]
+    except (OSError, ValueError, AttributeError):
+        return []
 
 
 def with_word_times(speech: Speech, count: int) -> Speech:
     """Providers that give no word times get them spread over the audio."""
     if len(speech.word_times) >= count:
         return speech
-    return Speech(speech.path, speech.duration, [speech.duration * i / max(1, count) for i in range(count)])
+    return Speech(speech.path, speech.duration, [speech.duration * i / max(1, count) for i in range(count)], "spread")
 
 
 def trimmed(speech: Speech) -> Speech:
@@ -159,9 +218,7 @@ class VoiceMixin:
 
             source = resolve_media_path(source, "s.voice")
             _, words, marks = parse(text) if text is not None else ("", [], {})
-            duration = audio_duration(source)
-            # Spread over the audio until the words are aligned to it.
-            speech = Speech(source, duration, [duration * i / max(1, len(words)) for i in range(len(words))])
+            speech = with_word_times(Speech(source, audio_duration(source), recorded_word_times(source)), len(words))
         else:
             _, words, marks = parse(source)
             speech = synthesize(s, source, voice)
@@ -173,6 +230,9 @@ class VoiceMixin:
             s._b.add_mark(when, name, False)
             s._marks.append((name, when, False, s._b.log_position()))
         line = Voice(s, start, speech.duration, words, speech.word_times, span)
+        s.__dict__.setdefault("_narration", []).append(
+            NarrationLine(line.start, line.end, " ".join(words), beat.id if beat else None, speech.path, voice, speech.timing, beat.audio_target if beat else None)
+        )
         if beat is not None:
             for name, when in ((beat.id, line.start), (f"{beat.id}.end", line.end)):
                 s._b.add_mark(when, name, False)

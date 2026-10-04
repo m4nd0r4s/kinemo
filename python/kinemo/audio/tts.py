@@ -20,6 +20,9 @@ class Speech:
     path: str | None
     duration: float
     word_times: list[float] = field(default_factory=list)
+    #: Where the word times come from: `provider`, `aligned`, `spread` (evenly over the audio)
+    #: or `estimated` (no audio: the speaking rate).
+    timing: str = "provider"
 
 
 class TTSProvider(Protocol):
@@ -31,7 +34,7 @@ class TTSProvider(Protocol):
 def estimate(words: list[str], wpm: float = WORDS_PER_MINUTE) -> Speech:
     """Silence with the duration a narrator would take (`wpm` words per minute)."""
     per_word = 60.0 / wpm
-    return Speech(None, max(per_word, len(words) * per_word), [i * per_word for i in range(len(words))])
+    return Speech(None, max(per_word, len(words) * per_word), [i * per_word for i in range(len(words))], "estimated")
 
 
 def installed_providers() -> list[str]:

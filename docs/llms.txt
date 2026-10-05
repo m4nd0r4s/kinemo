@@ -990,14 +990,19 @@ def loop(s: k.Scene):
     s.add(ax)
     s.play(k.draw(curve), duration=2)
 ```
-#### `k.Axes(x=(0, 10), y=(0, 5), *, labels=None, grid=False, width=8.0, height=4.5, tick_labels=True, **props)`
-Cartesian axes with ticks, labels and an optional grid: `x=(min, max, step)`, `y=(min, max)`, `labels=("x", "y")`, `width=`/`height=` in units. The visible ranges are signals: `ax.zoom_to(...)` animates them and everything on the axes follows. See also: `ax.plot`, `ax.zoom_to`, `k.NumberLine`.
+#### `k.Axes(x=(0, 10), y=(0, 5), *, labels=None, grid=False, width=8.0, height=4.5, tick_labels=True, x_ticks=None, y_ticks=None, tick_format=None, **props)`
+Cartesian axes with ticks, labels and an optional grid: `x=(min, max, step)`, `y=(min, max)`, `labels=("x", "y")`, `width=`/`height=` in units. The visible ranges are signals: `ax.zoom_to(...)` animates them and everything on the axes follows. `x_ticks=`/`y_ticks=` set the tick values by hand and `tick_format=` (`"{:.1f}"` or a function) writes their labels; y labels are right-aligned to the axis. See also: `ax.plot`, `ax.zoom_to`, `k.NumberLine`.
 ```python
 @k.scene
 def axes(s: k.Scene):
     ax = k.Axes(x=(0, 10, 2), y=(0, 5, 1), labels=("t", "v"), grid=True).place(at="center")
     s.play(k.draw(ax))
     s.wait(0.5)
+
+@k.scene
+def custom_ticks(s: k.Scene):
+    ax = k.Axes(x=(0, 30), y=(0, 1, 0.25), x_ticks=[4, 9, 16, 25], tick_format="{:.2f}").place(at="center")
+    s.play(k.draw(ax))
 ```
 #### `k.NumberLine(x=(0, 10, 1), *, width=10.0, **props)`
 A horizontal number line: a `k.Axes` with only the x axis. Use `nl.point(x, 0)` to position markers. See also: `k.Axes`, `ax.point`.
@@ -1070,7 +1075,7 @@ def scatter(s: k.Scene):
     s.play(k.indicate(pts))
 ```
 #### `ax.zoom_to(*, x=None, y=None, **kw) -> Animation`
-Named transition: animates the visible ranges of the axes (`x=(a, b)`, `y=(c, d)`). Curves, ticks and points follow. Equivalent to `ax.to(x_range=..., y_range=...)`. See also: `k.Axes`, `ax.plot`.
+Named transition: animates the visible ranges of the axes (`x=(a, b)`, `y=(c, d)`). Curves, ticks and points follow, and ticks are regenerated with a nice step for the new ranges: new ones grow in, ones that no longer fit fade out. Equivalent to `ax.to(x_range=..., y_range=...)` plus the tick change. See also: `k.Axes`, `ax.plot`.
 ```python
 @k.scene
 def zoom(s: k.Scene):

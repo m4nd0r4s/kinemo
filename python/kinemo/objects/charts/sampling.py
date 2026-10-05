@@ -83,6 +83,11 @@ def ticks(lo: float, hi: float, step: float | None) -> list[float]:
 
 def _nice_step(lo: float, hi: float) -> float:
     """A 1-2-2.5-5 step giving about 5 ticks on [lo, hi]."""
-    raw = (hi - lo) / 5
+    return nice_step(lo, hi, 5)
+
+
+def nice_step(lo: float, hi: float, count: float) -> float:
+    """A 1-2-2.5-5 step giving about `count` ticks on [lo, hi]."""
+    raw = (hi - lo) / count
     mag: float = 10 ** math.floor(math.log10(raw))
     return min((m * mag for m in (1, 2, 2.5, 5, 10) if m * mag >= raw), default=raw)

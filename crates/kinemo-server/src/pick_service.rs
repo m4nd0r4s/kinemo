@@ -59,6 +59,28 @@ fn pixel_bbox(publication: &ScenePublication, layout: &Layout, id: u32, t: f64) 
     json!([pixels.x0, pixels.y0, pixels.x1, pixels.y1])
 }
 
+/// Values of `(object, prop)` items at `times`, one row per item (`null` where the object or
+/// the prop is unknown); the scene is evaluated once per instant.
+pub fn sampled_values_json(publication: &ScenePublication, items: &[(u32, String)], times: &[f64]) -> Json {
+    let scene = &publication.scene;
+    let evaluator = Evaluator::new(scene);
+    let layout = Layout::new(&evaluator);
+    let mut rows: Vec<Vec<Json>> = vec![Vec::with_capacity(times.len()); items.len()];
+    for &t in times {
+        let t = t.clamp(0.0, scene.duration.max(0.0));
+        let mut objects: std::collections::HashMap<u32, Json> = std::collections::HashMap::new();
+        for (row, (id, prop)) in rows.iter_mut().zip(items) {
+            if *id as usize >= scene.objects.len() {
+                row.push(Json::Null);
+                continue;
+            }
+            let object = objects.entry(*id).or_insert_with(|| object_json(&layout, *id, t));
+            row.push(object["props"].get(prop).cloned().unwrap_or(Json::Null));
+        }
+    }
+    json!(rows)
+}
+
 fn snapshot(publication: &ScenePublication, layout: &Layout, id: u32, t: f64) -> Json {
     let mut object = object_json(layout, id, t);
     object["label"] = json!(publication.object_label(id));
@@ -105,5 +127,16 @@ mod tests {
         assert_eq!(selection_json(&publication, &[7, 0], 1.5).as_array().unwrap().len(), 1);
         assert!(inspected_object_json(&publication, 7, 1.5).is_null());
         assert_eq!(inspected_object_json(&publication, 0, 0.5)["present"], false);
+    }
+
+    #[test]
+    fn samples_have_one_row_per_item_and_null_for_unknown_ones() {
+        let state = PreviewState::new();
+        state.set_scene(scene_with_late_object(), json!({}));
+        let publication = state.current().unwrap();
+        let rows = sampled_values_json(&publication, &[(0, "opacity".into()), (9, "x".into()), (0, "nope".into())], &[0.0, 1.5]);
+        assert_eq!(rows.as_array().unwrap().len(), 3);
+        assert_eq!(rows[0].as_array().unwrap().len(), 2);
+        assert!(rows[1][0].is_null() && rows[2][1].is_null());
     }
 }

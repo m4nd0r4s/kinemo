@@ -185,6 +185,10 @@ The page has three panes: the **outliner** (every object as a tree), the **frame
 - **Call stacks:** a statement inside a `@k.clip`, a component method or a helper function knows
   the lines that called it. The Code tab lights those callers too, the inspector of a bar lists
   them under *Called from*, and a breakpoint on a clip's line can stop for one call site only.
+- **Watch:** ☆ next to a prop in the inspector pins it to the Watch list of the Code tab, which
+  shows its value at the playhead while playing, stepping or scrubbing (flashing when it
+  changes) and, for numbers, a sparkline over the whole scene. Watches are remembered per
+  browser by object label.
 - **Stepping:** F10 (or ⤓) moves the playhead to the next statement run, Shift+F10 (⤒) to the
   previous one; click a line of code and press F8 (⇥) to play until that line next runs.
 - Saving the file (or a local module it imports) rebuilds the scene, and the preview stays

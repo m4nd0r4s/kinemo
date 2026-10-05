@@ -11,6 +11,9 @@
 //!   (`x`, `y`) of the rendered frame (frame pixels, y-down, origin top-left).
 //! - `{"type":"inspect","object":3,"t":1.25,"id":9}`: snapshot of a known object (the
 //!   selection, as it moves); answered like `pick`.
+//! - `{"type":"sample","id":11,"items":[{"object":3,"prop":"x"}],"times":[0,0.5,1]}`: the
+//!   values of props at several instants in one call (the Watch list and its sparklines);
+//!   at most 12 items and 240 instants.
 //! - `{"type":"open","file":"/abs/scene.py","line":12}`: open a source line in the editor of
 //!   `[editor] command`, when it is a command the page cannot open by URL. Queued for the
 //!   Python side like an edit.
@@ -33,6 +36,8 @@
 //!   scene is published.
 //! - `{"type":"error","diagnostics":[...]}`: the latest rebuild failed; the previous
 //!   scene stays live.
+//! - `{"type":"sample","id","values":[[v_t0, v_t1, ...], ...]}`: one row per item, `null`
+//!   for an unknown object or prop.
 //! - `{"type":"edit_result","id","ok","message"}`: outcome of an edit, pushed by Python.
 //! - `{"type":"notice","message":"..."}`: request could not be served (no scene yet,
 //!   malformed message).
@@ -75,6 +80,13 @@ pub enum ClientMessage {
         #[serde(default)]
         line: u32,
     },
+    /// Values of props at several instants (the Watch list).
+    Sample {
+        #[serde(default)]
+        id: Option<u64>,
+        items: Vec<SampleItem>,
+        times: Vec<f64>,
+    },
     /// Snapshot of a known object at `t`.
     Inspect {
         object: u32,
@@ -83,6 +95,16 @@ pub enum ClientMessage {
         id: Option<u64>,
     },
 }
+
+#[derive(Debug, Deserialize, PartialEq)]
+pub struct SampleItem {
+    pub object: u32,
+    pub prop: String,
+}
+
+/// Most items and instants one `sample` request evaluates.
+pub const SAMPLE_ITEMS: usize = 12;
+pub const SAMPLE_TIMES: usize = 240;
 
 pub fn parse_client_message(text: &str) -> Result<ClientMessage, String> {
     serde_json::from_str(text).map_err(|e| format!("bad message: {e}"))
@@ -135,6 +157,10 @@ mod tests {
         assert_eq!(
             parse_client_message(r#"{"type":"open","file":"/a/s.py","line":3}"#),
             Ok(ClientMessage::Open { file: "/a/s.py".into(), line: 3 })
+        );
+        assert_eq!(
+            parse_client_message(r#"{"type":"sample","id":4,"items":[{"object":1,"prop":"x"}],"times":[0,1]}"#),
+            Ok(ClientMessage::Sample { id: Some(4), items: vec![SampleItem { object: 1, prop: "x".into() }], times: vec![0.0, 1.0] })
         );
         assert!(parse_client_message(r#"{"type":"nope"}"#).is_err());
     }

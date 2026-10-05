@@ -19,6 +19,7 @@ import { emit, lastFrameTime, listen, state } from "./state.js";
 import { installStepping } from "./stepping.js";
 import { installTimeline } from "./timeline.js";
 import { installTracks } from "./tracks.js";
+import { installWatch } from "./watch.js";
 
 /**
  * The page can open on a given state, for links and screenshots:
@@ -57,6 +58,7 @@ installTracks();
 installBreakpoints();
 installCodeView();
 installStepping();
+installWatch();
 installResizer();
 installProblems();
 installAudio();

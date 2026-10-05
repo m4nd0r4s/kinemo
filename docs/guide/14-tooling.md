@@ -212,8 +212,9 @@ The page has three panes: the **outliner** (every object as a tree), the **frame
   overlay.
 - `--debug layout` draws object boxes and constraint relations; `--debug safe` draws the
   safe area.
-- After every build, `dev` builds the scene a second time and warns if the two results
-  differ (see [Determinism](#determinism)).
+- After a build, once you pause for a second, `dev` builds the scene a second time in the
+  background and warns if the two results differ (see [Determinism](#determinism)). The
+  preview never waits for it, and a newer save cancels the pending check.
 
 ### Editing from the preview
 

@@ -89,6 +89,8 @@ Methods:
 
 Shapes, groups, images, SVG and mass objects (points, vector fields, stream lines).
 
+- [`k.Angle`](objects.md#k-angle): Angle markers.
+- [`k.RightAngle`](objects.md#k-rightangle): `k.RightAngle(a, vertex, b, size=0.3)`: the square mark of a right angle at `vertex`, along the rays toward `a` and `b`.
 - [`k.Circle`](objects.md#k-circle): Circle of radius `r`, centered on its position.
 - [`k.Dot`](objects.md#k-dot): Filled dot (default radius 0.08), with no stroke.
 - [`k.Ellipse`](objects.md#k-ellipse): Ellipse of width `w` and height `h`, centered on its position.

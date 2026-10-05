@@ -102,10 +102,22 @@ pub fn rasterize(dl: &DisplayList, antialias: bool) -> Image {
     for item in &dl.items {
         draw_item(&mut pm, item, antialias);
     }
-    let mut rgba = Vec::with_capacity(pm.data().len());
-    for px in pm.pixels() {
-        let c = px.demultiply();
-        rgba.extend_from_slice(&[c.red(), c.green(), c.blue(), c.alpha()]);
+    let opaque = dl.background[3] >= 1.0;
+    let mut rgba = pm.take();
+    // Over an opaque background every pixel stays opaque (source-over), and premultiplied
+    // equals straight alpha: the buffer is already the image. Otherwise demultiply in place,
+    // skipping the opaque and empty pixels.
+    if !opaque {
+        for pixel in rgba.as_chunks_mut::<4>().0 {
+            let alpha = pixel[3];
+            if alpha == 0 || alpha == 255 {
+                continue;
+            }
+            if let Some(c) = sk::PremultipliedColorU8::from_rgba(pixel[0], pixel[1], pixel[2], alpha) {
+                let c = c.demultiply();
+                *pixel = [c.red(), c.green(), c.blue(), c.alpha()];
+            }
+        }
     }
     Image { width: dl.width, height: dl.height, rgba }
 }

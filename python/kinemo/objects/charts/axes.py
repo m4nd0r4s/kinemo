@@ -14,7 +14,7 @@ from ..props import PropSpec
 from ..shapes import Dot, Line
 from ..text import Text
 from .plot import FAR, Area, Plot
-from .sampling import sample, ticks
+from .sampling import nice_step, sample, ticks
 
 if TYPE_CHECKING:
     from ...anim.animation import Animation, AnimationTiming
@@ -37,6 +37,9 @@ PALETTE_CYCLE = ("BLUE", "YELLOW", "RED", "GREEN", "PURPLE", "ORANGE")
 
 #: `ax.vline(..., style=)`.
 LineStyle = Literal["solid", "dashed"]
+
+#: `tick_format=`: a format string (`"{:.1f}"`, `"{}%"`) or a function from value to label.
+TickFormat = str | Callable[[float], str]
 
 
 def _name_from_call(node: Node, factory: Callable[..., Any]) -> None:
@@ -80,6 +83,10 @@ class Axes(Group):
         size: PropAccessor[Vec]
         _axes_opts: tuple[float, float, float | None, float, float, float | None, tuple[str, str] | None, bool, bool]
         _plot_count: int
+        _tick_values: dict[str, list[float] | None]
+        _tick_count: dict[str, int]
+        _tick_format: TickFormat | None
+        _ticks: dict[tuple[str, float], list[Node]]
 
     def __init__(
         self,
@@ -91,12 +98,22 @@ class Axes(Group):
         width: float = 8.0,
         height: float = 4.5,
         tick_labels: bool = True,
+        x_ticks: Sequence[float] | None = None,
+        y_ticks: Sequence[float] | None = None,
+        tick_format: TickFormat | None = None,
         **props: Unpack[UnplacedKeywords],
     ) -> None:
         x0, x1, xs = _range(x)
         y0, y1, ys = _range(y)
         object.__setattr__(self, "_axes_opts", (x0, x1, xs, y0, y1, ys, labels, grid, tick_labels))
         object.__setattr__(self, "_plot_count", 0)
+        # Explicit tick values stay as given; generated ones keep their count and are
+        # regenerated with a nice step when the axes zoom.
+        explicit = {"x": [float(v) for v in x_ticks] if x_ticks is not None else None, "y": [float(v) for v in y_ticks] if y_ticks is not None else None}
+        object.__setattr__(self, "_tick_values", explicit)
+        object.__setattr__(self, "_tick_count", {"x": max(2, len(ticks(x0, x1, xs))), "y": max(2, len(ticks(y0, y1, ys)))})
+        object.__setattr__(self, "_tick_format", tick_format)
+        object.__setattr__(self, "_ticks", {})
         super().__init__(x_range=(x0, x1), y_range=(y0, y1), size=(width, height), **props)
 
     # ---- coordinate mapping ------------------------------------------------------
@@ -140,7 +157,6 @@ class Axes(Group):
     def _parts(self) -> list[Node]:
         x0, x1, xs, y0, y1, ys, labels, grid, tick_labels = self._axes_opts
         w = self.size
-        muted = self._scene.theme.muted
         parts: list[Node] = []
         ax_y, ax_x = self._axis_y(), self._axis_x()
         x_axis = Line(start=vec(-w.x / 2, ax_y), end=vec(w.x / 2, ax_y), stroke_width=3.0)
@@ -148,28 +164,60 @@ class Axes(Group):
         self._name_part(x_axis, "x_axis")
         self._name_part(y_axis, "y_axis")
         parts += [x_axis, y_axis]
-        for v in ticks(x0, x1, xs):
-            px = self.map_x(v)
-            vis = self._visible_x(v)
-            if grid:
-                parts.append(Line(start=vec(px, -w.y / 2), end=vec(px, w.y / 2), stroke=muted, stroke_width=1.5, opacity=0.5, visible=vis))
-            parts.append(Line(start=vec(px, ax_y - TICK), end=vec(px, ax_y + TICK), stroke_width=2.5, visible=vis))
-            if tick_labels:
-                parts.append(Text(f"{v:g}", size=LABEL_SIZE, x=px, y=ax_y - 0.28, visible=vis))
-        for v in ticks(y0, y1, ys) if self._y_ticks else ():
-            py = self.map_y(v)
-            vis = self._visible_y(v)
-            if grid:
-                parts.append(Line(start=vec(-w.x / 2, py), end=vec(w.x / 2, py), stroke=muted, stroke_width=1.5, opacity=0.5, visible=vis))
-            parts.append(Line(start=vec(ax_x - TICK, py), end=vec(ax_x + TICK, py), stroke_width=2.5, visible=vis))
-            if tick_labels:
-                parts.append(Text(f"{v:g}", size=LABEL_SIZE, x=ax_x - 0.3, y=py, visible=vis))
+        for v in self._tick_values_for("x", x0, x1, xs):
+            parts += self._tick_parts("x", v)
+        for v in self._tick_values_for("y", y0, y1, ys) if self._y_ticks else ():
+            parts += self._tick_parts("y", v)
         if labels:
             xl = Text(labels[0], size=0.3, x=w.x / 2 + 0.5, y=ax_y - 0.28)
             yl = Text(labels[1], size=0.3, x=ax_x, y=w.y / 2 + 0.4)
             self._name_part(xl, "x_label")
             self._name_part(yl, "y_label")
             parts += [xl, yl]
+        return parts
+
+    def _tick_values_for(self, axis: str, lo: float, hi: float, step: float | None) -> list[float]:
+        explicit = self._tick_values[axis]
+        if explicit is not None:
+            return explicit
+        return ticks(lo, hi, step)
+
+    def _tick_label(self, v: float) -> str:
+        fmt = self._tick_format
+        if fmt is None:
+            return f"{v:g}"
+        return fmt(v) if callable(fmt) else fmt.format(v)
+
+    def _tick_parts(self, axis: str, v: float) -> list[Node]:
+        """Grid line, tick mark and label for one value, shown while the value is in view.
+        Made once per value: zooms reuse the ones still in range."""
+        key = (axis, round(v, 10))
+        if key in self._ticks:
+            return self._ticks[key]
+        grid, tick_labels = self._axes_opts[7], self._axes_opts[8]
+        w = self.size
+        muted = self._scene.theme.muted
+        parts: list[Node] = []
+        if axis == "x":
+            px, ax_y, vis = self.map_x(v), self._axis_y(), self._visible_x(v)
+            if grid:
+                parts.append(Line(start=vec(px, -w.y / 2), end=vec(px, w.y / 2), stroke=muted, stroke_width=1.5, opacity=0.5, visible=vis))
+            parts.append(Line(start=vec(px, ax_y - TICK), end=vec(px, ax_y + TICK), stroke_width=2.5, visible=vis))
+            if tick_labels:
+                parts.append(Text(self._tick_label(v), size=LABEL_SIZE, x=px, y=ax_y - 0.28, visible=vis))
+        else:
+            py, ax_x, vis = self.map_y(v), self._axis_x(), self._visible_y(v)
+            if grid:
+                parts.append(Line(start=vec(-w.x / 2, py), end=vec(w.x / 2, py), stroke=muted, stroke_width=1.5, opacity=0.5, visible=vis))
+            parts.append(Line(start=vec(ax_x - TICK, py), end=vec(ax_x + TICK, py), stroke_width=2.5, visible=vis))
+            if tick_labels:
+                label = Text(self._tick_label(v), size=LABEL_SIZE, y=py, visible=vis)
+                # Right-aligned to the axis, so long labels clear it instead of crossing it.
+                label.set(x=ax_x - TICK - 0.1 - label.width.now / 2)
+                parts.append(label)
+        for part in parts:
+            object.__setattr__(part, "_tick_axis", axis)
+        self._ticks[key] = parts
         return parts
 
     @staticmethod
@@ -369,13 +417,43 @@ class Axes(Group):
         return group
 
     def zoom_to(self, *, x: Sequence[float] | None = None, y: Sequence[float] | None = None, **kw: Unpack[AnimationTiming]) -> Animation:
-        """Animated change of the visible ranges. ≡ `.to(x_range=..., y_range=...)`."""
+        """Animated change of the visible ranges. ≡ `.to(x_range=..., y_range=...)`. Ticks are
+        regenerated for the new ranges with a nice step: new ones grow in, ones that no longer
+        fit fade out (explicit `x_ticks=`/`y_ticks=` stay as given)."""
         props: dict[str, Any] = {}
         if x is not None:
             props["x_range"] = (float(x[0]), float(x[1]))
         if y is not None:
             props["y_range"] = (float(y[0]), float(y[1]))
-        return self.to(**props, **kw)
+        children = self._children_after_zoom(props.get("x_range"), props.get("y_range"))
+        if children is None:
+            return self.to(**props, **kw)
+        return self.to(**props, children=children, **kw)
+
+    def _children_after_zoom(self, x_range: tuple[float, float] | None, y_range: tuple[float, float] | None) -> list[Node] | None:
+        """The children with the tick sets of the new ranges, or None when nothing changes
+        (or the axes are not in the scene yet, so nothing could enter)."""
+        if not self._scene._b.present(self._id, self._scene.cursor):
+            return None
+        changed = {axis: new_range for axis, new_range in (("x", x_range), ("y", y_range if self._y_ticks else None)) if new_range is not None and self._tick_values[axis] is None}
+        if not changed:
+            return None
+        wanted: list[Node] = []
+        for axis, (lo, hi) in changed.items():
+            for v in ticks(lo, hi, nice_step(lo, hi, self._tick_count[axis])):
+                wanted += self._tick_parts(axis, v)
+        wanted_ids = {id(p) for p in wanted}
+        kept = [c for c in self.children if self._tick_axis(c) not in changed or id(c) in wanted_ids]
+        kept_ids = {id(c) for c in kept}
+        added = [p for p in wanted if id(p) not in kept_ids]
+        if not added and len(kept) == len(self.children):
+            return None
+        # New ticks join the other axis parts, under the plots.
+        last_axis_part = max((i for i, c in enumerate(kept) if self._tick_axis(c) is not None or getattr(c, "_part", None) in ("x_axis", "y_axis")), default=-1)
+        return kept[: last_axis_part + 1] + added + kept[last_axis_part + 1 :]
+
+    def _tick_axis(self, node: Node) -> str | None:
+        return getattr(node, "_tick_axis", None)
 
 
 class NumberLine(Axes):

@@ -56,7 +56,9 @@ def loop(s: k.Scene):
         "Charts",
         "Cartesian axes with ticks, labels and an optional grid: `x=(min, max, step)`, "
         "`y=(min, max)`, `labels=(\"x\", \"y\")`, `width=`/`height=` in units. The visible "
-        "ranges are signals: `ax.zoom_to(...)` animates them and everything on the axes follows.",
+        "ranges are signals: `ax.zoom_to(...)` animates them and everything on the axes follows. "
+        "`x_ticks=`/`y_ticks=` set the tick values by hand and `tick_format=` (`\"{:.1f}\"` or a "
+        "function) writes their labels; y labels are right-aligned to the axis.",
         '''
 import kinemo as k
 
@@ -65,6 +67,11 @@ def axes(s: k.Scene):
     ax = k.Axes(x=(0, 10, 2), y=(0, 5, 1), labels=("t", "v"), grid=True).place(at="center")
     s.play(k.draw(ax))
     s.wait(0.5)
+
+@k.scene
+def custom_ticks(s: k.Scene):
+    ax = k.Axes(x=(0, 30), y=(0, 1, 0.25), x_ticks=[4, 9, 16, 25], tick_format="{:.2f}").place(at="center")
+    s.play(k.draw(ax))
 ''',
         related=("Axes.plot", "Axes.zoom_to", "k.NumberLine"),
     ),
@@ -246,7 +253,9 @@ def scatter(s: k.Scene):
         "Axes.zoom_to",
         "Charts",
         "Named transition: animates the visible ranges of the axes (`x=(a, b)`, `y=(c, d)`). "
-        "Curves, ticks and points follow. Equivalent to `ax.to(x_range=..., y_range=...)`.",
+        "Curves, ticks and points follow, and ticks are regenerated with a nice step for the new "
+        "ranges: new ones grow in, ones that no longer fit fade out. Equivalent to "
+        "`ax.to(x_range=..., y_range=...)` plus the tick change.",
         '''
 import kinemo as k
 

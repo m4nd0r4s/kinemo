@@ -21,4 +21,4 @@ pub mod format;
 pub mod interp;
 pub mod noise;
 
-pub use evaluator::{Evaluated, Evaluator, NoResolver, PointContext, PointSource, Resolver};
+pub use evaluator::{Evaluated, Evaluator, NoResolver, PointContext, PointSource, Resolver, TimelineIndex};

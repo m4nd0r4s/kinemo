@@ -1,7 +1,7 @@
 //! The layout engine: memoized per-time queries over the scene graph.
 
 use std::cell::RefCell;
-use std::collections::{HashMap, HashSet};
+use rustc_hash::{FxHashMap, FxHashSet};
 
 use kurbo::{Affine, Rect};
 
@@ -23,10 +23,13 @@ pub(crate) enum Query {
 /// Layout queries for one scene. Results are memoized per (object, time).
 pub struct Layout<'a> {
     pub(crate) ev: &'a Evaluator<'a>,
-    bbox: RefCell<HashMap<Key, Rect>>,
-    translation: RefCell<HashMap<Key, [f64; 2]>>,
-    arrangements: RefCell<HashMap<Key, Arrangement>>,
-    active: RefCell<HashSet<(Query, ObjectId, u64)>>,
+    bbox: RefCell<FxHashMap<Key, Rect>>,
+    translation: RefCell<FxHashMap<Key, [f64; 2]>>,
+    arrangements: RefCell<FxHashMap<Key, Arrangement>>,
+    /// Parent-chain transforms, asked once per leaf and again by every descendant.
+    world_affines: RefCell<FxHashMap<Key, Affine>>,
+    render_affines: RefCell<FxHashMap<Key, Affine>>,
+    active: RefCell<FxHashSet<(Query, ObjectId, u64)>>,
     issues: RefCell<Vec<LayoutIssue>>,
 }
 
@@ -37,6 +40,8 @@ impl<'a> Layout<'a> {
             bbox: RefCell::default(),
             translation: RefCell::default(),
             arrangements: RefCell::default(),
+            world_affines: RefCell::default(),
+            render_affines: RefCell::default(),
             active: RefCell::default(),
             issues: RefCell::default(),
         }
@@ -55,6 +60,8 @@ impl<'a> Layout<'a> {
         self.bbox.borrow_mut().clear();
         self.translation.borrow_mut().clear();
         self.arrangements.borrow_mut().clear();
+        self.world_affines.borrow_mut().clear();
+        self.render_affines.borrow_mut().clear();
     }
 
     /// Problems found while resolving (cycles, contradictions), deduplicated.
@@ -160,20 +167,32 @@ impl<'a> Layout<'a> {
 
     /// Parent chain transform: local → world, without render effects.
     pub fn world_affine(&self, o: ObjectId, t: f64) -> Affine {
+        let key = (o, t.to_bits());
+        if let Some(affine) = self.world_affines.borrow().get(&key) {
+            return *affine;
+        }
         let local = self.local_affine(o, t);
-        match self.scene().object(o).parent {
+        let affine = match self.scene().object(o).parent {
             Some(p) => self.world_affine(p, t) * local,
             None => local,
-        }
+        };
+        self.world_affines.borrow_mut().insert(key, affine);
+        affine
     }
 
     /// Local → world including the render-only effects of ancestors and the object.
     pub fn render_affine(&self, o: ObjectId, t: f64) -> Affine {
+        let key = (o, t.to_bits());
+        if let Some(affine) = self.render_affines.borrow().get(&key) {
+            return *affine;
+        }
         let own = self.local_affine(o, t) * self.effect_affine(o, t);
-        match self.scene().object(o).parent {
+        let affine = match self.scene().object(o).parent {
             Some(p) => self.render_affine(p, t) * own,
             None => own,
-        }
+        };
+        self.render_affines.borrow_mut().insert(key, affine);
+        affine
     }
 
     pub fn world_bbox(&self, o: ObjectId, t: f64) -> Rect {

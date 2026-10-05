@@ -2,6 +2,7 @@
 //! evaluates expression graphs, memoizing per `(signal, t)`.
 
 mod expr;
+mod index;
 mod memo;
 pub(crate) mod ops;
 mod point;
@@ -10,7 +11,9 @@ mod timeline;
 use crate::interp;
 use kinemo_ir::{Lerp, ObjectId, Scene, SignalId, Value};
 use memo::{time_key, Memo};
+pub use index::TimelineIndex;
 pub use point::{PointContext, PointSource};
+use std::sync::Arc;
 
 /// The raw state of a signal at a time.
 #[derive(Clone, Debug, PartialEq)]
@@ -73,11 +76,20 @@ impl Resolver for NoResolver {
 pub struct Evaluator<'a> {
     scene: &'a Scene,
     memo: Memo,
+    /// Shared time-independent work; `None` keeps it in `memo` (a one-off evaluator).
+    index: Option<Arc<TimelineIndex>>,
 }
 
 impl<'a> Evaluator<'a> {
     pub fn new(scene: &'a Scene) -> Self {
-        Evaluator { scene, memo: Memo::default() }
+        Evaluator { scene, memo: Memo::default(), index: None }
+    }
+
+    /// An evaluator sharing the time-independent work of `index` (made for this scene) with
+    /// other evaluators: one per frame or per thread, one index per render.
+    pub fn with_index(scene: &'a Scene, index: Arc<TimelineIndex>) -> Self {
+        debug_assert!(index.fits(scene), "timeline index made for another scene");
+        Evaluator { scene, memo: Memo::default(), index: Some(index) }
     }
 
     pub fn scene(&self) -> &'a Scene {
@@ -116,7 +128,8 @@ impl<'a> Evaluator<'a> {
         ev
     }
 
-    /// Drops all memoized results.
+    /// Drops the memoized per-time results, keeping their capacity (the time-independent work
+    /// stays), so one evaluator can serve many instants.
     pub fn clear(&self) {
         self.memo.clear();
     }

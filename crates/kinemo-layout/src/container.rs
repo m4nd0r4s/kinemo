@@ -3,7 +3,7 @@
 //! Reordering (`row.swap`, `row.insert`, ...) animates the `children` signal; during the
 //! transition each child blends between its slot in the old and in the new arrangement.
 
-use std::collections::HashMap;
+use rustc_hash::FxHashMap as HashMap;
 
 use kurbo::Rect;
 
@@ -48,7 +48,7 @@ impl<'a> Layout<'a> {
                 let travel = |id: ObjectId| (b[&id][axis] - a[&id][axis]).abs();
                 // Each pair that passes clears exactly: they step aside by half their summed
                 // size, shared in proportion to how far each one travels.
-                let mut clearance: HashMap<ObjectId, f64> = HashMap::new();
+                let mut clearance: HashMap<ObjectId, f64> = HashMap::default();
                 for (x, y) in crossing(&old, &new) {
                     let needed = (across(x) + across(y)) / 2.0;
                     let total = travel(x) + travel(y);

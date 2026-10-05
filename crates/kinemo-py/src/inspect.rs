@@ -36,21 +36,20 @@ impl Builder {
     /// Layout problems found when resolving every object at each of `times`.
     fn layout_issues(&self, times: Vec<f64>) -> String {
         let mut out: Vec<Json> = vec![];
-        for t in times {
-            self.with_layout(|l| {
-                for o in 0..l.scene().objects.len() as u32 {
-                    l.translation(o, t);
-                }
-                for issue in l.issues() {
-                    let code = match issue.kind {
-                        LayoutIssueKind::Cycle => "K0402",
-                        LayoutIssueKind::Contradiction => "K0403",
-                    };
-                    if !out.iter().any(|j| j["code"] == code && j["objects"] == json!(issue.objects)) {
-                        out.push(json!({"code": code, "objects": issue.objects, "t": issue.t}));
-                    }
-                }
-            });
+        let issues_at = self.with_layout_at(times, |l, t| {
+            for o in 0..l.scene().objects.len() as u32 {
+                l.translation(o, t);
+            }
+            l.issues()
+        });
+        for issue in issues_at.into_iter().flatten() {
+            let code = match issue.kind {
+                LayoutIssueKind::Cycle => "K0402",
+                LayoutIssueKind::Contradiction => "K0403",
+            };
+            if !out.iter().any(|j| j["code"] == code && j["objects"] == json!(issue.objects)) {
+                out.push(json!({"code": code, "objects": issue.objects, "t": issue.t}));
+            }
         }
         to_json(&out)
     }

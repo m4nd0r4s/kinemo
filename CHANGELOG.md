@@ -4,6 +4,48 @@ All notable changes to kinemo are listed here. The project follows
 [semantic versioning](https://semver.org/); until 1.0, a minor version may change the API, and
 `kinemo upgrade` rewrites the forms it replaces.
 
+## 0.13.0
+
+Components for explanatory videos: terminals, annotation marks, angles, cards, gauges, callouts,
+arrays, graphs and a number plane that bends, plus axes that keep their ticks right while they
+zoom.
+
+**Added**
+
+- **`k.Terminal`:** a terminal or REPL window. `term.type(cmd)` types a command as `k.Code`
+  after the prompt with a caret, `term.output(text)` prints rows (staggered or at once), and
+  the window scrolls when full; `term.clear()`.
+- **Annotation marks:** `k.underline`, `k.box`, `k.encircle`, `k.strike` and `k.cross` draw
+  around any object and follow it.
+- **`k.Angle` and `k.RightAngle`:** the arc of the smaller angle between two rays, with a
+  label or its measure (`unit="deg"` or `"rad"`), following reactive points.
+- **`k.Card`:** a panel around content with a title, caption and accent bar.
+- **`k.Gauge`:** a dial with ticks, colored zones, a needle and a readout; `gauge.to(value=)`.
+- **`k.Callout`:** a label pointing at an object as a bubble, a box or a leader line.
+- **`k.Array`:** cells with indices for algorithm videos: `swap`, `compare`, `set` and
+  `pointer`.
+- **`k.Graph`:** nodes and edges with `force`, `tree`, `layered` and `circle` layouts (or
+  positions), weighted and directed edges, `add_node`, `add_edge`, `remove`, `path` highlights
+  and `relayout` transitions.
+- **`k.NumberPlane`:** a grid with basis vectors; `plane.apply([[a, b], [c, d]])` or
+  `plane.apply(fn)` deforms it, carrying `plane.vector`, `plane.dot`, `plane.polygon` and
+  `plane.add(obj, at=)`; `plane.reset()`.
+- **Axes:** `ax.add(obj)` puts objects in the axes' coordinates (they follow zooms),
+  `ax.origin()` and `ax.in_view(x=, y=)`; `x_ticks=`/`y_ticks=` set tick values and
+  `tick_format=` writes their labels.
+- The style keyword dicts are public for reusable styles: `k.StyleKeywords`,
+  `k.PaintKeywords`, `k.TextKeywords` and the others.
+
+**Changed**
+
+- `ax.zoom_to(...)` regenerates the ticks for the new ranges with a nice step: new ones grow
+  in and ones that no longer fit fade out. y tick labels are right-aligned to the axis.
+- W1003 (contrast) measures text against the shapes drawn behind it, not only the background.
+
+**Fixed**
+
+- `group.to(children=...)` enters the new children and exits the removed ones.
+
 ## 0.12.0
 
 A debugging view in `kinemo dev`: the scene's code follows the playhead, with breakpoints,

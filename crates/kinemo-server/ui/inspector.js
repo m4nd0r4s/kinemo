@@ -135,6 +135,14 @@ function renderBar(bar) {
     const timing = [...argumentRows(call.site, call.key, (a) => a.keyword !== null), ...missingRows(call.site, call.key)];
     sections.push(el("table", { class: "props" }, ...timing));
   }
+  // Where it was called from: the statement run of this bar, and the user lines above it.
+  const statement = (state.meta.statements || []).find((s) => s.file === bar.file && s.line === bar.line);
+  const run = statement && statement.runs.find((r) => Math.abs(r.start - bar.start) < 1e-6);
+  const callers = (run && run.callers) || [];
+  if (callers.length) {
+    sections.push(el("div", { class: "section-title" }, "Called from"));
+    sections.push(...callers.map((c) => el("div", { class: "object-where" }, "← ", sourceLink(c))));
+  }
   fill(
     head(bar.label, "animation"),
     el("div", { class: "object-where" }, editorLink(bar.file, bar.line, `${basename(bar.file)}:${bar.line}`), `  · ${bar.start.toFixed(2)}–${bar.end.toFixed(2)} s`),

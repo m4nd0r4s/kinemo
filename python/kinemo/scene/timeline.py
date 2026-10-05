@@ -7,7 +7,7 @@ from contextlib import contextmanager
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Callable, Iterator, Literal, cast
 
-from .._runtime.spans import Span, user_span
+from .._runtime.spans import Span, user_span, user_stack
 from ..anim.animation import Animation, Par, check_duration, not_an_animation
 from ..anim.ease import Ease, EaseLike, as_ease
 from ..diagnostics import Collector, KinemoError
@@ -46,9 +46,11 @@ class Statement:
     label: str
     span: Span
     position: int
+    #: The user lines that called this one, innermost first (a clip's call site, a helper's).
+    callers: tuple[Span, ...] = ()
 
     def warped(self, warp: Callable[[float], float]) -> "Statement":
-        return Statement(self.kind, warp(self.start), warp(self.end), self.label, self.span, self.position)
+        return Statement(self.kind, warp(self.start), warp(self.end), self.label, self.span, self.position, self.callers)
 
 
 class TimelineMixin:
@@ -74,7 +76,11 @@ class TimelineMixin:
 
     def _record(self, kind: str, start: float, end: float, label: str = "", span: Span | None = None) -> None:
         """Note a statement run for the code view."""
-        self._statements.append(Statement(kind, start, end, label, span or user_span(), self._b.log_position()))
+        stack = user_stack(root=self.__dict__.get("_scene_code"))
+        here = span or (stack[0] if stack else user_span())
+        # Callers: the user frames above the statement's own line.
+        callers = tuple(f for f in stack if (f.file, f.line) != (here.file, here.line))
+        self._statements.append(Statement(kind, start, end, label, here, self._b.log_position(), callers))
 
     def _schedule(self, anims: tuple[object, ...], duration: float | None, ease: EaseLike | None, at: float | None, kind: str = "start") -> TimeSpan:
         anim = self._as_animation(anims)

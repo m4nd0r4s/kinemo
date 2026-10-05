@@ -113,11 +113,12 @@ function show(path) {
 
 /** Light the lines running at the playhead; the latest-started one is the current line. */
 function updateLit() {
-  for (const node of lit) node.classList.remove("running", "current");
+  for (const node of lit) node.classList.remove("running", "current", "caller");
   lit = [];
   if (!file) return;
   const t = state.t;
   let current = null;
+  let currentRun = null;
   let latest = -Infinity;
   for (const [line, runs] of runsByLine()) {
     const node = lineNodes[line - 1];
@@ -127,9 +128,20 @@ function updateLit() {
     if (!run) continue;
     node.classList.add("running");
     lit.push(node);
-    if (run.start >= latest) {
+    // The latest-started run is current; on a tie, the innermost (a clip's line over its call).
+    const depth = (run.callers || []).length;
+    if (run.start > latest + 1e-9 || (Math.abs(run.start - latest) <= 1e-9 && depth >= ((currentRun && currentRun.callers) || []).length)) {
       latest = run.start;
       current = node;
+      currentRun = run;
+    }
+  }
+  // The lines that called the current one (a clip's call site, a helper's), in this file.
+  for (const caller of (currentRun && currentRun.callers) || []) {
+    const node = caller.file === file && lineNodes[caller.line - 1];
+    if (node && node !== current) {
+      node.classList.add("caller");
+      lit.push(node);
     }
   }
   if (current) {

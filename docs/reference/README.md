@@ -120,6 +120,11 @@ Text, LaTeX math and highlighted code, with addressable parts.
 - [`k.Text`](text.md#k-text): Text with minimal inline markup (`**bold**`, `*italic*`, `` `code` ``).
 - [`k.Math`](text.md#k-math): Formula in LaTeX syntax, typeset by the built-in engine (no TeX installation needed).
 - [`k.Code`](text.md#k-code): Code with syntax highlighting (tree-sitter) and stable tokens: `lang=`, `line_numbers=True`, `size=`, `theme="auto"` (follows the scene background).
+- [`k.underline`](text.md#k-underline): Annotation marks on any object or part of a text or formula (`eq["dx"]`): `k.underline(target)`, `k.box(target)`, `k.encircle(target)`, `k.strike(target)` (crossed out) and `k.cross(target)` (an X).
+- [`k.box`](text.md#k-box): A rounded box around `target`, `pad` away from its box.
+- [`k.cross`](text.md#k-cross): An X over `target`: two lines corner to corner, `pad` past its box.
+- [`k.encircle`](text.md#k-encircle): An ellipse around `target` (its box, `pad` larger on each side, times √2 so the corners fit inside).
+- [`k.strike`](text.md#k-strike): A line through the middle of `target` (struck out), `overhang` past each side.
 - [`k.Terminal`](text.md#k-terminal): A terminal or REPL window: `title=`, `prompt=` (`"$ "`, `">>>"`), `lang=` of the commands (`"bash"`, `"python"`...), `width=` and `rows=` on screen, `size=`, `theme="auto"`.
 
 Methods:

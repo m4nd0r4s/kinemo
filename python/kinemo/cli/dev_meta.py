@@ -196,7 +196,8 @@ def scene_statements(result: BuildResult) -> list[dict[str, Any]]:
     by_line: dict[tuple[str, int], list[dict[str, Any]]] = {}
     for st in s._statements:  # pyright: ignore[reportPrivateUsage]
         key = (os.path.abspath(st.span.file), st.span.line)
-        by_line.setdefault(key, []).append({"kind": st.kind, "start": st.start, "end": st.end, "label": st.label})
+        callers = [{"file": os.path.abspath(c.file), "line": c.line} for c in st.callers]
+        by_line.setdefault(key, []).append({"kind": st.kind, "start": st.start, "end": st.end, "label": st.label, "callers": callers})
     return [
         {"file": file, "line": line, "runs": sorted(runs, key=lambda r: (r["start"], r["end"]))}
         for (file, line), runs in sorted(by_line.items())

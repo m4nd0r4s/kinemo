@@ -89,6 +89,7 @@ function firstHit(from, to) {
     if (!point.enabled || point.orphan) continue;
     runsOf(point.file, point.line).forEach((run, i) => {
       if (point.run && point.run !== i + 1) return;
+      if (point.caller && !(run.callers || []).some((c) => `${c.file}:${c.line}` === point.caller)) return;
       if (run.start > from + 1e-9 && run.start <= to + 1e-9 && (!best || run.start < best.run.start)) best = { point, run };
     });
   }
@@ -131,6 +132,25 @@ function renderList() {
           )
         : null;
     if (runChoice) runChoice.value = String(point.run || 0);
+    // A line reached from several call sites (a clip used in two places) can stop for one.
+    const callers = [...new Map(runs.filter((r) => r.callers && r.callers.length).map((r) => [`${r.callers[0].file}:${r.callers[0].line}`, r.callers[0]])).values()];
+    const callerChoice =
+      callers.length > 1
+        ? el(
+            "select",
+            {
+              class: "bp-run",
+              title: "Break when called from anywhere, or from one call site",
+              onchange: (e) => {
+                point.caller = e.currentTarget.value || null;
+                save();
+              },
+            },
+            el("option", { value: "" }, "any caller"),
+            ...callers.map((c) => el("option", { value: `${c.file}:${c.line}` }, `from ${basename(c.file)}:${c.line}`))
+          )
+        : null;
+    if (callerChoice) callerChoice.value = point.caller || "";
     return el(
       "div",
       { class: `bp-row${point.orphan ? " orphan" : ""}` },
@@ -145,6 +165,7 @@ function renderList() {
       }),
       el("span", { class: "bp-where", title: point.text }, `${basename(point.file)}:${point.line}`, point.orphan ? " (line gone)" : ""),
       runChoice,
+      callerChoice,
       el("button", { class: "ghost bp-remove", title: "Remove", onclick: () => ((points = points.filter((p) => p !== point)), save(), emit("breakpoints")) }, "✕")
     );
   });

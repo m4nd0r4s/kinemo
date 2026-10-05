@@ -42,6 +42,8 @@ class SceneDef:
         token = push_scene(s)
         try:
             args = _param_signals(s, config, params or {})
+            # Call stacks of statements stop at the scene function (see `user_stack`).
+            s.__dict__["_scene_code"] = getattr(self.fn, "__code__", None)
             self.fn(s, **args)
             s._finish()
         finally:

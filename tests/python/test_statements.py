@@ -82,3 +82,36 @@ def test_voice_blocks_and_v_at_are_statements(tmp_path: Path) -> None:
     lines = {entry["line"]: entry["runs"] for entry in scene_statements(result)}
     assert lines[6][0]["kind"] == "voice" and lines[6][0]["label"] == "one two three four"
     assert lines[7][0]["kind"] == "wait" and lines[7][0]["end"] > lines[7][0]["start"]
+
+
+CLIP_SCENE = '''import kinemo as k
+
+
+@k.clip
+def pop(s, obj):
+    s.play(k.indicate(obj), duration=0.3)
+    s.wait(0.1)
+
+
+def twice(s, obj):
+    s.play(pop(obj))
+    s.play(pop(obj))
+
+
+@k.scene
+def calls(s: k.Scene):
+    dot = k.Dot()
+    s.add(dot)
+    twice(s, dot)
+'''
+
+
+def test_runs_inside_clips_and_helpers_know_their_callers(tmp_path: Path) -> None:
+    scene = tmp_path / "scene.py"
+    scene.write_text(CLIP_SCENE, encoding="utf-8")
+    result = build(find_scenes(load_module(str(scene)))[0], {})
+    lines = {entry["line"]: entry["runs"] for entry in scene_statements(result)}
+    inner = lines[6]
+    assert [[c["line"] for c in run["callers"]] for run in inner] == [[11, 19], [12, 19]]
+    assert [c["line"] for c in lines[11][0]["callers"]] == [19]
+    assert lines[18][0]["callers"] == []

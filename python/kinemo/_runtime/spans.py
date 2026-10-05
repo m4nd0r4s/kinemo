@@ -5,8 +5,9 @@ from __future__ import annotations
 import linecache
 import os
 import sys
+import sysconfig
 from dataclasses import dataclass
-from types import FrameType
+from types import CodeType, FrameType
 
 _PKG_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -58,6 +59,32 @@ def user_span(skip: int = 1) -> Span:
             return _call_span(frame)
         frame = frame.f_back
     return UNKNOWN
+
+
+#: Folders of the standard library and installed packages: never part of a user call stack.
+_LIBRARIES = tuple(
+    os.path.abspath(p) + os.sep for p in {sysconfig.get_path(name) for name in ("stdlib", "platstdlib", "purelib", "platlib")} if p
+)
+#: Deepest user call chain recorded.
+STACK_LIMIT = 8
+
+
+def user_stack(skip: int = 1, root: CodeType | None = None) -> tuple[Span, ...]:
+    """The user frames calling the current one, innermost first: the scene's lines that led to
+    this call, through clips, components and helper functions (kinemo, the standard library
+    and installed packages are left out). It stops at `root` (the scene function), so the code
+    that built the scene (a script, a test) is not part of it."""
+    frame = sys._getframe(skip)
+    out: list[Span] = []
+    while frame is not None and len(out) < STACK_LIMIT:
+        name = frame.f_code.co_filename
+        path = os.path.abspath(name)
+        if not _is_internal(name) and not path.startswith(_LIBRARIES) and not name.startswith("<"):
+            out.append(_call_span(frame))
+        if root is not None and frame.f_code is root:
+            break
+        frame = frame.f_back
+    return tuple(out)
 
 
 def _call_span(frame: FrameType) -> Span:

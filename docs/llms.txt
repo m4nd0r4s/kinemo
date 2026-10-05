@@ -470,6 +470,22 @@ def easing(s: k.Scene):
 
 ### Objects
 
+#### `k.Array(values, *, index=True, cell=0.8, size=0.4, gap=0.0, **props)`
+An array for algorithm videos: cells with the values and the indices under them (`index=False` hides them), `cell=` size. `arr.cells[i]` is the cell now at index `i` (`.box`, `.value`); `arr.swap(i, j)` exchanges two cells along arcs, `arr.compare(i, j)` highlights them, `arr.set(i, v)` changes a value, and `arr.pointer("i", 2)` points a labelled arrow at an index (it fades in the first time, then slides). See also: `k.Row`, `k.Bar`.
+```python
+@k.scene
+def bubble_step(s: k.Scene):
+    arr = k.Array([5, 2, 9, 1]).place(at="center")
+    s.play(k.fade_in(arr))
+    s.play(arr.pointer("j", 0))
+    for j in range(3):
+        s.play(arr.pointer("j", j), duration=0.4)
+        s.play(arr.compare(j, j + 1), duration=0.4)
+        a, b = arr.cells[j].value.text.now, arr.cells[j + 1].value.text.now
+        if int(a) > int(b):
+            s.play(arr.swap(j, j + 1), duration=0.5)
+    s.wait(0.5)
+```
 #### `k.Circle(r=1.0, **props)`
 Circle of radius `r`, centered on its position. Like every shape, it accepts the style props `color` (shorthand for stroke and fill), `fill`, `fill_opacity`, `stroke`, `stroke_width`, `dash` and the transform props. See also: `k.Dot`, `k.Ellipse`, `k.Arc`.
 ```python

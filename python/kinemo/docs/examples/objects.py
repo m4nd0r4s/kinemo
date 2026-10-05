@@ -29,6 +29,32 @@ def styles(s: k.Scene):
         related=("Node.to", "k.Text"),
     ),
     DocEntry(
+        "k.Array",
+        "Objects",
+        "An array for algorithm videos: cells with the values and the indices under them "
+        "(`index=False` hides them), `cell=` size. `arr.cells[i]` is the cell now at index `i` "
+        "(`.box`, `.value`); `arr.swap(i, j)` exchanges two cells along arcs, `arr.compare(i, j)` "
+        "highlights them, `arr.set(i, v)` changes a value, and `arr.pointer(\"i\", 2)` points a "
+        "labelled arrow at an index (it fades in the first time, then slides).",
+        '''
+import kinemo as k
+
+@k.scene
+def bubble_step(s: k.Scene):
+    arr = k.Array([5, 2, 9, 1]).place(at="center")
+    s.play(k.fade_in(arr))
+    s.play(arr.pointer("j", 0))
+    for j in range(3):
+        s.play(arr.pointer("j", j), duration=0.4)
+        s.play(arr.compare(j, j + 1), duration=0.4)
+        a, b = arr.cells[j].value.text.now, arr.cells[j + 1].value.text.now
+        if int(a) > int(b):
+            s.play(arr.swap(j, j + 1), duration=0.5)
+    s.wait(0.5)
+''',
+        related=("k.Row", "k.Bar"),
+    ),
+    DocEntry(
         "Node.to",
         "Object state",
         "Animated state change: interpolates each prop from its value at the cursor to the target. "

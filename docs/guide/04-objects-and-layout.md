@@ -338,6 +338,32 @@ def group(s: k.Scene):
 Positions inside a group are local to it. An object has **exactly one parent**: adding it
 to a second group is `K0103`.
 
+## Arrays
+
+`k.Array(values)` draws an array as cells with their indices, for algorithm videos: swap cells,
+compare them, change a value and point at indices:
+
+```python
+import kinemo as k
+
+
+@k.scene
+def pass_one(s: k.Scene):
+    arr = k.Array([5, 2, 9, 1]).place(at="center")
+    s.play(k.fade_in(arr))
+    for j in range(3):
+        s.play(arr.pointer("j", j), duration=0.3)
+        s.play(arr.compare(j, j + 1), duration=0.4)
+        if int(arr.cells[j].value.text.now) > int(arr.cells[j + 1].value.text.now):
+            s.play(arr.swap(j, j + 1), duration=0.5)
+    s.wait(0.5)
+```
+
+- `arr.cells[i]` is the cell at index `i` at the cursor (after the swaps scheduled so far);
+  each cell has `.box` and `.value`.
+- `arr.pointer(name, i)` adds a labelled arrow under index `i` the first time and moves it
+  afterwards; several pointers stack below each other and follow the array if it moves.
+
 ## Changing parents: `k.reparent`
 
 `k.reparent(obj, new_parent)` moves an object to another group at the scheduled time. The

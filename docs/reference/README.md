@@ -120,9 +120,12 @@ Text, LaTeX math and highlighted code, with addressable parts.
 - [`k.Text`](text.md#k-text): Text with minimal inline markup (`**bold**`, `*italic*`, `` `code` ``).
 - [`k.Math`](text.md#k-math): Formula in LaTeX syntax, typeset by the built-in engine (no TeX installation needed).
 - [`k.Code`](text.md#k-code): Code with syntax highlighting (tree-sitter) and stable tokens: `lang=`, `line_numbers=True`, `size=`, `theme="auto"` (follows the scene background).
+- [`k.Terminal`](text.md#k-terminal): A terminal or REPL window: `title=`, `prompt=` (`"$ "`, `">>>"`), `lang=` of the commands (`"bash"`, `"python"`...), `width=` and `rows=` on screen, `size=`, `theme="auto"`.
 
 Methods:
 
+- [`terminal.type`](text.md#terminal-type): Named transition: types a command after the prompt, character by character, as `k.Code` in the terminal's language, with the caret following; `cps=` characters per second (22 by default) or `duration=`.
+- [`terminal.output`](text.md#terminal-output): Named transition: prints `text` below the last row, one row per line, all at once or `stagger=` seconds apart; lines that do not fit scroll the older ones up.
 - [`code.highlight`](text.md#code-highlight): Named transition: dims every line except `lines` (numbered from 1); `code.highlight(None)` removes the highlight.
 
 ## [Layout](layout.md)

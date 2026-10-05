@@ -277,6 +277,42 @@ def refactor(s: k.Scene):
     s.wait(0.5)
 ```
 
+## `k.Terminal`
+
+```python signature
+k.Terminal(*, title="", prompt="$ ", lang="bash", width=8, rows=8, size=0.28, theme="auto", chrome=True, caret=True, **props)
+```
+
+A terminal or REPL window for commands being run. `term.type(cmd)` types a command after the
+prompt as `k.Code` (colored in `lang`, so `k.morph` works between two versions of a command)
+with the caret following, and `term.output(text)` prints monospace lines below it. The window
+grows row by row and, once `rows` are on screen, scrolls the oldest up.
+
+```python
+import kinemo as k
+
+
+@k.scene
+def session(s: k.Scene):
+    term = k.Terminal(title="zsh", width=9, rows=5).place(at="center")
+    s.play(k.fade_in(term), duration=0.4)
+    s.play(term.type("pip install kinemo"))
+    s.play(term.output("Collecting kinemo\nSuccessfully installed kinemo", stagger=0.3))
+    s.play(term.type("kinemo check scene.py --strict"))
+    s.play(term.output("scene.py — scene 'hello' — ok"))
+    s.play(k.indicate(term.lines[-1]))
+    s.wait(0.5)
+```
+
+- `type(cmd, cps=22)` (or `duration=`) types at a natural speed; `output(text, stagger=0.3)`
+  prints line by line. Printed at once, lines that would scroll off immediately are skipped,
+  as a real terminal would show them.
+- `term.lines` are the rows on screen, oldest first: an input row is a group with `.prompt`
+  and `.code`, an output row is a `k.Text`. They are parts like any other (`term.lines[2]` in
+  `inspect` and the dev editor).
+- `term.clear()` fades the rows out; `chrome=False` hides the window bar, `caret=False` the
+  caret.
+
 ## Common mistakes
 
 > | Diagnostic | What happened | Fix |

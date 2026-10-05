@@ -12,7 +12,7 @@ use std::collections::HashMap;
 use kurbo::Rect;
 
 use kinemo_ir::{ObjectId, Scene};
-use kinemo_layout::{frame_rect, Layout};
+use kinemo_layout::frame_rect;
 
 use super::{InvisibilityReason, LintCode, LintContext, LintDetails, LintFinding, VisualLint};
 use crate::sampling::{object_label, FrameSample, LeafSample};
@@ -84,7 +84,7 @@ impl InvisibleObjectLint {
 }
 
 impl VisualLint for InvisibleObjectLint {
-    fn observe(&mut self, context: &LintContext, sample: &FrameSample, _layout: &Layout) {
+    fn observe(&mut self, context: &LintContext, sample: &FrameSample) {
         let frame = frame_rect(&context.scene.config);
         let mut still_invisible: HashMap<ObjectId, InvisibilityReason> = HashMap::new();
         for leaf in &sample.leaves {

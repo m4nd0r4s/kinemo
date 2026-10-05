@@ -6,7 +6,7 @@ use serde_json::{json, Value as Json};
 use kinemo_layout::LayoutIssueKind;
 use kinemo_render::inspect::object_json;
 
-use crate::builder::Builder;
+use crate::builder::{layout_at, Builder};
 use crate::errors::to_json;
 
 #[pymethods]
@@ -34,13 +34,16 @@ impl Builder {
     }
 
     /// Layout problems found when resolving every object at each of `times`.
-    fn layout_issues(&self, times: Vec<f64>) -> String {
+    fn layout_issues(&self, py: Python<'_>, times: Vec<f64>) -> String {
         let mut out: Vec<Json> = vec![];
-        let issues_at = self.with_layout_at(times, |l, t| {
-            for o in 0..l.scene().objects.len() as u32 {
-                l.translation(o, t);
-            }
-            l.issues()
+        let scene = &self.scene;
+        let issues_at = py.detach(|| {
+            layout_at(scene, &times, |l, t| {
+                for o in 0..l.scene().objects.len() as u32 {
+                    l.translation(o, t);
+                }
+                l.issues()
+            })
         });
         for issue in issues_at.into_iter().flatten() {
             let code = match issue.kind {

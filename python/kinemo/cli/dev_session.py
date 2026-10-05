@@ -6,6 +6,8 @@ from __future__ import annotations
 import json
 import os
 import sys
+import threading
+import time
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any
 
@@ -57,6 +59,10 @@ def read_text(path: str) -> str | None:
         return None
 
 
+#: Quiet time after a build before its determinism check runs (saves often come in bursts).
+DETERMINISM_IDLE_SECONDS = 1.0
+
+
 @dataclass
 class Session:
     path: str
@@ -70,6 +76,8 @@ class Session:
     #: refused when the file no longer matches (edited elsewhere in the meantime).
     texts: dict[str, str] = field(default_factory=lambda: dict[str, str]())
     index: SceneIndex | None = None
+    #: Counts builds from disk: a determinism check is dropped once a newer build started.
+    generation: int = 0
 
     @property
     def root(self) -> str:
@@ -121,7 +129,8 @@ class Session:
         version = self.server.set_scene(result.scene.builder, json.dumps(meta))
         if not live:
             self._report(result, version)
-            self._check_determinism(chosen[0], ir_json)
+            self.generation += 1
+            self._schedule_determinism_check(chosen[0], ir_json, self.generation)
         return True
 
     def _remember_files(self, main: str) -> None:
@@ -139,12 +148,27 @@ class Session:
             flush=True,
         )
 
-    def _check_determinism(self, definition: Any, first: str) -> None:
+    def _schedule_determinism_check(self, definition: Any, first: str, generation: int) -> None:
+        """Run `_check_determinism` off the rebuild path: in a background thread, once
+        the session has been idle for a moment, and only if no newer build started. Building is
+        isolated per thread (the current scene is a context variable)."""
+
+        def check() -> None:
+            time.sleep(DETERMINISM_IDLE_SECONDS)
+            if self.generation == generation:
+                self._check_determinism(definition, first, generation)
+
+        threading.Thread(target=check, name="kinemo-determinism", daemon=True).start()
+
+    def _check_determinism(self, definition: Any, first: str, generation: int | None = None) -> None:
         """Build again and compare: handlers and `.map` functions must be pure, and a
-        different second build means the cache and the parallel render can't be trusted."""
+        different second build means the cache and the parallel render can't be trusted.
+        With `generation`, the result is dropped when a newer build started meanwhile."""
         try:
             second = definition.build(self.params).builder.to_json()
         except Exception:  # noqa: BLE001 - the published build already succeeded
+            return
+        if generation is not None and self.generation != generation:
             return
         if first != second:
             print(

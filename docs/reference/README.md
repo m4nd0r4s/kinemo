@@ -89,6 +89,7 @@ Methods:
 
 Shapes, groups, images, SVG and mass objects (points, vector fields, stream lines).
 
+- [`k.Gauge`](objects.md#k-gauge): A dial whose needle follows `value=` (a number or a signal, clamped to `range=`): numbered `ticks=`, `sweep=` degrees (240), `zones=[(lo, hi, color)]`, a readout with `label=` under the hub.
 - [`k.Card`](objects.md#k-card): A panel around `content` (sized to it, or `w=`, `h=`): `title=` in its top-left corner, `caption=` under it, `accent=` a color bar beside the title; `pad=`, `radius=`.
 - [`k.Angle`](objects.md#k-angle): Angle markers.
 - [`k.RightAngle`](objects.md#k-rightangle): `k.RightAngle(a, vertex, b, size=0.3)`: the square mark of a right angle at `vertex`, along the rays toward `a` and `b`.

@@ -470,6 +470,16 @@ def easing(s: k.Scene):
 
 ### Objects
 
+#### `k.Gauge(*, value=0.0, range=(0.0, 100.0), ticks=5, sweep=240.0, r=1.5, label="", zones=(), readout=True, needle_color=k.RED, digits=0, **props)`
+A dial whose needle follows `value=` (a number or a signal, clamped to `range=`): numbered `ticks=`, `sweep=` degrees (240), `zones=[(lo, hi, color)]`, a readout with `label=` under the hub. `gauge.value` is the signal and `gauge.to(value=...)` animates it. Parts: `track`, `needle`, `hub`, `readout`, `ticks`, `labels`, `zones`. See also: `k.signal`, `k.Arc`.
+```python
+@k.scene
+def speedometer(s: k.Scene):
+    gauge = k.Gauge(value=20, range=(0, 120), ticks=6, label="km/h", zones=[(90, 120, k.RED)]).place(at="center")
+    s.play(k.fade_in(gauge))
+    s.play(gauge.to(value=100), duration=2)
+    s.wait(0.5)
+```
 #### `k.Card(content=None, *, title=None, caption=None, accent=None, w=None, h=None, pad=0.35, radius=0.18, title_size=0.32, caption_size=0.28, **props)`
 A panel around `content` (sized to it, or `w=`, `h=`): `title=` in its top-left corner, `caption=` under it, `accent=` a color bar beside the title; `pad=`, `radius=`. Cards line up in a `k.Row` for side-by-side comparisons. Parts: `card.box`, `card.content`, `card.title`, `card.caption`, `card.accent`. See also: `k.Row`, `k.RoundedRect`.
 ```python

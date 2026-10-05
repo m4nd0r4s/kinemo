@@ -29,6 +29,25 @@ def styles(s: k.Scene):
         related=("Node.to", "k.Text"),
     ),
     DocEntry(
+        "k.Gauge",
+        "Objects",
+        "A dial whose needle follows `value=` (a number or a signal, clamped to `range=`): numbered "
+        "`ticks=`, `sweep=` degrees (240), `zones=[(lo, hi, color)]`, a readout with `label=` under "
+        "the hub. `gauge.value` is the signal and `gauge.to(value=...)` animates it. Parts: `track`, "
+        "`needle`, `hub`, `readout`, `ticks`, `labels`, `zones`.",
+        '''
+import kinemo as k
+
+@k.scene
+def speedometer(s: k.Scene):
+    gauge = k.Gauge(value=20, range=(0, 120), ticks=6, label="km/h", zones=[(90, 120, k.RED)]).place(at="center")
+    s.play(k.fade_in(gauge))
+    s.play(gauge.to(value=100), duration=2)
+    s.wait(0.5)
+''',
+        related=("k.signal", "k.Arc"),
+    ),
+    DocEntry(
         "k.Card",
         "Objects",
         "A panel around `content` (sized to it, or `w=`, `h=`): `title=` in its top-left corner, "

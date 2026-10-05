@@ -89,6 +89,7 @@ Methods:
 
 Shapes, groups, images, SVG and mass objects (points, vector fields, stream lines).
 
+- [`k.Gauge`](objects.md#k-gauge): A dial whose needle follows `value=` (a number or a signal, clamped to `range=`): numbered `ticks=`, `sweep=` degrees (240), `zones=[(lo, hi, color)]`, a readout with `label=` under the hub.
 - [`k.Circle`](objects.md#k-circle): Circle of radius `r`, centered on its position.
 - [`k.Dot`](objects.md#k-dot): Filled dot (default radius 0.08), with no stroke.
 - [`k.Ellipse`](objects.md#k-ellipse): Ellipse of width `w` and height `h`, centered on its position.

@@ -336,6 +336,30 @@ def profile(s: k.Scene):
     s.wait(0.5)
 ```
 
+## Gauges
+
+`k.Gauge` is a dial whose needle follows a value, for speeds, pressures and levels. The value
+can be a signal shared with the rest of the scene:
+
+```python
+import kinemo as k
+
+
+@k.scene
+def dial(s: k.Scene):
+    speed = k.signal(20.0)
+    gauge = k.Gauge(value=speed, range=(0, 120), ticks=6, label="km/h", zones=[(90, 120, k.RED)]).place(at="center")
+    s.play(k.fade_in(gauge))
+    s.play(speed.to(105), duration=2)
+    s.play(gauge.to(value=60), duration=1)
+    s.wait(0.5)
+```
+
+- `sweep=` is the dial's angle (240° by default), `ticks=` the number of intervals between the
+  numbered marks, `digits=` the decimals of the numbers and the readout.
+- The needle stays within `range=` even when the value leaves it; `readout=False` hides the
+  value under the hub.
+
 ## Common mistakes
 
 > | Diagnostic | What happened | Fix |

@@ -6,6 +6,7 @@ Shapes, groups, images, SVG and mass objects (points, vector fields, stream line
 
 **Contents:**
 
+- [`k.Gauge`](#k-gauge): A dial whose needle follows `value=` (a number or a signal, clamped to `range=`): numbered `ticks=`, `sweep=` degrees (240), `zones=[(lo, hi, color)]`, a readout with `label=` under the hub.
 - [`k.Circle`](#k-circle): Circle of radius `r`, centered on its position.
 - [`k.Dot`](#k-dot): Filled dot (default radius 0.08), with no stroke.
 - [`k.Ellipse`](#k-ellipse): Ellipse of width `w` and height `h`, centered on its position.
@@ -31,6 +32,90 @@ Shapes, groups, images, SVG and mass objects (points, vector fields, stream line
 - [`k.StreamLines`](#k-streamlines): Streamlines of a field (a `k.VectorField` or a function), integrated with RK4 in the core from `seeds` (a count or points).
 
 Back to the [reference index](README.md).
+
+<a id="k-gauge"></a>
+### `k.Gauge` *(class)*
+
+```python
+k.Gauge(
+    *,
+    value: float | Signal[float] = 0.0,
+    range: tuple[float, float] = (0.0, 100.0),
+    ticks: int = 5,
+    sweep: float = 240.0,
+    r: float = 1.5,
+    label: str = "",
+    zones: Sequence[tuple[float, float, ColorLike]] = (),
+    readout: bool = True,
+    needle_color: ColorLike = k.RED,
+    digits: int = 0,
+    **props: Unpack[TransformKeywords],
+)
+```
+
+A dial whose needle follows `value=` (a number or a signal, clamped to `range=`): numbered `ticks=`, `sweep=` degrees (240), `zones=[(lo, hi, color)]`, a readout with `label=` under the hub. `gauge.value` is the signal and `gauge.to(value=...)` animates it. Parts: `track`, `needle`, `hub`, `readout`, `ticks`, `labels`, `zones`.
+
+**Parameters:**
+
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `value` | `float \| Signal[float]` | `0.0` | A dial whose needle follows `value=` (a number or a signal, clamped to `range=`): numbered `ticks=`, `sweep=` degrees (240), `zones=[(lo, hi, color)]`, a readout with `label=` under the hub. |
+| `range` | `tuple[float, float]` | `(0.0, 100.0)` | A dial whose needle follows `value=` (a number or a signal, clamped to `range=`): numbered `ticks=`, `sweep=` degrees (240), `zones=[(lo, hi, color)]`, a readout with `label=` under the hub. |
+| `ticks` | `int` | `5` | A dial whose needle follows `value=` (a number or a signal, clamped to `range=`): numbered `ticks=`, `sweep=` degrees (240), `zones=[(lo, hi, color)]`, a readout with `label=` under the hub. |
+| `sweep` | `float` | `240.0` | A dial whose needle follows `value=` (a number or a signal, clamped to `range=`): numbered `ticks=`, `sweep=` degrees (240), `zones=[(lo, hi, color)]`, a readout with `label=` under the hub. |
+| `r` | `float` | `1.5` |   |
+| `label` | `str` | `""` | A dial whose needle follows `value=` (a number or a signal, clamped to `range=`): numbered `ticks=`, `sweep=` degrees (240), `zones=[(lo, hi, color)]`, a readout with `label=` under the hub. |
+| `zones` | `Sequence[tuple[float, float, ColorLike]]` | `()` | A dial whose needle follows `value=` (a number or a signal, clamped to `range=`): numbered `ticks=`, `sweep=` degrees (240), `zones=[(lo, hi, color)]`, a readout with `label=` under the hub. |
+| `readout` | `bool` | `True` | Parts: `track`, `needle`, `hub`, `readout`, `ticks`, `labels`, `zones`. |
+| `needle_color` | `ColorLike` | `k.RED` |   |
+| `digits` | `int` | `0` |   |
+| `**props` | `Unpack[TransformKeywords]` | variadic | Keyword arguments (`TransformKeywords`): `name: str \| None`, `key: str \| None`, `x: FloatVal`, `y: FloatVal`, `position: VecVal`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`. |
+
+Props inherited from [`k.Node`](object-state.md#k-node): `x`, `y`, `rotate`, `scale`, `scale_x`, `scale_y`, `anchor`, `opacity`, `z`, `visible`, `bleed`.
+
+**Example:**
+
+```python
+@k.scene
+def speedometer(s: k.Scene):
+    gauge = k.Gauge(value=20, range=(0, 120), ticks=6, label="km/h", zones=[(90, 120, k.RED)]).place(at="center")
+    s.play(k.fade_in(gauge))
+    s.play(gauge.to(value=100), duration=2)
+    s.wait(0.5)
+```
+
+**See also:** [`k.signal`](reactive.md#k-signal), [`k.Arc`](#k-arc).
+
+**Members:**
+
+- [`to`](#gauge-to): `gauge.to(value=80)`: the needle (and readout) move to a new value; other props as for any group.
+
+Inherited from [`k.Group`](#k-group): [`children`](#group-children), [`swap`](#group-swap), [`insert`](#group-insert), [`pop`](#group-pop), [`fit`](#group-fit).
+Inherited from [`k.Node`](object-state.md#k-node): [`set`](object-state.md#node-set), [`unbind`](object-state.md#node-unbind), [`edge`](object-state.md#node-edge), [`age`](object-state.md#node-age), [`entered`](object-state.md#node-entered), [`exited`](object-state.md#node-exited), [`copy`](object-state.md#node-copy), [`place`](object-state.md#node-place), [`to_place`](object-state.md#node-to_place), [`unpin`](object-state.md#node-unpin).
+
+<a id="gauge-to"></a>
+#### `k.Gauge.to` *(method)*
+
+```python
+gauge.to(
+    *,
+    value: float | None = None,
+    duration: float | None = None,
+    ease: EaseLike | None = None,
+    **kw: object,
+) -> Animation
+```
+
+`gauge.to(value=80)`: the needle (and readout) move to a new value; other props as for any group.
+
+**Parameters:**
+
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `value` | `float \| None` | `None` | `gauge.to(value=80)`: the needle (and readout) move to a new value; other props as for any group. |
+| `duration` | `float \| None` | `None` |   |
+| `ease` | `EaseLike \| None` | `None` |   |
+| `**kw` | `object` | variadic |   |
 
 <a id="k-circle"></a>
 ### `k.Circle` *(class)*

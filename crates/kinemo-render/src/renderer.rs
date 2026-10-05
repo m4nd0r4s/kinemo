@@ -152,7 +152,7 @@ pub fn render_video_range(
     let mut done = 0;
     for start in (0..total).step_by(BATCH) {
         let end = (start + BATCH).min(total);
-        let frames: Vec<Image> = (start..end)
+        let frames: Vec<Vec<u8>> = (start..end)
             .into_par_iter()
             .map_init(
                 || Evaluator::with_index(scene, index.clone()),
@@ -161,12 +161,13 @@ pub fn render_video_range(
                     evaluator.clear();
                     let layout = Layout::new(evaluator);
                     let list = display_list_with(&layout, start_time + i as f64 / opts.fps, opts.size(), opts.transparent);
-                    rasterize(&list, opts.antialias)
+                    // Converted to the encoder's pixel format here, on the rendering threads.
+                    enc_opts.encoder_frame(rasterize(&list, opts.antialias).rgba)
                 },
             )
             .collect();
-        for f in frames {
-            encoder.push_frame(&f.rgba)?;
+        for frame in frames {
+            encoder.push_frame(&frame)?;
             done += 1;
             progress(done, total);
         }

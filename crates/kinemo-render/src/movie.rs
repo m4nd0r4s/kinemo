@@ -103,12 +103,12 @@ pub fn render_movie(
     const BATCH: usize = 32;
     let mut done = 0;
     for first in (0..total).step_by(BATCH) {
-        let frames: Vec<Image> = (first..(first + BATCH).min(total))
+        let frames: Vec<Vec<u8>> = (first..(first + BATCH).min(total))
             .into_par_iter()
-            .map(|i| movie_frame(scenes, &starts, i as f64 / opts.fps, opts))
+            .map(|i| enc.encoder_frame(movie_frame(scenes, &starts, i as f64 / opts.fps, opts).rgba))
             .collect();
-        for f in frames {
-            encoder.push_frame(&f.rgba)?;
+        for frame in frames {
+            encoder.push_frame(&frame)?;
             done += 1;
             progress(done, total);
         }

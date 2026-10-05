@@ -5,9 +5,9 @@ use std::path::Path;
 use std::process::{Child, ChildStdin, Command, Stdio};
 use std::thread::JoinHandle;
 
-use crate::{audio, formats, EncodeError, EncoderOptions, Format};
+use crate::{audio, formats, EncodeError, EncoderOptions, Format, InputFormat};
 
-/// Streams raw RGBA frames into an ffmpeg process.
+/// Streams raw frames (see [`EncoderOptions::input_format`]) into an ffmpeg process.
 pub struct VideoEncoder {
     child: Option<Child>,
     stdin: Option<ChildStdin>,
@@ -34,8 +34,13 @@ pub(crate) fn build_args(path: &Path, opts: &EncoderOptions) -> Vec<String> {
         .map(|s| s.to_string())
         .collect();
     let push = |a: &mut Vec<String>, xs: &[&str]| a.extend(xs.iter().map(|s| s.to_string()));
-    push(&mut a, &["-f", "rawvideo", "-pix_fmt", "rgba"]);
-    push(&mut a, &["-s", &format!("{}x{}", opts.width, opts.height)]);
+    let (input_width, input_height) = opts.input_size();
+    match opts.input_format() {
+        InputFormat::Rgba => push(&mut a, &["-f", "rawvideo", "-pix_fmt", "rgba"]),
+        // Already converted: tag the input so ffmpeg does not convert it again.
+        InputFormat::Yuv420 => push(&mut a, &["-f", "rawvideo", "-pix_fmt", "yuv420p", "-color_range", "tv", "-colorspace", "bt709", "-color_primaries", "bt709", "-color_trc", "bt709"]),
+    }
+    push(&mut a, &["-s", &format!("{input_width}x{input_height}")]);
     push(&mut a, &["-framerate", &formats::fps_rational(opts.fps), "-i", "pipe:0"]);
 
     let audio_args = formats::audio_codec_args(opts.format);
@@ -102,7 +107,8 @@ impl VideoEncoder {
         self.frames
     }
 
-    /// Write one straight-alpha RGBA8 frame of exactly `width * height * 4` bytes.
+    /// Write one frame in the input format, exactly [`EncoderOptions::frame_len`] bytes
+    /// (from [`EncoderOptions::encoder_frame`]).
     pub fn push_frame(&mut self, rgba: &[u8]) -> Result<(), EncodeError> {
         if rgba.len() != self.frame_len {
             return Err(EncodeError::Ffmpeg(format!(

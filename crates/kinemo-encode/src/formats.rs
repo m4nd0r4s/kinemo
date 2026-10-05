@@ -19,8 +19,8 @@ fn alpha(opts: &EncoderOptions) -> bool {
 /// `-filter_complex` fragment turning `[0:v]` (rgba) into `[vout]`.
 pub(crate) fn video_graph(opts: &EncoderOptions) -> String {
     let chain = match opts.format {
-        // yuv420p needs even dimensions: pad one pixel on the right/bottom if odd.
-        Format::Mp4 => format!("pad=ceil(iw/2)*2:ceil(ih/2)*2,{}", convert("yuv420p")),
+        // Frames arrive as yuv420p already (padded to even sizes by the caller).
+        Format::Mp4 => "null".to_string(),
         Format::Webm => convert(if alpha(opts) { "yuva420p" } else { "yuv420p" }),
         Format::Mov => convert(if alpha(opts) { "yuva444p10le" } else { "yuv444p10le" }),
         Format::Gif => {

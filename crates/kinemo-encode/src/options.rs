@@ -70,8 +70,45 @@ pub struct EncoderOptions {
     pub loudness: Option<f64>,
 }
 
+/// The pixel format frames are pushed in (see [`EncoderOptions::encoder_frame`]).
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum InputFormat {
+    /// Straight-alpha RGBA8; ffmpeg converts (formats with alpha, ProRes 4:4:4, GIF palettes).
+    Rgba,
+    /// Planar YUV 4:2:0, BT.709 limited range, converted by the caller (MP4).
+    Yuv420,
+}
+
 impl EncoderOptions {
+    pub fn input_format(&self) -> InputFormat {
+        match self.format {
+            Format::Mp4 => InputFormat::Yuv420,
+            Format::Webm | Format::Mov | Format::Gif => InputFormat::Rgba,
+        }
+    }
+
+    /// Size of the frames ffmpeg reads (after rounding up to even for 4:2:0).
+    pub(crate) fn input_size(&self) -> (u32, u32) {
+        match self.input_format() {
+            InputFormat::Rgba => (self.width, self.height),
+            InputFormat::Yuv420 => crate::pixels::even_size(self.width, self.height),
+        }
+    }
+
+    /// Bytes of one frame as pushed to the encoder.
     pub fn frame_len(&self) -> usize {
-        self.width as usize * self.height as usize * 4
+        match self.input_format() {
+            InputFormat::Rgba => self.width as usize * self.height as usize * 4,
+            InputFormat::Yuv420 => crate::pixels::yuv420_len(self.width, self.height),
+        }
+    }
+
+    /// A rendered straight-alpha RGBA8 frame in the encoder's input format. Call it on the
+    /// rendering threads: the conversion runs there, in parallel, instead of in ffmpeg.
+    pub fn encoder_frame(&self, rgba: Vec<u8>) -> Vec<u8> {
+        match self.input_format() {
+            InputFormat::Rgba => rgba,
+            InputFormat::Yuv420 => crate::pixels::rgba_to_yuv420(&rgba, self.width, self.height),
+        }
     }
 }

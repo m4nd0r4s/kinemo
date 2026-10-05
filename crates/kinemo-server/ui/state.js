@@ -50,6 +50,7 @@ export const state = {
   selectedBar: null, // index into meta.timeline of the bar shown in the inspector
   selectedClip: null, // index into meta.tracks of the audio clip shown in the inspector
   stopAt: null, // playback pauses here (playing one narration line)
+  lastHit: null, // the breakpoint run playback last stopped at
   boxes: new Map(), // object id → [x0, y0, x1, y1] in frame pixels, from the last frame
   overlay: null,
   pickedObject: null,

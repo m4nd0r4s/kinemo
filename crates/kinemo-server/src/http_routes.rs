@@ -36,6 +36,7 @@ const SCRIPTS: &[(&str, &str)] = &[
     ("clip_inspector.js", include_str!("../ui/clip_inspector.js")),
     ("resizer.js", include_str!("../ui/resizer.js")),
     ("code_view.js", include_str!("../ui/code_view.js")),
+    ("breakpoints.js", include_str!("../ui/breakpoints.js")),
 ];
 
 fn asset(content_type: &'static str, body: &'static str) -> Response {

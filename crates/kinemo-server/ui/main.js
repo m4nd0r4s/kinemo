@@ -2,6 +2,7 @@
 "use strict";
 
 import { installAudio } from "./audio.js";
+import { installBreakpoints } from "./breakpoints.js";
 import { installCanvas } from "./canvas.js";
 import { installCodeView } from "./code_view.js";
 import { installColorPicker } from "./colorpicker.js";
@@ -52,6 +53,7 @@ installInspector();
 installOutliner();
 installTimeline();
 installTracks();
+installBreakpoints();
 installCodeView();
 installResizer();
 installProblems();

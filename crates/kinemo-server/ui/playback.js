@@ -6,6 +6,12 @@ import { emit, fps, frameIndex, lastFrameTime, state, view } from "./state.js";
 
 let playStartedAt = 0;
 let playStartedT = 0;
+/** `(from, to) → stop time | null`: breakpoints, asked as the playhead advances while playing. */
+let breakCheck = null;
+
+export function setBreakCheck(check) {
+  breakCheck = check;
+}
 
 export function setTime(t, force = false) {
   state.t = Math.min(Math.max(0, t), lastFrameTime());
@@ -44,6 +50,12 @@ export function pause() {
 function tick(now) {
   if (!state.playing) return;
   let t = playStartedT + ((now - playStartedAt) / 1000) * state.speed;
+  const stop = breakCheck && breakCheck(state.t, Math.min(t, lastFrameTime()));
+  if (stop !== null && stop !== undefined) {
+    pause();
+    setTime(stop, true);
+    return;
+  }
   if (state.stopAt !== null && t >= state.stopAt) {
     setTime(state.stopAt);
     pause();

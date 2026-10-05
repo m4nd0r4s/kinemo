@@ -4,6 +4,7 @@
 // Selecting a bar or an audio clip shows its line.
 "use strict";
 
+import { hasBreakpoint, toggleBreakpoint } from "./breakpoints.js";
 import { pause, setTime } from "./playback.js";
 import { el, listen, state } from "./state.js";
 
@@ -76,7 +77,15 @@ function renderLines() {
     el(
       "div",
       { class: `code-line${runs.has(i + 1) ? " has-runs" : ""}`, "data-line": i + 1 },
-      el("span", { class: "ln" }, String(i + 1)),
+      el(
+        "span",
+        {
+          class: `ln${hasBreakpoint(file, i + 1) ? " bp" : ""}`,
+          title: runs.has(i + 1) ? "click: toggle a breakpoint" : null,
+          onclick: () => runs.has(i + 1) && toggleBreakpoint(file, i + 1),
+        },
+        String(i + 1)
+      ),
       whenNode(runs.get(i + 1)),
       el("span", { class: "src" }, ...segments.map(([text, kind]) => el("span", { class: `tk-${kind}` }, text)), segments.length ? null : " ")
     )
@@ -183,4 +192,10 @@ export function installCodeView() {
   });
   listen("time", updateLit);
   listen("selection", onSelection);
+  listen("breakpoints", () => {
+    for (const node of lineNodes) node.querySelector(".ln").classList.toggle("bp", !!hasBreakpoint(file, Number(node.dataset.line)));
+  });
+  listen("breakpoint-hit", ({ point }) => {
+    if (!$("code-pane").classList.contains("hidden")) reveal(point.file, point.line);
+  });
 }

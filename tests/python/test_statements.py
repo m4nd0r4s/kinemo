@@ -115,3 +115,22 @@ def test_runs_inside_clips_and_helpers_know_their_callers(tmp_path: Path) -> Non
     assert [[c["line"] for c in run["callers"]] for run in inner] == [[11, 19], [12, 19]]
     assert [c["line"] for c in lines[11][0]["callers"]] == [19]
     assert lines[18][0]["callers"] == []
+
+
+def test_script_beats_are_statements_of_the_script_file(tmp_path: Path) -> None:
+    (tmp_path / "script.md").write_text("# Talk\n\n### B01 · One\n\n> One two.\n\n### B02 · Two\n\n> Three four.\n", encoding="utf-8")
+    scene = tmp_path / "scene.py"
+    scene.write_text(
+        'import kinemo as k\n\nscript = k.Script("script.md")\n\n\n@k.scene\ndef talk(s: k.Scene):\n'
+        '    with s.voice(script["B01"]):  # kinemo: allow W1401\n        s.wait(0.2)\n'
+        '    with s.voice(script["B02"]):  # kinemo: allow W1401\n        s.wait(0.2)\n',
+        encoding="utf-8",
+    )
+    result = build(find_scenes(load_module(str(scene)))[0], {})
+    statements = scene_statements(result)
+    script = str((tmp_path / "script.md").resolve())
+    beats = {entry["line"]: entry["runs"][0] for entry in statements if entry["file"] == script}
+    assert set(beats) == {3, 7}
+    assert beats[3]["label"].startswith("B01 · estimated") and beats[7]["start"] == beats[3]["end"]
+    files = code_files(statements)
+    assert files[script]["name"] == "script.md" and "".join(t for t, _ in files[script]["lines"][2]) == "### B01 · One"

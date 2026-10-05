@@ -185,6 +185,9 @@ The page has three panes: the **outliner** (every object as a tree), the **frame
 - **Call stacks:** a statement inside a `@k.clip`, a component method or a helper function knows
   the lines that called it. The Code tab lights those callers too, the inspector of a bar lists
   them under *Called from*, and a breakpoint on a clip's line can stop for one call site only.
+- **Script tab:** a scene narrated from a `k.Script` shows the script file as a tab of the Code
+  view: the beat being narrated is lit, each beat's heading shows its time (click to go there)
+  and its tooltip says whether its audio is recorded, stale or still estimated.
 - **Code and canvas:** names of objects in the code are links: hovering one draws its box on the
   frame (a list's name, all its elements), clicking selects it. Selecting an object marks the
   lines that made and animate it.

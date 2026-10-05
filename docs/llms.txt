@@ -470,6 +470,18 @@ def easing(s: k.Scene):
 
 ### Objects
 
+#### `k.Callout(text, *, to, side="top-right", style="bubble", gap=0.45, max_width=4.0, size=0.32, pad=0.22, color=None, **props)`
+A speech bubble or callout beside `to=` (an object), with a tail pointing at it, that follows it: `side=` (`"top-right"`, `"left"`, ...), `style="bubble"` (filled), `"box"` (outlined) or `"line"` (text with a leader line), `gap=`, `max_width=` (the text wraps), `size=`, `color=`. Parts: `callout.box`, `callout.label`, `callout.tail`. See also: `k.Text`.
+```python
+@k.scene
+def thought(s: k.Scene):
+    fox = k.Circle(r=0.6, fill=k.ORANGE, fill_opacity=1).place(at="center")
+    s.add(fox)
+    s.play(k.fade_in(k.Callout("Wait... the slope changes at every point?", to=fox, max_width=3)))
+    s.play(k.fade_in(k.Callout("the fox", to=fox, side="left", style="line")))
+    s.play(fox.to(x=-2, unpin=True), duration=1.5)
+    s.wait(0.5)
+```
 #### `k.Circle(r=1.0, **props)`
 Circle of radius `r`, centered on its position. Like every shape, it accepts the style props `color` (shorthand for stroke and fill), `fill`, `fill_opacity`, `stroke`, `stroke_width`, `dash` and the transform props. See also: `k.Dot`, `k.Ellipse`, `k.Arc`.
 ```python

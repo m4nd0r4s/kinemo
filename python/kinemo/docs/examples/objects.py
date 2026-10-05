@@ -29,6 +29,27 @@ def styles(s: k.Scene):
         related=("Node.to", "k.Text"),
     ),
     DocEntry(
+        "k.Callout",
+        "Objects",
+        "A speech bubble or callout beside `to=` (an object), with a tail pointing at it, that "
+        "follows it: `side=` (`\"top-right\"`, `\"left\"`, ...), `style=\"bubble\"` (filled), "
+        "`\"box\"` (outlined) or `\"line\"` (text with a leader line), `gap=`, `max_width=` (the text "
+        "wraps), `size=`, `color=`. Parts: `callout.box`, `callout.label`, `callout.tail`.",
+        '''
+import kinemo as k
+
+@k.scene
+def thought(s: k.Scene):
+    fox = k.Circle(r=0.6, fill=k.ORANGE, fill_opacity=1).place(at="center")
+    s.add(fox)
+    s.play(k.fade_in(k.Callout("Wait... the slope changes at every point?", to=fox, max_width=3)))
+    s.play(k.fade_in(k.Callout("the fox", to=fox, side="left", style="line")))
+    s.play(fox.to(x=-2, unpin=True), duration=1.5)
+    s.wait(0.5)
+''',
+        related=("k.Card", "k.Text"),
+    ),
+    DocEntry(
         "Node.to",
         "Object state",
         "Animated state change: interpolates each prop from its value at the cursor to the target. "

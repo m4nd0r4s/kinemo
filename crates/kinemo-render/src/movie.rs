@@ -1,5 +1,6 @@
 //! Movies: several scenes in one output, joined by cuts or crossfades.
 
+use std::ops::Range;
 use std::path::Path;
 
 use rayon::prelude::*;
@@ -8,6 +9,7 @@ use kinemo_encode::{EncoderOptions, Format, VideoEncoder};
 use kinemo_ir::Scene;
 
 use crate::raster::Image;
+use crate::pipeline::render_and_encode;
 use crate::renderer::{render_frame, RenderError, RenderOptions};
 
 #[derive(Clone, Copy, Debug, PartialEq)]
@@ -99,22 +101,11 @@ pub fn render_movie(
         // A movie takes the loudness of its first scene.
         loudness: scenes[0].config.loudness,
     };
-    let mut encoder = VideoEncoder::start(path, &enc)?;
-    const BATCH: usize = 32;
-    let mut done = 0;
-    for first in (0..total).step_by(BATCH) {
-        let frames: Vec<Vec<u8>> = (first..(first + BATCH).min(total))
-            .into_par_iter()
-            .map(|i| enc.encoder_frame(movie_frame(scenes, &starts, i as f64 / opts.fps, opts).rgba))
-            .collect();
-        for frame in frames {
-            encoder.push_frame(&frame)?;
-            done += 1;
-            progress(done, total);
-        }
-    }
-    encoder.finish()?;
-    Ok(())
+    let encoder = VideoEncoder::start(path, &enc)?;
+    let render_batch = |frames: Range<usize>| -> Vec<Vec<u8>> {
+        frames.into_par_iter().map(|i| enc.encoder_frame(movie_frame(scenes, &starts, i as f64 / opts.fps, opts).rgba)).collect()
+    };
+    render_and_encode(encoder, total, render_batch, progress)
 }
 
 #[cfg(test)]

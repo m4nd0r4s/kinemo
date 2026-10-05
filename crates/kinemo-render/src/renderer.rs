@@ -1,5 +1,6 @@
 //! Frame and video rendering with quality presets and parallel rasterization.
 
+use std::ops::Range;
 use std::path::Path;
 use std::sync::Arc;
 
@@ -11,6 +12,7 @@ use kinemo_layout::Layout;
 use kinemo_ir::Scene;
 
 use crate::frame::{display_list, display_list_indexed, display_list_with, FrameSize};
+use crate::pipeline::render_and_encode;
 use crate::raster::{rasterize, Image, RenderBackend};
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -146,13 +148,10 @@ pub fn render_video_range(
         duration: total as f64 / opts.fps,
         loudness: scene.config.loudness,
     };
-    let mut encoder = VideoEncoder::start(path, &enc_opts)?;
+    let encoder = VideoEncoder::start(path, &enc_opts)?;
     let index = Arc::new(TimelineIndex::new(scene));
-    const BATCH: usize = 32;
-    let mut done = 0;
-    for start in (0..total).step_by(BATCH) {
-        let end = (start + BATCH).min(total);
-        let frames: Vec<Vec<u8>> = (start..end)
+    let render_batch = |frames: Range<usize>| -> Vec<Vec<u8>> {
+        frames
             .into_par_iter()
             .map_init(
                 || Evaluator::with_index(scene, index.clone()),
@@ -165,13 +164,7 @@ pub fn render_video_range(
                     enc_opts.encoder_frame(rasterize(&list, opts.antialias).rgba)
                 },
             )
-            .collect();
-        for frame in frames {
-            encoder.push_frame(&frame)?;
-            done += 1;
-            progress(done, total);
-        }
-    }
-    encoder.finish()?;
-    Ok(())
+            .collect()
+    };
+    render_and_encode(encoder, total, render_batch, progress)
 }

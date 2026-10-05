@@ -182,6 +182,8 @@ The page has three panes: the **outliner** (every object as a tree), the **frame
   loop, a breakpoint can stop on one run only (`run 2 of 3`). The list under the code enables,
   disables and removes them; they are remembered per browser and follow their line when the
   file changes (a breakpoint whose line is gone is shown crossed out).
+- **Stepping:** F10 (or ⤓) moves the playhead to the next statement run, Shift+F10 (⤒) to the
+  previous one; click a line of code and press F8 (⇥) to play until that line next runs.
 - Saving the file (or a local module it imports) rebuilds the scene, and the preview stays
   at the same instant.
 - Clicking an object, on the frame or in the outliner, shows its props and where each one

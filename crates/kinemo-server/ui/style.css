@@ -419,6 +419,8 @@ a:hover { text-decoration: underline; }
 .bp-run { font: 11px var(--mono); background: var(--panel-2); color: var(--text); border: 1px solid var(--line); border-radius: 4px; }
 .code-line.running { background: rgba(245, 197, 66, 0.07); }
 .code-line.current { background: rgba(245, 197, 66, 0.16); border-left-color: var(--accent); }
+.code-line.picked .src { text-decoration: underline dotted var(--text-faint); text-underline-offset: 3px; }
+.code-bar .step { padding: 2px 6px; font-size: 13px; }
 .code-line.selected { outline: 1px solid rgba(95, 179, 249, 0.6); outline-offset: -1px; }
 .tk-keyword { color: #c792ea; }
 .tk-function { color: #82aaff; }

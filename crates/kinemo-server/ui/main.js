@@ -16,6 +16,7 @@ import { installProblems } from "./problems.js";
 import { installResizer } from "./resizer.js";
 import { installSelection, selectBar, selectObject } from "./selection.js";
 import { emit, lastFrameTime, listen, state } from "./state.js";
+import { installStepping } from "./stepping.js";
 import { installTimeline } from "./timeline.js";
 import { installTracks } from "./tracks.js";
 
@@ -55,6 +56,7 @@ installTimeline();
 installTracks();
 installBreakpoints();
 installCodeView();
+installStepping();
 installResizer();
 installProblems();
 installAudio();

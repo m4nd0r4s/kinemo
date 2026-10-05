@@ -41,7 +41,8 @@ folder.
 ## Screenshots of the preview
 
 `static/img/editor-*.png` are captures of `kinemo dev`, taken with headless Chrome by
-`capture.py`. Run it again after a change to the preview UI:
+`capture.py`. The website workflow takes them again on every deploy, so the published site
+always shows the current editor. To see them locally after a change to the preview UI:
 
 ```bash
 ../.venv/bin/python capture.py

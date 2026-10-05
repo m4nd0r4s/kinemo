@@ -4,7 +4,8 @@
 
 Starts `kinemo dev` on an example and photographs it with headless Chrome, opening the page
 on a given state through the URL (`#t=2.6&select=dot`). The PNGs land in
-website/static/img/ and are committed, since the capture needs a local Chrome.
+website/static/img/. The website workflow runs it on every deploy, so the site shows the
+current editor; the committed PNGs are the fallback for a local build without Chrome.
 """
 
 from __future__ import annotations
@@ -80,6 +81,8 @@ def main() -> int:
             subprocess.run(
                 [
                     browser, "--headless=new", "--disable-gpu", "--hide-scrollbars",
+                    # CI containers have no user namespace for Chrome's sandbox.
+                    *(["--no-sandbox"] if os.environ.get("CI") else []),
                     f"--window-size={WINDOW[0]},{WINDOW[1]}", f"--force-device-scale-factor={SCALE}",
                     "--virtual-time-budget=6000", f"--screenshot={target}", f"http://127.0.0.1:{port}/#{state}",
                 ],

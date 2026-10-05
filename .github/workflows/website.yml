@@ -44,6 +44,10 @@ jobs:
           path: website/.cache
           key: renders-${{ hashFiles('examples/**', 'python/kinemo/__init__.py') }}
           restore-keys: renders-
+      # The editor screenshots are taken from the current `kinemo dev` (ubuntu-latest has
+      # Google Chrome), so the site never shows an older editor.
+      - name: Capture the editor
+        run: .venv/bin/python website/capture.py
       - name: Export and build the site
         working-directory: website
         run: |

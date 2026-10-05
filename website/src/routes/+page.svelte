@@ -34,7 +34,7 @@
       </p>
       <div class="actions">
         <a class="button primary" href="#install">Install</a>
-        <a class="button" href="{base}/docs/guide/getting-started/">Read the guide</a>
+        <a class="button" href="{base}/docs/latest/guide/getting-started/">Read the guide</a>
       </div>
     </div>
   </section>

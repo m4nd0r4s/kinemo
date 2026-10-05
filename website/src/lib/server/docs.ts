@@ -1,14 +1,41 @@
 // The documentation pages: which Markdown file becomes which page, in what order, how links
-// between them resolve, and the search index. Read from the repository's docs/ at build time.
+// between them resolve, and the search index. Every published version has its own pages under
+// /docs/<version>/: `dev` reads the repository's docs/, a release reads the docs/ extracted
+// from its tag (website/.versions/<minor>/docs, written by `npm run export`), and `latest`
+// is the newest release.
 
 import fs from "node:fs";
 import path from "node:path";
 import { getHighlighter } from "./highlight";
 import { createRenderer, type Rendered } from "./markdown";
+import { siteData } from "./site-data";
 
 /** The repository (the site is built from website/). */
 export const ROOT = path.resolve(process.cwd(), "..");
 export const DOCS = path.join(ROOT, "docs");
+
+export interface DocsVersion {
+  /** In URLs: `latest`, `0.11`, `dev`. */
+  id: string;
+  /** In the switcher: `0.11 (latest)`, `dev (unreleased)`. */
+  label: string;
+  /** The docs folder it is built from. */
+  root: string;
+}
+
+/** Every published version, `latest` first, then the releases (newest first) and `dev`. */
+export function docsVersions(): DocsVersion[] {
+  const { latest, releases } = siteData().docs_versions ?? { latest: "dev", releases: [] };
+  const release = (id: string) => path.join(process.cwd(), ".versions", id, "docs");
+  const out: DocsVersion[] = [{ id: "latest", label: latest === "dev" ? "latest (unreleased)" : `latest (${latest})`, root: latest === "dev" ? DOCS : release(latest) }];
+  for (const r of releases) out.push({ id: r.id, label: r.id, root: release(r.id) });
+  out.push({ id: "dev", label: "dev (unreleased)", root: DOCS });
+  return out;
+}
+
+export function docsVersion(id: string): DocsVersion | undefined {
+  return docsVersions().find((v) => v.id === id);
+}
 
 export const SECTIONS = ["Overview", "Guide", "Reference", "Examples", "Project"] as const;
 export type Section = (typeof SECTIONS)[number];
@@ -16,9 +43,9 @@ export type Section = (typeof SECTIONS)[number];
 export interface DocPage {
   /** Markdown file, absolute. */
   source: string;
-  /** Site path of the page, with a trailing slash (`/docs/guide/timeline/`). */
+  /** Site path of the page, with a trailing slash (`/docs/latest/guide/timeline/`). */
   url: string;
-  /** Route parameter of `/docs/[...slug]` (`guide/timeline`; empty for the overview). */
+  /** The page within its version (`guide/timeline`; empty for the overview). */
   slug: string;
   section: Section;
   /** Position in an ordered section (the guides), shown in the navigation. */
@@ -27,11 +54,10 @@ export interface DocPage {
   rendered: Rendered;
 }
 
-/** Repository folders the docs link to, and the page that stands for them on the site. */
-const REPOSITORY_LINKS: Record<string, string> = { [path.join(ROOT, "examples")]: "/docs/examples/" };
-
-/** Images and other files next to the docs, served under /docs/ at the same relative path. */
-export const DOC_ASSETS = path.join(DOCS, "examples", "images");
+/** Images next to a version's docs, served under /docs/<version>/ at the same relative path. */
+export function docAssets(version: DocsVersion): string {
+  return path.join(version.root, "examples", "images");
+}
 
 function orderedLinks(index: string): string[] {
   const seen: string[] = [];
@@ -42,26 +68,29 @@ function orderedLinks(index: string): string[] {
   return seen;
 }
 
-function discover(): Omit<DocPage, "title" | "rendered">[] {
+function discover(version: DocsVersion): Omit<DocPage, "title" | "rendered">[] {
+  const docs = version.root;
   const page = (source: string, slug: string, section: Section, number: number | null = null) => ({
     source,
     slug,
-    url: slug ? `/docs/${slug}/` : "/docs/",
+    url: slug ? `/docs/${version.id}/${slug}/` : `/docs/${version.id}/`,
     section,
     number,
   });
-  const pages = [page(path.join(DOCS, "README.md"), "", "Overview")];
-  const guides = fs.readdirSync(path.join(DOCS, "guide")).filter((f) => f.endsWith(".md")).sort();
-  guides.forEach((file, i) => pages.push(page(path.join(DOCS, "guide", file), `guide/${file.replace(/^\d+-/, "").replace(/\.md$/, "")}`, "Guide", i + 1)));
+  const pages = [page(path.join(docs, "README.md"), "", "Overview")];
+  const guides = fs.readdirSync(path.join(docs, "guide")).filter((f) => f.endsWith(".md")).sort();
+  guides.forEach((file, i) => pages.push(page(path.join(docs, "guide", file), `guide/${file.replace(/^\d+-/, "").replace(/\.md$/, "")}`, "Guide", i + 1)));
   for (const [folder, section] of [["reference", "Reference"], ["examples", "Examples"]] as const) {
-    const index = path.join(DOCS, folder, "README.md");
+    const index = path.join(docs, folder, "README.md");
+    if (!fs.existsSync(index)) continue;
     pages.push(page(index, folder, section));
     const listed = orderedLinks(index);
-    const rest = fs.readdirSync(path.join(DOCS, folder)).filter((f) => f.endsWith(".md") && f !== "README.md").map((f) => path.join(DOCS, folder, f)).filter((f) => !listed.includes(f)).sort();
+    const rest = fs.readdirSync(path.join(docs, folder)).filter((f) => f.endsWith(".md") && f !== "README.md").map((f) => path.join(docs, folder, f)).filter((f) => !listed.includes(f)).sort();
     for (const file of [...listed, ...rest]) pages.push(page(file, `${folder}/${path.basename(file, ".md")}`, section));
   }
+  // Older versions may lack some project pages.
   for (const [file, slug] of [["caveats.md", "caveats"], ["status.md", "status"], ["specs.md", "specification"]]) {
-    pages.push(page(path.join(DOCS, file), slug, "Project"));
+    if (fs.existsSync(path.join(docs, file))) pages.push(page(path.join(docs, file), slug, "Project"));
   }
   return pages;
 }
@@ -77,14 +106,19 @@ export function relativeUrl(from: string, to: string): string {
   return hash ? `${href}#${hash}` : href;
 }
 
-let cache: DocPage[] | null = null;
+const cache = new Map<string, DocPage[]>();
 
-export async function docPages(): Promise<DocPage[]> {
-  if (cache) return cache;
+/** The pages of a version (`latest` when not given). */
+export async function docPages(id = "latest"): Promise<DocPage[]> {
+  const cached = cache.get(id);
+  if (cached) return cached;
+  const version = docsVersion(id);
+  if (!version) throw new Error(`no docs version ${id}`);
+  const docs = version.root;
   const render = createRenderer(await getHighlighter());
-  const found = discover();
+  const found = discover(version);
   const bySource = new Map(found.map((p) => [p.source, p]));
-  cache = found.map((p) => {
+  const pages = found.map((p) => {
     const resolve = (target: string): string | null => {
       if (!target || target.startsWith("#")) return null;
       const [file, anchor] = target.split("#");
@@ -92,17 +126,19 @@ export async function docPages(): Promise<DocPage[]> {
       const absolute = path.resolve(path.dirname(p.source), file);
       const linked = bySource.get(absolute);
       if (linked) return relativeUrl(p.url, linked.url + suffix);
-      if (absolute === path.join(DOCS, "llms.txt")) return relativeUrl(p.url, "/llms.txt");
-      if (REPOSITORY_LINKS[absolute]) return relativeUrl(p.url, REPOSITORY_LINKS[absolute] + suffix);
-      if (absolute.startsWith(DOCS + path.sep) && fs.existsSync(absolute)) {
-        return relativeUrl(p.url, `/docs/${path.relative(DOCS, absolute).split(path.sep).join("/")}`);
+      if (absolute === path.join(docs, "llms.txt")) return relativeUrl(p.url, `/docs/${id}/llms.txt`);
+      // The repository's examples folder (one level above docs/) stands for the examples page.
+      if (absolute === path.join(path.dirname(docs), "examples")) return relativeUrl(p.url, `/docs/${id}/examples/${suffix}`);
+      if (absolute.startsWith(docs + path.sep) && fs.existsSync(absolute)) {
+        return relativeUrl(p.url, `/docs/${id}/${path.relative(docs, absolute).split(path.sep).join("/")}`);
       }
       return null;
     };
     const rendered = render(fs.readFileSync(p.source, "utf8"), resolve);
     return { ...p, title: rendered.title || path.basename(p.source, ".md"), rendered };
   });
-  return cache;
+  cache.set(id, pages);
+  return pages;
 }
 
 export function neighbours(pages: DocPage[], page: DocPage): [DocPage | null, DocPage | null] {

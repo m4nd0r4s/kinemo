@@ -26,7 +26,7 @@
   <ul class="gallery">
     {#each examples as example (example.name)}
       <li>
-        <a href="{base}/docs/examples/{example.name}/" onmouseenter={play} onfocus={play} onmouseleave={stop} onblur={stop}>
+        <a href="{base}/docs/latest/examples/{example.name}/" onmouseenter={play} onfocus={play} onmouseleave={stop} onblur={stop}>
           <figure class="stage">
             <video src="{base}/media/{example.name}.mp4" poster="{base}/media/{example.name}.png" muted loop playsinline preload="none"></video>
           </figure>

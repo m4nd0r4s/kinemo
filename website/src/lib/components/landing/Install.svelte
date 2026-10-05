@@ -36,7 +36,7 @@
     {@html install.source}
   </details>
   <p class="next">
-    Next: <a href="{base}/docs/guide/getting-started/">Getting started</a>, the first of fifteen short
-    guides, or the <a href="{base}/docs/reference/">API reference</a>.
+    Next: <a href="{base}/docs/latest/guide/getting-started/">Getting started</a>, the first of fifteen short
+    guides, or the <a href="{base}/docs/latest/reference/">API reference</a>.
   </p>
 </section>

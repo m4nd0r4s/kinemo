@@ -23,6 +23,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
+        with:
+          # Every release tag: each one's docs are published as a version of the documentation.
+          fetch-depth: 0
       - uses: actions/setup-python@v7
         with:
           python-version: "3.13"

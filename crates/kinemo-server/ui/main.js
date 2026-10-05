@@ -3,6 +3,7 @@
 
 import { installAudio } from "./audio.js";
 import { installCanvas } from "./canvas.js";
+import { installCodeView } from "./code_view.js";
 import { installColorPicker } from "./colorpicker.js";
 import { connect } from "./connection.js";
 import { installEditing } from "./editing.js";
@@ -51,6 +52,7 @@ installInspector();
 installOutliner();
 installTimeline();
 installTracks();
+installCodeView();
 installResizer();
 installProblems();
 installAudio();

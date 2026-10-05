@@ -39,7 +39,12 @@
       <div class="toast hidden" id="toast"></div>
     </section>
 
-    <aside class="inspector" id="inspector">
+    <aside class="side" id="side">
+      <div class="side-tabs" role="tablist">
+        <button class="side-tab active" id="tab-inspector" role="tab" data-pane="inspector">Inspector</button>
+        <button class="side-tab" id="tab-code" role="tab" data-pane="code" title="The scene's code, following the playhead">Code</button>
+      </div>
+      <div class="inspector" id="inspector">
       <div class="inspector-empty" id="inspector-empty">
         <p>Click an object (or a timeline bar) to see where each value came from. Values the
           code wrote as literals can be edited here: drag a number, or click to type. Drag a
@@ -47,6 +52,15 @@
         <div id="problems"></div>
       </div>
       <div class="inspector-object hidden" id="inspector-object"></div>
+    </div>
+      <div class="code-pane hidden" id="code-pane">
+        <div class="code-bar">
+          <div class="code-files" id="code-files"></div>
+          <span class="spacer"></span>
+          <label class="option" title="Scroll to the running line while playing and scrubbing"><input type="checkbox" id="code-follow" checked> follow</label>
+        </div>
+        <div class="code-lines" id="code-lines"></div>
+      </div>
     </aside>
   </main>
 

@@ -51,6 +51,19 @@ impl<'a> Layout<'a> {
             .collect()
     }
 
+    /// Number of glyphs of a source (what [`Layout::source_glyphs`] returns), without
+    /// copying their outlines.
+    pub fn source_glyph_count(&self, source: ObjectId, t: f64) -> usize {
+        match self.scene().object(source).kind.as_str() {
+            "code" => self.code_layout(source, t).map_or(0, |lay| lay.glyphs.len() + lay.line_numbers.iter().map(Vec::len).sum::<usize>()),
+            "math" => self.math_layout(source, t).map_or(0, |lay| lay.glyphs.len() + lay.rules.len()),
+            _ => {
+                let text = self.prop_str(source, "text", t).unwrap_or_default();
+                kinemo_text::layout(&text, &self.text_options(source, t)).glyphs.len()
+            }
+        }
+    }
+
     /// Logical box of a source (the text block, not the ink).
     pub fn source_box(&self, source: ObjectId, t: f64) -> Rect {
         match self.scene().object(source).kind.as_str() {
@@ -103,7 +116,7 @@ impl<'a> Layout<'a> {
     /// minus what later sibling parts claim.
     fn owned_indices(&self, owner: ObjectId, source: ObjectId, t: f64) -> HashSet<usize> {
         if !self.is_part(owner, t) {
-            return (0..self.source_glyphs(source, t).len()).collect();
+            return (0..self.source_glyph_count(source, t)).collect();
         }
         let mut own = self.run_indices(owner, t);
         if let Some(parent) = self.scene().object(owner).parent {

@@ -76,7 +76,10 @@ function renderLines() {
   lineNodes = (info ? info.lines : []).map((segments, i) =>
     el(
       "div",
-      { class: `code-line${runs.has(i + 1) ? " has-runs" : ""}`, "data-line": i + 1 },
+      {
+        class: `code-line${runs.has(i + 1) ? " has-runs" : ""}${state.pickedLine && state.pickedLine.file === file && state.pickedLine.line === i + 1 ? " picked" : ""}`,
+        "data-line": i + 1,
+      },
       el(
         "span",
         {
@@ -87,12 +90,19 @@ function renderLines() {
         String(i + 1)
       ),
       whenNode(runs.get(i + 1)),
-      el("span", { class: "src" }, ...segments.map(([text, kind]) => el("span", { class: `tk-${kind}` }, text)), segments.length ? null : " ")
+      el("span", { class: "src", onclick: () => pick(i + 1) }, ...segments.map(([text, kind]) => el("span", { class: `tk-${kind}` }, text)), segments.length ? null : " ")
     )
   );
   $("code-lines").replaceChildren(...lineNodes);
   lit = [];
   updateLit();
+}
+
+/** Pick a line (the target of "run to line"). */
+function pick(line) {
+  state.pickedLine = { file, line };
+  for (const node of $("code-lines").querySelectorAll(".code-line.picked")) node.classList.remove("picked");
+  if (lineNodes[line - 1]) lineNodes[line - 1].classList.add("picked");
 }
 
 function show(path) {

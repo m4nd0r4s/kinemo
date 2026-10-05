@@ -14,4 +14,4 @@ mod svg;
 pub use frame::{display_list, display_list_indexed, display_list_with, morph_parts, FrameSize, MorphPart};
 pub use movie::{render_movie, scene_starts, Transition};
 pub use svg::{display_list_to_svg, render_svg};
-pub use renderer::{render_frame, render_frame_indexed, render_frame_with_backend, render_video, render_video_range, Quality, RenderError, RenderOptions};
+pub use renderer::{render_frame, render_frame_indexed, render_frame_with_backend, render_png_frames, render_video, render_video_range, Quality, RenderError, RenderOptions};

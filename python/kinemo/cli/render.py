@@ -102,9 +102,7 @@ def run(args: argparse.Namespace) -> int:
                 os.makedirs(base, exist_ok=True)
                 fps = result.scene.config.fps if args.quality == "final" else min(30.0, result.scene.config.fps)
                 n = int(result.scene.duration * fps) + 1
-                for i in range(n):
-                    with open(os.path.join(base, f"{i:05d}.png"), "wb") as fh:
-                        fh.write(b.frame_png(i / fps, args.quality, args.transparent))
+                b.render_frames(base, n, fps, args.quality, args.transparent)
                 print(f"kinemo: {n} frames in {base}/")
             else:
                 t = parse_time(args.at or "end", result.scene.duration, result.scene.marks)

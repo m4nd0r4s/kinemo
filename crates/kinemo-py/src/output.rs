@@ -57,6 +57,23 @@ impl Builder {
         Ok(PyBytes::new(py, &png))
     }
 
+    /// Writes `count` frames at `i / fps` as `folder/00000.png`, ... rendered, encoded and
+    /// written in parallel. `progress(done, total)` is called from Python.
+    #[pyo3(signature = (folder, count, fps, quality = "final", transparent = false, progress = None))]
+    #[allow(clippy::too_many_arguments)] // the Python signature: keyword arguments with defaults
+    fn render_frames(&self, py: Python<'_>, folder: PathBuf, count: usize, fps: f64, quality: &str, transparent: bool, progress: Option<Py<PyAny>>) -> PyResult<()> {
+        let opts = self.options(quality, transparent)?;
+        let scene = &self.scene;
+        let report = move |done: usize, total: usize| {
+            if let Some(cb) = &progress {
+                Python::attach(|py| {
+                    let _ = cb.call1(py, (done, total));
+                });
+            }
+        };
+        py.detach(|| kinemo_render::render_png_frames(scene, &folder, count, fps, &opts, &report)).map_err(runtime)
+    }
+
     /// SVG document of the frame at `t` (vector, scene resolution).
     #[pyo3(signature = (t, transparent = false))]
     fn frame_svg(&self, t: f64, transparent: bool) -> String {

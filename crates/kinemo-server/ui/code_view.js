@@ -4,6 +4,7 @@
 // Selecting a bar or an audio clip shows its line.
 "use strict";
 
+import { pause, setTime } from "./playback.js";
 import { el, listen, state } from "./state.js";
 
 const PANE_KEY = "kinemo-dev-side-pane";
@@ -46,6 +47,28 @@ function renderFiles() {
   );
 }
 
+/** The gutter of a line with statements: its time (`1.20s`), a loop's run count (`×3`) or a
+ *  mark's name; clicking moves the playhead to the run after it (wrapping to the first). */
+function whenNode(runs) {
+  if (!runs) return el("span", { class: "when" });
+  const marks = runs.filter((r) => r.kind === "mark");
+  const text = marks.length === runs.length ? `◆ ${marks[0].label}` : runs.length > 1 ? `×${runs.length}` : `${runs[0].start.toFixed(2)}s`;
+  const title = runs.map((r, i) => `${runs.length > 1 ? `${i + 1}. ` : ""}${r.start.toFixed(2)}${r.end > r.start ? `–${r.end.toFixed(2)}` : ""} s  ${r.kind}${r.label ? ` · ${r.label}` : ""}`).join("\n");
+  return el(
+    "span",
+    {
+      class: "when",
+      title: `${title}\n\nclick: go to ${runs.length > 1 ? "the next run" : "it"}`,
+      onclick: () => {
+        const next = runs.find((r) => r.start > state.t + 1e-6) || runs[0];
+        pause();
+        setTime(next.start, true);
+      },
+    },
+    text
+  );
+}
+
 function renderLines() {
   const info = codeFiles()[file];
   const runs = runsByLine();
@@ -54,6 +77,7 @@ function renderLines() {
       "div",
       { class: `code-line${runs.has(i + 1) ? " has-runs" : ""}`, "data-line": i + 1 },
       el("span", { class: "ln" }, String(i + 1)),
+      whenNode(runs.get(i + 1)),
       el("span", { class: "src" }, ...segments.map(([text, kind]) => el("span", { class: `tk-${kind}` }, text)), segments.length ? null : " ")
     )
   );

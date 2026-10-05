@@ -175,6 +175,8 @@ The page has three panes: the **outliner** (every object as a tree), the **frame
   blocks, `add`/`remove`, marks), the one that started last is marked, and **follow** keeps it
   in view while playing or scrubbing (scrolling by hand turns it off). Selecting a timeline bar
   or an audio clip shows its line. Local modules with statements get their own tab.
+  The gutter shows when each statement runs (`1.20s`, `×3` for a loop, `◆ name` for a mark);
+  clicking it moves the playhead there (to the next run, for a loop), and hovering lists the runs.
 - Saving the file (or a local module it imports) rebuilds the scene, and the preview stays
   at the same instant.
 - Clicking an object, on the frame or in the outliner, shows its props and where each one

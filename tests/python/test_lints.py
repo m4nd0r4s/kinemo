@@ -198,6 +198,27 @@ def test_w1003_low_contrast_against_the_background() -> None:
     assert d.message.endswith(":1 against the background (minimum 4.5:1)")
 
 
+def test_w1003_judges_text_against_the_shape_behind_it() -> None:
+    def scene(s: k.Scene) -> None:
+        panel = k.Rect(w=4, h=1.5, fill=k.WHITE, fill_opacity=1)
+        dark = k.Text("dark on a light panel", size=0.4, color=k.rgb(0.1, 0.1, 0.12))
+        s.add(panel, dark)
+        s.wait(1)
+
+    assert lints_of(build(scene), "W1003") == []
+
+
+def test_w1003_still_reports_light_text_on_a_light_panel() -> None:
+    def scene(s: k.Scene) -> None:
+        panel = k.Rect(w=4, h=1.5, fill=k.WHITE, fill_opacity=1)
+        pale = k.Text("pale on a light panel", size=0.4, color=k.rgb(0.92, 0.92, 0.92))
+        s.add(panel, pale)
+        s.wait(1)
+
+    d = only_one(lints_of(build(scene), "W1003"))
+    assert "pale" in d.message
+
+
 def test_w1003_fade_in_is_not_low_contrast() -> None:
     def scene(s: k.Scene) -> None:
         title = k.Text("Hello")

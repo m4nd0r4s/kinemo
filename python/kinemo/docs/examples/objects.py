@@ -55,6 +55,93 @@ def bubble_step(s: k.Scene):
         related=("k.Row", "k.Bar"),
     ),
     DocEntry(
+        "k.Callout",
+        "Objects",
+        "A speech bubble or callout beside `to=` (an object), with a tail pointing at it, that "
+        "follows it: `side=` (`\"top-right\"`, `\"left\"`, ...), `style=\"bubble\"` (filled), "
+        "`\"box\"` (outlined) or `\"line\"` (text with a leader line), `gap=`, `max_width=` (the text "
+        "wraps), `size=`, `color=`. Parts: `callout.box`, `callout.label`, `callout.tail`.",
+        '''
+import kinemo as k
+
+@k.scene
+def thought(s: k.Scene):
+    fox = k.Circle(r=0.6, fill=k.ORANGE, fill_opacity=1).place(at="center")
+    s.add(fox)
+    s.play(k.fade_in(k.Callout("Wait... the slope changes at every point?", to=fox, max_width=3)))
+    s.play(k.fade_in(k.Callout("the fox", to=fox, side="left", style="line")))
+    s.play(fox.to(x=-2, unpin=True), duration=1.5)
+    s.wait(0.5)
+''',
+        related=("k.Card", "k.Text"),
+    ),
+    DocEntry(
+        "k.Gauge",
+        "Objects",
+        "A dial whose needle follows `value=` (a number or a signal, clamped to `range=`): numbered "
+        "`ticks=`, `sweep=` degrees (240), `zones=[(lo, hi, color)]`, a readout with `label=` under "
+        "the hub. `gauge.value` is the signal and `gauge.to(value=...)` animates it. Parts: `track`, "
+        "`needle`, `hub`, `readout`, `ticks`, `labels`, `zones`.",
+        '''
+import kinemo as k
+
+@k.scene
+def speedometer(s: k.Scene):
+    gauge = k.Gauge(value=20, range=(0, 120), ticks=6, label="km/h", zones=[(90, 120, k.RED)]).place(at="center")
+    s.play(k.fade_in(gauge))
+    s.play(gauge.to(value=100), duration=2)
+    s.wait(0.5)
+''',
+        related=("k.signal", "k.Arc"),
+    ),
+    DocEntry(
+        "k.Card",
+        "Objects",
+        "A panel around `content` (sized to it, or `w=`, `h=`): `title=` in its top-left corner, "
+        "`caption=` under it, `accent=` a color bar beside the title; `pad=`, `radius=`. Cards line up "
+        "in a `k.Row` for side-by-side comparisons. Parts: `card.box`, `card.content`, `card.title`, "
+        "`card.caption`, `card.accent`.",
+        '''
+import kinemo as k
+
+@k.scene
+def compare(s: k.Scene):
+    rocket = k.Card(k.Triangle.right(2, 2, scale=0.6), title="Rocket", caption="pushes the gas down", accent=k.ORANGE)
+    gas = k.Card(k.Circle(r=0.6, fill=k.BLUE, fill_opacity=0.6), title="Gas", caption="pushes the rocket up", accent=k.BLUE)
+    s.play(k.fade_in(k.Row(rocket, gas, gap=1).place(at="center")))
+    s.play(k.indicate(gas.content))
+    s.wait(0.5)
+''',
+        related=("k.Row", "k.RoundedRect"),
+    ),
+    DocEntry(
+        "k.Angle",
+        "Objects",
+        "Angle markers. `k.Angle(a, vertex, b, r=0.5)` draws the arc of the smaller angle between the "
+        "rays vertex→a and vertex→b, with `label=\"θ\"` beside it or `show_value=True` for its measure "
+        "(`unit=\"deg\"` or `\"rad\"`); `k.RightAngle(a, vertex, b, size=0.3)` draws the square mark. "
+        "Points are tuples or reactive points (`dot.world.center`, a `k.vec` of signals), so the "
+        "marker follows an angle as it opens. Points are world coordinates: use `poly.sides` "
+        "(not `poly.vertices`) for a polygon's corners.",
+        '''
+import kinemo as k
+
+@k.scene
+def opening(s: k.Scene):
+    deg = k.signal(30.0)
+    origin = (-1.5, -1.0)
+    tip = k.vec(-1.5 + 3 * k.cos(deg * k.pi / 180), -1 + 3 * k.sin(deg * k.pi / 180))
+    s.add(k.Line(start=origin, end=(1.5, -1.0)), k.Line(start=origin, end=tip))
+    theta = k.Angle((1.5, -1.0), origin, tip, r=0.8, label="θ", show_value=True)
+    s.play(k.draw(theta))
+    s.play(deg.to(90), duration=2)
+    corner = k.RightAngle((1.5, -1.0), origin, tip)
+    s.play(k.fade_out(theta), k.draw(corner))
+    s.wait(0.5)
+''',
+        related=("k.Arc", "k.vec"),
+    ),
+    DocEntry(
         "Node.to",
         "Object state",
         "Animated state change: interpolates each prop from its value at the cursor to the target. "

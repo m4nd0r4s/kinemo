@@ -90,6 +90,11 @@ Methods:
 Shapes, groups, images, SVG and mass objects (points, vector fields, stream lines).
 
 - [`k.Array`](objects.md#k-array): An array for algorithm videos: cells with the values and the indices under them (`index=False` hides them), `cell=` size.
+- [`k.Callout`](objects.md#k-callout): A speech bubble or callout beside `to=` (an object), with a tail pointing at it, that follows it: `side=` (`"top-right"`, `"left"`, ...), `style="bubble"` (filled), `"box"` (outlined) or `"line"` (text with a leader line), `gap=`, `max_width=` (the text wraps), `size=`, `color=`.
+- [`k.Gauge`](objects.md#k-gauge): A dial whose needle follows `value=` (a number or a signal, clamped to `range=`): numbered `ticks=`, `sweep=` degrees (240), `zones=[(lo, hi, color)]`, a readout with `label=` under the hub.
+- [`k.Card`](objects.md#k-card): A panel around `content` (sized to it, or `w=`, `h=`): `title=` in its top-left corner, `caption=` under it, `accent=` a color bar beside the title; `pad=`, `radius=`.
+- [`k.Angle`](objects.md#k-angle): Angle markers.
+- [`k.RightAngle`](objects.md#k-rightangle): `k.RightAngle(a, vertex, b, size=0.3)`: the square mark of a right angle at `vertex`, along the rays toward `a` and `b`.
 - [`k.Circle`](objects.md#k-circle): Circle of radius `r`, centered on its position.
 - [`k.Dot`](objects.md#k-dot): Filled dot (default radius 0.08), with no stroke.
 - [`k.Ellipse`](objects.md#k-ellipse): Ellipse of width `w` and height `h`, centered on its position.
@@ -121,6 +126,11 @@ Text, LaTeX math and highlighted code, with addressable parts.
 - [`k.Text`](text.md#k-text): Text with minimal inline markup (`**bold**`, `*italic*`, `` `code` ``).
 - [`k.Math`](text.md#k-math): Formula in LaTeX syntax, typeset by the built-in engine (no TeX installation needed).
 - [`k.Code`](text.md#k-code): Code with syntax highlighting (tree-sitter) and stable tokens: `lang=`, `line_numbers=True`, `size=`, `theme="auto"` (follows the scene background).
+- [`k.underline`](text.md#k-underline): Annotation marks on any object or part of a text or formula (`eq["dx"]`): `k.underline(target)`, `k.box(target)`, `k.encircle(target)`, `k.strike(target)` (crossed out) and `k.cross(target)` (an X).
+- [`k.box`](text.md#k-box): A rounded box around `target`, `pad` away from its box.
+- [`k.cross`](text.md#k-cross): An X over `target`: two lines corner to corner, `pad` past its box.
+- [`k.encircle`](text.md#k-encircle): An ellipse around `target` (its box, `pad` larger on each side, times √2 so the corners fit inside).
+- [`k.strike`](text.md#k-strike): A line through the middle of `target` (struck out), `overhang` past each side.
 - [`k.Terminal`](text.md#k-terminal): A terminal or REPL window: `title=`, `prompt=` (`"$ "`, `">>>"`), `lang=` of the commands (`"bash"`, `"python"`...), `width=` and `rows=` on screen, `size=`, `theme="auto"`.
 
 Methods:
@@ -170,6 +180,9 @@ Methods:
 - [`ax.scatter`](charts.md#axes-scatter): Points `(xs[i], ys[i])` on the axes, as a group of `k.Dot`.
 - [`ax.zoom_to`](charts.md#axes-zoom_to): Named transition: animates the visible ranges of the axes (`x=(a, b)`, `y=(c, d)`).
 - [`ax.point`](charts.md#axes-point): Data point `(x, y)` in world coordinates, reactive when `x` or `y` are signals.
+- [`ax.add`](charts.md#axes-add): Puts objects inside the axes, in its own coordinates, so they follow zooms like plots do; place them with `position=ax.local_point(x, y)` or `ax.origin()`.
+- [`ax.origin`](charts.md#axes-origin): Where the two axes cross, in the axes' own coordinates: the data origin clamped to the visible ranges.
+- [`ax.in_view`](charts.md#axes-in_view): Whether a data value is inside the visible ranges, as a reactive bool for `visible=`: `ax.in_view(x=3)`, `ax.in_view(y=5)` or both.
 - [`curve.point_at`](charts.md#plot-point_at): World position of the curve at `x`; reactive when `x` is a signal.
 - [`curve.tangent_at`](charts.md#plot-tangent_at): Tangent segment `length` units long, centered on the curve at `x`, reactive when `x` is a signal.
 - [`curve.slope_at`](charts.md#plot-slope_at): Numerical derivative of the curve at `x`, reactive when `x` is a signal.

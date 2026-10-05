@@ -48,6 +48,30 @@ def code_block(s: k.Scene):
         related=("Code.highlight", "k.morph", "k.Text"),
     ),
     DocEntry(
+        "k.underline",
+        "Text",
+        "Annotation marks on any object or part of a text or formula (`eq[\"dx\"]`): "
+        "`k.underline(target)`, `k.box(target)`, `k.encircle(target)`, `k.strike(target)` (crossed "
+        "out) and `k.cross(target)` (an X). Each is an ordinary object bound to the target's box in "
+        "world coordinates, so it follows the target; it enters with `k.draw` and leaves with "
+        "`k.fade_out`. `pad=` (or `overhang=` for `strike`), `color=` and `stroke_width=`.",
+        '''
+import kinemo as k
+
+@k.scene
+def marks(s: k.Scene):
+    eq = k.Math(r"a^2 + b^2 = c^2", size=0.8).place(at="center")
+    s.add(eq)
+    s.play(k.draw(k.box(eq["c^2"])))
+    s.play(k.draw(k.underline(eq["a^2"])), k.draw(k.encircle(eq["b^2"])))
+    wrong = k.Text("a + b = c", size=0.5).place(below=eq, gap=1)
+    s.play(k.write(wrong))
+    s.play(k.draw(k.cross(wrong)))
+    s.wait(0.5)
+''',
+        related=("k.Math", "k.draw", "k.fade_out"),
+    ),
+    DocEntry(
         "k.Terminal",
         "Text",
         "A terminal or REPL window: `title=`, `prompt=` (`\"$ \"`, `\">>>\"`), `lang=` of the commands "

@@ -217,6 +217,32 @@ Commands outside mathematical LaTeX, such as `\usepackage` or a TikZ environment
 (`K0105`, "not available in this installation yet"). Rewrite the formula with
 mathematical commands, or draw the figure with kinemo shapes.
 
+## Marking parts: underline, box, encircle, strike, cross
+
+`k.underline(target)`, `k.box(target)`, `k.encircle(target)`, `k.strike(target)` and
+`k.cross(target)` draw on any object or part of a text or formula, and follow it when it
+moves. They are ordinary objects: enter with `k.draw`, leave with `k.fade_out`.
+
+```python
+import kinemo as k
+
+
+@k.scene
+def marked(s: k.Scene):
+    eq = k.Math(r"\frac{dy}{dx} = \lim_{h \to 0} \frac{f(x+h) - f(x)}{h}").place(at="center")
+    s.add(eq)
+    s.play(k.draw(k.box(eq["h"])), k.draw(k.encircle(eq["0"])))
+    wrong = k.Text("dy / dx = 0", size=0.45).place(below=eq, gap=1)
+    s.play(k.write(wrong))
+    s.play(k.draw(k.strike(wrong)))
+    s.wait(0.5)
+```
+
+- `pad=` sets the distance to the target's box (`overhang=` for `strike`), `color=` and
+  `stroke_width=` the line; marks default to yellow, `strike` and `cross` to red.
+- The mark is bound to the target's box in world coordinates, so it works on parts nested in
+  a formula (`eq["dx"]`, `txt["word"]`) and keeps up with `.to()` and constraints.
+
 ## `k.Code`
 
 ```python signature

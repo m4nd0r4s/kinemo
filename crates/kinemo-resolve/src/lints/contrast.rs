@@ -8,7 +8,6 @@
 //! luminances. Only texts at rest are judged, so fades in and out never count; texts
 //! with a nearly-zero alpha are W1005's business.
 
-use kinemo_layout::Layout;
 
 use super::{FirstOccurrences, LintCode, LintContext, LintDetails, LintFinding, VisualLint};
 use crate::sampling::{object_label, FrameSample};
@@ -45,7 +44,7 @@ pub(crate) fn blend_over(foreground: [f64; 3], alpha: f64, background: [f64; 3])
 
 /// What is behind the text at `index`: the scene background, with the fill of every shape
 /// drawn before it (tree order) whose box contains the text's center composited over it.
-fn backdrop(sample: &FrameSample, layout: &Layout, index: usize, scene_background: [f64; 3], visible_opacity: f64) -> [f64; 3] {
+fn backdrop(sample: &FrameSample, index: usize, scene_background: [f64; 3], visible_opacity: f64) -> [f64; 3] {
     let text = &sample.leaves[index];
     let center = text.world_bbox.center();
     let mut color = scene_background;
@@ -53,8 +52,8 @@ fn backdrop(sample: &FrameSample, layout: &Layout, index: usize, scene_backgroun
         if leaf.is_text || !leaf.revealed || !leaf.is_visible(visible_opacity) || !leaf.world_bbox.contains(center) {
             continue;
         }
-        let Some(fill) = layout.prop_color(leaf.id, "fill", sample.t) else { continue };
-        let alpha = fill[3] * layout.prop_f(leaf.id, "fill_opacity", sample.t, 1.0) * leaf.opacity;
+        let Some(fill) = leaf.fill else { continue };
+        let alpha = fill[3] * leaf.fill_opacity * leaf.opacity;
         if alpha > visible_opacity {
             color = blend_over([fill[0], fill[1], fill[2]], alpha, color);
         }
@@ -63,7 +62,7 @@ fn backdrop(sample: &FrameSample, layout: &Layout, index: usize, scene_backgroun
 }
 
 impl VisualLint for ContrastLint {
-    fn observe(&mut self, context: &LintContext, sample: &FrameSample, layout: &Layout) {
+    fn observe(&mut self, context: &LintContext, sample: &FrameSample) {
         let options = context.options;
         let bg = context.scene.config.background;
         let scene_background = [bg[0], bg[1], bg[2]];
@@ -74,13 +73,12 @@ impl VisualLint for ContrastLint {
             if self.found.contains(&[leaf.id]) {
                 continue;
             }
-            let Some(fill) = layout.prop_color(leaf.id, "fill", sample.t) else { continue };
-            let fill_opacity = layout.prop_f(leaf.id, "fill_opacity", sample.t, 1.0);
-            let alpha = fill[3] * fill_opacity * leaf.opacity;
+            let Some(fill) = leaf.fill else { continue };
+            let alpha = fill[3] * leaf.fill_opacity * leaf.opacity;
             if alpha <= options.visible_opacity {
                 continue;
             }
-            let background = backdrop(sample, layout, index, scene_background, options.visible_opacity);
+            let background = backdrop(sample, index, scene_background, options.visible_opacity);
             let shown = blend_over([fill[0], fill[1], fill[2]], alpha, background);
             let ratio = contrast_ratio(shown, background);
             if ratio >= options.minimum_contrast {

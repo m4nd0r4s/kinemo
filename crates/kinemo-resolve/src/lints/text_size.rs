@@ -5,13 +5,11 @@
 //! height of the default font is about 0.7 em, so an 18 px em has ~13 px capitals.
 //! Only texts at rest are judged (a `scale` or `size` animation in progress is skipped).
 
-use kinemo_layout::Layout;
 
 use super::{FirstOccurrences, LintCode, LintContext, LintDetails, LintFinding, VisualLint};
 use crate::sampling::{object_label, FrameSample};
 
 /// Default `size` of a text when the IR does not declare one.
-const DEFAULT_TEXT_SIZE: f64 = 0.5;
 
 #[derive(Default)]
 pub(crate) struct TextSizeLint {
@@ -19,7 +17,7 @@ pub(crate) struct TextSizeLint {
 }
 
 impl VisualLint for TextSizeLint {
-    fn observe(&mut self, context: &LintContext, sample: &FrameSample, layout: &Layout) {
+    fn observe(&mut self, context: &LintContext, sample: &FrameSample) {
         let scene = context.scene;
         let options = context.options;
         let pixels_per_unit = scene.config.width as f64 / scene.config.frame_w;
@@ -30,14 +28,11 @@ impl VisualLint for TextSizeLint {
             if self.found.contains(&[leaf.id]) {
                 continue;
             }
-            if layout.prop_str(leaf.text_owner, "text", sample.t).unwrap_or_default().trim().is_empty() {
+            let Some(metrics) = leaf.text else { continue };
+            if metrics.blank {
                 continue;
             }
-            let em = layout.prop_f(leaf.text_owner, "size", sample.t, DEFAULT_TEXT_SIZE);
-            // Length of the image of the unit y vector: the vertical scale, rotation-invariant.
-            let [_, _, c, d, _, _] = layout.world_affine(leaf.id, sample.t).as_coeffs();
-            let vertical_scale = c.hypot(d);
-            let pixels = em * vertical_scale * pixels_per_unit;
+            let pixels = metrics.em * metrics.vertical_scale * pixels_per_unit;
             if pixels <= 0.0 || pixels >= options.minimum_text_pixels {
                 continue;
             }

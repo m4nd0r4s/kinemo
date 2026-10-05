@@ -25,8 +25,11 @@ mod text_size;
 
 use serde::Serialize;
 
-use kinemo_eval::Evaluator;
-use kinemo_ir::{ObjectId, Scene, Span};
+use std::sync::Arc;
+
+use kinemo_eval::{Evaluator, TimelineIndex};
+use rayon::prelude::*;
+use kinemo_ir::{ObjectId, Scene, SignalId, Span};
 use kinemo_layout::Layout;
 
 use crate::sampling::{expression_signals, sample_frame, sample_times, FrameSample, MotionIndex, DEFAULT_SAMPLE_STEP};
@@ -194,9 +197,12 @@ pub(crate) struct LintContext<'a> {
 
 /// A lint family. `observe` sees every sample in time order; `finish` reports.
 pub(crate) trait VisualLint {
-    fn observe(&mut self, _context: &LintContext, _sample: &FrameSample, _layout: &Layout) {}
+    fn observe(&mut self, _context: &LintContext, _sample: &FrameSample) {}
     fn finish(self: Box<Self>, context: &LintContext) -> Vec<LintFinding>;
 }
+
+/// Instants sampled together in parallel before the lints observe them.
+const SAMPLE_BATCH: usize = 512;
 
 /// Runs every visual lint over `scene`. Findings are deduplicated per `(code, objects)`
 /// (earliest instant kept) and sorted by time, then code.
@@ -213,13 +219,31 @@ pub fn run_visual_lints(scene: &Scene, options: &LintOptions) -> Vec<LintFinding
     ];
     let motion = MotionIndex::new(scene);
     let reactive = expression_signals(scene);
-    for t in sample_times(scene, options.sample_step) {
-        // A fresh evaluator per instant keeps memoization bounded on long scenes.
-        let evaluator = Evaluator::new(scene);
-        let layout = Layout::new(&evaluator);
-        let sample = sample_frame(&layout, &motion, &reactive, t);
-        for lint in lints.iter_mut() {
-            lint.observe(&context, &sample, &layout);
+    let quiet = static_scene::quiet_stretches(scene, options.static_seconds);
+    let in_quiet_stretch = |t: f64| quiet.iter().any(|&(from, to)| t >= from - options.sample_step && t <= to + options.sample_step);
+    let index = Arc::new(TimelineIndex::new(scene));
+    let times = sample_times(scene, options.sample_step);
+    // Instants are sampled in parallel, a batch at a time (memory stays bounded); the lints
+    // then observe them in time order, since some follow objects from one sample to the next.
+    for batch in times.chunks(SAMPLE_BATCH) {
+        let samples: Vec<FrameSample> = batch
+            .par_iter()
+            .map_init(
+                || Evaluator::with_index(scene, index.clone()),
+                |evaluator, &t| {
+                    // One evaluator per worker, cleared per instant: memoization stays bounded
+                    // and the caches keep their capacity.
+                    evaluator.clear();
+                    let layout = Layout::new(evaluator);
+                    let reactive_now: &[SignalId] = if in_quiet_stretch(t) { &reactive } else { &[] };
+                    sample_frame(&layout, &motion, reactive_now, t)
+                },
+            )
+            .collect();
+        for sample in &samples {
+            for lint in lints.iter_mut() {
+                lint.observe(&context, sample);
+            }
         }
     }
     let findings: Vec<LintFinding> = lints.into_iter().flat_map(|lint| lint.finish(&context)).collect();

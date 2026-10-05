@@ -13,7 +13,9 @@ impl Builder {
     /// timeline boundary). JSON list of findings: `code`, `objects`, `t`, `message`,
     /// `details` (tagged by `kind`), `fix` (tagged by `kind`, or null) and `span`.
     #[pyo3(signature = (step = 0.1))]
-    fn visual_lints(&self, step: f64) -> String {
-        to_json(&run_visual_lints(&self.scene, &LintOptions::with_step(step)))
+    fn visual_lints(&self, py: Python<'_>, step: f64) -> String {
+        let scene = &self.scene;
+        // Rust only, on every core: Python keeps running meanwhile.
+        to_json(&py.detach(|| run_visual_lints(scene, &LintOptions::with_step(step))))
     }
 }

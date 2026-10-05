@@ -9,8 +9,7 @@
 //! counts as a change. Gaps between changes in `[0, duration]` longer than 8 s are reported
 //! at their start, located at the timeline entry that ended right before the gap.
 
-use kinemo_ir::{Entry, SignalId, Span, Value};
-use kinemo_layout::Layout;
+use kinemo_ir::{Entry, Scene, SignalId, Span, Value};
 
 use super::{LintCode, LintContext, LintDetails, LintFinding, VisualLint};
 use crate::sampling::{values_close, FrameSample};
@@ -30,12 +29,15 @@ struct Change {
 }
 
 impl VisualLint for StaticSceneLint {
-    fn observe(&mut self, _context: &LintContext, sample: &FrameSample, _layout: &Layout) {
+    fn observe(&mut self, _context: &LintContext, sample: &FrameSample) {
+        // Samples outside the quiet stretches carry no reactive values (see `quiet_stretches`):
+        // nothing to compare there.
         if let Some((t_prev, values)) = &self.previous {
-            let changed = values
-                .iter()
-                .zip(&sample.reactive_values)
-                .any(|((_, before), (_, after))| !values_close(before, after));
+            let changed = values.len() == sample.reactive_values.len()
+                && values
+                    .iter()
+                    .zip(&sample.reactive_values)
+                    .any(|((_, before), (_, after))| !values_close(before, after));
             if changed {
                 self.reactive_changes.push((*t_prev, sample.t));
             }
@@ -45,24 +47,7 @@ impl VisualLint for StaticSceneLint {
 
     fn finish(self: Box<Self>, context: &LintContext) -> Vec<LintFinding> {
         let scene = context.scene;
-        let mut changes: Vec<Change> = Vec::new();
-        for signal in &scene.signals {
-            for entry in &signal.timeline {
-                let span = match entry {
-                    Entry::Set { span, .. } | Entry::Anim { span, .. } => span.clone(),
-                };
-                changes.push(Change { start: entry.start(), end: entry.end(), span: Some(span) });
-            }
-        }
-        for object in &scene.objects {
-            for (t, _) in &object.presence {
-                changes.push(Change { start: *t, end: *t, span: Some(object.span.clone()) });
-            }
-            for e in &object.place {
-                let span = e.p.as_ref().map(|p| p.span.clone()).unwrap_or_else(|| object.span.clone());
-                changes.push(Change { start: e.t, end: e.t + e.dur, span: Some(span) });
-            }
-        }
+        let mut changes = timeline_changes(scene);
         changes.extend(self.reactive_changes.iter().map(|&(start, end)| Change { start, end, span: None }));
         changes.sort_by(|a, b| a.start.total_cmp(&b.start));
 
@@ -95,4 +80,47 @@ impl VisualLint for StaticSceneLint {
         }
         findings
     }
+}
+
+/// Every stretch during which the timeline itself changes something: animation entries,
+/// sets, presence toggles and placement changes.
+fn timeline_changes(scene: &Scene) -> Vec<Change> {
+    let mut changes: Vec<Change> = Vec::new();
+    for signal in &scene.signals {
+        for entry in &signal.timeline {
+            let span = match entry {
+                Entry::Set { span, .. } | Entry::Anim { span, .. } => span.clone(),
+            };
+            changes.push(Change { start: entry.start(), end: entry.end(), span: Some(span) });
+        }
+    }
+    for object in &scene.objects {
+        for (t, _) in &object.presence {
+            changes.push(Change { start: *t, end: *t, span: Some(object.span.clone()) });
+        }
+        for e in &object.place {
+            let span = e.p.as_ref().map(|p| p.span.clone()).unwrap_or_else(|| object.span.clone());
+            changes.push(Change { start: e.t, end: e.t + e.dur, span: Some(span) });
+        }
+    }
+    changes
+}
+
+/// Stretches longer than `limit` in which the timeline changes nothing. Only there can a
+/// reactive value decide W1007, so samples elsewhere skip evaluating reactive signals.
+pub(crate) fn quiet_stretches(scene: &Scene, limit: f64) -> Vec<(f64, f64)> {
+    let mut changes = timeline_changes(scene);
+    changes.sort_by(|a, b| a.start.total_cmp(&b.start));
+    let mut stretches = Vec::new();
+    let mut covered_until = 0.0_f64;
+    for change in &changes {
+        if change.start - covered_until > limit {
+            stretches.push((covered_until, change.start.min(scene.duration)));
+        }
+        covered_until = covered_until.max(change.end);
+    }
+    if scene.duration - covered_until > limit {
+        stretches.push((covered_until, scene.duration));
+    }
+    stretches
 }

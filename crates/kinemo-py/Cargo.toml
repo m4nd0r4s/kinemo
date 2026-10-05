@@ -12,6 +12,7 @@ test = false
 doctest = false
 
 [dependencies]
+rayon.workspace = true
 kinemo-ir.workspace = true
 kinemo-eval.workspace = true
 kinemo-layout.workspace = true

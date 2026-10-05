@@ -2026,6 +2026,7 @@ dependencies = [
  "kinemo-text",
  "kurbo 0.11.3",
  "pyo3",
+ "rayon",
  "serde",
  "serde_json",
 ]
@@ -2072,6 +2073,7 @@ dependencies = [
  "kinemo-ir",
  "kinemo-layout",
  "kurbo 0.11.3",
+ "rayon",
  "serde",
  "serde_json",
 ]

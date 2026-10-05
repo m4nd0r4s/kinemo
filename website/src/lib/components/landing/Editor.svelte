@@ -51,4 +51,17 @@
       it, including the ones it leaves out, with their defaults.
     </figcaption>
   </figure>
+  <figure class="screenshot">
+    <img
+      src="{base}/img/editor-code.png"
+      width="1600"
+      height="1000"
+      loading="lazy"
+      alt="The preview's Code tab: the scene's code beside the frame, the statement running at the playhead lit, each statement's time in the gutter and a breakpoint on the zoom."
+    />
+    <figcaption>
+      The Code tab follows the playhead through your code. Set breakpoints, step statement by
+      statement, see who called a clip and watch props change, without editing anything.
+    </figcaption>
+  </figure>
 </section>

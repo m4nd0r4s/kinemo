@@ -240,7 +240,7 @@ function onSelection() {
   }
 }
 
-function setPane(pane) {
+export function setPane(pane) {
   const code = pane === "code";
   $("tab-code").classList.toggle("active", code);
   $("tab-inspector").classList.toggle("active", !code);

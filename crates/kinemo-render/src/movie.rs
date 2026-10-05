@@ -85,7 +85,7 @@ pub fn render_movie(
     let audio = scenes
         .iter()
         .zip(&starts)
-        .flat_map(|(s, start)| s.audio.iter().map(move |a| crate::renderer::audio_clip(a, start + a.t)))
+        .flat_map(|(s, start)| s.audio.iter().map(move |a| crate::renderer::audio_clip(a, start + a.t, Some(start + s.duration))))
         .collect();
     let enc = EncoderOptions {
         width: opts.width,

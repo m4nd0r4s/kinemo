@@ -21,10 +21,16 @@ pub(crate) fn mix_graph(clips: &[AudioClip], first_input: usize, duration: f64, 
         let delay_ms = (clip.start.max(0.0) * 1000.0).round() as u64;
         let gain = if clip.gain.is_finite() { clip.gain.max(0.0) } else { 1.0 };
         let mut chain = format!("[{}:a]aresample=48000,aformat=channel_layouts=stereo", first_input + i);
-        if clip.role == ClipRole::Music && clip.fade > 0.0 {
-            // In at its start, out at the end of the scene (clip-local times, before the delay).
-            let out_at = (duration - clip.start.max(0.0) - clip.fade).max(0.0);
-            chain.push_str(&format!(",afade=t=in:d={:.3},afade=t=out:st={out_at:.3}:d={:.3}", clip.fade, clip.fade));
+        if clip.role == ClipRole::Music {
+            // Clip-local times, before the delay: music plays until the end of its scene.
+            let length = (clip.end.unwrap_or(duration).min(duration) - clip.start.max(0.0)).max(0.0);
+            if clip.fade > 0.0 {
+                let out_at = (length - clip.fade).max(0.0);
+                chain.push_str(&format!(",afade=t=in:d={:.3},afade=t=out:st={out_at:.3}:d={:.3}", clip.fade, clip.fade));
+            }
+            if clip.end.is_some() {
+                chain.push_str(&format!(",atrim=end={length:.3}"));
+            }
         }
         chain.push_str(&format!(",adelay={delay_ms}:all=1,volume={gain:.6}[a{i}]"));
         parts.push(chain);
@@ -82,6 +88,14 @@ pub(crate) fn mix_graph(clips: &[AudioClip], first_input: usize, duration: f64, 
 mod tests {
     use super::*;
 
+    #[test]
+    fn music_with_an_end_fades_and_stops_there() {
+        let bed = AudioClip { path: "bed.wav".into(), start: 1.0, gain: 0.3, role: ClipRole::Music, duck: 0.0, fade: 0.5, end: Some(4.0) };
+        let g = mix_graph(&[bed], 1, 10.0, None).unwrap();
+        assert!(g.contains("afade=t=out:st=2.500:d=0.500"), "{g}");
+        assert!(g.contains("atrim=end=3.000"), "{g}");
+    }
+
     fn clip(path: &str, start: f64, role: ClipRole) -> AudioClip {
         AudioClip { path: path.into(), start, gain: 1.0, role, ..AudioClip::default() }
     }
@@ -105,7 +119,7 @@ mod tests {
     fn music_ducks_under_the_voice_and_fades() {
         let clips = vec![
             clip("voice.wav", 1.0, ClipRole::Voice),
-            AudioClip { path: "bed.mp3".into(), start: 0.0, gain: 0.3, role: ClipRole::Music, duck: 0.25, fade: 1.0 },
+            AudioClip { path: "bed.mp3".into(), start: 0.0, gain: 0.3, role: ClipRole::Music, duck: 0.25, fade: 1.0, end: None },
         ];
         let g = mix_graph(&clips, 1, 10.0, Some(-16.0)).unwrap();
         assert!(g.contains("asplit=2[voice][sidechain]"));

@@ -48,6 +48,9 @@ pub struct AudioClip {
     pub duck: f64,
     /// Music only: fade in at its start and out at the end, in seconds.
     pub fade: f64,
+    /// Music only: where it stops on the video timeline (the end of its scene in a movie);
+    /// `None` = the end of the output.
+    pub end: Option<f64>,
 }
 
 #[derive(Clone, Debug, PartialEq)]

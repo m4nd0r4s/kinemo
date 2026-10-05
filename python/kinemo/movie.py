@@ -9,6 +9,7 @@ from .diagnostics import KinemoError
 from .scene.decorator import SceneDef
 
 if TYPE_CHECKING:
+    from .audio.voice import NarrationLine
     from .scene.scene import Scene
 
 
@@ -42,14 +43,41 @@ class Movie:
         """Build every scene of the movie."""
         return [s.build(params) for s in self.scenes]
 
-    def render(self, path: str, format: str = "mp4", quality: str = "final", progress: Callable[[int, int], object] | None = None) -> None:
-        """Render the movie to one video file, joining scenes with their transitions."""
+    def render(self, path: str, format: str = "mp4", quality: str = "final", progress: Callable[[int, int], object] | None = None) -> list[Scene]:
+        """Render the movie to one video file, joining scenes with their transitions; returns
+        the built scenes. Each scene's narration, sounds and music are kept; its music stops
+        at the scene's end."""
         from ._core import render_movie
 
         built = self.build()
+        render_movie([b.builder for b in built], self._joins(len(built)), path, format, quality, progress)
+        return built
+
+    def _joins(self, count: int) -> list[tuple[str, float]]:
         joins = [(t.kind, t.duration) for t in self.transitions]
-        joins += [("cut", 0.0)] * (len(built) - 1 - len(joins))
-        render_movie([b.builder for b in built], joins, path, format, quality, progress)
+        return joins + [("cut", 0.0)] * (count - 1 - len(joins))
+
+    def starts(self, built: Sequence[Scene]) -> list[float]:
+        """Where each scene starts in the movie: a crossfade overlaps two scenes (as the
+        renderer joins them)."""
+        starts: list[float] = []
+        t = 0.0
+        for scene, (kind, duration) in zip(built, self._joins(len(built)) + [("cut", 0.0)]):
+            starts.append(t)
+            overlap = min(max(0.0, duration), scene.duration) if kind == "crossfade" else 0.0
+            t += scene.duration - overlap
+        return starts
+
+    def narration(self, built: Sequence[Scene]) -> list[NarrationLine]:
+        """Every narration line of the movie, in movie time (for subtitles)."""
+        from dataclasses import replace
+
+        lines: list[NarrationLine] = []
+        for scene, start in zip(built, self.starts(built)):
+            for line in scene.__dict__.get("_narration", []):
+                words = tuple((word, a + start, b + start) for word, a, b in line.words)
+                lines.append(replace(line, start=line.start + start, end=line.end + start, words=words))
+        return lines
 
 
 def movie(scenes: Sequence[SceneDef], transitions: Sequence[Transition] = (), *, name: str = "movie") -> Movie:

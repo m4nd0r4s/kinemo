@@ -68,13 +68,15 @@ pub fn render_frame_with_backend(backend: &dyn RenderBackend, scene: &Scene, t: 
 }
 
 /// The encoder's view of an audio clip of the scene, starting at `start` in the output.
-pub(crate) fn audio_clip(audio: &kinemo_ir::Audio, start: f64) -> AudioClip {
+/// `end`: where the clip's scene ends on the output timeline (music stops there), `None` for a
+/// single scene.
+pub(crate) fn audio_clip(audio: &kinemo_ir::Audio, start: f64, end: Option<f64>) -> AudioClip {
     let role = match audio.role {
         kinemo_ir::AudioRole::Voice => ClipRole::Voice,
         kinemo_ir::AudioRole::Sound => ClipRole::Sound,
         kinemo_ir::AudioRole::Music => ClipRole::Music,
     };
-    AudioClip { path: audio.path.clone(), start, gain: audio.gain, role, duck: audio.duck, fade: audio.fade }
+    AudioClip { path: audio.path.clone(), start, gain: audio.gain, role, duck: audio.duck, fade: audio.fade, end }
 }
 
 #[derive(Debug)]
@@ -123,7 +125,7 @@ pub fn render_video_range(
         .audio
         .iter()
         .filter(|a| a.t >= start_time && a.t < end_time)
-        .map(|a| audio_clip(a, a.t - start_time))
+        .map(|a| audio_clip(a, a.t - start_time, None))
         .collect();
     let enc_opts = EncoderOptions {
         width: opts.width,

@@ -2,7 +2,9 @@
 
 use pyo3::prelude::*;
 
-use kinemo_eval::Evaluator;
+use std::sync::Arc;
+
+use kinemo_eval::{Evaluator, TimelineIndex};
 use kinemo_ir::{
     Audio, AudioRole, Entry, Expr, Lerp, Mark, Object, PlaceEntry, Scene, SceneConfig, Signal, Span,
     Table, Value,
@@ -31,6 +33,20 @@ impl Builder {
         let ev = Evaluator::new(&self.scene);
         let layout = Layout::new(&ev);
         f(&layout)
+    }
+
+    /// [`Builder::with_layout`] at many instants: a fresh evaluator per instant (memoization
+    /// stays bounded) sharing the time-independent timeline work.
+    pub(crate) fn with_layout_at<T>(&self, times: impl IntoIterator<Item = f64>, mut f: impl FnMut(&Layout, f64) -> T) -> Vec<T> {
+        let index = Arc::new(TimelineIndex::new(&self.scene));
+        times
+            .into_iter()
+            .map(|t| {
+                let ev = Evaluator::with_index(&self.scene, index.clone());
+                let layout = Layout::new(&ev);
+                f(&layout, t)
+            })
+            .collect()
     }
 }
 
@@ -238,12 +254,7 @@ impl Builder {
     /// Numeric samples of an expression on a uniform time grid.
     fn eval_expr_grid(&self, expr_json: &str, t0: f64, dt: f64, n: usize) -> PyResult<Vec<f64>> {
         let e: Expr = parse("expression", expr_json)?;
-        Ok((0..n)
-            .map(|i| {
-                let t = t0 + i as f64 * dt;
-                self.with_layout(|l| l.evaluator().expr(&e, t, l).as_f64())
-            })
-            .collect())
+        Ok(self.with_layout_at((0..n).map(|i| t0 + i as f64 * dt), |l, t| l.evaluator().expr(&e, t, l).as_f64()))
     }
 
     #[pyo3(signature = (obj, prop, t, world = false))]

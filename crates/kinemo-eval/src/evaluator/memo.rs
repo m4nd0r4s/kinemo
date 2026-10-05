@@ -7,9 +7,9 @@
 use super::Evaluated;
 use kinemo_ir::{SignalId, Value};
 use std::cell::RefCell;
-use std::collections::{HashMap, HashSet};
+use rustc_hash::{FxHashMap, FxHashSet};
 use std::hash::Hash;
-use std::rc::Rc;
+use std::sync::Arc;
 
 /// Time key: the exact bit pattern of the query time.
 pub(crate) type TimeKey = u64;
@@ -21,11 +21,11 @@ pub(crate) fn time_key(t: f64) -> TimeKey {
 
 /// A `RefCell<HashMap>` whose accessors never leak a borrow.
 #[derive(Debug)]
-pub(crate) struct Cache<K, V>(RefCell<HashMap<K, V>>);
+pub(crate) struct Cache<K, V>(RefCell<FxHashMap<K, V>>);
 
 impl<K, V> Default for Cache<K, V> {
     fn default() -> Self {
-        Cache(RefCell::new(HashMap::new()))
+        Cache(RefCell::new(FxHashMap::default()))
     }
 }
 
@@ -57,12 +57,13 @@ pub(crate) struct Memo {
     pub(crate) value: Cache<(SignalId, TimeKey), Value>,
     /// Raw evaluations by `(signal, t)`.
     pub(crate) raw: Cache<(SignalId, TimeKey), Evaluated>,
-    /// Start values of `Anim` entries by `(signal, sorted position)`; time-independent.
+    /// Start values of `Anim` entries by `(signal, sorted position)`, for an evaluator without
+    /// a shared [`super::TimelineIndex`]; time-independent.
     pub(crate) from: Cache<(SignalId, usize), Value>,
-    /// Stable start-time order of each signal's timeline.
-    pub(crate) order: Cache<SignalId, Rc<[usize]>>,
+    /// Stable start-time order of each signal's timeline (same).
+    pub(crate) order: Cache<SignalId, Arc<[usize]>>,
     /// Timeline evaluations currently on the stack (cycle detection).
-    active: RefCell<HashSet<FrameKey>>,
+    active: RefCell<FxHashSet<FrameKey>>,
 }
 
 impl Memo {
@@ -73,11 +74,10 @@ impl Memo {
         inserted.then(|| ActiveGuard { memo: self, key })
     }
 
+    /// Drops the per-time results, keeping the maps' capacity for the next instant.
     pub(crate) fn clear(&self) {
         self.value.clear();
         self.raw.clear();
-        self.from.clear();
-        self.order.clear();
     }
 }
 

@@ -1,13 +1,16 @@
 //! Frame and video rendering with quality presets and parallel rasterization.
 
 use std::path::Path;
+use std::sync::Arc;
 
 use rayon::prelude::*;
 
 use kinemo_encode::{AudioClip, ClipRole, EncodeError, EncoderOptions, Format, VideoEncoder};
+use kinemo_eval::{Evaluator, TimelineIndex};
+use kinemo_layout::Layout;
 use kinemo_ir::Scene;
 
-use crate::frame::{display_list, FrameSize};
+use crate::frame::{display_list, display_list_indexed, display_list_with, FrameSize};
 use crate::raster::{rasterize, Image, RenderBackend};
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -60,6 +63,11 @@ fn even(v: u32) -> u32 {
 
 pub fn render_frame(scene: &Scene, t: f64, opts: &RenderOptions) -> Image {
     rasterize(&display_list(scene, t, opts.size(), opts.transparent), opts.antialias)
+}
+
+/// [`render_frame`] sharing `index` (made for `scene`) with the other frames of a render.
+pub fn render_frame_indexed(scene: &Scene, index: &Arc<TimelineIndex>, t: f64, opts: &RenderOptions) -> Image {
+    rasterize(&display_list_indexed(scene, index, t, opts.size(), opts.transparent), opts.antialias)
 }
 
 /// [`render_frame`] through an explicit rasterization backend (e.g. the GPU in preview).
@@ -139,13 +147,23 @@ pub fn render_video_range(
         loudness: scene.config.loudness,
     };
     let mut encoder = VideoEncoder::start(path, &enc_opts)?;
+    let index = Arc::new(TimelineIndex::new(scene));
     const BATCH: usize = 32;
     let mut done = 0;
     for start in (0..total).step_by(BATCH) {
         let end = (start + BATCH).min(total);
         let frames: Vec<Image> = (start..end)
             .into_par_iter()
-            .map(|i| render_frame(scene, start_time + i as f64 / opts.fps, opts))
+            .map_init(
+                || Evaluator::with_index(scene, index.clone()),
+                |evaluator, i| {
+                    // One evaluator per worker: its caches keep their capacity between frames.
+                    evaluator.clear();
+                    let layout = Layout::new(evaluator);
+                    let list = display_list_with(&layout, start_time + i as f64 / opts.fps, opts.size(), opts.transparent);
+                    rasterize(&list, opts.antialias)
+                },
+            )
             .collect();
         for f in frames {
             encoder.push_frame(&f.rgba)?;

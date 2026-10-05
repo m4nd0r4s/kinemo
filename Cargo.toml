@@ -48,6 +48,8 @@ image = { version = "0.25", default-features = false, features = ["png", "jpeg"]
 usvg = { version = "0.47", default-features = false, features = ["text"] }
 base64 = "0.22"
 rayon = "1"
+# Fast hashing for the evaluator and layout memo caches (keys are small integers).
+rustc-hash = "2"
 tree-sitter = "0.25"
 tree-sitter-highlight = "0.25"
 tree-sitter-python = "0.25"

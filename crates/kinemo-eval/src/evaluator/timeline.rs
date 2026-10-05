@@ -17,10 +17,10 @@
 
 use super::memo::time_key;
 use super::ops;
-use super::{Evaluated, Evaluator, Resolver};
+use super::{Evaluated, Evaluator, Resolver, TimelineIndex};
 use crate::ease;
 use kinemo_ir::{Blend, Entry, Signal, SignalId, Src, Value};
-use std::rc::Rc;
+use std::sync::Arc;
 
 /// What currently provides the base value while walking the timeline.
 #[derive(Clone, Copy)]
@@ -118,7 +118,12 @@ impl<'a> Evaluator<'a> {
     /// Start value of the anim at sorted position `pos`: explicit `from` at
     /// `t0`, or the snapshot of the earlier entries at `t0` (memoized).
     fn anim_from(&self, id: SignalId, sig: &Signal, pos: usize, r: &dyn Resolver) -> Value {
-        if let Some(v) = self.memo.from.get(&(id, pos)) {
+        let cell = self.index.as_ref().map(|index| index.start(sig, id, pos));
+        let cached = match cell {
+            Some(cell) => cell.get().cloned(),
+            None => self.memo.from.get(&(id, pos)),
+        };
+        if let Some(v) = cached {
             return v;
         }
         let order = self.order(sig, id);
@@ -132,7 +137,13 @@ impl<'a> Evaluator<'a> {
                 None => return Value::None,
             },
         };
-        self.memo.from.insert((id, pos), v.clone());
+        match cell {
+            // A cycle may have filled the cell meanwhile; the first value wins either way.
+            Some(cell) => {
+                let _ = cell.set(v.clone());
+            }
+            None => self.memo.from.insert((id, pos), v.clone()),
+        }
         v
     }
 
@@ -143,15 +154,16 @@ impl<'a> Evaluator<'a> {
         }
     }
 
-    /// Stable start-time order of a signal's entries (memoized).
-    pub(super) fn order(&self, sig: &Signal, id: SignalId) -> Rc<[usize]> {
-        if let Some(o) = self.memo.order.get(&id) {
-            return o;
+    /// Stable start-time order of a signal's entries (shared by the index).
+    pub(super) fn order(&self, sig: &Signal, id: SignalId) -> Arc<[usize]> {
+        if let Some(index) = &self.index {
+            return index.order(sig, id);
         }
-        let mut idx: Vec<usize> = (0..sig.timeline.len()).collect();
-        idx.sort_by(|&a, &b| sig.timeline[a].start().total_cmp(&sig.timeline[b].start()));
-        let o: Rc<[usize]> = idx.into();
-        self.memo.order.insert(id, o.clone());
-        o
+        if let Some(order) = self.memo.order.get(&id) {
+            return order;
+        }
+        let order = TimelineIndex::sorted(sig);
+        self.memo.order.insert(id, order.clone());
+        order
     }
 }

@@ -9,7 +9,9 @@ pub(crate) mod style;
 
 use kurbo::Affine;
 
-use kinemo_eval::Evaluator;
+use std::sync::Arc;
+
+use kinemo_eval::{Evaluator, TimelineIndex};
 use kinemo_ir::Scene;
 use kinemo_layout::Layout;
 
@@ -43,18 +45,30 @@ impl FrameSize {
 
 /// Display list of `scene` at time `t`.
 pub fn display_list(scene: &Scene, t: f64, size: FrameSize, transparent: bool) -> DisplayList {
-    let ev = Evaluator::new(scene);
-    let layout = Layout::new(&ev);
+    display_list_indexed(scene, &Arc::new(TimelineIndex::new(scene)), t, size, transparent)
+}
+
+/// [`display_list`] sharing the time-independent timeline work of `index` (made for `scene`)
+/// with the other frames of a render.
+pub fn display_list_indexed(scene: &Scene, index: &Arc<TimelineIndex>, t: f64, size: FrameSize, transparent: bool) -> DisplayList {
+    let ev = Evaluator::with_index(scene, index.clone());
+    display_list_with(&Layout::new(&ev), t, size, transparent)
+}
+
+/// [`display_list`] through a caller's layout (e.g. over an evaluator reused for every frame
+/// a thread renders).
+pub fn display_list_with(layout: &Layout, t: f64, size: FrameSize, transparent: bool) -> DisplayList {
+    let scene = layout.scene();
     let mut background = scene.config.background;
     if transparent {
         background[3] = 0.0;
     }
-    let items = collect::leaves(&layout, t)
+    let items = collect::leaves(layout, t)
         .into_iter()
-        .flat_map(|leaf| match layout.scene().object(leaf).kind.as_str() {
-            "morph" => morph::draw_items(&layout, leaf, t, size),
-            k if kinemo_layout::mass::is_mass_kind(k) => mass::draw_items(&layout, leaf, t, size),
-            _ => style::draw_items(&layout, leaf, t, size),
+        .flat_map(|leaf| match scene.object(leaf).kind.as_str() {
+            "morph" => morph::draw_items(layout, leaf, t, size),
+            k if kinemo_layout::mass::is_mass_kind(k) => mass::draw_items(layout, leaf, t, size),
+            _ => style::draw_items(layout, leaf, t, size),
         })
         .collect();
     DisplayList { width: size.width, height: size.height, background, items }

@@ -198,10 +198,29 @@ def scene_statements(result: BuildResult) -> list[dict[str, Any]]:
         key = (os.path.abspath(st.span.file), st.span.line)
         callers = [{"file": os.path.abspath(c.file), "line": c.line} for c in st.callers]
         by_line.setdefault(key, []).append({"kind": st.kind, "start": st.start, "end": st.end, "label": st.label, "callers": callers})
+    # The beats of a `k.Script`: the heading of each beat is a statement of the script file.
+    for line in s.__dict__.get("_narration", []):
+        if line.script is None:
+            continue
+        key = (os.path.abspath(line.script[0]), line.script[1])
+        by_line.setdefault(key, []).append({"kind": "voice", "start": line.start, "end": line.end, "label": f"{line.beat} · {_beat_state(line)}", "callers": []})
     return [
         {"file": file, "line": line, "runs": sorted(runs, key=lambda r: (r["start"], r["end"]))}
         for (file, line), runs in sorted(by_line.items())
     ]
+
+
+def _beat_state(line: Any) -> str:
+    """`recorded`, `stale` (made from another text) or `estimated` (no audio yet)."""
+    from ..audio.script import read_manifest, text_hash
+
+    if line.audio is None:
+        return "estimated: no audio yet"
+    if line.audio_target is not None:
+        made_from = read_manifest(os.path.dirname(line.audio_target)).get(line.beat)
+        if made_from is not None and made_from != text_hash(line.text):
+            return "stale: the script changed after the audio was made"
+    return f"recorded ({os.path.basename(line.audio)})"
 
 
 #: Largest source file sent to the code view (characters).
@@ -222,7 +241,8 @@ def code_files(statements: list[dict[str, Any]]) -> dict[str, dict[str, Any]]:
             continue
         if len(source) > CODE_FILE_LIMIT:
             continue
-        out[file] = {"name": os.path.basename(file), "lines": _highlighted_lines(source, code_tokens(source, "python"))}
+        language = "python" if file.endswith(".py") else "text"
+        out[file] = {"name": os.path.basename(file), "lines": _highlighted_lines(source, code_tokens(source, language))}
     return out
 
 

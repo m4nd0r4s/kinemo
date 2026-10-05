@@ -6,6 +6,7 @@ pub mod inspect;
 pub mod media;
 pub mod raster;
 mod movie;
+mod pipeline;
 mod renderer;
 pub mod segments;
 pub mod sheet;

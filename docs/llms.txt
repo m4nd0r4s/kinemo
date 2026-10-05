@@ -1025,6 +1025,39 @@ def point(s: k.Scene):
     s.play(k.draw(ax))
     s.play(k.fade_in(pin, label))
 ```
+#### `ax.add(*objs, enter_with_axes=True)`
+Puts objects inside the axes, in its own coordinates, so they follow zooms like plots do; place them with `position=ax.local_point(x, y)` or `ax.origin()`. They enter with the axes; with `enter_with_axes=False` they stay hidden until a verb brings them in. See also: `ax.origin`, `ax.in_view`, `ax.point`.
+```python
+@k.scene
+def marker(s: k.Scene):
+    ax = k.Axes(x=(0, 10, 2), y=(0, 10, 2)).place(at="center")
+    peak = k.Dot(r=0.12, fill=k.RED, position=ax.local_point(4, 8))
+    ax.add(peak, enter_with_axes=False)
+    s.play(k.draw(ax))
+    s.play(k.fade_in(peak))
+    s.play(ax.zoom_to(x=(2, 6), y=(4, 10)), duration=1.5)
+```
+#### `ax.origin() -> Expr[Vec]`
+Where the two axes cross, in the axes' own coordinates: the data origin clamped to the visible ranges. Reactive, so it moves with zooms. See also: `ax.add`, `k.Axes`.
+```python
+@k.scene
+def origin(s: k.Scene):
+    ax = k.Axes(x=(-2, 8, 2), y=(-2, 8, 2)).place(at="center")
+    ax.add(k.Dot(r=0.1, fill=k.YELLOW, position=ax.origin()))
+    s.play(k.draw(ax))
+    s.play(ax.zoom_to(x=(2, 8)), duration=1.5)
+```
+#### `ax.in_view(*, x=None, y=None) -> Expr[bool]`
+Whether a data value is inside the visible ranges, as a reactive bool for `visible=`: `ax.in_view(x=3)`, `ax.in_view(y=5)` or both. Markers hide when a zoom leaves them out. See also: `ax.add`, `ax.zoom_to`.
+```python
+@k.scene
+def in_view(s: k.Scene):
+    ax = k.Axes(x=(0, 10, 2), y=(0, 10, 2)).place(at="center")
+    tag = k.Text("x = 8", size=0.3, position=ax.local_point(8, 9), visible=ax.in_view(x=8))
+    ax.add(tag)
+    s.play(k.draw(ax))
+    s.play(ax.zoom_to(x=(0, 5)), duration=1.5)
+```
 #### `curve.point_at(x) -> Expr[Vec]`
 World position of the curve at `x`; reactive when `x` is a signal. With `place(at=...)` it makes a dot slide along the curve. `curve.value_at(x)` gives the y value. See also: `curve.tangent_at`, `curve.slope_at`, `ax.point`.
 ```python

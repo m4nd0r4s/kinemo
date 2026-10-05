@@ -174,6 +174,9 @@ Methods:
 - [`ax.scatter`](charts.md#axes-scatter): Points `(xs[i], ys[i])` on the axes, as a group of `k.Dot`.
 - [`ax.zoom_to`](charts.md#axes-zoom_to): Named transition: animates the visible ranges of the axes (`x=(a, b)`, `y=(c, d)`).
 - [`ax.point`](charts.md#axes-point): Data point `(x, y)` in world coordinates, reactive when `x` or `y` are signals.
+- [`ax.add`](charts.md#axes-add): Puts objects inside the axes, in its own coordinates, so they follow zooms like plots do; place them with `position=ax.local_point(x, y)` or `ax.origin()`.
+- [`ax.origin`](charts.md#axes-origin): Where the two axes cross, in the axes' own coordinates: the data origin clamped to the visible ranges.
+- [`ax.in_view`](charts.md#axes-in_view): Whether a data value is inside the visible ranges, as a reactive bool for `visible=`: `ax.in_view(x=3)`, `ax.in_view(y=5)` or both.
 - [`curve.point_at`](charts.md#plot-point_at): World position of the curve at `x`; reactive when `x` is a signal.
 - [`curve.tangent_at`](charts.md#plot-tangent_at): Tangent segment `length` units long, centered on the curve at `x`, reactive when `x` is a signal.
 - [`curve.slope_at`](charts.md#plot-slope_at): Numerical derivative of the curve at `x`, reactive when `x` is a signal.

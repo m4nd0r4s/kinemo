@@ -218,6 +218,61 @@ def point(s: k.Scene):
         related=("Plot.point_at", "Node.place"),
     ),
     DocEntry(
+        "Axes.add",
+        "Charts",
+        "Puts objects inside the axes, in its own coordinates, so they follow zooms like "
+        "plots do; place them with `position=ax.local_point(x, y)` or `ax.origin()`. They enter with "
+        "the axes; with `enter_with_axes=False` they stay hidden until a verb brings them in.",
+        '''
+import kinemo as k
+
+@k.scene
+def marker(s: k.Scene):
+    ax = k.Axes(x=(0, 10, 2), y=(0, 10, 2)).place(at="center")
+    peak = k.Dot(r=0.12, fill=k.RED, position=ax.local_point(4, 8))
+    ax.add(peak, enter_with_axes=False)
+    s.play(k.draw(ax))
+    s.play(k.fade_in(peak))
+    s.play(ax.zoom_to(x=(2, 6), y=(4, 10)), duration=1.5)
+''',
+        related=("Axes.origin", "Axes.in_view", "Axes.point"),
+    ),
+    DocEntry(
+        "Axes.origin",
+        "Charts",
+        "Where the two axes cross, in the axes' own coordinates: the data origin clamped "
+        "to the visible ranges. Reactive, so it moves with zooms.",
+        '''
+import kinemo as k
+
+@k.scene
+def origin(s: k.Scene):
+    ax = k.Axes(x=(-2, 8, 2), y=(-2, 8, 2)).place(at="center")
+    ax.add(k.Dot(r=0.1, fill=k.YELLOW, position=ax.origin()))
+    s.play(k.draw(ax))
+    s.play(ax.zoom_to(x=(2, 8)), duration=1.5)
+''',
+        related=("Axes.add", "k.Axes"),
+    ),
+    DocEntry(
+        "Axes.in_view",
+        "Charts",
+        "Whether a data value is inside the visible ranges, as a reactive bool for `visible=`: "
+        "`ax.in_view(x=3)`, `ax.in_view(y=5)` or both. Markers hide when a zoom leaves them out.",
+        '''
+import kinemo as k
+
+@k.scene
+def in_view(s: k.Scene):
+    ax = k.Axes(x=(0, 10, 2), y=(0, 10, 2)).place(at="center")
+    tag = k.Text("x = 8", size=0.3, position=ax.local_point(8, 9), visible=ax.in_view(x=8))
+    ax.add(tag)
+    s.play(k.draw(ax))
+    s.play(ax.zoom_to(x=(0, 5)), duration=1.5)
+''',
+        related=("Axes.add", "Axes.zoom_to"),
+    ),
+    DocEntry(
         "Plot.point_at",
         "Charts",
         "World position of the curve at `x`; reactive when `x` is a signal. With "

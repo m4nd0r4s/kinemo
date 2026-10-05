@@ -4,6 +4,40 @@ All notable changes to kinemo are listed here. The project follows
 [semantic versioning](https://semver.org/); until 1.0, a minor version may change the API, and
 `kinemo upgrade` rewrites the forms it replaces.
 
+## 0.12.0
+
+A debugging view in `kinemo dev`: the scene's code follows the playhead, with breakpoints,
+stepping, call stacks and watched values. Nothing is edited from it.
+
+**Added**
+
+- **Code tab** beside the inspector: the scene's code (and the local modules it ran), with the
+  same colors as `k.Code`; the statements running at the playhead are lit, the latest one
+  marked, and **follow** keeps it in view. Selecting a bar or an audio clip shows its line.
+- **Run times in the gutter:** when each statement runs (`1.20s`, `×3` for a loop, `◆ mark`);
+  click to go there, hover for every run.
+- **Breakpoints:** click a line number; playback pauses exactly where a run of that statement
+  starts and selects it. A loop can stop on one run, a clip's line on one call site.
+  Breakpoints are remembered per browser and follow their line when the file changes.
+- **Stepping:** next / previous statement (F10 / Shift+F10) and run to line (F8).
+- **Call stacks:** a statement inside a `@k.clip`, a component method or a helper knows the
+  lines that called it; the code lights them and the inspector lists them (*Called from*).
+- **Watch:** ☆ pins a prop from the inspector; its value at the playhead, flashing when it
+  changes, and a sparkline over the scene for numbers.
+- **Code and canvas:** names of objects in the code are links (hover draws the object's box,
+  click selects it); selecting an object marks the lines that make and animate it.
+- **Script tab:** a scene narrated from a `k.Script` shows the script, the beat being narrated
+  lit, each beat's time and whether its audio is recorded, stale or estimated.
+- The dev page opens on more states from its URL: `pane=code` and `bp=17,20`.
+
+**Changed**
+
+- `kinemo dev` metadata carries the statements of the scene (`play`, `start`, `wait`,
+  `wait_for`, `v.at`, voice blocks, `add`/`remove`, marks) with every run, and the highlighted
+  source of the files the scene ran.
+- The website shows the code view; its editor screenshots are checked before they are published
+  (a shot taken before the scene arrived is retaken).
+
 ## 0.11.1
 
 Faster narration with heavy voice models, audio in the dev editor, more code languages and

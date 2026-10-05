@@ -49,6 +49,33 @@ def compare(s: k.Scene):
         related=("k.Row", "k.RoundedRect"),
     ),
     DocEntry(
+        "k.Angle",
+        "Objects",
+        "Angle markers. `k.Angle(a, vertex, b, r=0.5)` draws the arc of the smaller angle between the "
+        "rays vertex→a and vertex→b, with `label=\"θ\"` beside it or `show_value=True` for its measure "
+        "(`unit=\"deg\"` or `\"rad\"`); `k.RightAngle(a, vertex, b, size=0.3)` draws the square mark. "
+        "Points are tuples or reactive points (`dot.world.center`, a `k.vec` of signals), so the "
+        "marker follows an angle as it opens. Points are world coordinates: use `poly.sides` "
+        "(not `poly.vertices`) for a polygon's corners.",
+        '''
+import kinemo as k
+
+@k.scene
+def opening(s: k.Scene):
+    deg = k.signal(30.0)
+    origin = (-1.5, -1.0)
+    tip = k.vec(-1.5 + 3 * k.cos(deg * k.pi / 180), -1 + 3 * k.sin(deg * k.pi / 180))
+    s.add(k.Line(start=origin, end=(1.5, -1.0)), k.Line(start=origin, end=tip))
+    theta = k.Angle((1.5, -1.0), origin, tip, r=0.8, label="θ", show_value=True)
+    s.play(k.draw(theta))
+    s.play(deg.to(90), duration=2)
+    corner = k.RightAngle((1.5, -1.0), origin, tip)
+    s.play(k.fade_out(theta), k.draw(corner))
+    s.wait(0.5)
+''',
+        related=("k.Arc", "k.vec"),
+    ),
+    DocEntry(
         "Node.to",
         "Object state",
         "Animated state change: interpolates each prop from its value at the cursor to the target. "

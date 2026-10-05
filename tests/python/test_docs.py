@@ -175,7 +175,7 @@ def test_llms_txt_has_every_section() -> None:
     assert "`self.play(Create(x))` | `s.play(k.draw(x))`" in text
     for e in ENTRIES:
         assert signatures.display_name(e.symbol) in text
-    assert len(text.splitlines()) < 1750
+    assert len(text.splitlines()) < 1900
 
 
 def test_llms_txt_is_deterministic() -> None:

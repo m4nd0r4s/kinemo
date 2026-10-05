@@ -7,6 +7,8 @@ Shapes, groups, images, SVG and mass objects (points, vector fields, stream line
 **Contents:**
 
 - [`k.Card`](#k-card): A panel around `content` (sized to it, or `w=`, `h=`): `title=` in its top-left corner, `caption=` under it, `accent=` a color bar beside the title; `pad=`, `radius=`.
+- [`k.Angle`](#k-angle): Angle markers.
+- [`k.RightAngle`](#k-rightangle): `k.RightAngle(a, vertex, b, size=0.3)`: the square mark of a right angle at `vertex`, along the rays toward `a` and `b`.
 - [`k.Circle`](#k-circle): Circle of radius `r`, centered on its position.
 - [`k.Dot`](#k-dot): Filled dot (default radius 0.08), with no stroke.
 - [`k.Ellipse`](#k-ellipse): Ellipse of width `w` and height `h`, centered on its position.
@@ -86,6 +88,105 @@ def compare(s: k.Scene):
 ```
 
 **See also:** [`k.Row`](layout.md#k-row), [`k.RoundedRect`](#k-roundedrect).
+
+Inherited from [`k.Group`](#k-group): [`children`](#group-children), [`to`](#group-to), [`swap`](#group-swap), [`insert`](#group-insert), [`pop`](#group-pop), [`fit`](#group-fit).
+Inherited from [`k.Node`](object-state.md#k-node): [`set`](object-state.md#node-set), [`unbind`](object-state.md#node-unbind), [`edge`](object-state.md#node-edge), [`age`](object-state.md#node-age), [`entered`](object-state.md#node-entered), [`exited`](object-state.md#node-exited), [`copy`](object-state.md#node-copy), [`place`](object-state.md#node-place), [`to_place`](object-state.md#node-to_place), [`unpin`](object-state.md#node-unpin).
+
+<a id="k-angle"></a>
+### `k.Angle` *(class)*
+
+```python
+k.Angle(
+    a: VecVal,
+    vertex: VecVal,
+    b: VecVal,
+    *,
+    r: float = 0.5,
+    label: str | None = None,
+    show_value: bool = False,
+    unit: Literal['deg', 'rad'] = "deg",
+    color: ColorLike = k.YELLOW,
+    stroke_width: float = 3.0,
+    label_size: float = 0.34,
+    **props: Unpack[VisibilityKeywords],
+)
+```
+
+Angle markers. `k.Angle(a, vertex, b, r=0.5)` draws the arc of the smaller angle between the rays vertex→a and vertex→b, with `label="θ"` beside it or `show_value=True` for its measure (`unit="deg"` or `"rad"`); `k.RightAngle(a, vertex, b, size=0.3)` draws the square mark. Points are tuples or reactive points (`dot.world.center`, a `k.vec` of signals), so the marker follows an angle as it opens. Points are world coordinates: use `poly.sides` (not `poly.vertices`) for a polygon's corners.
+
+**Parameters:**
+
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `a` | `VecVal` | required |   |
+| `vertex` | `VecVal` | required |   |
+| `b` | `VecVal` | required |   |
+| `r` | `float` | `0.5` | `k.Angle(a, vertex, b, r=0.5)` draws the arc of the smaller angle between the rays vertex→a and vertex→b, with `label="θ"` beside it or `show_value=True` for its measure (`unit="deg"` or `"rad"`); `k.RightAngle(a, vertex, b, size=0.3)` draws the square mark. |
+| `label` | `str \| None` | `None` | `k.Angle(a, vertex, b, r=0.5)` draws the arc of the smaller angle between the rays vertex→a and vertex→b, with `label="θ"` beside it or `show_value=True` for its measure (`unit="deg"` or `"rad"`); `k.RightAngle(a, vertex, b, size=0.3)` draws the square mark. |
+| `show_value` | `bool` | `False` | `k.Angle(a, vertex, b, r=0.5)` draws the arc of the smaller angle between the rays vertex→a and vertex→b, with `label="θ"` beside it or `show_value=True` for its measure (`unit="deg"` or `"rad"`); `k.RightAngle(a, vertex, b, size=0.3)` draws the square mark. |
+| `unit` | `Literal['deg', 'rad']` | `"deg"` | `k.Angle(a, vertex, b, r=0.5)` draws the arc of the smaller angle between the rays vertex→a and vertex→b, with `label="θ"` beside it or `show_value=True` for its measure (`unit="deg"` or `"rad"`); `k.RightAngle(a, vertex, b, size=0.3)` draws the square mark. |
+| `color` | `ColorLike` | `k.YELLOW` |   |
+| `stroke_width` | `float` | `3.0` |   |
+| `label_size` | `float` | `0.34` |   |
+| `**props` | `Unpack[VisibilityKeywords]` | variadic | Keyword arguments (`VisibilityKeywords`): `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`. |
+
+Props inherited from [`k.Node`](object-state.md#k-node): `x`, `y`, `rotate`, `scale`, `scale_x`, `scale_y`, `anchor`, `opacity`, `z`, `visible`, `bleed`.
+
+**Example:**
+
+```python
+@k.scene
+def opening(s: k.Scene):
+    deg = k.signal(30.0)
+    origin = (-1.5, -1.0)
+    tip = k.vec(-1.5 + 3 * k.cos(deg * k.pi / 180), -1 + 3 * k.sin(deg * k.pi / 180))
+    s.add(k.Line(start=origin, end=(1.5, -1.0)), k.Line(start=origin, end=tip))
+    theta = k.Angle((1.5, -1.0), origin, tip, r=0.8, label="θ", show_value=True)
+    s.play(k.draw(theta))
+    s.play(deg.to(90), duration=2)
+    corner = k.RightAngle((1.5, -1.0), origin, tip)
+    s.play(k.fade_out(theta), k.draw(corner))
+    s.wait(0.5)
+```
+
+**See also:** [`k.Arc`](#k-arc), [`k.vec`](native-blocks.md#k-vec).
+
+Inherited from [`k.Group`](#k-group): [`children`](#group-children), [`to`](#group-to), [`swap`](#group-swap), [`insert`](#group-insert), [`pop`](#group-pop), [`fit`](#group-fit).
+Inherited from [`k.Node`](object-state.md#k-node): [`set`](object-state.md#node-set), [`unbind`](object-state.md#node-unbind), [`edge`](object-state.md#node-edge), [`age`](object-state.md#node-age), [`entered`](object-state.md#node-entered), [`exited`](object-state.md#node-exited), [`copy`](object-state.md#node-copy), [`place`](object-state.md#node-place), [`to_place`](object-state.md#node-to_place), [`unpin`](object-state.md#node-unpin).
+
+<a id="k-rightangle"></a>
+### `k.RightAngle` *(class)*
+
+```python
+k.RightAngle(
+    a: VecVal,
+    vertex: VecVal,
+    b: VecVal,
+    *,
+    size: float = 0.3,
+    color: ColorLike = k.YELLOW,
+    stroke_width: float = 3.0,
+    **props: Unpack[VisibilityKeywords],
+)
+```
+
+`k.RightAngle(a, vertex, b, size=0.3)`: the square mark of a right angle at `vertex`, along the rays toward `a` and `b`. Parts: `mark.lines`.
+
+Documented together with [`k.Angle`](#k-angle).
+
+**Parameters:**
+
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `a` | `VecVal` | required | `k.RightAngle(a, vertex, b, size=0.3)`: the square mark of a right angle at `vertex`, along the rays toward `a` and `b`. |
+| `vertex` | `VecVal` | required | `k.RightAngle(a, vertex, b, size=0.3)`: the square mark of a right angle at `vertex`, along the rays toward `a` and `b`. |
+| `b` | `VecVal` | required | `k.RightAngle(a, vertex, b, size=0.3)`: the square mark of a right angle at `vertex`, along the rays toward `a` and `b`. |
+| `size` | `float` | `0.3` | `k.RightAngle(a, vertex, b, size=0.3)`: the square mark of a right angle at `vertex`, along the rays toward `a` and `b`. |
+| `color` | `ColorLike` | `k.YELLOW` |   |
+| `stroke_width` | `float` | `3.0` |   |
+| `**props` | `Unpack[VisibilityKeywords]` | variadic | Keyword arguments (`VisibilityKeywords`): `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`. |
+
+Props inherited from [`k.Node`](object-state.md#k-node): `x`, `y`, `rotate`, `scale`, `scale_x`, `scale_y`, `anchor`, `opacity`, `z`, `visible`, `bleed`.
 
 Inherited from [`k.Group`](#k-group): [`children`](#group-children), [`to`](#group-to), [`swap`](#group-swap), [`insert`](#group-insert), [`pop`](#group-pop), [`fit`](#group-fit).
 Inherited from [`k.Node`](object-state.md#k-node): [`set`](object-state.md#node-set), [`unbind`](object-state.md#node-unbind), [`edge`](object-state.md#node-edge), [`age`](object-state.md#node-age), [`entered`](object-state.md#node-entered), [`exited`](object-state.md#node-exited), [`copy`](object-state.md#node-copy), [`place`](object-state.md#node-place), [`to_place`](object-state.md#node-to_place), [`unpin`](object-state.md#node-unpin).

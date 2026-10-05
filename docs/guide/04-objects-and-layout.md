@@ -240,6 +240,34 @@ def derived(s: k.Scene):
 during build. Animating or setting a derived prop is `K0303`: animate its source (position,
 scale or size) instead.
 
+## Angles
+
+`k.Angle(a, vertex, b)` marks the angle at `vertex` between the rays toward `a` and `b` (the
+smaller one) with an arc, a label or its measure; `k.RightAngle(a, vertex, b)` draws the square
+mark. The points can be reactive, so the marker follows an angle that opens:
+
+```python
+import kinemo as k
+
+
+@k.scene
+def angle(s: k.Scene):
+    deg = k.signal(20.0)
+    origin = (-1.5, -1.0)
+    tip = k.vec(-1.5 + 3 * k.cos(deg * k.pi / 180), -1 + 3 * k.sin(deg * k.pi / 180))
+    s.add(k.Line(start=origin, end=(1.5, -1.0)), k.Line(start=origin, end=tip))
+    theta = k.Angle((1.5, -1.0), origin, tip, r=0.8, label="θ", show_value=True)
+    s.play(k.draw(theta))
+    s.play(deg.to(120), duration=2)
+    s.wait(0.5)
+```
+
+- `r=` is the arc's radius, `label=` a name beside it, `show_value=True` its measure
+  (`unit="rad"` for radians); the label stays clear of the arc as the angle changes.
+- Points are in world coordinates. A polygon's `vertices` are in its own coordinates; its
+  `sides` (`side.start`, `side.end`) are in world coordinates, so mark a triangle's right angle
+  with `k.RightAngle(legs[0].end, legs[0].start, legs[2].start)` where `legs = tri.sides`.
+
 ## Containers
 
 Containers lay out their children and keep them laid out (flexbox and grid style):

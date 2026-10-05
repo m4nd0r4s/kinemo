@@ -9,6 +9,11 @@ Text, LaTeX math and highlighted code, with addressable parts.
 - [`k.Text`](#k-text): Text with minimal inline markup (`**bold**`, `*italic*`, `` `code` ``).
 - [`k.Math`](#k-math): Formula in LaTeX syntax, typeset by the built-in engine (no TeX installation needed).
 - [`k.Code`](#k-code): Code with syntax highlighting (tree-sitter) and stable tokens: `lang=`, `line_numbers=True`, `size=`, `theme="auto"` (follows the scene background).
+- [`k.underline`](#k-underline): Annotation marks on any object or part of a text or formula (`eq["dx"]`): `k.underline(target)`, `k.box(target)`, `k.encircle(target)`, `k.strike(target)` (crossed out) and `k.cross(target)` (an X).
+- [`k.box`](#k-box): A rounded box around `target`, `pad` away from its box.
+- [`k.cross`](#k-cross): An X over `target`: two lines corner to corner, `pad` past its box.
+- [`k.encircle`](#k-encircle): An ellipse around `target` (its box, `pad` larger on each side, times √2 so the corners fit inside).
+- [`k.strike`](#k-strike): A line through the middle of `target` (struck out), `overhang` past each side.
 - [`k.Terminal`](#k-terminal): A terminal or REPL window: `title=`, `prompt=` (`"$ "`, `">>>"`), `lang=` of the commands (`"bash"`, `"python"`...), `width=` and `rows=` on screen, `size=`, `theme="auto"`.
 
 **Methods in this area:**
@@ -422,6 +427,163 @@ code.lines: PartView  # read-only
 ```
 
 Laid-out lines as parts: `txt.lines[0]`.
+
+<a id="k-underline"></a>
+### `k.underline` *(function)*
+
+```python
+k.underline(
+    target: Node,
+    *,
+    pad: float = 0.08,
+    color: ColorLike = k.YELLOW,
+    stroke_width: FloatVal = 4.0,
+    **props: Unpack[VisibilityKeywords],
+) -> Line
+```
+
+Annotation marks on any object or part of a text or formula (`eq["dx"]`): `k.underline(target)`, `k.box(target)`, `k.encircle(target)`, `k.strike(target)` (crossed out) and `k.cross(target)` (an X). Each is an ordinary object bound to the target's box in world coordinates, so it follows the target; it enters with `k.draw` and leaves with `k.fade_out`. `pad=` (or `overhang=` for `strike`), `color=` and `stroke_width=`.
+
+**Parameters:**
+
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `target` | `Node` | required | A line under `target`, `pad` below its box; `k.draw` draws it left to right. |
+| `pad` | `float` | `0.08` | `pad=` (or `overhang=` for `strike`), `color=` and `stroke_width=`. |
+| `color` | `ColorLike` | `k.YELLOW` | `pad=` (or `overhang=` for `strike`), `color=` and `stroke_width=`. |
+| `stroke_width` | `FloatVal` | `4.0` | `pad=` (or `overhang=` for `strike`), `color=` and `stroke_width=`. |
+| `**props` | `Unpack[VisibilityKeywords]` | variadic | Keyword arguments (`VisibilityKeywords`): `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`. |
+
+**Example:**
+
+```python
+@k.scene
+def marks(s: k.Scene):
+    eq = k.Math(r"a^2 + b^2 = c^2", size=0.8).place(at="center")
+    s.add(eq)
+    s.play(k.draw(k.box(eq["c^2"])))
+    s.play(k.draw(k.underline(eq["a^2"])), k.draw(k.encircle(eq["b^2"])))
+    wrong = k.Text("a + b = c", size=0.5).place(below=eq, gap=1)
+    s.play(k.write(wrong))
+    s.play(k.draw(k.cross(wrong)))
+    s.wait(0.5)
+```
+
+**See also:** [`k.Math`](#k-math), [`k.draw`](verbs.md#k-draw), [`k.fade_out`](verbs.md#k-fade_out).
+
+<a id="k-box"></a>
+### `k.box` *(function)*
+
+```python
+k.box(
+    target: Node,
+    *,
+    pad: float = 0.12,
+    radius: float = 0.08,
+    color: ColorLike = k.YELLOW,
+    stroke_width: FloatVal = 4.0,
+    **props: Unpack[VisibilityKeywords],
+) -> RoundedRect
+```
+
+A rounded box around `target`, `pad` away from its box.
+
+Documented together with [`k.underline`](#k-underline).
+
+**Parameters:**
+
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `target` | `Node` | required | A rounded box around `target`, `pad` away from its box. |
+| `pad` | `float` | `0.12` | A rounded box around `target`, `pad` away from its box. |
+| `radius` | `float` | `0.08` |   |
+| `color` | `ColorLike` | `k.YELLOW` |   |
+| `stroke_width` | `FloatVal` | `4.0` |   |
+| `**props` | `Unpack[VisibilityKeywords]` | variadic | Keyword arguments (`VisibilityKeywords`): `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`. |
+
+<a id="k-cross"></a>
+### `k.cross` *(function)*
+
+```python
+k.cross(
+    target: Node,
+    *,
+    pad: float = 0.06,
+    color: ColorLike = k.RED,
+    stroke_width: FloatVal = 4.0,
+    **props: Unpack[VisibilityKeywords],
+) -> Group
+```
+
+An X over `target`: two lines corner to corner, `pad` past its box.
+
+Documented together with [`k.underline`](#k-underline).
+
+**Parameters:**
+
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `target` | `Node` | required | An X over `target`: two lines corner to corner, `pad` past its box. |
+| `pad` | `float` | `0.06` | An X over `target`: two lines corner to corner, `pad` past its box. |
+| `color` | `ColorLike` | `k.RED` |   |
+| `stroke_width` | `FloatVal` | `4.0` |   |
+| `**props` | `Unpack[VisibilityKeywords]` | variadic | Keyword arguments (`VisibilityKeywords`): `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`. |
+
+<a id="k-encircle"></a>
+### `k.encircle` *(function)*
+
+```python
+k.encircle(
+    target: Node,
+    *,
+    pad: float = 0.18,
+    color: ColorLike = k.YELLOW,
+    stroke_width: FloatVal = 4.0,
+    **props: Unpack[VisibilityKeywords],
+) -> Ellipse
+```
+
+An ellipse around `target` (its box, `pad` larger on each side, times √2 so the corners fit inside).
+
+Documented together with [`k.underline`](#k-underline).
+
+**Parameters:**
+
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `target` | `Node` | required | An ellipse around `target` (its box, `pad` larger on each side, times √2 so the corners fit inside). |
+| `pad` | `float` | `0.18` | An ellipse around `target` (its box, `pad` larger on each side, times √2 so the corners fit inside). |
+| `color` | `ColorLike` | `k.YELLOW` |   |
+| `stroke_width` | `FloatVal` | `4.0` |   |
+| `**props` | `Unpack[VisibilityKeywords]` | variadic | Keyword arguments (`VisibilityKeywords`): `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`. |
+
+<a id="k-strike"></a>
+### `k.strike` *(function)*
+
+```python
+k.strike(
+    target: Node,
+    *,
+    overhang: float = 0.06,
+    color: ColorLike = k.RED,
+    stroke_width: FloatVal = 4.0,
+    **props: Unpack[VisibilityKeywords],
+) -> Line
+```
+
+A line through the middle of `target` (struck out), `overhang` past each side.
+
+Documented together with [`k.underline`](#k-underline).
+
+**Parameters:**
+
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `target` | `Node` | required | A line through the middle of `target` (struck out), `overhang` past each side. |
+| `overhang` | `float` | `0.06` | A line through the middle of `target` (struck out), `overhang` past each side. |
+| `color` | `ColorLike` | `k.RED` |   |
+| `stroke_width` | `FloatVal` | `4.0` |   |
+| `**props` | `Unpack[VisibilityKeywords]` | variadic | Keyword arguments (`VisibilityKeywords`): `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`. |
 
 <a id="k-terminal"></a>
 ### `k.Terminal` *(class)*

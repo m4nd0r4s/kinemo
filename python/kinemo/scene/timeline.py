@@ -34,6 +34,23 @@ class LogEntry:
         return LogEntry(warp(self.start), warp(self.end), self.label, self.span, self.position, self.call)
 
 
+@dataclass(frozen=True)
+class Statement:
+    """A run of a statement that schedules time or acts at the cursor (`play`, `start`, `wait`,
+    `wait_for`, `voice`, `add`, `remove`, `mark`), for the dev editor's code view. A statement
+    in a loop has one run per iteration."""
+
+    kind: str
+    start: float
+    end: float
+    label: str
+    span: Span
+    position: int
+
+    def warped(self, warp: Callable[[float], float]) -> "Statement":
+        return Statement(self.kind, warp(self.start), warp(self.end), self.label, self.span, self.position)
+
+
 class TimelineMixin:
     _b: "Builder"
     cursor: float
@@ -42,6 +59,7 @@ class TimelineMixin:
     _marks: list[tuple[str | None, float, bool, int]]
     lints: Collector
     _log: list[LogEntry]
+    _statements: list[Statement]
 
     # ---- scheduling ----------------------------------------------------------------
     def _as_animation(self, anims: tuple[object, ...]) -> Animation:
@@ -54,7 +72,11 @@ class TimelineMixin:
             checked.append(a)
         return checked[0] if len(checked) == 1 else Par(checked, span=user_span(2))
 
-    def _schedule(self, anims: tuple[object, ...], duration: float | None, ease: EaseLike | None, at: float | None) -> TimeSpan:
+    def _record(self, kind: str, start: float, end: float, label: str = "", span: Span | None = None) -> None:
+        """Note a statement run for the code view."""
+        self._statements.append(Statement(kind, start, end, label, span or user_span(), self._b.log_position()))
+
+    def _schedule(self, anims: tuple[object, ...], duration: float | None, ease: EaseLike | None, at: float | None, kind: str = "start") -> TimeSpan:
         anim = self._as_animation(anims)
         k = self._speed
         if duration is not None:
@@ -66,6 +88,7 @@ class TimelineMixin:
         end = anim.emit(cast("Scene", self), start, k, as_ease(ease) if ease is not None else None)
         self._max_end = max(self._max_end, end)
         self._log.append(LogEntry(start, end, anim.describe(), anim.span, self._b.log_position(), call))
+        self._record(kind, start, end, anim.describe(), call)
         return TimeSpan(start, end, cast("Scene", self))
 
     def play(self, *anims: Animation, duration: float | None = None, ease: EaseLike | None = None, at: float | None = None) -> TimeSpan:
@@ -76,8 +99,8 @@ class TimelineMixin:
                 "play(..., at=) does not move the cursor",
                 fixes=[("make the intent explicit", "s.start(..., at=...)")],
             )
-            return self._schedule(anims, duration, ease, at)
-        span = self._schedule(anims, duration, ease, None)
+            return self._schedule(anims, duration, ease, at, "play")
+        span = self._schedule(anims, duration, ease, None, "play")
         self.cursor = span.end
         return span
 
@@ -89,12 +112,14 @@ class TimelineMixin:
         """Advance the cursor by `d` seconds."""
         start = self.cursor
         self.cursor += check_duration(d, "wait") * self._speed
+        self._record("wait", start, self.cursor, f"wait({d:g})")
         return TimeSpan(start, self.cursor, cast("Scene", self))
 
     def mark(self, name: str | None = None, slide: bool = False) -> float:
         """Time anchor at the cursor; `slide=True` makes it a slide break."""
         self._b.add_mark(self.cursor, name, slide)
         self._marks.append((name, self.cursor, slide, self._b.log_position()))
+        self._record("mark", self.cursor, self.cursor, name or "mark")
         return self.cursor
 
     @property
@@ -154,4 +179,5 @@ class TimelineMixin:
                 self._max_end = max(max_before, warp(self._max_end))
             self._marks = [(n, warp(t) if pos >= since else t, sl, pos) for n, t, sl, pos in self._marks]
             self._log = [e.warped(warp) if e.position >= since else e for e in self._log]
+            self._statements = [e.warped(warp) if e.position >= since else e for e in self._statements]
             self.cursor = new_end

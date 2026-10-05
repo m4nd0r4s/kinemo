@@ -57,7 +57,9 @@ class Voice:
         """Wait (move the cursor) until a point of the line; returns that instant. Already
         past it, the cursor stays."""
         when = self.time(where, occurrence)
-        self._scene.cursor = max(self._scene.cursor, when)
+        before = self._scene.cursor
+        self._scene.cursor = max(before, when)
+        self._scene._record("wait", before, self._scene.cursor, f"v.at({where!r})")
         return when
 
     def _phrase_time(self, phrase: str, occurrence: int) -> float:

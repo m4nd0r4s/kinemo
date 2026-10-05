@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, Iterable
 
-from .._runtime.spans import user_span
+from .._runtime.spans import Span, user_span
 from ..diagnostics import KinemoError
 
 if TYPE_CHECKING:
@@ -16,15 +16,23 @@ class LifecycleMixin:
     _b: "Builder"
     cursor: float
 
+    if TYPE_CHECKING:
+
+        def _record(self, kind: str, start: float, end: float, label: str = "", span: "Span | None" = None) -> None: ...
+
     def add(self, *objs: "Node") -> None:
         """Put objects in the scene instantly, at the cursor."""
-        for o in _nodes(objs, "add"):
+        nodes = _nodes(objs, "add")
+        for o in nodes:
             self._enter(o, self.cursor)
+        self._record("add", self.cursor, self.cursor, ", ".join(o._label() for o in nodes))
 
     def remove(self, *objs: "Node") -> None:
         """Take objects out of the scene instantly, at the cursor."""
-        for o in _nodes(objs, "remove"):
+        nodes = _nodes(objs, "remove")
+        for o in nodes:
             self._exit(o, self.cursor)
+        self._record("remove", self.cursor, self.cursor, ", ".join(o._label() for o in nodes))
 
     def _enter(self, node: "Node", t: float) -> None:
         for n in [node, *node._entering_descendants(t)]:

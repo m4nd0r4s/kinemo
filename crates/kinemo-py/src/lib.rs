@@ -24,6 +24,7 @@ fn _core(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<server::PreviewServer>()?;
     m.add_function(wrap_pyfunction!(code::code_language, m)?)?;
     m.add_function(wrap_pyfunction!(code::code_languages, m)?)?;
+    m.add_function(wrap_pyfunction!(code::code_tokens, m)?)?;
     m.add_function(wrap_pyfunction!(output::ffmpeg_available, m)?)?;
     m.add_function(wrap_pyfunction!(output::measure_text, m)?)?;
     m.add_function(wrap_pyfunction!(output::render_movie, m)?)?;

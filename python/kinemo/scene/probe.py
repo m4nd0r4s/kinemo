@@ -13,7 +13,7 @@ if TYPE_CHECKING:
     from .._core import Builder
 
 _SCALARS = ("cursor", "_speed", "_max_end", "_tables_dirty")
-_CONTAINERS = ("_base", "_marks", "_tables", "_log", "_statefuls", "_exits")
+_CONTAINERS = ("_base", "_marks", "_tables", "_log", "_statements", "_statefuls", "_exits")
 
 
 class ProbeMixin:

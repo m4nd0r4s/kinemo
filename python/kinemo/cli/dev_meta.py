@@ -187,6 +187,65 @@ def _audio_verb_span(s: Any, role: str, path: str, start: float) -> dict[str, An
     return None
 
 
+def scene_statements(result: BuildResult) -> list[dict[str, Any]]:
+    """Every statement that schedules time or acts at the cursor, by file and line, with its runs
+    (a statement in a loop runs once per iteration): what the code view lights up and seeks to."""
+    s = result.scene
+    if s is None:
+        return []
+    by_line: dict[tuple[str, int], list[dict[str, Any]]] = {}
+    for st in s._statements:  # pyright: ignore[reportPrivateUsage]
+        key = (os.path.abspath(st.span.file), st.span.line)
+        by_line.setdefault(key, []).append({"kind": st.kind, "start": st.start, "end": st.end, "label": st.label})
+    return [
+        {"file": file, "line": line, "runs": sorted(runs, key=lambda r: (r["start"], r["end"]))}
+        for (file, line), runs in sorted(by_line.items())
+    ]
+
+
+#: Largest source file sent to the code view (characters).
+CODE_FILE_LIMIT = 400_000
+
+
+def code_files(statements: list[dict[str, Any]]) -> dict[str, dict[str, Any]]:
+    """The highlighted source of every file with statements (the scene and the local modules it
+    ran), as lines of `[text, kind]` segments; only files the scene itself executed are sent."""
+    from .._core import code_tokens
+
+    out: dict[str, dict[str, Any]] = {}
+    for file in dict.fromkeys(entry["file"] for entry in statements):
+        try:
+            with open(file, encoding="utf-8") as fh:
+                source = fh.read(CODE_FILE_LIMIT + 1)
+        except (OSError, UnicodeDecodeError):
+            continue
+        if len(source) > CODE_FILE_LIMIT:
+            continue
+        out[file] = {"name": os.path.basename(file), "lines": _highlighted_lines(source, code_tokens(source, "python"))}
+    return out
+
+
+def _highlighted_lines(source: str, tokens: list[tuple[str, str, int, int]]) -> list[list[list[str]]]:
+    """Each line as `[text, kind]` segments that cover it, whitespace included (as `plain`)."""
+    kinds = ["plain"] * len(source)
+    for _, kind, start, end in tokens:
+        for i in range(start, min(end, len(source))):
+            kinds[i] = kind
+    lines: list[list[list[str]]] = [[]]
+    for char, kind in zip(source, kinds):
+        if char == "\n":
+            lines.append([])
+            continue
+        line = lines[-1]
+        if line and line[-1][1] == kind:
+            line[-1][0] += char
+        else:
+            line.append([char, kind])
+    if source.endswith("\n"):
+        lines.pop()
+    return lines
+
+
 def scene_marks(result: BuildResult) -> list[dict[str, Any]]:
     s = result.scene
     if s is None:
@@ -246,6 +305,8 @@ def preview_meta(
         "timeline": timeline_bars(result, ir, sources),
         "marks": scene_marks(result),
         "tracks": audio_tracks(result, ir),
+        "statements": (statements := scene_statements(result)),
+        "code": code_files(statements),
         "diagnostics": diagnostics_json(result.diagnostics),
         "objects": object_tree(result, ir),
         "sources": editable,

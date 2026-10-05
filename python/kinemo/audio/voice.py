@@ -280,3 +280,5 @@ class VoiceMixin:
                 fixes=[("shorten or speed up the animations, or lengthen the narration", None)],
             )
         s.cursor = max(s.cursor, line.end)
+        spoken = " ".join(words)
+        s._record("voice", line.start, s.cursor, f"{beat.id} · {spoken}" if beat else spoken, span)

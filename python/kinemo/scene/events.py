@@ -20,6 +20,10 @@ RESOLVE_DT = 1.0 / 240.0
 class EventsMixin:
     _b: "Builder"
     cursor: float
+
+    if TYPE_CHECKING:
+
+        def _record(self, kind: str, start: float, end: float, label: str = "", span: Any = None) -> None: ...
     _speed: float
     _max_end: float
     _events: "EventRegistry"
@@ -74,6 +78,7 @@ class EventsMixin:
         if len(after) >= count:
             f = after[count - 1]
             index = firings.index(f) + 1
+            self._record("wait_for", self.cursor, f.t, f"wait_for({event!r})")
             self.cursor = f.t
             return EventInfo(f.t, f.data, index, self)
         before = [f for f in firings if f.t <= self.cursor + 1e-9]

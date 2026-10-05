@@ -75,6 +75,7 @@ class Scene(TimelineMixin, LifecycleMixin, WritesMixin, ProbeMixin, EventsMixin,
         self._tables: list[tuple[int, "PythonFn", "Expr"]] = []
         self._nodes: list[Any] = []
         self._log: list[Any] = []
+        self._statements: list[Any] = []
         self.lints = Collector()
         from ..project import project_config
 

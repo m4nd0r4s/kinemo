@@ -135,7 +135,11 @@ class Group(Node, Generic[ChildT]):
         anim = super().to(duration=duration, ease=ease, delay=delay, blend=blend, place=place, **props)
         if children is not None:
             assert isinstance(anim, PropTo)
-            anim.extra.append(Reorder(self, list(children), user_span()))
+            new, before = list(children), self.children
+            # Like insert()/pop(): new children enter with the reflow, removed ones leave.
+            entering = [c for c in new if c not in before]
+            leaving = [c for c in before if c not in new]
+            anim.extra.append(Reorder(self, new, user_span(), entering=entering, leaving=leaving))
         return anim
 
     def _reorder(self, new: Sequence[Node], **kw: Unpack[ReorderKeywords]) -> Animation:

@@ -224,3 +224,32 @@ def test_back_to_back_swaps_see_each_other_under_tempo() -> None:
         final.extend(bar.value.now for bar in row)
 
     assert final == [1, 2, 4, 5, 8]
+
+
+def test_to_children_enters_new_children_and_exits_removed_ones() -> None:
+    @build
+    def scene(s: k.Scene) -> None:
+        old = k.Circle(r=0.5)
+        new = k.Square(1)
+        group = k.Group(old)
+        s.add(group)
+        s.play(group.to(children=[new]), duration=1)
+
+    # The pose swap MinuteMath does: the new child appears, the old one leaves.
+    assert presence(scene, "new") == [(0.0, True)]
+    assert presence(scene, "old") == [(0.0, True), (1.0, False)]
+
+
+def test_to_children_can_insert_reorder_and_remove_at_once() -> None:
+    @build
+    def scene(s: k.Scene) -> None:
+        a = k.Square()
+        b = k.Circle(r=0.5)
+        c = k.Dot()
+        row = k.Row(a, b, gap=0.5)
+        s.add(row)
+        s.play(row.to(children=[c, a]), duration=1)
+
+    assert presence(scene, "c") == [(0.0, True)]
+    assert presence(scene, "b") == [(0.0, True), (1.0, False)]
+    assert presence(scene, "a") == [(0.0, True)]

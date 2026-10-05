@@ -11,6 +11,7 @@ __pycache__/
 /out
 uv.lock
 /website/.cache
+/website/.versions
 /website/build
 /website/.svelte-kit
 /website/node_modules

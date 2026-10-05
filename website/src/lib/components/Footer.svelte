@@ -13,9 +13,9 @@
   </p>
   <p>
     <a href="https://github.com/m4nd0r4s/kinemo" rel="noopener">Source on GitHub</a>
-    <a href="{base}/docs/">Documentation</a>
+    <a href="{base}/docs/latest/">Documentation</a>
     <a href="{base}/llms.txt">llms.txt</a>
-    <a href="{base}/docs/caveats/">Caveats</a>
-    <a href="{base}/docs/status/">Status</a>
+    <a href="{base}/docs/latest/caveats/">Caveats</a>
+    <a href="{base}/docs/latest/status/">Status</a>
   </p>
 </footer>

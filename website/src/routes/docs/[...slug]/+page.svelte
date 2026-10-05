@@ -6,17 +6,38 @@
   import { copyButtons } from "$lib/copy-buttons";
 
   let { data } = $props();
+  const latest = $derived(data.versions?.find((v) => v.id === "latest"));
 </script>
 
 <svelte:head>
-  <title>{data.title} — kinemo</title>
-  <meta name="description" content="kinemo documentation: {data.title}." />
+  {#if data.redirect !== null}
+    <!-- An address from before versions: the same page in the latest release. -->
+    <title>kinemo documentation</title>
+    <meta http-equiv="refresh" content="0; url={data.redirect}" />
+  {:else}
+    <title>{data.title} — kinemo</title>
+    <meta name="description" content="kinemo documentation: {data.title}." />
+    {#if data.version.id !== "latest" && latest}<link rel="canonical" href="{base}{latest.url}" />{/if}
+  {/if}
 </svelte:head>
 
+{#if data.redirect !== null}
+  <p class="doc-redirect">This page moved to <a href={data.redirect}>the latest documentation</a>.</p>
+{:else}
 <div class="doc-layout">
-  <DocNav groups={data.nav} current={data.url} />
+  <DocNav groups={data.nav} current={data.url} versions={data.versions} version={data.version.id} />
   {#key data.url}
     <article class="doc prose" use:copyButtons>
+      {#if data.version.id !== "latest" && latest}
+        <p class="version-banner">
+          {#if data.version.id === "dev"}
+            These are the docs of the unreleased development version.
+          {:else}
+            These are the docs of kinemo {data.version.label}.
+          {/if}
+          <a href="{base}{latest.url}">Read this page in the latest release</a>.
+        </p>
+      {/if}
       {#if data.video}
         <!-- The article opens with the example's render, then the page's own content. -->
         {@html data.html.split("</h1>")[0] + "</h1>"}
@@ -39,3 +60,4 @@
   {/key}
   <Toc headings={data.toc} />
 </div>
+{/if}

@@ -19,7 +19,9 @@
   let list = $state<HTMLOListElement>();
 
   async function load() {
-    index ??= await (await fetch(`${base}/search.json`)).json();
+    // The index of the version being read (`/docs/<version>/...`), the latest elsewhere.
+    const version = window.location.pathname.match(/\/docs\/([^/]+)\//)?.[1] ?? "latest";
+    index ??= await (await fetch(`${base}/docs/${version}/search.json`)).json();
     return index!;
   }
 

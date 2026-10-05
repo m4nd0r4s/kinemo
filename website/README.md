@@ -38,6 +38,15 @@ The build fails when a page links to an `#anchor` that does not exist.
 The output in `build/` is static files with relative links: it works from any web server or
 folder.
 
+## Documentation versions
+
+The docs are published per version under `/docs/<version>/`: `latest` (the newest release,
+the default), the newest release of each minor version (`0.11`, `0.10`, ...) and `dev` (this
+checkout, unreleased). `npm run export` extracts each release's `docs/` from its git tag into
+`.versions/` (only tags reachable from the current commit), so the build needs the tags:
+CI checks out with `fetch-depth: 0`. Addresses from before versions (`/docs/guide/...`)
+redirect to `latest`.
+
 ## Screenshots of the preview
 
 `static/img/editor-*.png` are captures of `kinemo dev`, taken with headless Chrome by

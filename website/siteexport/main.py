@@ -18,6 +18,7 @@ import kinemo
 from .evidence import check_json, check_output, preview_edit, snippet, timings
 from .media import Media, render_example
 from .paths import DATA, EXAMPLES, MEDIA, ROOT
+from .versions import export_versions
 
 #: The example shown in the landing page's studio, next to its source.
 HERO = "derivative"
@@ -55,6 +56,7 @@ def export(*, videos: bool = True, measure: bool = True, data_file: Path = DATA)
             "bars": hero.bars,
         },
         "examples": examples,
+        "docs_versions": export_versions(),
         "checks": {
             "timeline": {"command": f"kinemo check {HERO}.py", "output": check_output(EXAMPLES / f"{HERO}.py")},
             "constraint": {"command": "kinemo check constraint.py", "output": check_output(snippet("constraint.py"))},

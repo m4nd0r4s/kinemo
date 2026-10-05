@@ -6,9 +6,9 @@
   import ThemeToggle from "./ThemeToggle.svelte";
 
   const links = [
-    { label: "Guide", href: "/docs/guide/getting-started/", section: "/docs/guide/" },
-    { label: "Reference", href: "/docs/reference/", section: "/docs/reference/" },
-    { label: "Examples", href: "/docs/examples/", section: "/docs/examples/" },
+    { label: "Guide", href: "/docs/latest/guide/getting-started/", section: "/guide/" },
+    { label: "Reference", href: "/docs/latest/reference/", section: "/reference/" },
+    { label: "Examples", href: "/docs/latest/examples/", section: "/examples/" },
   ];
 </script>
 

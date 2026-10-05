@@ -89,3 +89,15 @@
   .doc-nav.open { display: block; }
   .prose img { width: 100%; }
 }
+
+/* Versions: the switcher above the navigation and the banner of a version other than latest. */
+.version-switch { display: flex; align-items: center; gap: 8px; margin-bottom: 18px; font-size: 13px; color: var(--ink-faint); }
+.version-switch select {
+  flex: 1; font: inherit; color: var(--ink); background: var(--paper-raised);
+  border: 1px solid var(--rule); border-radius: 6px; padding: 4px 6px;
+}
+.version-banner {
+  margin: 0 0 20px; padding: 10px 14px; font-size: 14px; color: var(--ink-soft);
+  background: var(--blue-soft); border: 1px solid var(--rule); border-left: 3px solid var(--blue); border-radius: 6px;
+}
+.doc-redirect { max-width: 40rem; margin: 64px auto; padding: 0 16px; color: var(--ink-soft); }

@@ -34,8 +34,17 @@ export interface Timing {
   ok: boolean;
 }
 
+/** The docs versions the site publishes (website/siteexport/versions.py). */
+export interface DocsVersions {
+  /** The release `/docs/latest/` shows (`dev` when the checkout has no release tag). */
+  latest: string;
+  /** Newest first: the newest release of each minor version. */
+  releases: { id: string; tag: string }[];
+}
+
 export interface SiteData {
   version: string;
+  docs_versions: DocsVersions;
   hero: { name: string; source: string; duration: number; bars: Bar[] };
   examples: Example[];
   checks: { timeline: Run; constraint: Run; manim: Run; json: Run };

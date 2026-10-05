@@ -4,6 +4,47 @@ All notable changes to kinemo are listed here. The project follows
 [semantic versioning](https://semver.org/); until 1.0, a minor version may change the API, and
 `kinemo upgrade` rewrites the forms it replaces.
 
+## 0.14.0
+
+A performance release: lints, frames and video encoding are several times faster, with the same
+output (golden frames unchanged; MP4 bytes differ from 0.13 but stay identical across machines).
+Measured with the new `python -m benchmarks` on an M4 Pro (14 cores), 1080p60:
+
+| | 0.13 | 0.14 |
+|---|---|---|
+| Lints of a ten-minute scene (every `check`, `render` and dev rebuild) | 82 s | 1.2 s |
+| One final frame, simple scene (bubble sort) | 5.0 ms | 1.2 ms |
+| Render throughput on every core (bubble sort) | 690 fps | 1760 fps |
+| MP4 render, end to end (bubble sort / ten-minute scene) | 264 / 277 fps | 544 / 609 fps |
+| 20,000 dots (`k.Points`), one final frame | 31 ms | 7.3 ms |
+| PNG frame sequence (`--format png --frames`) | 323 fps | 2128 fps |
+
+**Added**
+
+- `python -m benchmarks`: build, lint, frame, parallel render and video timings of the example
+  and benchmark scenes (heavy text, math, code, mass objects, a ten-minute episode-like scene);
+  `--json` to compare runs. CI runs it on every push to `main`. `cargo run --release -p
+  kinemo-render --example stage_timings` splits a frame into display list and rasterization.
+- `builder.render_frames(folder, count, fps, ...)`: PNG sequences rendered, encoded and
+  written in parallel.
+
+**Changed**
+
+- The visual and layout lints run in parallel and release the GIL; W1007 only evaluates
+  expression-driven signals inside stretches where the timeline changes nothing.
+- The evaluator hashes its memo caches with FxHash, shares the time-independent work of a
+  scene (entry order, animation start values) across frames, threads and lint samples, reuses
+  its caches between frames, and skips absent objects before evaluating their props.
+- Frames over an opaque background skip the demultiply copy.
+- MP4 frames are converted to YUV 4:2:0 on the render threads (BT.709, deterministic integer
+  math) and piped as yuv420p; encoding runs on a writer thread while the next frames render;
+  x264 is pinned to 12 threads (still deterministic).
+- Mass-object dots are stamped as disks instead of filling one path per color.
+- Text, math and code layout caches keep the most recently used entries instead of clearing
+  when full.
+- `kinemo dev` checks that two builds agree in the background, after a quiet second, instead of
+  in the rebuild loop.
+
 ## 0.13.0
 
 Components for explanatory videos: terminals, annotation marks, angles, cards, gauges, callouts,

@@ -29,6 +29,26 @@ def styles(s: k.Scene):
         related=("Node.to", "k.Text"),
     ),
     DocEntry(
+        "k.Card",
+        "Objects",
+        "A panel around `content` (sized to it, or `w=`, `h=`): `title=` in its top-left corner, "
+        "`caption=` under it, `accent=` a color bar beside the title; `pad=`, `radius=`. Cards line up "
+        "in a `k.Row` for side-by-side comparisons. Parts: `card.box`, `card.content`, `card.title`, "
+        "`card.caption`, `card.accent`.",
+        '''
+import kinemo as k
+
+@k.scene
+def compare(s: k.Scene):
+    rocket = k.Card(k.Triangle.right(2, 2, scale=0.6), title="Rocket", caption="pushes the gas down", accent=k.ORANGE)
+    gas = k.Card(k.Circle(r=0.6, fill=k.BLUE, fill_opacity=0.6), title="Gas", caption="pushes the rocket up", accent=k.BLUE)
+    s.play(k.fade_in(k.Row(rocket, gas, gap=1).place(at="center")))
+    s.play(k.indicate(gas.content))
+    s.wait(0.5)
+''',
+        related=("k.Row", "k.RoundedRect"),
+    ),
+    DocEntry(
         "Node.to",
         "Object state",
         "Animated state change: interpolates each prop from its value at the cursor to the target. "

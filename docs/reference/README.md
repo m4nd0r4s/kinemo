@@ -89,6 +89,7 @@ Methods:
 
 Shapes, groups, images, SVG and mass objects (points, vector fields, stream lines).
 
+- [`k.Card`](objects.md#k-card): A panel around `content` (sized to it, or `w=`, `h=`): `title=` in its top-left corner, `caption=` under it, `accent=` a color bar beside the title; `pad=`, `radius=`.
 - [`k.Circle`](objects.md#k-circle): Circle of radius `r`, centered on its position.
 - [`k.Dot`](objects.md#k-dot): Filled dot (default radius 0.08), with no stroke.
 - [`k.Ellipse`](objects.md#k-ellipse): Ellipse of width `w` and height `h`, centered on its position.

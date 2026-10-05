@@ -470,6 +470,17 @@ def easing(s: k.Scene):
 
 ### Objects
 
+#### `k.Card(content=None, *, title=None, caption=None, accent=None, w=None, h=None, pad=0.35, radius=0.18, title_size=0.32, caption_size=0.28, **props)`
+A panel around `content` (sized to it, or `w=`, `h=`): `title=` in its top-left corner, `caption=` under it, `accent=` a color bar beside the title; `pad=`, `radius=`. Cards line up in a `k.Row` for side-by-side comparisons. Parts: `card.box`, `card.content`, `card.title`, `card.caption`, `card.accent`. See also: `k.Row`, `k.RoundedRect`.
+```python
+@k.scene
+def compare(s: k.Scene):
+    rocket = k.Card(k.Triangle.right(2, 2, scale=0.6), title="Rocket", caption="pushes the gas down", accent=k.ORANGE)
+    gas = k.Card(k.Circle(r=0.6, fill=k.BLUE, fill_opacity=0.6), title="Gas", caption="pushes the rocket up", accent=k.BLUE)
+    s.play(k.fade_in(k.Row(rocket, gas, gap=1).place(at="center")))
+    s.play(k.indicate(gas.content))
+    s.wait(0.5)
+```
 #### `k.Circle(r=1.0, **props)`
 Circle of radius `r`, centered on its position. Like every shape, it accepts the style props `color` (shorthand for stroke and fill), `fill`, `fill_opacity`, `stroke`, `stroke_width`, `dash` and the transform props. See also: `k.Dot`, `k.Ellipse`, `k.Arc`.
 ```python

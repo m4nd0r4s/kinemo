@@ -129,6 +129,32 @@ jobs:
       - run: pip install pytest numpy polars && pip install --force-reinstall dist/*.whl
       - run: pytest -q tests/python/test_performance.py
 
+  # Stage timings of the example and benchmark scenes on main, kept as an artifact and shown in
+  # the job summary so a slower commit is visible (`python -m benchmarks`).
+  benchmarks:
+    if: github.event_name == 'push'
+    needs: wheel
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.13"
+          cache: pip
+          cache-dependency-path: pyproject.toml
+      - uses: ./.github/actions/ffmpeg
+      - uses: actions/download-artifact@v8
+        with:
+          name: wheel-macos-14
+          path: dist
+      - run: pip install numpy polars && pip install --force-reinstall dist/*.whl
+      - run: python -m benchmarks --json benchmarks.json --markdown "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v7
+        with:
+          name: benchmarks-${{ github.sha }}
+          path: benchmarks.json
+          retention-days: 90
+
   # The website builds and type-checks (videos and timings are left to the Pages workflow).
   website:
     runs-on: ubuntu-latest

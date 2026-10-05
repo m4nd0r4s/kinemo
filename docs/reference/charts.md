@@ -24,6 +24,9 @@ Axes, number lines, polar axes, plots and data charts.
 - [`ax.scatter`](#axes-scatter): Points `(xs[i], ys[i])` on the axes, as a group of `k.Dot`.
 - [`ax.zoom_to`](#axes-zoom_to): Named transition: animates the visible ranges of the axes (`x=(a, b)`, `y=(c, d)`).
 - [`ax.point`](#axes-point): Data point `(x, y)` in world coordinates, reactive when `x` or `y` are signals.
+- [`ax.add`](#axes-add): Puts objects inside the axes, in its own coordinates, so they follow zooms like plots do; place them with `position=ax.local_point(x, y)` or `ax.origin()`.
+- [`ax.origin`](#axes-origin): Where the two axes cross, in the axes' own coordinates: the data origin clamped to the visible ranges.
+- [`ax.in_view`](#axes-in_view): Whether a data value is inside the visible ranges, as a reactive bool for `visible=`: `ax.in_view(x=3)`, `ax.in_view(y=5)` or both.
 - [`curve.point_at`](#plot-point_at): World position of the curve at `x`; reactive when `x` is a signal.
 - [`curve.tangent_at`](#plot-tangent_at): Tangent segment `length` units long, centered on the curve at `x`, reactive when `x` is a signal.
 - [`curve.slope_at`](#plot-slope_at): Numerical derivative of the curve at `x`, reactive when `x` is a signal.
@@ -210,6 +213,9 @@ def axes(s: k.Scene):
 - [`map_y`](#axes-map_y): Data y → y in the axes' own coordinates (reactive: follows zooms).
 - [`local_point`](#axes-local_point): Data point in the axes' own coordinates.
 - [`point`](#axes-point): Data point `(x, y)` in world coordinates, reactive when `x` or `y` are signals.
+- [`add`](#axes-add): Puts objects inside the axes, in its own coordinates, so they follow zooms like plots do; place them with `position=ax.local_point(x, y)` or `ax.origin()`.
+- [`origin`](#axes-origin): Where the two axes cross, in the axes' own coordinates: the data origin clamped to the visible ranges.
+- [`in_view`](#axes-in_view): Whether a data value is inside the visible ranges, as a reactive bool for `visible=`: `ax.in_view(x=3)`, `ax.in_view(y=5)` or both.
 - [`plot`](#axes-plot): Draws the curve `y = fn(x)` on the axes, with adaptive sampling.
 - [`area`](#axes-area): Filled region under a curve (down to the x axis) or between two curves (`between=`).
 - [`vline`](#axes-vline): Vertical line on the axes at `at=` (accepts a signal: the line moves with it); `style="dashed"` makes it dashed.
@@ -297,6 +303,89 @@ def point(s: k.Scene):
 ```
 
 **See also:** [`curve.point_at`](#plot-point_at), [`obj.place`](object-state.md#node-place).
+
+<a id="axes-add"></a>
+#### `k.Axes.add` *(method)*
+
+```python
+ax.add(*objs: Node, enter_with_axes: bool = True)
+```
+
+Puts objects inside the axes, in its own coordinates, so they follow zooms like plots do; place them with `position=ax.local_point(x, y)` or `ax.origin()`. They enter with the axes; with `enter_with_axes=False` they stay hidden until a verb brings them in.
+
+**Parameters:**
+
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `*objs` | `Node` | variadic |   |
+| `enter_with_axes` | `bool` | `True` | They enter with the axes; with `enter_with_axes=False` they stay hidden until a verb brings them in. |
+
+**Example:**
+
+```python
+@k.scene
+def marker(s: k.Scene):
+    ax = k.Axes(x=(0, 10, 2), y=(0, 10, 2)).place(at="center")
+    peak = k.Dot(r=0.12, fill=k.RED, position=ax.local_point(4, 8))
+    ax.add(peak, enter_with_axes=False)
+    s.play(k.draw(ax))
+    s.play(k.fade_in(peak))
+    s.play(ax.zoom_to(x=(2, 6), y=(4, 10)), duration=1.5)
+```
+
+**See also:** [`ax.origin`](#axes-origin), [`ax.in_view`](#axes-in_view), [`ax.point`](#axes-point).
+
+<a id="axes-origin"></a>
+#### `k.Axes.origin` *(method)*
+
+```python
+ax.origin() -> Expr[Vec]
+```
+
+Where the two axes cross, in the axes' own coordinates: the data origin clamped to the visible ranges. Reactive, so it moves with zooms.
+
+**Example:**
+
+```python
+@k.scene
+def origin(s: k.Scene):
+    ax = k.Axes(x=(-2, 8, 2), y=(-2, 8, 2)).place(at="center")
+    ax.add(k.Dot(r=0.1, fill=k.YELLOW, position=ax.origin()))
+    s.play(k.draw(ax))
+    s.play(ax.zoom_to(x=(2, 8)), duration=1.5)
+```
+
+**See also:** [`ax.add`](#axes-add), [`k.Axes`](#k-axes).
+
+<a id="axes-in_view"></a>
+#### `k.Axes.in_view` *(method)*
+
+```python
+ax.in_view(*, x: float | None = None, y: float | None = None) -> Expr[bool]
+```
+
+Whether a data value is inside the visible ranges, as a reactive bool for `visible=`: `ax.in_view(x=3)`, `ax.in_view(y=5)` or both. Markers hide when a zoom leaves them out.
+
+**Parameters:**
+
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `x` | `float \| None` | `None` | Whether a data value is inside the visible ranges, as a reactive bool for `visible=`: `ax.in_view(x=3)`, `ax.in_view(y=5)` or both. |
+| `y` | `float \| None` | `None` | Whether a data value is inside the visible ranges, as a reactive bool for `visible=`: `ax.in_view(x=3)`, `ax.in_view(y=5)` or both. |
+
+**Example:**
+
+```python
+@k.scene
+def in_view(s: k.Scene):
+    ax = k.Axes(x=(0, 10, 2), y=(0, 10, 2)).place(at="center")
+    tag = k.Text("x = 8", size=0.3, position=ax.local_point(8, 9), visible=ax.in_view(x=8))
+    ax.add(tag)
+    s.play(k.draw(ax))
+    s.play(ax.zoom_to(x=(0, 5)), duration=1.5)
+```
+
+**See also:** [`ax.add`](#axes-add), [`ax.zoom_to`](#axes-zoom_to).
 
 <a id="axes-plot"></a>
 #### `k.Axes.plot` *(method)*
@@ -660,7 +749,7 @@ def number_line(s: k.Scene):
 
 **See also:** [`k.Axes`](#k-axes), [`ax.point`](#axes-point).
 
-Inherited from [`k.Axes`](#k-axes): [`map_x`](#axes-map_x), [`map_y`](#axes-map_y), [`local_point`](#axes-local_point), [`point`](#axes-point), [`plot`](#axes-plot), [`area`](#axes-area), [`vline`](#axes-vline), [`hline`](#axes-hline), [`scatter`](#axes-scatter), [`parametric`](#axes-parametric), [`bars`](#axes-bars), [`zoom_to`](#axes-zoom_to).
+Inherited from [`k.Axes`](#k-axes): [`map_x`](#axes-map_x), [`map_y`](#axes-map_y), [`local_point`](#axes-local_point), [`point`](#axes-point), [`add`](#axes-add), [`origin`](#axes-origin), [`in_view`](#axes-in_view), [`plot`](#axes-plot), [`area`](#axes-area), [`vline`](#axes-vline), [`hline`](#axes-hline), [`scatter`](#axes-scatter), [`parametric`](#axes-parametric), [`bars`](#axes-bars), [`zoom_to`](#axes-zoom_to).
 Inherited from [`k.Group`](objects.md#k-group): [`children`](objects.md#group-children), [`to`](objects.md#group-to), [`swap`](objects.md#group-swap), [`insert`](objects.md#group-insert), [`pop`](objects.md#group-pop), [`fit`](objects.md#group-fit).
 Inherited from [`k.Node`](object-state.md#k-node): [`set`](object-state.md#node-set), [`unbind`](object-state.md#node-unbind), [`edge`](object-state.md#node-edge), [`age`](object-state.md#node-age), [`entered`](object-state.md#node-entered), [`exited`](object-state.md#node-exited), [`copy`](object-state.md#node-copy), [`place`](object-state.md#node-place), [`to_place`](object-state.md#node-to_place), [`unpin`](object-state.md#node-unpin).
 
@@ -1010,7 +1099,7 @@ def lines(s: k.Scene):
 
 - [`to`](#linechart-to): `chart.to(data=df2)`: the lines morph to the new values (plus any other props).
 
-Inherited from [`k.Axes`](#k-axes): [`map_x`](#axes-map_x), [`map_y`](#axes-map_y), [`local_point`](#axes-local_point), [`point`](#axes-point), [`plot`](#axes-plot), [`area`](#axes-area), [`vline`](#axes-vline), [`hline`](#axes-hline), [`scatter`](#axes-scatter), [`parametric`](#axes-parametric), [`bars`](#axes-bars), [`zoom_to`](#axes-zoom_to).
+Inherited from [`k.Axes`](#k-axes): [`map_x`](#axes-map_x), [`map_y`](#axes-map_y), [`local_point`](#axes-local_point), [`point`](#axes-point), [`add`](#axes-add), [`origin`](#axes-origin), [`in_view`](#axes-in_view), [`plot`](#axes-plot), [`area`](#axes-area), [`vline`](#axes-vline), [`hline`](#axes-hline), [`scatter`](#axes-scatter), [`parametric`](#axes-parametric), [`bars`](#axes-bars), [`zoom_to`](#axes-zoom_to).
 Inherited from [`k.Group`](objects.md#k-group): [`children`](objects.md#group-children), [`swap`](objects.md#group-swap), [`insert`](objects.md#group-insert), [`pop`](objects.md#group-pop), [`fit`](objects.md#group-fit).
 Inherited from [`k.Node`](object-state.md#k-node): [`set`](object-state.md#node-set), [`unbind`](object-state.md#node-unbind), [`edge`](object-state.md#node-edge), [`age`](object-state.md#node-age), [`entered`](object-state.md#node-entered), [`exited`](object-state.md#node-exited), [`copy`](object-state.md#node-copy), [`place`](object-state.md#node-place), [`to_place`](object-state.md#node-to_place), [`unpin`](object-state.md#node-unpin).
 

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, Callable, Literal, Sequence, Unpack
 
+from ...diagnostics import KinemoError
 from ...reactive.expr import Expr, Op, lift
 from ...reactive.native import clamp, vec
 from ...theme.tokens import ThemeToken
@@ -186,6 +187,31 @@ class Axes(Group):
         if enter_with_axes and self._scene._b.present(self._id, self._scene.cursor):
             self._scene._enter(node, self._scene.cursor)
         return node
+
+    def add(self, *objs: Node, enter_with_axes: bool = True) -> None:
+        """Put objects in the axes, in its own coordinates (place them with `ax.local_point(x, y)`
+        or `ax.map_x(x)`): they follow zooms like plots do. With `enter_with_axes=False` they stay
+        hidden until a verb brings them in."""
+        for obj in objs:
+            self._append(obj, enter_with_axes)
+
+    def origin(self) -> Expr[Vec]:
+        """Where the two axes cross, in the axes' own coordinates (reactive): the data origin,
+        clamped to the visible ranges."""
+        return vec(self._axis_x(), self._axis_y())
+
+    def in_view(self, *, x: float | None = None, y: float | None = None) -> Expr[bool]:
+        """Whether a data value is inside the visible range (reactive, follows zooms):
+        `k.Text("x=3", visible=ax.in_view(x=3))`."""
+        visible: Expr[bool] | None = None
+        if x is not None:
+            visible = self._visible_x(float(x))
+        if y is not None:
+            on_y = self._visible_y(float(y))
+            visible = on_y if visible is None else visible & on_y
+        if visible is None:
+            raise KinemoError.make("K0105", "ax.in_view needs x= or y=")
+        return visible
 
     def _next_color(self) -> Color:
         from ...values import color as palette

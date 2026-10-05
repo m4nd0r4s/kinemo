@@ -384,6 +384,31 @@ def copies(s: k.Scene):
 
 A component's `copy()` rebuilds it with the same arguments.
 
+## Graphs
+
+`k.Graph(nodes, edges, layout=...)` draws nodes (circles with their names) joined by edges,
+for trees, searches and small networks. Edges are `(u, v)` pairs, or `(u, v, weight)` with
+a label; `directed=True` draws arrows. The layout is `"force"`, `"tree"` (from `root=`),
+`"layered"` (left to right) or `"circle"`, or a dict of positions:
+
+```python
+import kinemo as k
+
+
+@k.scene
+def search(s: k.Scene):
+    g = k.Graph(["a", "b", "c", "d", "e"], [("a", "b"), ("a", "c"), ("b", "d"), ("c", "e")], layout="tree", width=7, height=4)
+    s.play(k.draw(g))
+    s.play(g.add_node("f", edges=[("c", "f")]))
+    s.play(g.path(["a", "c", "f"]))
+    s.play(g.relayout("circle"), duration=1.5)
+```
+
+- Edges follow their nodes, so moving a node (`g.node("a").to(x=2)`) or `g.relayout(...)`
+  carries them along.
+- `g.add_node(name, edges=...)` lays the graph out again with the new node; `at=(x, y)`
+  puts it somewhere instead. `g.add_edge(u, v)` and `g.remove(name, (u, v))` change edges.
+
 ## Identity and keys
 
 An object's identity is its Python identity: there are no string ids. `key=` is only needed

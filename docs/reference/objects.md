@@ -23,12 +23,19 @@ Shapes, groups, images, SVG and mass objects (points, vector fields, stream line
 - [`k.subtract`](#k-subtract): `a` with `b` cut out.
 - [`k.Bar`](#k-bar): A value shown as a bar that grows from its base, with an optional label (`label=True`).
 - [`k.Group`](#k-group): Groups objects: transforms compose and opacity multiplies.
+- [`k.Graph`](#k-graph): Nodes and edges: `k.Graph(nodes, edges, layout=...)` with names as nodes and `(u, v)` or `(u, v, weight)` edges (arrows with `directed=True`).
 - [`k.Image`](#k-image): Raster image (PNG or JPEG) drawn by the renderer, centered on its position.
 - [`k.SVG`](#k-svg): Imports an SVG illustration (a file or inline markup): each shape becomes a `k.Path` with the SVG's fill, stroke and stroke width, and each `<g>` becomes a `k.Group`.
 - [`k.Brace`](#k-brace): Curly brace (`}`) along one side of an object's box: `direction=` "down", "up", "left" or "right", `gap` units away from it, with the tip pointing outward.
 - [`k.Points`](#k-points): Thousands of points in a single object, batch-drawn in the core.
 - [`k.VectorField`](#k-vectorfield): Arrows of a field `fn(x, y) -> (vx, vy)` on a grid with `density` columns across the width of the region (`x_range`, `y_range`).
 - [`k.StreamLines`](#k-streamlines): Streamlines of a field (a `k.VectorField` or a function), integrated with RK4 in the core from `seeds` (a count or points).
+
+**Methods in this area:**
+
+- [`graph.add_node`](#graph-add_node): A new node and its `edges=` grow in; without `at=` the graph is laid out again with it and the other nodes move to make room.
+- [`graph.path`](#graph-path): Highlights a path: its nodes and the edges between them take `color` one after the other (the accent color by default), for searches and shortest paths.
+- [`graph.relayout`](#graph-relayout): Moves the nodes to a new layout as a transition (another named layout, positions, or the current one again after changes); edges follow their nodes.
 
 Back to the [reference index](README.md).
 
@@ -988,6 +995,269 @@ def fit(s: k.Scene):
 ```
 
 **See also:** [`k.Grid`](layout.md#k-grid).
+
+<a id="k-graph"></a>
+### `k.Graph` *(class)*
+
+```python
+k.Graph(
+    nodes: Sequence[NodeName],
+    edges: Sequence[EdgeSpec] = (),
+    *,
+    layout: GraphLayout = "force",
+    root: NodeName | None = None,
+    directed: bool = False,
+    width: float = 10.0,
+    height: float = 5.5,
+    radius: float = 0.35,
+    size: float = 0.3,
+    **props: Unpack[TransformKeywords],
+)
+```
+
+Nodes and edges: `k.Graph(nodes, edges, layout=...)` with names as nodes and `(u, v)` or `(u, v, weight)` edges (arrows with `directed=True`). Layouts: `"force"`, `"tree"` (from `root=`), `"layered"` (left to right, for networks), `"circle"` or a dict of positions. `g.node(name)` and `g.edge_between(u, v)` give the parts; edges follow their nodes.
+
+**Parameters:**
+
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `nodes` | `Sequence[NodeName]` | required |   |
+| `edges` | `Sequence[EdgeSpec]` | `()` |   |
+| `layout` | `GraphLayout` | `"force"` | Nodes and edges: `k.Graph(nodes, edges, layout=...)` with names as nodes and `(u, v)` or `(u, v, weight)` edges (arrows with `directed=True`). |
+| `root` | `NodeName \| None` | `None` | Layouts: `"force"`, `"tree"` (from `root=`), `"layered"` (left to right, for networks), `"circle"` or a dict of positions. |
+| `directed` | `bool` | `False` | Nodes and edges: `k.Graph(nodes, edges, layout=...)` with names as nodes and `(u, v)` or `(u, v, weight)` edges (arrows with `directed=True`). |
+| `width` | `float` | `10.0` |   |
+| `height` | `float` | `5.5` |   |
+| `radius` | `float` | `0.35` |   |
+| `size` | `float` | `0.3` |   |
+| `**props` | `Unpack[TransformKeywords]` | variadic | Keyword arguments (`TransformKeywords`): `name: str \| None`, `key: str \| None`, `x: FloatVal`, `y: FloatVal`, `position: VecVal`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`. |
+
+Props inherited from [`k.Node`](object-state.md#k-node): `x`, `y`, `rotate`, `scale`, `scale_x`, `scale_y`, `anchor`, `opacity`, `z`, `visible`, `bleed`.
+
+**Example:**
+
+```python
+@k.scene
+def tree(s: k.Scene):
+    g = k.Graph(["a", "b", "c", "d", "e"], [("a", "b"), ("a", "c", 4), ("b", "d"), ("b", "e")], layout="tree", width=7, height=4)
+    s.play(k.draw(g))
+    s.play(k.indicate(g.node("c")))
+```
+
+**See also:** [`graph.add_node`](#graph-add_node), [`graph.path`](#graph-path), [`graph.relayout`](#graph-relayout).
+
+**Members:**
+
+- [`node`](#graph-node): The node called `name` (`.circle`, `.label`).
+- [`edge_between`](#graph-edge_between): The edge between `u` and `v` (`.line`, `.label`); either order for undirected graphs.
+- [`nodes`](#graph-nodes): The nodes, in the order they were added.
+- [`edges`](#graph-edges): The edges, in the order they were added.
+- [`add_node`](#graph-add_node): A new node and its `edges=` grow in; without `at=` the graph is laid out again with it and the other nodes move to make room.
+- [`add_edge`](#graph-add_edge): A new edge grows in between two existing nodes.
+- [`remove`](#graph-remove): Remove nodes (with their edges) or edges given as `(u, v)`: they shrink away.
+- [`relayout`](#graph-relayout): Moves the nodes to a new layout as a transition (another named layout, positions, or the current one again after changes); edges follow their nodes.
+- [`path`](#graph-path): Highlights a path: its nodes and the edges between them take `color` one after the other (the accent color by default), for searches and shortest paths.
+
+Inherited from [`k.Group`](#k-group): [`children`](#group-children), [`to`](#group-to), [`swap`](#group-swap), [`insert`](#group-insert), [`pop`](#group-pop), [`fit`](#group-fit).
+Inherited from [`k.Node`](object-state.md#k-node): [`set`](object-state.md#node-set), [`unbind`](object-state.md#node-unbind), [`edge`](object-state.md#node-edge), [`age`](object-state.md#node-age), [`entered`](object-state.md#node-entered), [`exited`](object-state.md#node-exited), [`copy`](object-state.md#node-copy), [`place`](object-state.md#node-place), [`to_place`](object-state.md#node-to_place), [`unpin`](object-state.md#node-unpin).
+
+<a id="graph-node"></a>
+#### `k.Graph.node` *(method)*
+
+```python
+graph.node(name: NodeName) -> GraphNode
+```
+
+The node called `name` (`.circle`, `.label`).
+
+**Parameters:**
+
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `name` | `NodeName` | required | The node called `name` (`.circle`, `.label`). |
+
+<a id="graph-edge_between"></a>
+#### `k.Graph.edge_between` *(method)*
+
+```python
+graph.edge_between(u: NodeName, v: NodeName) -> GraphEdge
+```
+
+The edge between `u` and `v` (`.line`, `.label`); either order for undirected graphs.
+
+**Parameters:**
+
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `u` | `NodeName` | required | The edge between `u` and `v` (`.line`, `.label`); either order for undirected graphs. |
+| `v` | `NodeName` | required | The edge between `u` and `v` (`.line`, `.label`); either order for undirected graphs. |
+
+<a id="graph-nodes"></a>
+#### `k.Graph.nodes` *(property)*
+
+```python
+graph.nodes: list[GraphNode]  # read-only
+```
+
+The nodes, in the order they were added.
+
+<a id="graph-edges"></a>
+#### `k.Graph.edges` *(property)*
+
+```python
+graph.edges: list[GraphEdge]  # read-only
+```
+
+The edges, in the order they were added.
+
+<a id="graph-add_node"></a>
+#### `k.Graph.add_node` *(method)*
+
+```python
+graph.add_node(
+    name: NodeName,
+    *,
+    edges: Sequence[EdgeSpec] = (),
+    at: Position | None = None,
+    **kw: Unpack[ReorderTiming],
+) -> Animation
+```
+
+A new node and its `edges=` grow in; without `at=` the graph is laid out again with it and the other nodes move to make room. `g.add_edge(u, v, weight)` adds an edge and `g.remove(name, (u, v))` shrinks nodes (with their edges) and edges away.
+
+**Parameters:**
+
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `name` | `NodeName` | required |   |
+| `edges` | `Sequence[EdgeSpec]` | `()` | A new node and its `edges=` grow in; without `at=` the graph is laid out again with it and the other nodes move to make room. |
+| `at` | `Position \| None` | `None` | A new node and its `edges=` grow in; without `at=` the graph is laid out again with it and the other nodes move to make room. |
+| `**kw` | `Unpack[ReorderTiming]` | variadic | Keyword arguments (`ReorderTiming`): `duration: float \| None`, `ease: EaseLike \| None`. |
+
+**Example:**
+
+```python
+@k.scene
+def grow_tree(s: k.Scene):
+    g = k.Graph(["a", "b", "c"], [("a", "b"), ("a", "c")], layout="tree", width=7, height=4)
+    s.play(k.draw(g))
+    s.play(g.add_node("d", edges=[("c", "d")]))
+    s.play(g.add_edge("b", "d"))
+    s.play(g.remove("b"))
+```
+
+**See also:** [`k.Graph`](#k-graph), [`graph.relayout`](#graph-relayout).
+
+<a id="graph-add_edge"></a>
+#### `k.Graph.add_edge` *(method)*
+
+```python
+graph.add_edge(
+    u: NodeName,
+    v: NodeName,
+    weight: object = None,
+    **kw: Unpack[ReorderTiming],
+) -> Animation
+```
+
+A new edge grows in between two existing nodes.
+
+**Parameters:**
+
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `u` | `NodeName` | required |   |
+| `v` | `NodeName` | required |   |
+| `weight` | `object` | `None` |   |
+| `**kw` | `Unpack[ReorderTiming]` | variadic | Keyword arguments (`ReorderTiming`): `duration: float \| None`, `ease: EaseLike \| None`. |
+
+<a id="graph-remove"></a>
+#### `k.Graph.remove` *(method)*
+
+```python
+graph.remove(
+    *targets: NodeName | tuple[NodeName, NodeName],
+    **kw: Unpack[ReorderTiming],
+) -> Animation
+```
+
+Remove nodes (with their edges) or edges given as `(u, v)`: they shrink away.
+
+**Parameters:**
+
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `*targets` | `NodeName \| tuple[NodeName, NodeName]` | variadic |   |
+| `**kw` | `Unpack[ReorderTiming]` | variadic | Keyword arguments (`ReorderTiming`): `duration: float \| None`, `ease: EaseLike \| None`. |
+
+<a id="graph-relayout"></a>
+#### `k.Graph.relayout` *(method)*
+
+```python
+graph.relayout(
+    layout: GraphLayout | None = None,
+    **kw: Unpack[ReorderTiming],
+) -> Animation
+```
+
+Moves the nodes to a new layout as a transition (another named layout, positions, or the current one again after changes); edges follow their nodes.
+
+**Parameters:**
+
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `layout` | `GraphLayout \| None` | `None` |   |
+| `**kw` | `Unpack[ReorderTiming]` | variadic | Keyword arguments (`ReorderTiming`): `duration: float \| None`, `ease: EaseLike \| None`. |
+
+**Example:**
+
+```python
+@k.scene
+def relayout(s: k.Scene):
+    g = k.Graph(list("abcdef"), [("a", "b"), ("b", "c"), ("c", "d"), ("d", "e"), ("e", "f"), ("f", "a")], layout="force", width=6, height=4)
+    s.play(k.draw(g))
+    s.play(g.relayout("circle"), duration=1.5)
+```
+
+**See also:** [`k.Graph`](#k-graph), [`graph.path`](#graph-path).
+
+<a id="graph-path"></a>
+#### `k.Graph.path` *(method)*
+
+```python
+graph.path(
+    names: Sequence[NodeName],
+    *,
+    color: ColorLike | None = None,
+    lag: float = 0.15,
+    duration: float | None = None,
+) -> Animation
+```
+
+Highlights a path: its nodes and the edges between them take `color` one after the other (the accent color by default), for searches and shortest paths.
+
+**Parameters:**
+
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `names` | `Sequence[NodeName]` | required |   |
+| `color` | `ColorLike \| None` | `None` | Highlights a path: its nodes and the edges between them take `color` one after the other (the accent color by default), for searches and shortest paths. |
+| `lag` | `float` | `0.15` |   |
+| `duration` | `float \| None` | `None` |   |
+
+**Example:**
+
+```python
+@k.scene
+def network(s: k.Scene):
+    layers = [["x1", "x2"], ["h1", "h2", "h3"], ["y"]]
+    edges = [(a, b) for left, right in zip(layers, layers[1:]) for a in left for b in right]
+    net = k.Graph([n for layer in layers for n in layer], edges, layout="layered", directed=True, width=7, height=4)
+    s.play(k.draw(net))
+    s.play(net.path(["x1", "h2", "y"]))
+```
+
+**See also:** [`k.Graph`](#k-graph), [`graph.add_node`](#graph-add_node).
 
 <a id="k-image"></a>
 ### `k.Image` *(class)*

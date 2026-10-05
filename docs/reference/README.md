@@ -106,12 +106,19 @@ Shapes, groups, images, SVG and mass objects (points, vector fields, stream line
 - [`k.subtract`](objects.md#k-subtract): `a` with `b` cut out.
 - [`k.Bar`](objects.md#k-bar): A value shown as a bar that grows from its base, with an optional label (`label=True`).
 - [`k.Group`](objects.md#k-group): Groups objects: transforms compose and opacity multiplies.
+- [`k.Graph`](objects.md#k-graph): Nodes and edges: `k.Graph(nodes, edges, layout=...)` with names as nodes and `(u, v)` or `(u, v, weight)` edges (arrows with `directed=True`).
 - [`k.Image`](objects.md#k-image): Raster image (PNG or JPEG) drawn by the renderer, centered on its position.
 - [`k.SVG`](objects.md#k-svg): Imports an SVG illustration (a file or inline markup): each shape becomes a `k.Path` with the SVG's fill, stroke and stroke width, and each `<g>` becomes a `k.Group`.
 - [`k.Brace`](objects.md#k-brace): Curly brace (`}`) along one side of an object's box: `direction=` "down", "up", "left" or "right", `gap` units away from it, with the tip pointing outward.
 - [`k.Points`](objects.md#k-points): Thousands of points in a single object, batch-drawn in the core.
 - [`k.VectorField`](objects.md#k-vectorfield): Arrows of a field `fn(x, y) -> (vx, vy)` on a grid with `density` columns across the width of the region (`x_range`, `y_range`).
 - [`k.StreamLines`](objects.md#k-streamlines): Streamlines of a field (a `k.VectorField` or a function), integrated with RK4 in the core from `seeds` (a count or points).
+
+Methods:
+
+- [`graph.add_node`](objects.md#graph-add_node): A new node and its `edges=` grow in; without `at=` the graph is laid out again with it and the other nodes move to make room.
+- [`graph.path`](objects.md#graph-path): Highlights a path: its nodes and the edges between them take `color` one after the other (the accent color by default), for searches and shortest paths.
+- [`graph.relayout`](objects.md#graph-relayout): Moves the nodes to a new layout as a transition (another named layout, positions, or the current one again after changes); edges follow their nodes.
 
 ## [Text](text.md)
 

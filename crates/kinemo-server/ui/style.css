@@ -79,6 +79,8 @@ a:hover { text-decoration: underline; }
   grid-template-columns: 220px 1fr 360px;
   min-height: 0;
 }
+/* The code tab needs room for lines of code. */
+.workspace.code-open { grid-template-columns: 220px 1fr minmax(360px, 42%); }
 .stage {
   position: relative;
   display: flex;
@@ -139,8 +141,15 @@ a:hover { text-decoration: underline; }
 .diagnostic .where { font-family: var(--mono); font-size: 12px; }
 
 /* ---- inspector -------------------------------------------------------------- */
+.side { display: flex; flex-direction: column; min-height: 0; border-left: 1px solid var(--line); background: var(--panel); }
+.side-tabs { display: flex; gap: 2px; padding: 6px 8px 0; border-bottom: 1px solid var(--line); }
+.side-tab {
+  background: none; border: none; border-bottom: 2px solid transparent; border-radius: 0;
+  color: var(--text-dim); padding: 6px 10px; font-size: 12px; cursor: pointer;
+}
+.side-tab.active { color: var(--text); border-bottom-color: var(--accent); }
 .inspector {
-  border-left: 1px solid var(--line);
+  flex: 1; min-height: 0;
   background: var(--panel);
   overflow: auto;
   padding: 14px;
@@ -382,3 +391,28 @@ a:hover { text-decoration: underline; }
 .clip-text .word:hover { background: var(--panel-2); color: var(--accent); }
 .clip-problem { font-size: 12px; margin: 4px 0; color: var(--text-dim); }
 .clip-problem strong { font: 11px var(--mono); color: var(--accent); }
+
+/* Code view: the scene's source, lit where the playhead is. */
+.code-pane { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+.code-pane.hidden { display: none; }
+.code-bar { display: flex; align-items: center; gap: 6px; padding: 6px 10px; border-bottom: 1px solid var(--line); }
+.code-files { display: flex; gap: 4px; overflow-x: auto; }
+.code-file { font: 11px var(--mono); padding: 2px 8px; border-radius: 4px; background: none; border: 1px solid transparent; color: var(--text-dim); cursor: pointer; }
+.code-file.active { color: var(--text); border-color: var(--line); background: var(--panel-2); }
+.code-lines { flex: 1; overflow: auto; font: 12px/1.6 var(--mono); padding: 6px 0 24px; background: var(--bg); }
+.code-line { display: flex; white-space: pre; padding-right: 12px; border-left: 2px solid transparent; }
+.code-line .ln { flex: 0 0 44px; text-align: right; padding-right: 12px; color: var(--text-faint); user-select: none; }
+.code-line .src { flex: 1; }
+.code-line.has-runs .ln { color: var(--text-dim); }
+.code-line.running { background: rgba(245, 197, 66, 0.07); }
+.code-line.current { background: rgba(245, 197, 66, 0.16); border-left-color: var(--accent); }
+.code-line.selected { outline: 1px solid rgba(95, 179, 249, 0.6); outline-offset: -1px; }
+.tk-keyword { color: #c792ea; }
+.tk-function { color: #82aaff; }
+.tk-type { color: #ffcb6b; }
+.tk-string { color: #c3e88d; }
+.tk-number, .tk-constant { color: #f78c6c; }
+.tk-comment { color: var(--text-faint); font-style: italic; }
+.tk-operator { color: #89ddff; }
+.tk-punctuation { color: var(--text-dim); }
+.tk-variable, .tk-plain { color: var(--text); }

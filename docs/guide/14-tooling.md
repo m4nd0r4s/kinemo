@@ -170,6 +170,11 @@ The page has three panes: the **outliner** (every object as a tree), the **frame
   shows its full text (click a word to move the playhead to it), its beat with a link to the
   script, the audio file, where the word times come from, the warnings on its line
   (`W1403`, `W1404`, ...) and a button that plays just that line.
+- The **Code** tab (beside the inspector) shows the scene's code, read-only: the lines whose
+  statements are running at the playhead are lit (`play`, `start`, `wait`, `v.at`, voice
+  blocks, `add`/`remove`, marks), the one that started last is marked, and **follow** keeps it
+  in view while playing or scrubbing (scrolling by hand turns it off). Selecting a timeline bar
+  or an audio clip shows its line. Local modules with statements get their own tab.
 - Saving the file (or a local module it imports) rebuilds the scene, and the preview stays
   at the same instant.
 - Clicking an object, on the frame or in the outliner, shows its props and where each one

@@ -69,6 +69,17 @@ pub struct DrawItem {
     /// When set, the item paints this image (with `opacity` and `clip`) after fill and
     /// stroke; `path` is the image's outline in pixels (for morphs, picking and SVG).
     pub image: Option<ImagePaint>,
+    /// When set, `path` is a union of small dots and the CPU rasterizer stamps them from
+    /// these centers and radii instead of filling the path (thousands of dots fill much
+    /// faster this way). Other consumers keep using `path`.
+    pub dots: Option<DotCloud>,
+}
+
+/// Disks in pixel coordinates: the marks of a mass object, for fast stamping.
+#[derive(Clone, Debug, Default)]
+pub struct DotCloud {
+    pub centers: Vec<[f32; 2]>,
+    pub radii: Vec<f32>,
 }
 
 /// Straight-alpha RGBA8 image, row-major, `width * height * 4` bytes.

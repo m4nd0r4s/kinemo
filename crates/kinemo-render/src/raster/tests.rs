@@ -15,6 +15,7 @@ fn square_item(fill: Option<Fill>, stroke: Option<Stroke>) -> DrawItem {
         clip: None,
         fill_rule_even_odd: false,
         image: None,
+        dots: None,
     }
 }
 
@@ -103,6 +104,7 @@ fn image_item(transform: kurbo::Affine, outline: Rect, opacity: f64) -> DrawItem
         clip: None,
         fill_rule_even_odd: false,
         image: Some(ImagePaint { bitmap: checker_bitmap(), transform }),
+        dots: None,
     }
 }
 
@@ -133,4 +135,43 @@ fn image_opacity_rotation_and_determinism() {
     // A quarter turn moves the red texel (top-left) to the top-right.
     let p = px(&a, 21, 10);
     assert!((p[0] as i32 - 128).abs() <= 2 && p[1] == 0 && p[2] == 0, "{p:?}");
+}
+
+fn dots_item(color: [f64; 4], centers: Vec<[f32; 2]>, radius: f32) -> DrawItem {
+    let radii = vec![radius; centers.len()];
+    let mut path = kurbo::BezPath::new();
+    for &[x, y] in &centers {
+        path.extend(kurbo::Circle::new((x as f64, y as f64), radius as f64).path_elements(0.1));
+    }
+    DrawItem { path, fill: Some(Fill { color }), stroke: None, opacity: 1.0, clip: None, fill_rule_even_odd: false, image: None, dots: Some(DotCloud { centers, radii }) }
+}
+
+#[test]
+fn dots_are_stamped_as_disks() {
+    let img = rasterize(&dl(vec![dots_item([1.0, 1.0, 1.0, 1.0], vec![[16.0, 16.0]], 4.0)]), true);
+    assert_eq!(px(&img, 16, 16), [255, 255, 255, 255]);
+    assert_eq!(px(&img, 16, 26), [0, 0, 0, 255]);
+    let edge = px(&img, 19, 16)[0];
+    assert!(edge > 0, "the edge is antialiased, not empty");
+}
+
+#[test]
+fn overlapping_dots_of_one_color_do_not_darken_each_other() {
+    let half_red = [1.0, 0.0, 0.0, 0.5];
+    let single = rasterize(&dl(vec![dots_item(half_red, vec![[16.0, 16.0]], 4.0)]), true);
+    let double = rasterize(&dl(vec![dots_item(half_red, vec![[16.0, 16.0], [16.5, 16.0]], 4.0)]), true);
+    assert_eq!(px(&single, 16, 16), px(&double, 16, 16));
+}
+
+#[test]
+fn dots_match_the_path_fill_closely() {
+    let color = [0.3, 0.6, 0.9, 1.0];
+    let centers: Vec<[f32; 2]> = (0..6).map(|i| [5.0 + i as f32 * 4.3, 12.0 + (i % 2) as f32 * 7.0]).collect();
+    let stamped = rasterize(&dl(vec![dots_item(color, centers.clone(), 1.6)]), true);
+    let mut filled = dots_item(color, centers, 1.6);
+    filled.dots = None;
+    let filled = rasterize(&dl(vec![filled]), true);
+    let total = |img: &Image| img.rgba.iter().map(|&v| v as u64).sum::<u64>();
+    let (a, b) = (total(&stamped) as f64, total(&filled) as f64);
+    assert!((a - b).abs() / b < 0.02, "stamped {a} vs filled {b}");
 }

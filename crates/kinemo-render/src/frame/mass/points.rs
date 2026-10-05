@@ -44,12 +44,12 @@ pub(super) fn draw(cx: &MassContext) -> Vec<DrawItem> {
             continue;
         }
         let radius_px = r * px_per_unit;
-        let path = buckets.path(0, color);
         if radius_px > BEZIER_RADIUS_PX {
             let circle = cx.to_px * Circle::new(Point::new(c[0], c[1]), r).to_path(0.1);
-            path.extend(circle.elements().iter().copied());
+            buckets.path(0, color).extend(circle.elements().iter().copied());
             continue;
         }
+        let path = buckets.disk(0, color, cx.to_px * Point::new(c[0], c[1]), radius_px);
         push_polygon(path, cx, c, r, polygons.get(radius_px));
     }
     buckets.into_fills()

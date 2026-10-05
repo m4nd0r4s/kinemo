@@ -179,5 +179,5 @@ pub(crate) fn painted_parts(layout: &Layout, leaf: ObjectId, t: f64, size: Frame
 }
 
 fn item(path: BezPath, fill: Option<Fill>, stroke: Option<Stroke>, opacity: f64, even_odd: bool) -> DrawItem {
-    DrawItem { path, fill, stroke, opacity, clip: None, fill_rule_even_odd: even_odd, image: None }
+    DrawItem { path, fill, stroke, opacity, clip: None, fill_rule_even_odd: even_odd, image: None, dots: None }
 }

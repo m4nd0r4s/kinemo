@@ -19,7 +19,7 @@ use kinemo_layout::Layout;
 
 use super::style::{chain_min, inherited};
 use super::FrameSize;
-use crate::raster::{Cap, DrawItem, Fill, Join, Stroke};
+use crate::raster::{Cap, DotCloud, DrawItem, Fill, Join, Stroke};
 
 /// What every mass painter receives.
 pub(super) struct MassContext<'l, 'a> {
@@ -83,28 +83,62 @@ fn color_key(c: [f64; 4]) -> ColorKey {
 /// layer then color, so output is deterministic.
 #[derive(Default)]
 pub(super) struct Buckets {
-    paths: BTreeMap<(u32, ColorKey), ([f64; 4], BezPath)>,
+    paths: BTreeMap<(u32, ColorKey), Bucket>,
+}
+
+struct Bucket {
+    color: [f64; 4],
+    path: BezPath,
+    /// The same marks as disks, while every mark of the bucket is one (see `DrawItem::dots`).
+    dots: Option<DotCloud>,
 }
 
 impl Buckets {
+    fn bucket(&mut self, layer: u32, color: [f64; 4]) -> &mut Bucket {
+        self.paths.entry((layer, color_key(color))).or_insert_with(|| Bucket { color, path: BezPath::new(), dots: Some(DotCloud::default()) })
+    }
+
     /// The path collecting marks of `color` in `layer` (lower layers draw first).
     pub fn path(&mut self, layer: u32, color: [f64; 4]) -> &mut BezPath {
-        &mut self.paths.entry((layer, color_key(color))).or_insert_with(|| (color, BezPath::new())).1
+        let bucket = self.bucket(layer, color);
+        // A mark that is not a disk: the bucket fills its path.
+        bucket.dots = None;
+        &mut bucket.path
+    }
+
+    /// The path collecting disks of `color` in `layer`, and the disk itself (pixels), so the
+    /// rasterizer can stamp the bucket instead of filling its path.
+    pub fn disk(&mut self, layer: u32, color: [f64; 4], center_px: kurbo::Point, radius_px: f64) -> &mut BezPath {
+        let bucket = self.bucket(layer, color);
+        if let Some(dots) = &mut bucket.dots {
+            dots.centers.push([center_px.x as f32, center_px.y as f32]);
+            dots.radii.push(radius_px as f32);
+        }
+        &mut bucket.path
     }
 
     pub fn into_fills(self) -> Vec<DrawItem> {
         self.paths
             .into_values()
-            .filter(|(_, p)| !p.elements().is_empty())
-            .map(|(color, path)| DrawItem { path, fill: Some(Fill { color }), stroke: None, opacity: 1.0, clip: None, fill_rule_even_odd: false, image: None })
+            .filter(|bucket| !bucket.path.elements().is_empty())
+            .map(|Bucket { color, path, dots }| DrawItem {
+                path,
+                fill: Some(Fill { color }),
+                stroke: None,
+                opacity: 1.0,
+                clip: None,
+                fill_rule_even_odd: false,
+                image: None,
+                dots: dots.filter(|dots| !dots.centers.is_empty()),
+            })
             .collect()
     }
 
     pub fn into_strokes(self, width: f64, cap: Cap) -> Vec<DrawItem> {
         self.paths
             .into_values()
-            .filter(|(_, p)| !p.elements().is_empty())
-            .map(|(color, path)| DrawItem {
+            .filter(|bucket| !bucket.path.elements().is_empty())
+            .map(|Bucket { color, path, .. }| DrawItem {
                 path,
                 fill: None,
                 stroke: Some(Stroke { color, width, dash: None, cap, join: Join::Round }),
@@ -112,6 +146,7 @@ impl Buckets {
                 clip: None,
                 fill_rule_even_odd: false,
                 image: None,
+                dots: None,
             })
             .collect()
     }

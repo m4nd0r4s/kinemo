@@ -4,7 +4,7 @@ build-backend = "maturin"
 
 [project]
 name = "kinemo"
-version = "0.11.1"
+version = "0.12.0"
 description = "Explanatory animations in Python with a native Rust core: a scrubbable timeline, errors that carry the fix, and a preview that edits your code"
 readme = "README.md"
 requires-python = ">=3.11"

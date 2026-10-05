@@ -1930,7 +1930,7 @@ checksum = "e2db585e1d738fc771bf08a151420d3ed193d9d895a36df7f6f8a9456b911ddc"
 
 [[package]]
 name = "kinemo-code"
-version = "0.11.1"
+version = "0.12.0"
 dependencies = [
  "kinemo-text",
  "kurbo 0.11.3",
@@ -1960,18 +1960,18 @@ dependencies = [
 
 [[package]]
 name = "kinemo-encode"
-version = "0.11.1"
+version = "0.12.0"
 
 [[package]]
 name = "kinemo-eval"
-version = "0.11.1"
+version = "0.12.0"
 dependencies = [
  "kinemo-ir",
 ]
 
 [[package]]
 name = "kinemo-ir"
-version = "0.11.1"
+version = "0.12.0"
 dependencies = [
  "serde",
  "serde_json",
@@ -1979,7 +1979,7 @@ dependencies = [
 
 [[package]]
 name = "kinemo-layout"
-version = "0.11.1"
+version = "0.12.0"
 dependencies = [
  "kinemo-code",
  "kinemo-eval",
@@ -1991,7 +1991,7 @@ dependencies = [
 
 [[package]]
 name = "kinemo-math"
-version = "0.11.1"
+version = "0.12.0"
 dependencies = [
  "comemo",
  "fxhash",
@@ -2006,7 +2006,7 @@ dependencies = [
 
 [[package]]
 name = "kinemo-py"
-version = "0.11.1"
+version = "0.12.0"
 dependencies = [
  "arrow-array",
  "arrow-cast",
@@ -2030,7 +2030,7 @@ dependencies = [
 
 [[package]]
 name = "kinemo-render"
-version = "0.11.1"
+version = "0.12.0"
 dependencies = [
  "base64 0.22.1",
  "image",
@@ -2050,7 +2050,7 @@ dependencies = [
 
 [[package]]
 name = "kinemo-render-gpu"
-version = "0.11.1"
+version = "0.12.0"
 dependencies = [
  "kinemo-ir",
  "kinemo-render",
@@ -2064,7 +2064,7 @@ dependencies = [
 
 [[package]]
 name = "kinemo-resolve"
-version = "0.11.1"
+version = "0.12.0"
 dependencies = [
  "kinemo-eval",
  "kinemo-ir",
@@ -2076,7 +2076,7 @@ dependencies = [
 
 [[package]]
 name = "kinemo-server"
-version = "0.11.1"
+version = "0.12.0"
 dependencies = [
  "axum",
  "kinemo-eval",
@@ -2092,7 +2092,7 @@ dependencies = [
 
 [[package]]
 name = "kinemo-text"
-version = "0.11.1"
+version = "0.12.0"
 dependencies = [
  "kurbo 0.11.3",
  "rustybuzz",

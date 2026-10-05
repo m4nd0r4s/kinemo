@@ -38,6 +38,7 @@ from .objects.groups import Column, Grid, Group, Row, Stack
 from .objects.boolean import intersect, subtract, union
 from .objects.keywords import ArrowKeywords, ColorKeywords, PaintKeywords, RectKeywords, StyleKeywords, TextKeywords, TransformKeywords
 from .objects.node import Node
+from .objects.terminal import Terminal
 from .objects.reparent import reparent
 from .objects.shapes import Arc, Arrow, Circle, Dot, Ellipse, Line, Path, Polygon, Rect, RoundedRect, Square, Triangle
 from .objects.svg import SVG
@@ -121,7 +122,7 @@ __all__ = [
     "Points", "StreamLines", "VectorField",
     "Brace", "Image", "SVG",
     "Axes", "NumberLine", "PolarAxes", "BarChart", "LineChart", "Table", "Component", "Context", "Event", "EventInfo", "EventSource", "State", "intersect", "spline", "subtract", "union", "reparent", "Code", "Math", "morph", "Movie", "crossfade", "cut", "morph_cut", "movie", "ListSignal", "list", "flash", "follow", "squash", "Trail", "trace", "integrate", "simulate", "when", "Out", "Prop", "clip", "context", "field", "from_context",
-    "prop", "provide",
+    "prop", "provide", "Terminal",
     "ArrowKeywords", "ColorKeywords", "PaintKeywords", "RectKeywords", "StyleKeywords", "TextKeywords", "TransformKeywords",
     "Animation", "Arc", "Arrow", "BLACK", "BLUE", "Bar", "Bool", "Choice", "Circle", "Color", "Column",
     "Diagnostic", "Dot", "Ellipse", "Expr", "Float", "GRAY", "GREEN", "Grid", "Group", "IR_VERSION", "Int",

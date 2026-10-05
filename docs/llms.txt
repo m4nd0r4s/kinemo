@@ -708,6 +708,42 @@ def code_block(s: k.Scene):
     s.play(k.write(code))
     s.wait(0.5)
 ```
+#### `k.Terminal(*, title="", prompt="$ ", lang="bash", width=8.0, rows=8, size=0.28, theme="auto", chrome=True, caret=True, **props)`
+A terminal or REPL window: `title=`, `prompt=` (`"$ "`, `">>>"`), `lang=` of the commands (`"bash"`, `"python"`...), `width=` and `rows=` on screen, `size=`, `theme="auto"`. `term.type(cmd)` types a command after the prompt as `k.Code`, `term.output(text)` prints monospace lines; the window grows row by row and scrolls up when full. `term.lines` are the rows on screen (an input row has `.prompt` and `.code`), `term.frame`, `term.title` and `term.caret` are the window's parts. See also: `terminal.type`, `terminal.output`, `k.Code`.
+```python
+@k.scene
+def terminal(s: k.Scene):
+    term = k.Terminal(title="zsh", width=9, rows=5).place(at="center")
+    s.play(k.fade_in(term), duration=0.4)
+    s.play(term.type("pip install kinemo"))
+    s.play(term.output("Successfully installed kinemo"))
+    s.play(term.type("kinemo check scene.py"))
+    s.play(term.output("scene.py — scene 'hello' — ok"))
+    s.wait(0.5)
+```
+#### `terminal.type(command, *, duration=None, cps=22.0) -> Animation`
+Named transition: types a command after the prompt, character by character, as `k.Code` in the terminal's language, with the caret following; `cps=` characters per second (22 by default) or `duration=`. See also: `k.Terminal`, `terminal.output`.
+```python
+@k.scene
+def repl(s: k.Scene):
+    term = k.Terminal(title="python", prompt=">>>", lang="python", rows=4).place(at="center")
+    s.add(term)
+    s.play(term.type("sum(range(10))", cps=12))
+    s.play(term.output("45"))
+    s.wait(0.5)
+```
+#### `terminal.output(text, *, stagger=0.0, duration=None) -> Animation`
+Named transition: prints `text` below the last row, one row per line, all at once or `stagger=` seconds apart; lines that do not fit scroll the older ones up. `term.clear()` fades every row out and starts again at the top. See also: `k.Terminal`, `terminal.type`.
+```python
+@k.scene
+def build_log(s: k.Scene):
+    term = k.Terminal(title="cargo", rows=4).place(at="center")
+    s.add(term)
+    s.play(term.type("cargo build"))
+    s.play(term.output("Compiling kinemo\nCompiling kinemo-py\nFinished release", stagger=0.4))
+    s.play(term.clear())
+    s.wait(0.5)
+```
 #### `code.highlight(lines=None, *, duration=None, ease=None) -> Animation`
 Named transition: dims every line except `lines` (numbered from 1); `code.highlight(None)` removes the highlight. Equivalent to `code.to(highlight=lines, highlight_amount=1)`. See also: `k.Code`.
 ```python

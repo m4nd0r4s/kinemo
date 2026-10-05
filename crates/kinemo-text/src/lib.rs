@@ -14,6 +14,7 @@ mod layout;
 mod markup;
 mod outline;
 mod query;
+pub mod recent;
 mod shape;
 mod types;
 mod wrap;

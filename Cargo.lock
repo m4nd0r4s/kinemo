@@ -1997,6 +1997,7 @@ version = "0.13.0"
 dependencies = [
  "comemo",
  "fxhash",
+ "kinemo-text",
  "kurbo 0.11.3",
  "mitex",
  "mitex-spec-gen",

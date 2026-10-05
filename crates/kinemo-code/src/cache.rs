@@ -1,7 +1,8 @@
 //! Global, bounded cache of code layouts keyed by (source, language, options).
 
-use std::collections::HashMap;
 use std::sync::{Arc, Mutex, OnceLock};
+
+use kinemo_text::recent::RecentCache;
 
 use crate::languages::{resolve, Language};
 use crate::layout::{compute_layout, CodeLayout, CodeOptions};
@@ -17,14 +18,14 @@ struct CacheKey {
     line_numbers: bool,
 }
 
-/// The cache is cleared when it reaches this many entries.
+/// Layouts kept (the most recently used survive).
 const CACHE_LIMIT: usize = 512;
 
-type Cache = Mutex<HashMap<CacheKey, Arc<CodeLayout>>>;
+type Cache = Mutex<RecentCache<CacheKey, Arc<CodeLayout>>>;
 
 fn cache() -> &'static Cache {
     static CACHE: OnceLock<Cache> = OnceLock::new();
-    CACHE.get_or_init(|| Mutex::new(HashMap::new()))
+    CACHE.get_or_init(|| Mutex::new(RecentCache::new(CACHE_LIMIT)))
 }
 
 /// Lay out highlighted code. The block is centered at (0,0), y-up. Cached.
@@ -47,14 +48,10 @@ pub fn layout_code(
         .unwrap_or_else(|error| error.into_inner())
         .get(&key)
     {
-        return Ok(layout.clone());
+        return Ok(layout);
     }
     // Computed outside the lock; layout is deterministic, so a concurrent
     // duplicate computation is harmless.
     let layout = Arc::new(compute_layout(source, language, options)?);
-    let mut cache = cache().lock().unwrap_or_else(|error| error.into_inner());
-    if cache.len() >= CACHE_LIMIT {
-        cache.clear();
-    }
-    Ok(cache.entry(key).or_insert(layout).clone())
+    Ok(cache().lock().unwrap_or_else(|error| error.into_inner()).insert(key, layout))
 }

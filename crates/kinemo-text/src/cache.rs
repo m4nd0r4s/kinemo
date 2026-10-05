@@ -1,10 +1,10 @@
 //! Global, bounded layout cache keyed by (text, options).
 
-use std::collections::HashMap;
 use std::sync::{Arc, Mutex, OnceLock};
 
 use kurbo::Rect;
 
+use crate::recent::RecentCache;
 use crate::types::{Align, TextLayout, TextOptions};
 
 #[derive(Clone, PartialEq, Eq, Hash)]
@@ -30,30 +30,26 @@ impl CacheKey {
     }
 }
 
-/// The cache is cleared when it reaches this many entries.
+/// Layouts kept (the most recently used survive).
 const CACHE_LIMIT: usize = 4096;
 
-type Cache = Mutex<HashMap<CacheKey, Arc<TextLayout>>>;
+type Cache = Mutex<RecentCache<CacheKey, Arc<TextLayout>>>;
 
 fn cache() -> &'static Cache {
     static CACHE: OnceLock<Cache> = OnceLock::new();
-    CACHE.get_or_init(|| Mutex::new(HashMap::new()))
+    CACHE.get_or_init(|| Mutex::new(RecentCache::new(CACHE_LIMIT)))
 }
 
 /// Lay out `text`. The logical bbox is centered at (0,0). Results are cached.
 pub fn layout(text: &str, opts: &TextOptions) -> Arc<TextLayout> {
     let key = CacheKey::new(text, opts);
     if let Some(l) = cache().lock().unwrap_or_else(|e| e.into_inner()).get(&key) {
-        return l.clone();
+        return l;
     }
     // Computed outside the lock; a concurrent duplicate computation is harmless
     // because layout is deterministic.
     let l = Arc::new(crate::layout::compute(text, opts));
-    let mut c = cache().lock().unwrap_or_else(|e| e.into_inner());
-    if c.len() >= CACHE_LIMIT {
-        c.clear();
-    }
-    c.entry(key).or_insert(l).clone()
+    cache().lock().unwrap_or_else(|e| e.into_inner()).insert(key, l)
 }
 
 /// Logical bounding box of the laid-out text (= `layout(..).bbox`).

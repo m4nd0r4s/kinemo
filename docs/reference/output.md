@@ -76,7 +76,9 @@ Documented together with [`k.movie`](#k-movie). Composes several scenes into a s
 **Members:**
 
 - [`build`](#movie-build): Build every scene of the movie.
-- [`render`](#movie-render): Render the movie to one video file, joining scenes with their transitions.
+- [`render`](#movie-render): Render the movie to one video file, joining scenes with their transitions; returns the built scenes.
+- [`starts`](#movie-starts): Where each scene starts in the movie: a crossfade overlaps two scenes (as the renderer joins them).
+- [`narration`](#movie-narration): Every narration line of the movie, in movie time (for subtitles).
 
 <a id="movie-build"></a>
 #### `k.Movie.build` *(method)*
@@ -102,10 +104,10 @@ movie.render(
     format: str = "mp4",
     quality: str = "final",
     progress: Callable[[int, int], object] | None = None,
-)
+) -> list[Scene]
 ```
 
-Render the movie to one video file, joining scenes with their transitions.
+Render the movie to one video file, joining scenes with their transitions; returns the built scenes. Each scene's narration, sounds and music are kept; its music stops at the scene's end.
 
 **Parameters:**
 
@@ -115,6 +117,36 @@ Render the movie to one video file, joining scenes with their transitions.
 | `format` | `str` | `"mp4"` |   |
 | `quality` | `str` | `"final"` |   |
 | `progress` | `Callable[[int, int], object] \| None` | `None` |   |
+
+<a id="movie-starts"></a>
+#### `k.Movie.starts` *(method)*
+
+```python
+movie.starts(built: Sequence[Scene]) -> list[float]
+```
+
+Where each scene starts in the movie: a crossfade overlaps two scenes (as the renderer joins them).
+
+**Parameters:**
+
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `built` | `Sequence[Scene]` | required |   |
+
+<a id="movie-narration"></a>
+#### `k.Movie.narration` *(method)*
+
+```python
+movie.narration(built: Sequence[Scene]) -> list[NarrationLine]
+```
+
+Every narration line of the movie, in movie time (for subtitles).
+
+**Parameters:**
+
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `built` | `Sequence[Scene]` | required |   |
 
 <a id="k-cut"></a>
 ### `k.cut` *(value)*

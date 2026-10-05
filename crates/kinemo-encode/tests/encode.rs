@@ -148,7 +148,7 @@ fn voice_over_ducked_music_normalized() {
     let mut o = opts(Format::Mp4);
     o.audio = vec![
         AudioClip { path: tone("voice.wav", 300), start: 0.2, gain: 1.0, role: ClipRole::Voice, ..AudioClip::default() },
-        AudioClip { path: tone("bed.wav", 600), start: 0.0, gain: 0.5, role: ClipRole::Music, duck: 0.25, fade: 0.3 },
+        AudioClip { path: tone("bed.wav", 600), start: 0.0, gain: 0.5, role: ClipRole::Music, duck: 0.25, fade: 0.3, end: None },
     ];
     o.loudness = Some(-16.0);
     let out = tmp("ducked.mp4");

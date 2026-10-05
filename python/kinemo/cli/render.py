@@ -17,11 +17,12 @@ from .voice import make_missing
 VIDEO = ("mp4", "webm", "mov", "gif")
 
 
-def write_subtitles(scene: Any, base: str) -> list[str]:
-    """`<base>.srt` and `<base>.vtt` from the scene's narration (nothing without narration)."""
+def write_subtitles(scene: Any, base: str, lines: list[Any] | None = None) -> list[str]:
+    """`<base>.srt` and `<base>.vtt` from the scene's narration, or `lines` (a movie's, in movie
+    time); nothing without narration."""
     from ..export.subtitles import srt, vtt
 
-    lines = scene.__dict__.get("_narration", [])
+    lines = scene.__dict__.get("_narration", []) if lines is None else lines
     if not lines:
         return []
     written = []
@@ -65,9 +66,12 @@ def run(args: argparse.Namespace) -> int:
     if movies and args.scene is None:
         for m in movies:
             path = single[0] if single else os.path.join(args.out, f"{m.name}.{args.format if args.format in VIDEO else 'mp4'}")
-            m.render(path, args.format if args.format in VIDEO else "mp4", args.quality, reporter(args.progress, m.name))
+            built = m.render(path, args.format if args.format in VIDEO else "mp4", args.quality, reporter(args.progress, m.name))
             finished(args.progress, m.name, path)
             print(f"kinemo: {path}")
+            if args.subtitles:
+                for written in write_subtitles(None, os.path.splitext(path)[0], m.narration(built)):
+                    print(f"kinemo: {written}")
         return 0
     cfg = load_project(os.path.dirname(os.path.abspath(args.file)))
     for defn in select(find_scenes(module), args.scene):

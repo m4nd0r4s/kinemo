@@ -198,6 +198,11 @@ movie = k.movie([intro, body, outro], transitions=[k.morph_cut(0.6), k.crossfade
 - Movies are video only. `png`, `svg` and `slides` apply to single scenes.
 - `kinemo check movie.py` checks every scene of the file.
 - Give the scenes of a movie the same `size` and `fps`.
+- A movie keeps each scene's narration, sounds and music; a scene's `k.music` fades out and
+  stops at the end of that scene. During a crossfade the two scenes' audio overlaps. The
+  loudness target (`[audio] loudness`) is the first scene's.
+- `--subtitles` writes `<name>.srt` and `<name>.vtt` for the whole movie, every line in movie
+  time.
 
 ## Narration: `s.voice`
 

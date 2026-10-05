@@ -679,6 +679,46 @@ def group(s: k.Scene):
     s.play(k.draw(icon))
     s.play(icon.to(scale=1.5, rotate=90))
 ```
+#### `k.Graph(nodes, edges=(), *, layout="force", root=None, directed=False, width=10.0, height=5.5, radius=0.35, size=0.3, **props)`
+Nodes and edges: `k.Graph(nodes, edges, layout=...)` with names as nodes and `(u, v)` or `(u, v, weight)` edges (arrows with `directed=True`). Layouts: `"force"`, `"tree"` (from `root=`), `"layered"` (left to right, for networks), `"circle"` or a dict of positions. `g.node(name)` and `g.edge_between(u, v)` give the parts; edges follow their nodes. See also: `graph.add_node`, `graph.path`, `graph.relayout`.
+```python
+@k.scene
+def tree(s: k.Scene):
+    g = k.Graph(["a", "b", "c", "d", "e"], [("a", "b"), ("a", "c", 4), ("b", "d"), ("b", "e")], layout="tree", width=7, height=4)
+    s.play(k.draw(g))
+    s.play(k.indicate(g.node("c")))
+```
+#### `graph.add_node(name, *, edges=(), at=None, **kw) -> Animation`
+A new node and its `edges=` grow in; without `at=` the graph is laid out again with it and the other nodes move to make room. `g.add_edge(u, v, weight)` adds an edge and `g.remove(name, (u, v))` shrinks nodes (with their edges) and edges away. See also: `k.Graph`, `graph.relayout`.
+```python
+@k.scene
+def grow_tree(s: k.Scene):
+    g = k.Graph(["a", "b", "c"], [("a", "b"), ("a", "c")], layout="tree", width=7, height=4)
+    s.play(k.draw(g))
+    s.play(g.add_node("d", edges=[("c", "d")]))
+    s.play(g.add_edge("b", "d"))
+    s.play(g.remove("b"))
+```
+#### `graph.path(names, *, color=None, lag=0.15, duration=None) -> Animation`
+Highlights a path: its nodes and the edges between them take `color` one after the other (the accent color by default), for searches and shortest paths. See also: `k.Graph`, `graph.add_node`.
+```python
+@k.scene
+def network(s: k.Scene):
+    layers = [["x1", "x2"], ["h1", "h2", "h3"], ["y"]]
+    edges = [(a, b) for left, right in zip(layers, layers[1:]) for a in left for b in right]
+    net = k.Graph([n for layer in layers for n in layer], edges, layout="layered", directed=True, width=7, height=4)
+    s.play(k.draw(net))
+    s.play(net.path(["x1", "h2", "y"]))
+```
+#### `graph.relayout(layout=None, **kw) -> Animation`
+Moves the nodes to a new layout as a transition (another named layout, positions, or the current one again after changes); edges follow their nodes. See also: `k.Graph`, `graph.path`.
+```python
+@k.scene
+def relayout(s: k.Scene):
+    g = k.Graph(list("abcdef"), [("a", "b"), ("b", "c"), ("c", "d"), ("d", "e"), ("e", "f"), ("f", "a")], layout="force", width=6, height=4)
+    s.play(k.draw(g))
+    s.play(g.relayout("circle"), duration=1.5)
+```
 #### `k.Image(path, width=None, height=None, **props)`
 Raster image (PNG or JPEG) drawn by the renderer, centered on its position. Without a size it is 3 units tall; with `width=` or `height=` the other side follows the file's aspect ratio (props `w` and `h`, animatable). Relative paths start from the folder of the scene file. Accepts `scale`, `rotate` and `opacity`; morphs and layout treat it as its rectangle, and the exported SVG embeds the file. See also: `k.SVG`, `k.morph`.
 ```python

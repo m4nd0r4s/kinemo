@@ -506,4 +506,75 @@ def group(s: k.Scene):
 ''',
         related=("k.Row", "k.Stack", "k.Component"),
     ),
+    DocEntry(
+        "k.Graph",
+        "Objects",
+        "Nodes and edges: `k.Graph(nodes, edges, layout=...)` with names as nodes and `(u, v)` or "
+        "`(u, v, weight)` edges (arrows with `directed=True`). Layouts: `\"force\"`, `\"tree\"` "
+        "(from `root=`), `\"layered\"` (left to right, for networks), `\"circle\"` or a dict of "
+        "positions. `g.node(name)` and `g.edge_between(u, v)` give the parts; edges follow their nodes.",
+        '''
+import kinemo as k
+
+@k.scene
+def tree(s: k.Scene):
+    g = k.Graph(["a", "b", "c", "d", "e"], [("a", "b"), ("a", "c", 4), ("b", "d"), ("b", "e")], layout="tree", width=7, height=4)
+    s.play(k.draw(g))
+    s.play(k.indicate(g.node("c")))
+''',
+        related=("Graph.add_node", "Graph.path", "Graph.relayout"),
+    ),
+    DocEntry(
+        "Graph.add_node",
+        "Objects",
+        "A new node and its `edges=` grow in; without `at=` the graph is laid out again with it and "
+        "the other nodes move to make room. `g.add_edge(u, v, weight)` adds an edge and "
+        "`g.remove(name, (u, v))` shrinks nodes (with their edges) and edges away.",
+        '''
+import kinemo as k
+
+@k.scene
+def grow_tree(s: k.Scene):
+    g = k.Graph(["a", "b", "c"], [("a", "b"), ("a", "c")], layout="tree", width=7, height=4)
+    s.play(k.draw(g))
+    s.play(g.add_node("d", edges=[("c", "d")]))
+    s.play(g.add_edge("b", "d"))
+    s.play(g.remove("b"))
+''',
+        related=("k.Graph", "Graph.relayout"),
+    ),
+    DocEntry(
+        "Graph.path",
+        "Objects",
+        "Highlights a path: its nodes and the edges between them take `color` one after the other "
+        "(the accent color by default), for searches and shortest paths.",
+        '''
+import kinemo as k
+
+@k.scene
+def network(s: k.Scene):
+    layers = [["x1", "x2"], ["h1", "h2", "h3"], ["y"]]
+    edges = [(a, b) for left, right in zip(layers, layers[1:]) for a in left for b in right]
+    net = k.Graph([n for layer in layers for n in layer], edges, layout="layered", directed=True, width=7, height=4)
+    s.play(k.draw(net))
+    s.play(net.path(["x1", "h2", "y"]))
+''',
+        related=("k.Graph", "Graph.add_node"),
+    ),
+    DocEntry(
+        "Graph.relayout",
+        "Objects",
+        "Moves the nodes to a new layout as a transition (another named layout, positions, or the "
+        "current one again after changes); edges follow their nodes.",
+        '''
+import kinemo as k
+
+@k.scene
+def relayout(s: k.Scene):
+    g = k.Graph(list("abcdef"), [("a", "b"), ("b", "c"), ("c", "d"), ("d", "e"), ("e", "f"), ("f", "a")], layout="force", width=6, height=4)
+    s.play(k.draw(g))
+    s.play(g.relayout("circle"), duration=1.5)
+''',
+        related=("k.Graph", "Graph.path"),
+    ),
 )

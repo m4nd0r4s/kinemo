@@ -43,6 +43,7 @@ from .objects.card import Card
 from .objects.gauge import Gauge
 from .objects.callout import Callout
 from .objects.array import Array
+from .objects.graphs import Graph
 from .objects.node import Node
 from .objects.number_plane import NumberPlane
 from .objects.terminal import Terminal
@@ -129,7 +130,7 @@ __all__ = [
     "Points", "StreamLines", "VectorField",
     "Brace", "Image", "SVG",
     "Axes", "NumberLine", "PolarAxes", "BarChart", "LineChart", "Table", "Component", "Context", "Event", "EventInfo", "EventSource", "State", "intersect", "spline", "subtract", "union", "reparent", "Code", "Math", "morph", "Movie", "crossfade", "cut", "morph_cut", "movie", "ListSignal", "list", "flash", "follow", "squash", "Trail", "trace", "integrate", "simulate", "when", "Out", "Prop", "clip", "context", "field", "from_context",
-    "prop", "provide", "Terminal", "box", "cross", "encircle", "strike", "underline", "Angle", "RightAngle", "Card", "Gauge", "Callout", "Array", "NumberPlane",
+    "prop", "provide", "Terminal", "box", "cross", "encircle", "strike", "underline", "Angle", "RightAngle", "Card", "Gauge", "Callout", "Array", "NumberPlane", "Graph",
     "ArrowKeywords", "ColorKeywords", "PaintKeywords", "RectKeywords", "StyleKeywords", "TextKeywords", "TransformKeywords",
     "Animation", "Arc", "Arrow", "BLACK", "BLUE", "Bar", "Bool", "Choice", "Circle", "Color", "Column",
     "Diagnostic", "Dot", "Ellipse", "Expr", "Float", "GRAY", "GREEN", "Grid", "Group", "IR_VERSION", "Int",

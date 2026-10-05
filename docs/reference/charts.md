@@ -166,11 +166,14 @@ k.Axes(
     width: float = 8.0,
     height: float = 4.5,
     tick_labels: bool = True,
+    x_ticks: Sequence[float] | None = None,
+    y_ticks: Sequence[float] | None = None,
+    tick_format: TickFormat | None = None,
     **props: Unpack[UnplacedKeywords],
 )
 ```
 
-Cartesian axes with ticks, labels and an optional grid: `x=(min, max, step)`, `y=(min, max)`, `labels=("x", "y")`, `width=`/`height=` in units. The visible ranges are signals: `ax.zoom_to(...)` animates them and everything on the axes follows.
+Cartesian axes with ticks, labels and an optional grid: `x=(min, max, step)`, `y=(min, max)`, `labels=("x", "y")`, `width=`/`height=` in units. The visible ranges are signals: `ax.zoom_to(...)` animates them and everything on the axes follows. `x_ticks=`/`y_ticks=` set the tick values by hand and `tick_format=` (`"{:.1f}"` or a function) writes their labels; y labels are right-aligned to the axis.
 
 **Parameters:**
 
@@ -183,6 +186,9 @@ Cartesian axes with ticks, labels and an optional grid: `x=(min, max, step)`, `y
 | `width` | `float` | `8.0` | Cartesian axes with ticks, labels and an optional grid: `x=(min, max, step)`, `y=(min, max)`, `labels=("x", "y")`, `width=`/`height=` in units. |
 | `height` | `float` | `4.5` | Cartesian axes with ticks, labels and an optional grid: `x=(min, max, step)`, `y=(min, max)`, `labels=("x", "y")`, `width=`/`height=` in units. |
 | `tick_labels` | `bool` | `True` |   |
+| `x_ticks` | `Sequence[float] \| None` | `None` | `x_ticks=`/`y_ticks=` set the tick values by hand and `tick_format=` (`"{:.1f}"` or a function) writes their labels; y labels are right-aligned to the axis. |
+| `y_ticks` | `Sequence[float] \| None` | `None` | `x_ticks=`/`y_ticks=` set the tick values by hand and `tick_format=` (`"{:.1f}"` or a function) writes their labels; y labels are right-aligned to the axis. |
+| `tick_format` | `TickFormat \| None` | `None` | `x_ticks=`/`y_ticks=` set the tick values by hand and `tick_format=` (`"{:.1f}"` or a function) writes their labels; y labels are right-aligned to the axis. |
 | `**props` | `Unpack[UnplacedKeywords]` | variadic | Keyword arguments (`UnplacedKeywords`): `name: str \| None`, `key: str \| None`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`. |
 
 **Props** (animatable with `.to()`, settable with `.set()` or in the constructor):
@@ -203,6 +209,11 @@ def axes(s: k.Scene):
     ax = k.Axes(x=(0, 10, 2), y=(0, 5, 1), labels=("t", "v"), grid=True).place(at="center")
     s.play(k.draw(ax))
     s.wait(0.5)
+
+@k.scene
+def custom_ticks(s: k.Scene):
+    ax = k.Axes(x=(0, 30), y=(0, 1, 0.25), x_ticks=[4, 9, 16, 25], tick_format="{:.2f}").place(at="center")
+    s.play(k.draw(ax))
 ```
 
 **See also:** [`ax.plot`](#axes-plot), [`ax.zoom_to`](#axes-zoom_to), [`k.NumberLine`](#k-numberline).
@@ -686,7 +697,7 @@ ax.zoom_to(
 ) -> Animation
 ```
 
-Named transition: animates the visible ranges of the axes (`x=(a, b)`, `y=(c, d)`). Curves, ticks and points follow. Equivalent to `ax.to(x_range=..., y_range=...)`.
+Named transition: animates the visible ranges of the axes (`x=(a, b)`, `y=(c, d)`). Curves, ticks and points follow, and ticks are regenerated with a nice step for the new ranges: new ones grow in, ones that no longer fit fade out. Equivalent to `ax.to(x_range=..., y_range=...)` plus the tick change.
 
 **Parameters:**
 

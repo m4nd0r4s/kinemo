@@ -25,10 +25,13 @@ k.Axes(x=(0, 10), y=(0, 5), *, labels=None, grid=False, width=8.0, height=4.5, t
   (the step is optional).
 - `labels=("x", "y")` names the axes; `grid=True` adds grid lines.
 - `width=`/`height=` are the size in scene units (the frame is 16 × 9).
+- `x_ticks=[4, 9, 16]`/`y_ticks=` set tick values by hand; `tick_format="{:.1f}"` (or a
+  function from value to text) writes the labels.
 
 The visible ranges are signals. `ax.zoom_to(x=(a, b), y=(c, d))` animates them, and every
-curve, tick and marker on the axes follows. It is a named transition, equivalent to
-`ax.to(x_range=..., y_range=...)`.
+curve, tick and marker on the axes follows. Ticks are regenerated for the new ranges with a
+nice step, so a zoom from `(0, 10)` to `(0, 1)` shows `0, 0.2, …, 1`. It is a named
+transition, equivalent to `ax.to(x_range=..., y_range=...)` plus the tick change.
 
 Your own markers can live in the axes too. `ax.add(obj, enter_with_axes=True)` adopts them
 in the axes' coordinates, so `k.Dot(position=ax.local_point(4, 8))` follows zooms like a

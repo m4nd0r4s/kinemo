@@ -410,7 +410,7 @@ a:hover { text-decoration: underline; }
 .code-line.has-runs .when { color: var(--accent-2); cursor: pointer; }
 .code-line.has-runs .when:hover { text-decoration: underline; }
 .code-line.has-runs .ln { color: var(--text-dim); cursor: pointer; }
-.code-line .ln.bp { color: #fff; background: radial-gradient(circle at calc(100% - 22px) 50%, var(--error) 5px, transparent 5.5px); }
+.code-line .ln.bp { color: var(--text); background: radial-gradient(circle at 10px 50%, var(--error) 4.5px, transparent 5px); }
 .code-breakpoints { border-top: 1px solid var(--line); padding: 6px 10px; max-height: 30%; overflow: auto; }
 .bp-head { display: flex; align-items: center; }
 .bp-row { display: flex; align-items: center; gap: 6px; font-size: 12px; padding: 2px 0; }

@@ -2,9 +2,9 @@
 "use strict";
 
 import { installAudio } from "./audio.js";
-import { installBreakpoints } from "./breakpoints.js";
+import { hasBreakpoint, installBreakpoints, toggleBreakpoint } from "./breakpoints.js";
 import { installCanvas } from "./canvas.js";
-import { installCodeView } from "./code_view.js";
+import { installCodeView, setPane } from "./code_view.js";
 import { installColorPicker } from "./colorpicker.js";
 import { connect } from "./connection.js";
 import { installEditing } from "./editing.js";
@@ -23,12 +23,17 @@ import { installWatch } from "./watch.js";
 
 /**
  * The page can open on a given state, for links and screenshots:
- * `#t=1.5` (instant), `select=dot` (an object, by label), `bar=2` (a timeline bar).
+ * `#t=1.5` (instant), `select=dot` (an object, by label), `bar=2` (a timeline bar),
+ * `pane=code` (the Code tab), `bp=17,20` (breakpoints on those lines of the scene file).
  * Changing the hash later moves the open page there too.
  */
 function applyLocationHash() {
   const params = new URLSearchParams(location.hash.slice(1));
   if (params.has("t")) state.t = Math.min(Math.max(0, Number(params.get("t")) || 0), lastFrameTime());
+  if (params.has("pane")) setPane(params.get("pane"));
+  for (const line of (params.get("bp") || "").split(",").map(Number).filter((n) => n > 0)) {
+    if (!hasBreakpoint(state.meta.file, line)) toggleBreakpoint(state.meta.file, line);
+  }
   if (params.has("bar")) return selectBar(Number(params.get("bar")));
   const label = params.get("select");
   const found = label && Object.entries(state.meta.objects).find(([, info]) => info.label === label);

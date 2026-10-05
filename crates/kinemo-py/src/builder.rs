@@ -5,6 +5,7 @@ use pyo3::prelude::*;
 use std::sync::Arc;
 
 use kinemo_eval::{Evaluator, TimelineIndex};
+use rayon::prelude::*;
 use kinemo_ir::{
     Audio, AudioRole, Entry, Expr, Lerp, Mark, Object, PlaceEntry, Scene, SceneConfig, Signal, Span,
     Table, Value,
@@ -28,6 +29,23 @@ fn lerp_mode(name: &str) -> PyResult<Lerp> {
     parse("lerp mode", &format!("\"{name}\""))
 }
 
+/// Layout queries at many instants, in parallel: one evaluator per worker, cleared per
+/// instant (memoization stays bounded), sharing the time-independent timeline work. Results
+/// come back in the order of `times`.
+pub(crate) fn layout_at<T: Send>(scene: &Scene, times: &[f64], f: impl Fn(&Layout, f64) -> T + Sync) -> Vec<T> {
+    let index = Arc::new(TimelineIndex::new(scene));
+    times
+        .par_iter()
+        .map_init(
+            || Evaluator::with_index(scene, index.clone()),
+            |evaluator, &t| {
+                evaluator.clear();
+                f(&Layout::new(evaluator), t)
+            },
+        )
+        .collect()
+}
+
 impl Builder {
     pub(crate) fn with_layout<T>(&self, f: impl FnOnce(&Layout) -> T) -> T {
         let ev = Evaluator::new(&self.scene);
@@ -35,19 +53,7 @@ impl Builder {
         f(&layout)
     }
 
-    /// [`Builder::with_layout`] at many instants: a fresh evaluator per instant (memoization
-    /// stays bounded) sharing the time-independent timeline work.
-    pub(crate) fn with_layout_at<T>(&self, times: impl IntoIterator<Item = f64>, mut f: impl FnMut(&Layout, f64) -> T) -> Vec<T> {
-        let index = Arc::new(TimelineIndex::new(&self.scene));
-        times
-            .into_iter()
-            .map(|t| {
-                let ev = Evaluator::with_index(&self.scene, index.clone());
-                let layout = Layout::new(&ev);
-                f(&layout, t)
-            })
-            .collect()
-    }
+
 }
 
 #[pymethods]
@@ -254,7 +260,8 @@ impl Builder {
     /// Numeric samples of an expression on a uniform time grid.
     fn eval_expr_grid(&self, expr_json: &str, t0: f64, dt: f64, n: usize) -> PyResult<Vec<f64>> {
         let e: Expr = parse("expression", expr_json)?;
-        Ok(self.with_layout_at((0..n).map(|i| t0 + i as f64 * dt), |l, t| l.evaluator().expr(&e, t, l).as_f64()))
+        let times: Vec<f64> = (0..n).map(|i| t0 + i as f64 * dt).collect();
+        Ok(layout_at(&self.scene, &times, |l, t| l.evaluator().expr(&e, t, l).as_f64()))
     }
 
     #[pyo3(signature = (obj, prop, t, world = false))]

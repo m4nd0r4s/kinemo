@@ -131,6 +131,28 @@ pub struct LeafSample {
     /// Its opacity is changing at this instant (a fade, including one driven by an
     /// expression): contrast and size are not judged mid-fade.
     pub fading: bool,
+    /// `fill` color and `fill_opacity` (what it paints over the shapes behind it).
+    pub fill: Option<[f64; 4]>,
+    pub fill_opacity: f64,
+    /// `bleed=True` on the leaf or an ancestor: cropped by the frame edge on purpose.
+    pub bleeds: bool,
+    /// For text leaves, what the size lint needs.
+    pub text: Option<TextMetrics>,
+}
+
+/// `size` of a text that does not set it.
+pub(crate) const DEFAULT_TEXT_SIZE: f64 = 0.5;
+
+/// Size facts of a text leaf at one instant.
+#[derive(Clone, Copy, Debug)]
+pub struct TextMetrics {
+    /// The text is empty or only whitespace.
+    pub blank: bool,
+    /// `size` of the text owner (em, scene units).
+    pub em: f64,
+    /// Length of the image of the unit y vector under the leaf's world transform: its
+    /// vertical scale, rotation-invariant.
+    pub vertical_scale: f64,
 }
 
 impl LeafSample {
@@ -172,20 +194,37 @@ pub fn sample_frame(layout: &Layout, motion: &MotionIndex, reactive: &[SignalId]
     let scene = layout.scene();
     let leaves = present_leaves(layout, t)
         .into_iter()
-        .map(|(id, shown)| LeafSample {
-            id,
-            is_text: is_text_leaf(layout, id, t),
-            text_owner: text_owner(layout, id, t),
-            world_bbox: layout.world_bbox(id, t),
-            opacity: accumulated_opacity(layout, id, t),
-            shown,
-            revealed: layout.prop_f(id, "_draw", t, 1.0).min(layout.prop_f(id, "_write", t, 1.0)) > 0.0,
-            at_rest: motion.is_at_rest(scene, id, t),
-            fading: is_fading(layout, id, t),
+        .map(|(id, shown)| {
+            let is_text = is_text_leaf(layout, id, t);
+            let text_owner = text_owner(layout, id, t);
+            LeafSample {
+                id,
+                is_text,
+                text_owner,
+                world_bbox: layout.world_bbox(id, t),
+                opacity: accumulated_opacity(layout, id, t),
+                shown,
+                revealed: layout.prop_f(id, "_draw", t, 1.0).min(layout.prop_f(id, "_write", t, 1.0)) > 0.0,
+                at_rest: motion.is_at_rest(scene, id, t),
+                fading: is_fading(layout, id, t),
+                fill: layout.prop_color(id, "fill", t),
+                fill_opacity: layout.prop_f(id, "fill_opacity", t, 1.0),
+                bleeds: ancestry(scene, id).any(|o| layout.prop_bool(o, "bleed", t, false)),
+                text: is_text.then(|| text_metrics(layout, id, text_owner, t)),
+            }
         })
         .collect();
     let reactive_values = reactive.iter().map(|&s| (s, layout.evaluator().signal(s, t, layout))).collect();
     FrameSample { t, leaves, reactive_values }
+}
+
+fn text_metrics(layout: &Layout, leaf: ObjectId, owner: ObjectId, t: f64) -> TextMetrics {
+    let [_, _, c, d, _, _] = layout.world_affine(leaf, t).as_coeffs();
+    TextMetrics {
+        blank: layout.prop_str(owner, "text", t).unwrap_or_default().trim().is_empty(),
+        em: layout.prop_f(owner, "size", t, DEFAULT_TEXT_SIZE),
+        vertical_scale: c.hypot(d),
+    }
 }
 
 /// A text leaf, or the `rest` run of a text-like group (parts split off, and the runs
@@ -240,12 +279,17 @@ fn present_leaves(layout: &Layout, t: f64) -> Vec<(ObjectId, bool)> {
     let mut out = Vec::new();
     let mut stack: Vec<(ObjectId, bool)> = scene.roots.iter().rev().map(|&r| (r, true)).collect();
     while let Some((o, parent_shown)) = stack.pop() {
+        let is_group = scene.object(o).children.is_some();
+        // Presence first: it needs no evaluation, and most leaves of a long scene are absent.
+        if !is_group && !scene.present(o, t) {
+            continue;
+        }
         let shown = parent_shown && layout.prop_bool(o, "visible", t, true);
-        if scene.object(o).children.is_some() {
+        if is_group {
             for child in layout.children(o, t).into_iter().rev() {
                 stack.push((child, shown));
             }
-        } else if scene.present(o, t) {
+        } else {
             out.push((o, shown));
         }
     }

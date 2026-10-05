@@ -4,7 +4,7 @@
 use kurbo::Rect;
 
 use kinemo_ir::{ObjectId, Scene};
-use kinemo_layout::{frame_rect, Layout};
+use kinemo_layout::frame_rect;
 
 use super::{FirstOccurrences, FrameEdge, LintCode, LintContext, LintDetails, LintFinding, SuggestedFix, VisualLint};
 use crate::sampling::{ancestry, object_label, FrameSample};
@@ -65,7 +65,7 @@ fn suggested_fix(scene: &Scene, leaf: ObjectId, t: f64) -> SuggestedFix {
 }
 
 impl VisualLint for SafeAreaLint {
-    fn observe(&mut self, context: &LintContext, sample: &FrameSample, layout: &Layout) {
+    fn observe(&mut self, context: &LintContext, sample: &FrameSample) {
         let area = safe_area(context.scene, context.options.safe_margin);
         let frame = frame_rect(&context.scene.config);
         for leaf in &sample.leaves {
@@ -74,7 +74,7 @@ impl VisualLint for SafeAreaLint {
             }
             // Entirely outside the frame: offstage (waiting to slide in), not clipped.
             // `bleed=True` up the tree: cropped by the edge on purpose.
-            if offstage(leaf.world_bbox, frame) || ancestry(context.scene, leaf.id).any(|o| layout.prop_bool(o, "bleed", sample.t, false)) {
+            if offstage(leaf.world_bbox, frame) || leaf.bleeds {
                 continue;
             }
             let (edge, overshoot) = largest_overshoot(leaf.world_bbox, area);

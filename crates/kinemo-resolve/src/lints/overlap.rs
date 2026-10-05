@@ -3,7 +3,6 @@
 
 use kurbo::Rect;
 
-use kinemo_layout::Layout;
 
 use super::{FirstOccurrences, LintCode, LintContext, LintDetails, LintFinding, VisualLint};
 use crate::sampling::{object_label, FrameSample};
@@ -24,7 +23,7 @@ pub(crate) fn overlap_fraction(a: Rect, b: Rect) -> f64 {
 }
 
 impl VisualLint for TextOverlapLint {
-    fn observe(&mut self, context: &LintContext, sample: &FrameSample, _layout: &Layout) {
+    fn observe(&mut self, context: &LintContext, sample: &FrameSample) {
         let options = context.options;
         let texts: Vec<_> = sample
             .leaves

@@ -36,24 +36,53 @@ jobs:
       - run: cargo test --workspace --exclude kinemo-render-gpu
         if: runner.os == 'Windows'
 
-  python:
-    name: python ${{ matrix.python }} (${{ matrix.os }})
+  # The extension is abi3 (Python 3.11+): one wheel per platform serves every Python version,
+  # so it is built once here and the test jobs only install it.
+  wheel:
+    name: wheel (${{ matrix.os }})
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, ubuntu-24.04-arm, macos-14, windows-latest]
-        python: ["3.11", "3.12", "3.13", "3.14"]
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.11"
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - run: pip install maturin
+      - run: maturin build --release --out dist
+      - uses: actions/upload-artifact@v7
+        with:
+          name: wheel-${{ matrix.os }}
+          path: dist
+          retention-days: 1
+
+  python:
+    name: python ${{ matrix.python }} (${{ matrix.os }})
+    needs: wheel
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, ubuntu-24.04-arm, macos-14, windows-latest]
+        # Pull requests try the oldest and newest Python; main runs every version.
+        python: ${{ fromJSON(github.event_name == 'pull_request' && '["3.11", "3.14"]' || '["3.11", "3.12", "3.13", "3.14"]') }}
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-python@v7
         with:
           python-version: ${{ matrix.python }}
-      - uses: dtolnay/rust-toolchain@stable
-      - uses: Swatinem/rust-cache@v2
+          cache: pip
+          cache-dependency-path: pyproject.toml
       - uses: ./.github/actions/ffmpeg
-      - run: pip install maturin pytest numpy polars pyarrow pandas pyright
-      - run: maturin build --release --out dist
+      - uses: actions/download-artifact@v8
+        with:
+          name: wheel-${{ matrix.os }}
+          path: dist
+      - run: pip install pytest numpy polars pyarrow pandas
       # The wheel file itself: `--find-links dist kinemo` may pick the PyPI release of the
       # same version instead of this build.
       - run: pip install --force-reinstall dist/*.whl
@@ -63,21 +92,41 @@ jobs:
           # Golden PNGs are byte-identical on the reference CPU renderer; performance
           # thresholds are checked on the dedicated job below.
           KINEMO_SKIP_PERF: "1"
+
+  # The same on every platform and Python version: checked once.
+  typecheck:
+    needs: wheel
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: pyproject.toml
+      - uses: actions/download-artifact@v8
+        with:
+          name: wheel-ubuntu-latest
+          path: dist
+      - run: pip install pyright numpy polars pyarrow pandas dist/*.whl
       - run: pyright python/kinemo
 
   performance:
+    needs: wheel
     runs-on: macos-14
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-python@v7
         with:
           python-version: "3.13"
-      - uses: dtolnay/rust-toolchain@stable
-      - uses: Swatinem/rust-cache@v2
+          cache: pip
+          cache-dependency-path: pyproject.toml
       - uses: ./.github/actions/ffmpeg
-      - run: pip install maturin pytest numpy polars
-      - run: maturin build --release --out dist && pip install --force-reinstall dist/*.whl
-        shell: bash
+      - uses: actions/download-artifact@v8
+        with:
+          name: wheel-macos-14
+          path: dist
+      - run: pip install pytest numpy polars && pip install --force-reinstall dist/*.whl
       - run: pytest -q tests/python/test_performance.py
 
   # The website builds and type-checks (videos and timings are left to the Pages workflow).

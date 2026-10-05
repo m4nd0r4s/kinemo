@@ -89,6 +89,12 @@ Methods:
 
 Shapes, groups, images, SVG and mass objects (points, vector fields, stream lines).
 
+- [`k.Array`](objects.md#k-array): An array for algorithm videos: cells with the values and the indices under them (`index=False` hides them), `cell=` size.
+- [`k.Callout`](objects.md#k-callout): A speech bubble or callout beside `to=` (an object), with a tail pointing at it, that follows it: `side=` (`"top-right"`, `"left"`, ...), `style="bubble"` (filled), `"box"` (outlined) or `"line"` (text with a leader line), `gap=`, `max_width=` (the text wraps), `size=`, `color=`.
+- [`k.Gauge`](objects.md#k-gauge): A dial whose needle follows `value=` (a number or a signal, clamped to `range=`): numbered `ticks=`, `sweep=` degrees (240), `zones=[(lo, hi, color)]`, a readout with `label=` under the hub.
+- [`k.Card`](objects.md#k-card): A panel around `content` (sized to it, or `w=`, `h=`): `title=` in its top-left corner, `caption=` under it, `accent=` a color bar beside the title; `pad=`, `radius=`.
+- [`k.Angle`](objects.md#k-angle): Angle markers.
+- [`k.RightAngle`](objects.md#k-rightangle): `k.RightAngle(a, vertex, b, size=0.3)`: the square mark of a right angle at `vertex`, along the rays toward `a` and `b`.
 - [`k.Circle`](objects.md#k-circle): Circle of radius `r`, centered on its position.
 - [`k.Dot`](objects.md#k-dot): Filled dot (default radius 0.08), with no stroke.
 - [`k.Ellipse`](objects.md#k-ellipse): Ellipse of width `w` and height `h`, centered on its position.
@@ -166,6 +172,7 @@ Axes, number lines, polar axes, plots and data charts.
 - [`k.PolarAxes`](charts.md#k-polaraxes): Polar axes (rings and spokes): `r=(0, r_max, step)`, `radius=` in units, `spokes=`.
 - [`k.Axes`](charts.md#k-axes): Cartesian axes with ticks, labels and an optional grid: `x=(min, max, step)`, `y=(min, max)`, `labels=("x", "y")`, `width=`/`height=` in units.
 - [`k.NumberLine`](charts.md#k-numberline): A horizontal number line: a `k.Axes` with only the x axis.
+- [`k.NumberPlane`](charts.md#k-numberplane): A coordinate grid with axes and the basis vectors î (green) and ĵ (red): `x=(min, max, step)`, `y=...`, `unit=` scene units per step.
 - [`Plot`](charts.md#plot): A curve `y = fn(x)` of an axes.
 - [`k.BarChart`](charts.md#k-barchart): Bar chart from a table: `x=` is the category column, `y=` the value column and `key=` identifies each bar.
 - [`k.LineChart`](charts.md#k-linechart): A `k.Axes` with one line per `y=` column (one or several), connecting the table's points in `x=` order.
@@ -174,6 +181,8 @@ Axes, number lines, polar axes, plots and data charts.
 Methods:
 
 - [`ax.parametric`](charts.md#axes-parametric): Parametric curve `(fx(t), fy(t))` for `t=(start, end)`; clipped to the visible ranges.
+- [`numberplane.apply`](charts.md#numberplane-apply): Animated transformation of the plane, composed after the ones already applied: a matrix `[[a, b], [c, d]]` sends î to `(a, c)` and ĵ to `(b, d)`; a function `(x, y) -> (x2, y2)` bends the grid for non-linear maps.
+- [`numberplane.polygon`](charts.md#numberplane-polygon): A filled shape with vertices in data coordinates that deforms with the plane.
 - [`ax.plot`](charts.md#axes-plot): Draws the curve `y = fn(x)` on the axes, with adaptive sampling.
 - [`ax.area`](charts.md#axes-area): Filled region under a curve (down to the x axis) or between two curves (`between=`).
 - [`ax.vline`](charts.md#axes-vline): Vertical line on the axes at `at=` (accepts a signal: the line moves with it); `style="dashed"` makes it dashed.

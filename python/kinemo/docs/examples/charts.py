@@ -56,7 +56,9 @@ def loop(s: k.Scene):
         "Charts",
         "Cartesian axes with ticks, labels and an optional grid: `x=(min, max, step)`, "
         "`y=(min, max)`, `labels=(\"x\", \"y\")`, `width=`/`height=` in units. The visible "
-        "ranges are signals: `ax.zoom_to(...)` animates them and everything on the axes follows.",
+        "ranges are signals: `ax.zoom_to(...)` animates them and everything on the axes follows. "
+        "`x_ticks=`/`y_ticks=` set the tick values by hand and `tick_format=` (`\"{:.1f}\"` or a "
+        "function) writes their labels; y labels are right-aligned to the axis.",
         '''
 import kinemo as k
 
@@ -65,6 +67,11 @@ def axes(s: k.Scene):
     ax = k.Axes(x=(0, 10, 2), y=(0, 5, 1), labels=("t", "v"), grid=True).place(at="center")
     s.play(k.draw(ax))
     s.wait(0.5)
+
+@k.scene
+def custom_ticks(s: k.Scene):
+    ax = k.Axes(x=(0, 30), y=(0, 1, 0.25), x_ticks=[4, 9, 16, 25], tick_format="{:.2f}").place(at="center")
+    s.play(k.draw(ax))
 ''',
         related=("Axes.plot", "Axes.zoom_to", "k.NumberLine"),
     ),
@@ -85,6 +92,66 @@ def number_line(s: k.Scene):
     s.play(x.to(2), duration=2)
 ''',
         related=("k.Axes", "Axes.point"),
+    ),
+    DocEntry(
+        "k.NumberPlane",
+        "Charts",
+        "A coordinate grid with axes and the basis vectors î (green) and ĵ (red): "
+        "`x=(min, max, step)`, `y=...`, `unit=` scene units per step. `plane.apply(matrix)` "
+        "deforms it; `plane.vector(x, y)`, `plane.dot(x, y)`, `plane.polygon(points)` and "
+        "`plane.add(obj, at=(x, y))` put objects on it that the transformations carry.",
+        '''
+import kinemo as k
+
+@k.scene
+def plane(s: k.Scene):
+    plane = k.NumberPlane(x=(-6, 6, 1), y=(-3, 3, 1))
+    v = plane.vector(2, 1, color=k.YELLOW)
+    s.play(k.draw(plane))
+    s.play(k.indicate(v))
+''',
+        related=("NumberPlane.apply", "NumberPlane.polygon", "k.Axes"),
+    ),
+    DocEntry(
+        "NumberPlane.apply",
+        "Charts",
+        "Animated transformation of the plane, composed after the ones already applied: a "
+        "matrix `[[a, b], [c, d]]` sends î to `(a, c)` and ĵ to `(b, d)`; a function "
+        "`(x, y) -> (x2, y2)` bends the grid for non-linear maps. Grid lines, basis vectors and "
+        "the objects made on the plane all move. `plane.reset()` goes back.",
+        '''
+import math
+import kinemo as k
+
+@k.scene
+def shear(s: k.Scene):
+    plane = k.NumberPlane(x=(-6, 6, 1), y=(-3, 3, 1))
+    eigen = plane.vector(1, 0, color=k.YELLOW)
+    s.play(k.draw(plane))
+    s.play(plane.apply([[1, 1], [0, 1]]), duration=2)
+    s.play(k.indicate(eigen))  # an eigenvector: still on its span
+    s.play(plane.apply(lambda x, y: (x + 0.3 * math.sin(y), y)), duration=2)
+    s.play(plane.reset())
+''',
+        related=("k.NumberPlane", "NumberPlane.polygon"),
+    ),
+    DocEntry(
+        "NumberPlane.polygon",
+        "Charts",
+        "A filled shape with vertices in data coordinates that deforms with the plane. The "
+        "unit square shows the determinant: its area after `apply(m)` is `det(m)`.",
+        '''
+import kinemo as k
+
+@k.scene
+def determinant(s: k.Scene):
+    plane = k.NumberPlane(x=(-6, 6, 1), y=(-3, 3, 1))
+    square = plane.polygon([(0, 0), (1, 0), (1, 1), (0, 1)], fill=k.YELLOW)
+    s.play(k.draw(plane))
+    s.play(plane.apply([[2, 1], [0, 1.5]]), duration=2)
+    s.play(k.indicate(square))  # area 3 = det
+''',
+        related=("NumberPlane.apply", "k.NumberPlane"),
     ),
     DocEntry(
         "Axes.plot",
@@ -186,7 +253,9 @@ def scatter(s: k.Scene):
         "Axes.zoom_to",
         "Charts",
         "Named transition: animates the visible ranges of the axes (`x=(a, b)`, `y=(c, d)`). "
-        "Curves, ticks and points follow. Equivalent to `ax.to(x_range=..., y_range=...)`.",
+        "Curves, ticks and points follow, and ticks are regenerated with a nice step for the new "
+        "ranges: new ones grow in, ones that no longer fit fade out. Equivalent to "
+        "`ax.to(x_range=..., y_range=...)` plus the tick change.",
         '''
 import kinemo as k
 

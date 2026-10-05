@@ -470,6 +470,71 @@ def easing(s: k.Scene):
 
 ### Objects
 
+#### `k.Array(values, *, index=True, cell=0.8, size=0.4, gap=0.0, **props)`
+An array for algorithm videos: cells with the values and the indices under them (`index=False` hides them), `cell=` size. `arr.cells[i]` is the cell now at index `i` (`.box`, `.value`); `arr.swap(i, j)` exchanges two cells along arcs, `arr.compare(i, j)` highlights them, `arr.set(i, v)` changes a value, and `arr.pointer("i", 2)` points a labelled arrow at an index (it fades in the first time, then slides). See also: `k.Row`, `k.Bar`.
+```python
+@k.scene
+def bubble_step(s: k.Scene):
+    arr = k.Array([5, 2, 9, 1]).place(at="center")
+    s.play(k.fade_in(arr))
+    s.play(arr.pointer("j", 0))
+    for j in range(3):
+        s.play(arr.pointer("j", j), duration=0.4)
+        s.play(arr.compare(j, j + 1), duration=0.4)
+        a, b = arr.cells[j].value.text.now, arr.cells[j + 1].value.text.now
+        if int(a) > int(b):
+            s.play(arr.swap(j, j + 1), duration=0.5)
+    s.wait(0.5)
+```
+#### `k.Callout(text, *, to, side="top-right", style="bubble", gap=0.45, max_width=4.0, size=0.32, pad=0.22, color=None, **props)`
+A speech bubble or callout beside `to=` (an object), with a tail pointing at it, that follows it: `side=` (`"top-right"`, `"left"`, ...), `style="bubble"` (filled), `"box"` (outlined) or `"line"` (text with a leader line), `gap=`, `max_width=` (the text wraps), `size=`, `color=`. Parts: `callout.box`, `callout.label`, `callout.tail`. See also: `k.Card`, `k.Text`.
+```python
+@k.scene
+def thought(s: k.Scene):
+    fox = k.Circle(r=0.6, fill=k.ORANGE, fill_opacity=1).place(at="center")
+    s.add(fox)
+    s.play(k.fade_in(k.Callout("Wait... the slope changes at every point?", to=fox, max_width=3)))
+    s.play(k.fade_in(k.Callout("the fox", to=fox, side="left", style="line")))
+    s.play(fox.to(x=-2, unpin=True), duration=1.5)
+    s.wait(0.5)
+```
+#### `k.Gauge(*, value=0.0, range=(0.0, 100.0), ticks=5, sweep=240.0, r=1.5, label="", zones=(), readout=True, needle_color=k.RED, digits=0, **props)`
+A dial whose needle follows `value=` (a number or a signal, clamped to `range=`): numbered `ticks=`, `sweep=` degrees (240), `zones=[(lo, hi, color)]`, a readout with `label=` under the hub. `gauge.value` is the signal and `gauge.to(value=...)` animates it. Parts: `track`, `needle`, `hub`, `readout`, `ticks`, `labels`, `zones`. See also: `k.signal`, `k.Arc`.
+```python
+@k.scene
+def speedometer(s: k.Scene):
+    gauge = k.Gauge(value=20, range=(0, 120), ticks=6, label="km/h", zones=[(90, 120, k.RED)]).place(at="center")
+    s.play(k.fade_in(gauge))
+    s.play(gauge.to(value=100), duration=2)
+    s.wait(0.5)
+```
+#### `k.Card(content=None, *, title=None, caption=None, accent=None, w=None, h=None, pad=0.35, radius=0.18, title_size=0.32, caption_size=0.28, **props)`
+A panel around `content` (sized to it, or `w=`, `h=`): `title=` in its top-left corner, `caption=` under it, `accent=` a color bar beside the title; `pad=`, `radius=`. Cards line up in a `k.Row` for side-by-side comparisons. Parts: `card.box`, `card.content`, `card.title`, `card.caption`, `card.accent`. See also: `k.Row`, `k.RoundedRect`.
+```python
+@k.scene
+def compare(s: k.Scene):
+    rocket = k.Card(k.Triangle.right(2, 2, scale=0.6), title="Rocket", caption="pushes the gas down", accent=k.ORANGE)
+    gas = k.Card(k.Circle(r=0.6, fill=k.BLUE, fill_opacity=0.6), title="Gas", caption="pushes the rocket up", accent=k.BLUE)
+    s.play(k.fade_in(k.Row(rocket, gas, gap=1).place(at="center")))
+    s.play(k.indicate(gas.content))
+    s.wait(0.5)
+```
+#### `k.Angle(a, vertex, b, *, r=0.5, label=None, show_value=False, unit="deg", color=k.YELLOW, stroke_width=3.0, label_size=0.34, **props)`
+Angle markers. `k.Angle(a, vertex, b, r=0.5)` draws the arc of the smaller angle between the rays vertex→a and vertex→b, with `label="θ"` beside it or `show_value=True` for its measure (`unit="deg"` or `"rad"`); `k.RightAngle(a, vertex, b, size=0.3)` draws the square mark. Points are tuples or reactive points (`dot.world.center`, a `k.vec` of signals), so the marker follows an angle as it opens. Points are world coordinates: use `poly.sides` (not `poly.vertices`) for a polygon's corners. See also: `k.Arc`, `k.vec`.
+```python
+@k.scene
+def opening(s: k.Scene):
+    deg = k.signal(30.0)
+    origin = (-1.5, -1.0)
+    tip = k.vec(-1.5 + 3 * k.cos(deg * k.pi / 180), -1 + 3 * k.sin(deg * k.pi / 180))
+    s.add(k.Line(start=origin, end=(1.5, -1.0)), k.Line(start=origin, end=tip))
+    theta = k.Angle((1.5, -1.0), origin, tip, r=0.8, label="θ", show_value=True)
+    s.play(k.draw(theta))
+    s.play(deg.to(90), duration=2)
+    corner = k.RightAngle((1.5, -1.0), origin, tip)
+    s.play(k.fade_out(theta), k.draw(corner))
+    s.wait(0.5)
+```
 #### `k.Circle(r=1.0, **props)`
 Circle of radius `r`, centered on its position. Like every shape, it accepts the style props `color` (shorthand for stroke and fill), `fill`, `fill_opacity`, `stroke`, `stroke_width`, `dash` and the transform props. See also: `k.Dot`, `k.Ellipse`, `k.Arc`.
 ```python
@@ -965,14 +1030,19 @@ def loop(s: k.Scene):
     s.add(ax)
     s.play(k.draw(curve), duration=2)
 ```
-#### `k.Axes(x=(0, 10), y=(0, 5), *, labels=None, grid=False, width=8.0, height=4.5, tick_labels=True, **props)`
-Cartesian axes with ticks, labels and an optional grid: `x=(min, max, step)`, `y=(min, max)`, `labels=("x", "y")`, `width=`/`height=` in units. The visible ranges are signals: `ax.zoom_to(...)` animates them and everything on the axes follows. See also: `ax.plot`, `ax.zoom_to`, `k.NumberLine`.
+#### `k.Axes(x=(0, 10), y=(0, 5), *, labels=None, grid=False, width=8.0, height=4.5, tick_labels=True, x_ticks=None, y_ticks=None, tick_format=None, **props)`
+Cartesian axes with ticks, labels and an optional grid: `x=(min, max, step)`, `y=(min, max)`, `labels=("x", "y")`, `width=`/`height=` in units. The visible ranges are signals: `ax.zoom_to(...)` animates them and everything on the axes follows. `x_ticks=`/`y_ticks=` set the tick values by hand and `tick_format=` (`"{:.1f}"` or a function) writes their labels; y labels are right-aligned to the axis. See also: `ax.plot`, `ax.zoom_to`, `k.NumberLine`.
 ```python
 @k.scene
 def axes(s: k.Scene):
     ax = k.Axes(x=(0, 10, 2), y=(0, 5, 1), labels=("t", "v"), grid=True).place(at="center")
     s.play(k.draw(ax))
     s.wait(0.5)
+
+@k.scene
+def custom_ticks(s: k.Scene):
+    ax = k.Axes(x=(0, 30), y=(0, 1, 0.25), x_ticks=[4, 9, 16, 25], tick_format="{:.2f}").place(at="center")
+    s.play(k.draw(ax))
 ```
 #### `k.NumberLine(x=(0, 10, 1), *, width=10.0, **props)`
 A horizontal number line: a `k.Axes` with only the x axis. Use `nl.point(x, 0)` to position markers. See also: `k.Axes`, `ax.point`.
@@ -984,6 +1054,43 @@ def number_line(s: k.Scene):
     dot = k.Dot(r=0.15, fill=k.RED).place(at=nl.point(x, 0))
     s.play(k.draw(nl), k.fade_in(dot))
     s.play(x.to(2), duration=2)
+```
+#### `k.NumberPlane(x=(-7, 7, 1), y=(-4, 4, 1), *, unit=1.0, basis=True, samples=24, color=None, **props)`
+A coordinate grid with axes and the basis vectors î (green) and ĵ (red): `x=(min, max, step)`, `y=...`, `unit=` scene units per step. `plane.apply(matrix)` deforms it; `plane.vector(x, y)`, `plane.dot(x, y)`, `plane.polygon(points)` and `plane.add(obj, at=(x, y))` put objects on it that the transformations carry. See also: `numberplane.apply`, `numberplane.polygon`, `k.Axes`.
+```python
+@k.scene
+def plane(s: k.Scene):
+    plane = k.NumberPlane(x=(-6, 6, 1), y=(-3, 3, 1))
+    v = plane.vector(2, 1, color=k.YELLOW)
+    s.play(k.draw(plane))
+    s.play(k.indicate(v))
+```
+#### `numberplane.apply(transform, **kw) -> Animation`
+Animated transformation of the plane, composed after the ones already applied: a matrix `[[a, b], [c, d]]` sends î to `(a, c)` and ĵ to `(b, d)`; a function `(x, y) -> (x2, y2)` bends the grid for non-linear maps. Grid lines, basis vectors and the objects made on the plane all move. `plane.reset()` goes back. See also: `k.NumberPlane`, `numberplane.polygon`.
+```python
+import math
+import kinemo as k
+
+@k.scene
+def shear(s: k.Scene):
+    plane = k.NumberPlane(x=(-6, 6, 1), y=(-3, 3, 1))
+    eigen = plane.vector(1, 0, color=k.YELLOW)
+    s.play(k.draw(plane))
+    s.play(plane.apply([[1, 1], [0, 1]]), duration=2)
+    s.play(k.indicate(eigen))  # an eigenvector: still on its span
+    s.play(plane.apply(lambda x, y: (x + 0.3 * math.sin(y), y)), duration=2)
+    s.play(plane.reset())
+```
+#### `numberplane.polygon(points, **style) -> Polygon`
+A filled shape with vertices in data coordinates that deforms with the plane. The unit square shows the determinant: its area after `apply(m)` is `det(m)`. See also: `numberplane.apply`, `k.NumberPlane`.
+```python
+@k.scene
+def determinant(s: k.Scene):
+    plane = k.NumberPlane(x=(-6, 6, 1), y=(-3, 3, 1))
+    square = plane.polygon([(0, 0), (1, 0), (1, 1), (0, 1)], fill=k.YELLOW)
+    s.play(k.draw(plane))
+    s.play(plane.apply([[2, 1], [0, 1.5]]), duration=2)
+    s.play(k.indicate(square))  # area 3 = det
 ```
 #### `ax.plot(fn, *, until=None, from_=None, domain=None, color=None, label=None, samples=160, enter_with_axes=True, **style) -> Plot`
 Draws the curve `y = fn(x)` on the axes, with adaptive sampling. `fn` uses `k` functions (`k.sin`, `k.max`...), so the same function works for floats and signals. `until=`/`from_=` accept signals: the curve grows as the signal moves. `label=` puts a label at the end of the curve. See also: `curve.point_at`, `ax.area`, `k.sin`.
@@ -1045,7 +1152,7 @@ def scatter(s: k.Scene):
     s.play(k.indicate(pts))
 ```
 #### `ax.zoom_to(*, x=None, y=None, **kw) -> Animation`
-Named transition: animates the visible ranges of the axes (`x=(a, b)`, `y=(c, d)`). Curves, ticks and points follow. Equivalent to `ax.to(x_range=..., y_range=...)`. See also: `k.Axes`, `ax.plot`.
+Named transition: animates the visible ranges of the axes (`x=(a, b)`, `y=(c, d)`). Curves, ticks and points follow, and ticks are regenerated with a nice step for the new ranges: new ones grow in, ones that no longer fit fade out. Equivalent to `ax.to(x_range=..., y_range=...)` plus the tick change. See also: `k.Axes`, `ax.plot`.
 ```python
 @k.scene
 def zoom(s: k.Scene):

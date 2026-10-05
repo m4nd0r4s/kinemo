@@ -25,10 +25,18 @@ k.Axes(x=(0, 10), y=(0, 5), *, labels=None, grid=False, width=8.0, height=4.5, t
   (the step is optional).
 - `labels=("x", "y")` names the axes; `grid=True` adds grid lines.
 - `width=`/`height=` are the size in scene units (the frame is 16 × 9).
+- `x_ticks=[4, 9, 16]`/`y_ticks=` set tick values by hand; `tick_format="{:.1f}"` (or a
+  function from value to text) writes the labels.
 
 The visible ranges are signals. `ax.zoom_to(x=(a, b), y=(c, d))` animates them, and every
-curve, tick and marker on the axes follows. It is a named transition, equivalent to
-`ax.to(x_range=..., y_range=...)`.
+curve, tick and marker on the axes follows. Ticks are regenerated for the new ranges with a
+nice step, so a zoom from `(0, 10)` to `(0, 1)` shows `0, 0.2, …, 1`. It is a named
+transition, equivalent to `ax.to(x_range=..., y_range=...)` plus the tick change.
+
+Your own markers can live in the axes too. `ax.add(obj, enter_with_axes=True)` adopts them
+in the axes' coordinates, so `k.Dot(position=ax.local_point(4, 8))` follows zooms like a
+plot does. `ax.origin()` is where the axes cross, and `ax.in_view(x=8)` is a reactive bool
+for `visible=` that hides a marker when a zoom leaves its value out.
 
 Your own markers can live in the axes too. `ax.add(obj, enter_with_axes=True)` adopts them
 in the axes' coordinates, so `k.Dot(position=ax.local_point(4, 8))` follows zooms like a
@@ -203,6 +211,31 @@ def polar(s: k.Scene):
     s.wait(0.5)
 ```
 
+## Number planes and linear transformations
+
+`k.NumberPlane(x=(-7, 7, 1), y=(-4, 4, 1))` is a grid with axes and the basis vectors î
+(green) and ĵ (red). `plane.apply(matrix)` animates the whole plane through a 2×2 matrix
+`[[a, b], [c, d]]`, sending î to `(a, c)` and ĵ to `(b, d)`. A function `(x, y) -> (x2, y2)`
+bends the grid for non-linear maps. Each call composes after the previous ones, and
+`plane.reset()` goes back.
+
+Objects made on the plane go along: `plane.vector(x, y)` is an arrow from the origin,
+`plane.dot(x, y)` a point, `plane.polygon(points)` a shape that deforms (the unit square's
+area is the determinant), and `plane.add(obj, at=(x, y))` moves any object with the plane
+while keeping its shape.
+
+```python
+import kinemo as k
+
+@k.scene
+def shear(s: k.Scene):
+    plane = k.NumberPlane(x=(-6, 6, 1), y=(-3, 3, 1))
+    square = plane.polygon([(0, 0), (1, 0), (1, 1), (0, 1)], fill=k.YELLOW)
+    s.play(k.draw(plane))
+    s.play(plane.apply([[1, 1], [0, 1]]), duration=2)
+    s.play(k.indicate(square))
+```
+
 ## Data charts
 
 ### Where data comes from
@@ -340,6 +373,30 @@ def profile(s: k.Scene):
     s.play(hour.to(24), duration=3, ease=k.ease.linear)
     s.wait(0.5)
 ```
+
+## Gauges
+
+`k.Gauge` is a dial whose needle follows a value, for speeds, pressures and levels. The value
+can be a signal shared with the rest of the scene:
+
+```python
+import kinemo as k
+
+
+@k.scene
+def dial(s: k.Scene):
+    speed = k.signal(20.0)
+    gauge = k.Gauge(value=speed, range=(0, 120), ticks=6, label="km/h", zones=[(90, 120, k.RED)]).place(at="center")
+    s.play(k.fade_in(gauge))
+    s.play(speed.to(105), duration=2)
+    s.play(gauge.to(value=60), duration=1)
+    s.wait(0.5)
+```
+
+- `sweep=` is the dial's angle (240° by default), `ticks=` the number of intervals between the
+  numbered marks, `digits=` the decimals of the numbers and the readout.
+- The needle stays within `range=` even when the value leaves it; `readout=False` hides the
+  value under the hub.
 
 ## Common mistakes
 

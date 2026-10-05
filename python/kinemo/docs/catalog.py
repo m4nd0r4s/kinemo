@@ -56,6 +56,7 @@ DOCUMENTED_BY: dict[str, str] = {
     "Color": "k.rgb",
     "Vec": "k.vec",
     "Movie": "k.movie",
+    "RightAngle": "k.Angle",
     "PaintKeywords": "k.StyleKeywords",
     "ColorKeywords": "k.StyleKeywords",
     "TransformKeywords": "k.StyleKeywords",

@@ -89,6 +89,12 @@ Methods:
 
 Shapes, groups, images, SVG and mass objects (points, vector fields, stream lines).
 
+- [`k.Array`](objects.md#k-array): An array for algorithm videos: cells with the values and the indices under them (`index=False` hides them), `cell=` size.
+- [`k.Callout`](objects.md#k-callout): A speech bubble or callout beside `to=` (an object), with a tail pointing at it, that follows it: `side=` (`"top-right"`, `"left"`, ...), `style="bubble"` (filled), `"box"` (outlined) or `"line"` (text with a leader line), `gap=`, `max_width=` (the text wraps), `size=`, `color=`.
+- [`k.Gauge`](objects.md#k-gauge): A dial whose needle follows `value=` (a number or a signal, clamped to `range=`): numbered `ticks=`, `sweep=` degrees (240), `zones=[(lo, hi, color)]`, a readout with `label=` under the hub.
+- [`k.Card`](objects.md#k-card): A panel around `content` (sized to it, or `w=`, `h=`): `title=` in its top-left corner, `caption=` under it, `accent=` a color bar beside the title; `pad=`, `radius=`.
+- [`k.Angle`](objects.md#k-angle): Angle markers.
+- [`k.RightAngle`](objects.md#k-rightangle): `k.RightAngle(a, vertex, b, size=0.3)`: the square mark of a right angle at `vertex`, along the rays toward `a` and `b`.
 - [`k.Circle`](objects.md#k-circle): Circle of radius `r`, centered on its position.
 - [`k.Dot`](objects.md#k-dot): Filled dot (default radius 0.08), with no stroke.
 - [`k.Ellipse`](objects.md#k-ellipse): Ellipse of width `w` and height `h`, centered on its position.

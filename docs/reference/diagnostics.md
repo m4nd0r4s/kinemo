@@ -346,7 +346,7 @@ s.play(c.to(x=2))
 <a id="w1003"></a>
 ### W1003: low contrast
 
-*Warning (lint).* Contrast between text and background is below 4.5:1.
+*Warning (lint).* Contrast between text and what is behind it (the background, or a filled shape under it such as a card or a speech bubble) is below 4.5:1.
 
 <a id="w1004"></a>
 ### W1004: small text

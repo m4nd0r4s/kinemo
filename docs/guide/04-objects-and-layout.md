@@ -240,6 +240,34 @@ def derived(s: k.Scene):
 during build. Animating or setting a derived prop is `K0303`: animate its source (position,
 scale or size) instead.
 
+## Angles
+
+`k.Angle(a, vertex, b)` marks the angle at `vertex` between the rays toward `a` and `b` (the
+smaller one) with an arc, a label or its measure; `k.RightAngle(a, vertex, b)` draws the square
+mark. The points can be reactive, so the marker follows an angle that opens:
+
+```python
+import kinemo as k
+
+
+@k.scene
+def angle(s: k.Scene):
+    deg = k.signal(20.0)
+    origin = (-1.5, -1.0)
+    tip = k.vec(-1.5 + 3 * k.cos(deg * k.pi / 180), -1 + 3 * k.sin(deg * k.pi / 180))
+    s.add(k.Line(start=origin, end=(1.5, -1.0)), k.Line(start=origin, end=tip))
+    theta = k.Angle((1.5, -1.0), origin, tip, r=0.8, label="θ", show_value=True)
+    s.play(k.draw(theta))
+    s.play(deg.to(120), duration=2)
+    s.wait(0.5)
+```
+
+- `r=` is the arc's radius, `label=` a name beside it, `show_value=True` its measure
+  (`unit="rad"` for radians); the label stays clear of the arc as the angle changes.
+- Points are in world coordinates. A polygon's `vertices` are in its own coordinates; its
+  `sides` (`side.start`, `side.end`) are in world coordinates, so mark a triangle's right angle
+  with `k.RightAngle(legs[0].end, legs[0].start, legs[2].start)` where `legs = tri.sides`.
+
 ## Containers
 
 Containers lay out their children and keep them laid out (flexbox and grid style):
@@ -337,6 +365,64 @@ def group(s: k.Scene):
 
 Positions inside a group are local to it. An object has **exactly one parent**: adding it
 to a second group is `K0103`.
+
+## Cards
+
+`k.Card(content, title=..., caption=..., accent=...)` puts content on a rounded panel sized to
+it, with a title in the corner and a caption under it; cards in a `k.Row` compare things side by
+side:
+## Callouts and speech bubbles
+
+`k.Callout(text, to=obj)` puts a box with text beside an object, with a tail pointing at it, and
+keeps it there as the object moves:
+## Arrays
+
+`k.Array(values)` draws an array as cells with their indices, for algorithm videos: swap cells,
+compare them, change a value and point at indices:
+
+```python
+import kinemo as k
+
+
+@k.scene
+def versus(s: k.Scene):
+    before = k.Card(k.Text("O(n²)", size=0.6), title="Bubble sort", caption="compares every pair", accent=k.RED)
+    after = k.Card(k.Text("O(n log n)", size=0.6), title="Merge sort", caption="splits, then merges", accent=k.GREEN)
+    s.play(k.fade_in(k.Row(before, after, gap=1).place(at="center")))
+    s.wait(0.5)
+```
+
+- `w=` and `h=` fix the panel's size; `pad=` is the space around the content, `radius=` the
+  corners. The caption is dimmer than the title and keeps a readable contrast.
+- The parts are addressable: `card.content`, `card.title`, `card.box`, `card.caption`,
+  `card.accent` (`s.play(k.indicate(card.content))`).
+def bubble(s: k.Scene):
+    fox = k.Circle(r=0.6, fill=k.ORANGE, fill_opacity=1).place(at="center")
+    s.add(fox)
+    s.play(k.fade_in(k.Callout("Wait... the slope changes at every point?", to=fox, max_width=3)))
+    s.play(fox.to(x=-2, unpin=True), duration=1.5)
+    s.wait(0.5)
+```
+
+- `side=` is where the box goes (`top-right` by default, any corner or side), `gap=` how far.
+- `style="bubble"` is a filled balloon with dark text, `"box"` an outlined box, `"line"` text
+  with a leader line; `max_width=` wraps the text.
+- The contrast lint judges the text against the bubble behind it, not the scene background.
+def pass_one(s: k.Scene):
+    arr = k.Array([5, 2, 9, 1]).place(at="center")
+    s.play(k.fade_in(arr))
+    for j in range(3):
+        s.play(arr.pointer("j", j), duration=0.3)
+        s.play(arr.compare(j, j + 1), duration=0.4)
+        if int(arr.cells[j].value.text.now) > int(arr.cells[j + 1].value.text.now):
+            s.play(arr.swap(j, j + 1), duration=0.5)
+    s.wait(0.5)
+```
+
+- `arr.cells[i]` is the cell at index `i` at the cursor (after the swaps scheduled so far);
+  each cell has `.box` and `.value`.
+- `arr.pointer(name, i)` adds a labelled arrow under index `i` the first time and moves it
+  afterwards; several pointers stack below each other and follow the array if it moves.
 
 ## Changing parents: `k.reparent`
 

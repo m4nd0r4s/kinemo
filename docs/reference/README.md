@@ -165,6 +165,7 @@ Axes, number lines, polar axes, plots and data charts.
 - [`k.PolarAxes`](charts.md#k-polaraxes): Polar axes (rings and spokes): `r=(0, r_max, step)`, `radius=` in units, `spokes=`.
 - [`k.Axes`](charts.md#k-axes): Cartesian axes with ticks, labels and an optional grid: `x=(min, max, step)`, `y=(min, max)`, `labels=("x", "y")`, `width=`/`height=` in units.
 - [`k.NumberLine`](charts.md#k-numberline): A horizontal number line: a `k.Axes` with only the x axis.
+- [`k.NumberPlane`](charts.md#k-numberplane): A coordinate grid with axes and the basis vectors î (green) and ĵ (red): `x=(min, max, step)`, `y=...`, `unit=` scene units per step.
 - [`Plot`](charts.md#plot): A curve `y = fn(x)` of an axes.
 - [`k.BarChart`](charts.md#k-barchart): Bar chart from a table: `x=` is the category column, `y=` the value column and `key=` identifies each bar.
 - [`k.LineChart`](charts.md#k-linechart): A `k.Axes` with one line per `y=` column (one or several), connecting the table's points in `x=` order.
@@ -173,6 +174,8 @@ Axes, number lines, polar axes, plots and data charts.
 Methods:
 
 - [`ax.parametric`](charts.md#axes-parametric): Parametric curve `(fx(t), fy(t))` for `t=(start, end)`; clipped to the visible ranges.
+- [`numberplane.apply`](charts.md#numberplane-apply): Animated transformation of the plane, composed after the ones already applied: a matrix `[[a, b], [c, d]]` sends î to `(a, c)` and ĵ to `(b, d)`; a function `(x, y) -> (x2, y2)` bends the grid for non-linear maps.
+- [`numberplane.polygon`](charts.md#numberplane-polygon): A filled shape with vertices in data coordinates that deforms with the plane.
 - [`ax.plot`](charts.md#axes-plot): Draws the curve `y = fn(x)` on the axes, with adaptive sampling.
 - [`ax.area`](charts.md#axes-area): Filled region under a curve (down to the x axis) or between two curves (`between=`).
 - [`ax.vline`](charts.md#axes-vline): Vertical line on the axes at `at=` (accepts a signal: the line moves with it); `style="dashed"` makes it dashed.

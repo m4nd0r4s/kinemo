@@ -94,6 +94,66 @@ def number_line(s: k.Scene):
         related=("k.Axes", "Axes.point"),
     ),
     DocEntry(
+        "k.NumberPlane",
+        "Charts",
+        "A coordinate grid with axes and the basis vectors î (green) and ĵ (red): "
+        "`x=(min, max, step)`, `y=...`, `unit=` scene units per step. `plane.apply(matrix)` "
+        "deforms it; `plane.vector(x, y)`, `plane.dot(x, y)`, `plane.polygon(points)` and "
+        "`plane.add(obj, at=(x, y))` put objects on it that the transformations carry.",
+        '''
+import kinemo as k
+
+@k.scene
+def plane(s: k.Scene):
+    plane = k.NumberPlane(x=(-6, 6, 1), y=(-3, 3, 1))
+    v = plane.vector(2, 1, color=k.YELLOW)
+    s.play(k.draw(plane))
+    s.play(k.indicate(v))
+''',
+        related=("NumberPlane.apply", "NumberPlane.polygon", "k.Axes"),
+    ),
+    DocEntry(
+        "NumberPlane.apply",
+        "Charts",
+        "Animated transformation of the plane, composed after the ones already applied: a "
+        "matrix `[[a, b], [c, d]]` sends î to `(a, c)` and ĵ to `(b, d)`; a function "
+        "`(x, y) -> (x2, y2)` bends the grid for non-linear maps. Grid lines, basis vectors and "
+        "the objects made on the plane all move. `plane.reset()` goes back.",
+        '''
+import math
+import kinemo as k
+
+@k.scene
+def shear(s: k.Scene):
+    plane = k.NumberPlane(x=(-6, 6, 1), y=(-3, 3, 1))
+    eigen = plane.vector(1, 0, color=k.YELLOW)
+    s.play(k.draw(plane))
+    s.play(plane.apply([[1, 1], [0, 1]]), duration=2)
+    s.play(k.indicate(eigen))  # an eigenvector: still on its span
+    s.play(plane.apply(lambda x, y: (x + 0.3 * math.sin(y), y)), duration=2)
+    s.play(plane.reset())
+''',
+        related=("k.NumberPlane", "NumberPlane.polygon"),
+    ),
+    DocEntry(
+        "NumberPlane.polygon",
+        "Charts",
+        "A filled shape with vertices in data coordinates that deforms with the plane. The "
+        "unit square shows the determinant: its area after `apply(m)` is `det(m)`.",
+        '''
+import kinemo as k
+
+@k.scene
+def determinant(s: k.Scene):
+    plane = k.NumberPlane(x=(-6, 6, 1), y=(-3, 3, 1))
+    square = plane.polygon([(0, 0), (1, 0), (1, 1), (0, 1)], fill=k.YELLOW)
+    s.play(k.draw(plane))
+    s.play(plane.apply([[2, 1], [0, 1.5]]), duration=2)
+    s.play(k.indicate(square))  # area 3 = det
+''',
+        related=("NumberPlane.apply", "k.NumberPlane"),
+    ),
+    DocEntry(
         "Axes.plot",
         "Charts",
         "Draws the curve `y = fn(x)` on the axes, with adaptive sampling. `fn` uses `k` "

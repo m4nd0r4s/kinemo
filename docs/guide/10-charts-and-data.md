@@ -211,6 +211,31 @@ def polar(s: k.Scene):
     s.wait(0.5)
 ```
 
+## Number planes and linear transformations
+
+`k.NumberPlane(x=(-7, 7, 1), y=(-4, 4, 1))` is a grid with axes and the basis vectors î
+(green) and ĵ (red). `plane.apply(matrix)` animates the whole plane through a 2×2 matrix
+`[[a, b], [c, d]]`, sending î to `(a, c)` and ĵ to `(b, d)`. A function `(x, y) -> (x2, y2)`
+bends the grid for non-linear maps. Each call composes after the previous ones, and
+`plane.reset()` goes back.
+
+Objects made on the plane go along: `plane.vector(x, y)` is an arrow from the origin,
+`plane.dot(x, y)` a point, `plane.polygon(points)` a shape that deforms (the unit square's
+area is the determinant), and `plane.add(obj, at=(x, y))` moves any object with the plane
+while keeping its shape.
+
+```python
+import kinemo as k
+
+@k.scene
+def shear(s: k.Scene):
+    plane = k.NumberPlane(x=(-6, 6, 1), y=(-3, 3, 1))
+    square = plane.polygon([(0, 0), (1, 0), (1, 1), (0, 1)], fill=k.YELLOW)
+    s.play(k.draw(plane))
+    s.play(plane.apply([[1, 1], [0, 1]]), duration=2)
+    s.play(k.indicate(square))
+```
+
 ## Data charts
 
 ### Where data comes from

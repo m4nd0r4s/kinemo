@@ -4,6 +4,48 @@ All notable changes to kinemo are listed here. The project follows
 [semantic versioning](https://semver.org/); until 1.0, a minor version may change the API, and
 `kinemo upgrade` rewrites the forms it replaces.
 
+## 0.11.1
+
+Faster narration with heavy voice models, audio in the dev editor, more code languages and
+versioned docs, from a first production client's feedback.
+
+**Added**
+
+- **Batch voices:** a `[tts] command` with `{lines_file}` makes every line in one run (a JSON
+  list of `{text, out, voice}`), so a model loads once; `kinemo voice` and `kinemo render`
+  send all missing lines in one call.
+- **The dev editor shows the audio:** Narration, Sounds and Music tracks under the timeline.
+  Clicking a line shows its full text (each word moves the playhead), its beat and script
+  line, the audio file, where the word times come from, the warnings on its line, and plays
+  just that line. Music is mixed as in the video (fades, duck under the voice).
+- **`k.Code` languages:** Java, Kotlin, Go, C#, Swift, Ruby, Haskell, Bash, SQL, HTML, CSS,
+  YAML and TOML (with their common aliases); JSON keys get their own color.
+- **`kinemo inspect --at 0,B03,end`** inspects several instants from one build (and `marks`);
+  so does the MCP `inspect` tool.
+- **Subtitles for movies:** `kinemo render --subtitles` on a `k.movie` covers the whole movie.
+- **Versioned docs** on the website: `latest`, each release (`0.11`, `0.10`, ...) and `dev`,
+  with a version switcher.
+
+**Changed**
+
+- `kinemo check` never calls the voice model: lines without audio are estimated and hint
+  `W1405` names them (`--strict` does not fail on it). `[tts] on_build` chooses for other
+  builds (`estimate` by default for the command provider); `kinemo render` makes missing lines
+  before rendering.
+- Source links in the dev editor open the editor of `[editor] command` (`cursor`, `zed`,
+  `idea`, `pycharm`, `sublime`, ... by URL, or any command with `{file}` and `{line}`).
+- Timeline: marks at one instant share a label (`B01.end · B02`) and never overlap; zero-length
+  entries are ticks in their own row; the timeline can be resized.
+- Objects made in a list are named after it (`squares[0]`); `k.Square.on` names its result.
+
+**Fixed**
+
+- `k.Code` with an unsupported `lang=` drew nothing and reported nothing: it is `K0802`, listing
+  the languages and suggesting the closest.
+- `k.sound` and `k.music` were labelled `instant` on the timeline.
+- A movie scene's music kept playing over the next scenes.
+- The site's editor screenshots are taken on every deploy.
+
 ## 0.11.0
 
 Narration and tooling: a narrated video made from a script, timed by its words, mixed and

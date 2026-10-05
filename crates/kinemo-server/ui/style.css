@@ -403,6 +403,12 @@ a:hover { text-decoration: underline; }
 .code-line { display: flex; white-space: pre; padding-right: 12px; border-left: 2px solid transparent; }
 .code-line .ln { flex: 0 0 44px; text-align: right; padding-right: 12px; color: var(--text-faint); user-select: none; }
 .code-line .src { flex: 1; }
+.code-line .when {
+  flex: 0 0 64px; padding-right: 10px; text-align: right; overflow: hidden; text-overflow: ellipsis;
+  font-size: 10.5px; color: var(--text-faint); cursor: default; user-select: none;
+}
+.code-line.has-runs .when { color: var(--accent-2); cursor: pointer; }
+.code-line.has-runs .when:hover { text-decoration: underline; }
 .code-line.has-runs .ln { color: var(--text-dim); }
 .code-line.running { background: rgba(245, 197, 66, 0.07); }
 .code-line.current { background: rgba(245, 197, 66, 0.16); border-left-color: var(--accent); }

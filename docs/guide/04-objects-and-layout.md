@@ -375,6 +375,10 @@ side:
 
 `k.Callout(text, to=obj)` puts a box with text beside an object, with a tail pointing at it, and
 keeps it there as the object moves:
+## Arrays
+
+`k.Array(values)` draws an array as cells with their indices, for algorithm videos: swap cells,
+compare them, change a value and point at indices:
 
 ```python
 import kinemo as k
@@ -404,6 +408,21 @@ def bubble(s: k.Scene):
 - `style="bubble"` is a filled balloon with dark text, `"box"` an outlined box, `"line"` text
   with a leader line; `max_width=` wraps the text.
 - The contrast lint judges the text against the bubble behind it, not the scene background.
+def pass_one(s: k.Scene):
+    arr = k.Array([5, 2, 9, 1]).place(at="center")
+    s.play(k.fade_in(arr))
+    for j in range(3):
+        s.play(arr.pointer("j", j), duration=0.3)
+        s.play(arr.compare(j, j + 1), duration=0.4)
+        if int(arr.cells[j].value.text.now) > int(arr.cells[j + 1].value.text.now):
+            s.play(arr.swap(j, j + 1), duration=0.5)
+    s.wait(0.5)
+```
+
+- `arr.cells[i]` is the cell at index `i` at the cursor (after the swaps scheduled so far);
+  each cell has `.box` and `.value`.
+- `arr.pointer(name, i)` adds a labelled arrow under index `i` the first time and moves it
+  afterwards; several pointers stack below each other and follow the array if it moves.
 
 ## Changing parents: `k.reparent`
 

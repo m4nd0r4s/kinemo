@@ -470,6 +470,22 @@ def easing(s: k.Scene):
 
 ### Objects
 
+#### `k.Array(values, *, index=True, cell=0.8, size=0.4, gap=0.0, **props)`
+An array for algorithm videos: cells with the values and the indices under them (`index=False` hides them), `cell=` size. `arr.cells[i]` is the cell now at index `i` (`.box`, `.value`); `arr.swap(i, j)` exchanges two cells along arcs, `arr.compare(i, j)` highlights them, `arr.set(i, v)` changes a value, and `arr.pointer("i", 2)` points a labelled arrow at an index (it fades in the first time, then slides). See also: `k.Row`, `k.Bar`.
+```python
+@k.scene
+def bubble_step(s: k.Scene):
+    arr = k.Array([5, 2, 9, 1]).place(at="center")
+    s.play(k.fade_in(arr))
+    s.play(arr.pointer("j", 0))
+    for j in range(3):
+        s.play(arr.pointer("j", j), duration=0.4)
+        s.play(arr.compare(j, j + 1), duration=0.4)
+        a, b = arr.cells[j].value.text.now, arr.cells[j + 1].value.text.now
+        if int(a) > int(b):
+            s.play(arr.swap(j, j + 1), duration=0.5)
+    s.wait(0.5)
+```
 #### `k.Callout(text, *, to, side="top-right", style="bubble", gap=0.45, max_width=4.0, size=0.32, pad=0.22, color=None, **props)`
 A speech bubble or callout beside `to=` (an object), with a tail pointing at it, that follows it: `side=` (`"top-right"`, `"left"`, ...), `style="bubble"` (filled), `"box"` (outlined) or `"line"` (text with a leader line), `gap=`, `max_width=` (the text wraps), `size=`, `color=`. Parts: `callout.box`, `callout.label`, `callout.tail`. See also: `k.Card`, `k.Text`.
 ```python

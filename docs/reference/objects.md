@@ -6,6 +6,7 @@ Shapes, groups, images, SVG and mass objects (points, vector fields, stream line
 
 **Contents:**
 
+- [`k.Array`](#k-array): An array for algorithm videos: cells with the values and the indices under them (`index=False` hides them), `cell=` size.
 - [`k.Callout`](#k-callout): A speech bubble or callout beside `to=` (an object), with a tail pointing at it, that follows it: `side=` (`"top-right"`, `"left"`, ...), `style="bubble"` (filled), `"box"` (outlined) or `"line"` (text with a leader line), `gap=`, `max_width=` (the text wraps), `size=`, `color=`.
 - [`k.Gauge`](#k-gauge): A dial whose needle follows `value=` (a number or a signal, clamped to `range=`): numbered `ticks=`, `sweep=` degrees (240), `zones=[(lo, hi, color)]`, a readout with `label=` under the hub.
 - [`k.Card`](#k-card): A panel around `content` (sized to it, or `w=`, `h=`): `title=` in its top-left corner, `caption=` under it, `accent=` a color bar beside the title; `pad=`, `radius=`.
@@ -36,6 +37,157 @@ Shapes, groups, images, SVG and mass objects (points, vector fields, stream line
 - [`k.StreamLines`](#k-streamlines): Streamlines of a field (a `k.VectorField` or a function), integrated with RK4 in the core from `seeds` (a count or points).
 
 Back to the [reference index](README.md).
+
+<a id="k-array"></a>
+### `k.Array` *(class)*
+
+```python
+k.Array(
+    values: Sequence[object],
+    *,
+    index: bool = True,
+    cell: float = 0.8,
+    size: float = 0.4,
+    gap: float = 0.0,
+    **props: Unpack[TransformKeywords],
+)
+```
+
+An array for algorithm videos: cells with the values and the indices under them (`index=False` hides them), `cell=` size. `arr.cells[i]` is the cell now at index `i` (`.box`, `.value`); `arr.swap(i, j)` exchanges two cells along arcs, `arr.compare(i, j)` highlights them, `arr.set(i, v)` changes a value, and `arr.pointer("i", 2)` points a labelled arrow at an index (it fades in the first time, then slides).
+
+**Parameters:**
+
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `values` | `Sequence[object]` | required |   |
+| `index` | `bool` | `True` | An array for algorithm videos: cells with the values and the indices under them (`index=False` hides them), `cell=` size. |
+| `cell` | `float` | `0.8` | An array for algorithm videos: cells with the values and the indices under them (`index=False` hides them), `cell=` size. |
+| `size` | `float` | `0.4` |   |
+| `gap` | `float` | `0.0` |   |
+| `**props` | `Unpack[TransformKeywords]` | variadic | Keyword arguments (`TransformKeywords`): `name: str \| None`, `key: str \| None`, `x: FloatVal`, `y: FloatVal`, `position: VecVal`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`. |
+
+Props inherited from [`k.Node`](object-state.md#k-node): `x`, `y`, `rotate`, `scale`, `scale_x`, `scale_y`, `anchor`, `opacity`, `z`, `visible`, `bleed`.
+
+**Example:**
+
+```python
+@k.scene
+def bubble_step(s: k.Scene):
+    arr = k.Array([5, 2, 9, 1]).place(at="center")
+    s.play(k.fade_in(arr))
+    s.play(arr.pointer("j", 0))
+    for j in range(3):
+        s.play(arr.pointer("j", j), duration=0.4)
+        s.play(arr.compare(j, j + 1), duration=0.4)
+        a, b = arr.cells[j].value.text.now, arr.cells[j + 1].value.text.now
+        if int(a) > int(b):
+            s.play(arr.swap(j, j + 1), duration=0.5)
+    s.wait(0.5)
+```
+
+**See also:** [`k.Row`](layout.md#k-row), [`k.Bar`](#k-bar).
+
+**Members:**
+
+- [`cells`](#array-cells): The cells in index order at the cursor (after the swaps scheduled so far).
+- [`swap`](#array-swap): Exchange the cells at `i` and `j` (they move along arcs).
+- [`compare`](#array-compare): Highlight the cells at `i` and `j` (a temporary tint and pulse).
+- [`set`](#array-set): Change the value shown at `i` (the old one crossfades into the new).
+- [`pointer`](#array-pointer): Point `name` at index `i`: a labelled arrow under the cell fades in the first time, then slides to the new index.
+
+Inherited from [`k.Group`](#k-group): [`children`](#group-children), [`to`](#group-to), [`insert`](#group-insert), [`pop`](#group-pop), [`fit`](#group-fit).
+Inherited from [`k.Node`](object-state.md#k-node): [`unbind`](object-state.md#node-unbind), [`edge`](object-state.md#node-edge), [`age`](object-state.md#node-age), [`entered`](object-state.md#node-entered), [`exited`](object-state.md#node-exited), [`copy`](object-state.md#node-copy), [`place`](object-state.md#node-place), [`to_place`](object-state.md#node-to_place), [`unpin`](object-state.md#node-unpin).
+
+<a id="array-cells"></a>
+#### `k.Array.cells` *(property)*
+
+```python
+array.cells: list[ArrayCell]  # read-only
+```
+
+The cells in index order at the cursor (after the swaps scheduled so far).
+
+<a id="array-swap"></a>
+#### `k.Array.swap` *(method)*
+
+```python
+array.swap(i: int, j: int, **kw: Unpack[ReorderTiming]) -> Animation
+```
+
+Exchange the cells at `i` and `j` (they move along arcs).
+
+**Parameters:**
+
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `i` | `int` | required | Exchange the cells at `i` and `j` (they move along arcs). |
+| `j` | `int` | required | Exchange the cells at `i` and `j` (they move along arcs). |
+| `**kw` | `Unpack[ReorderTiming]` | variadic | Keyword arguments (`ReorderTiming`): `duration: float \| None`, `ease: EaseLike \| None`. |
+
+<a id="array-compare"></a>
+#### `k.Array.compare` *(method)*
+
+```python
+array.compare(
+    i: int,
+    j: int,
+    *,
+    color: ColorLike = k.YELLOW,
+    duration: float | None = None,
+) -> Animation
+```
+
+Highlight the cells at `i` and `j` (a temporary tint and pulse).
+
+**Parameters:**
+
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `i` | `int` | required | Highlight the cells at `i` and `j` (a temporary tint and pulse). |
+| `j` | `int` | required | Highlight the cells at `i` and `j` (a temporary tint and pulse). |
+| `color` | `ColorLike` | `k.YELLOW` |   |
+| `duration` | `float \| None` | `None` |   |
+
+<a id="array-set"></a>
+#### `k.Array.set` *(method)*
+
+```python
+array.set(i: int, value: object, *, duration: float | None = None) -> Animation
+```
+
+Change the value shown at `i` (the old one crossfades into the new).
+
+**Parameters:**
+
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `i` | `int` | required | Change the value shown at `i` (the old one crossfades into the new). |
+| `value` | `object` | required |   |
+| `duration` | `float \| None` | `None` |   |
+
+<a id="array-pointer"></a>
+#### `k.Array.pointer` *(method)*
+
+```python
+array.pointer(
+    name: str,
+    i: int,
+    *,
+    color: ColorLike = k.YELLOW,
+    duration: float | None = None,
+) -> Animation
+```
+
+Point `name` at index `i`: a labelled arrow under the cell fades in the first time, then slides to the new index. Pointers follow the array if it moves.
+
+**Parameters:**
+
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `name` | `str` | required | Point `name` at index `i`: a labelled arrow under the cell fades in the first time, then slides to the new index. |
+| `i` | `int` | required | Point `name` at index `i`: a labelled arrow under the cell fades in the first time, then slides to the new index. |
+| `color` | `ColorLike` | `k.YELLOW` |   |
+| `duration` | `float \| None` | `None` |   |
 
 <a id="k-callout"></a>
 ### `k.Callout` *(class)*

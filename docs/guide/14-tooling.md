@@ -177,6 +177,11 @@ The page has three panes: the **outliner** (every object as a tree), the **frame
   or an audio clip shows its line. Local modules with statements get their own tab.
   The gutter shows when each statement runs (`1.20s`, `×3` for a loop, `◆ name` for a mark);
   clicking it moves the playhead there (to the next run, for a loop), and hovering lists the runs.
+- **Breakpoints:** click a line number in the Code tab. While playing, the preview pauses exactly
+  where a run of that statement starts and selects it (the inspector shows its arguments). In a
+  loop, a breakpoint can stop on one run only (`run 2 of 3`). The list under the code enables,
+  disables and removes them; they are remembered per browser and follow their line when the
+  file changes (a breakpoint whose line is gone is shown crossed out).
 - Saving the file (or a local module it imports) rebuilds the scene, and the preview stays
   at the same instant.
 - Clicking an object, on the frame or in the outliner, shows its props and where each one

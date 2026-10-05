@@ -30,6 +30,11 @@ The visible ranges are signals. `ax.zoom_to(x=(a, b), y=(c, d))` animates them, 
 curve, tick and marker on the axes follows. It is a named transition, equivalent to
 `ax.to(x_range=..., y_range=...)`.
 
+Your own markers can live in the axes too. `ax.add(obj, enter_with_axes=True)` adopts them
+in the axes' coordinates, so `k.Dot(position=ax.local_point(4, 8))` follows zooms like a
+plot does. `ax.origin()` is where the axes cross, and `ax.in_view(x=8)` is a reactive bool
+for `visible=` that hides a marker when a zoom leaves its value out.
+
 ### Plotting functions
 
 `ax.plot(fn, *, until=None, from_=None, domain=None, color=None, label=None, samples=160)`

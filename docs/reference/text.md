@@ -9,9 +9,17 @@ Text, LaTeX math and highlighted code, with addressable parts.
 - [`k.Text`](#k-text): Text with minimal inline markup (`**bold**`, `*italic*`, `` `code` ``).
 - [`k.Math`](#k-math): Formula in LaTeX syntax, typeset by the built-in engine (no TeX installation needed).
 - [`k.Code`](#k-code): Code with syntax highlighting (tree-sitter) and stable tokens: `lang=`, `line_numbers=True`, `size=`, `theme="auto"` (follows the scene background).
+- [`k.underline`](#k-underline): Annotation marks on any object or part of a text or formula (`eq["dx"]`): `k.underline(target)`, `k.box(target)`, `k.encircle(target)`, `k.strike(target)` (crossed out) and `k.cross(target)` (an X).
+- [`k.box`](#k-box): A rounded box around `target`, `pad` away from its box.
+- [`k.cross`](#k-cross): An X over `target`: two lines corner to corner, `pad` past its box.
+- [`k.encircle`](#k-encircle): An ellipse around `target` (its box, `pad` larger on each side, times √2 so the corners fit inside).
+- [`k.strike`](#k-strike): A line through the middle of `target` (struck out), `overhang` past each side.
+- [`k.Terminal`](#k-terminal): A terminal or REPL window: `title=`, `prompt=` (`"$ "`, `">>>"`), `lang=` of the commands (`"bash"`, `"python"`...), `width=` and `rows=` on screen, `size=`, `theme="auto"`.
 
 **Methods in this area:**
 
+- [`terminal.type`](#terminal-type): Named transition: types a command after the prompt, character by character, as `k.Code` in the terminal's language, with the caret following; `cps=` characters per second (22 by default) or `duration=`.
+- [`terminal.output`](#terminal-output): Named transition: prints `text` below the last row, one row per line, all at once or `stagger=` seconds apart; lines that do not fit scroll the older ones up.
 - [`code.highlight`](#code-highlight): Named transition: dims every line except `lines` (numbered from 1); `code.highlight(None)` removes the highlight.
 
 Back to the [reference index](README.md).
@@ -419,3 +427,311 @@ code.lines: PartView  # read-only
 ```
 
 Laid-out lines as parts: `txt.lines[0]`.
+
+<a id="k-underline"></a>
+### `k.underline` *(function)*
+
+```python
+k.underline(
+    target: Node,
+    *,
+    pad: float = 0.08,
+    color: ColorLike = k.YELLOW,
+    stroke_width: FloatVal = 4.0,
+    **props: Unpack[VisibilityKeywords],
+) -> Line
+```
+
+Annotation marks on any object or part of a text or formula (`eq["dx"]`): `k.underline(target)`, `k.box(target)`, `k.encircle(target)`, `k.strike(target)` (crossed out) and `k.cross(target)` (an X). Each is an ordinary object bound to the target's box in world coordinates, so it follows the target; it enters with `k.draw` and leaves with `k.fade_out`. `pad=` (or `overhang=` for `strike`), `color=` and `stroke_width=`.
+
+**Parameters:**
+
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `target` | `Node` | required | A line under `target`, `pad` below its box; `k.draw` draws it left to right. |
+| `pad` | `float` | `0.08` | `pad=` (or `overhang=` for `strike`), `color=` and `stroke_width=`. |
+| `color` | `ColorLike` | `k.YELLOW` | `pad=` (or `overhang=` for `strike`), `color=` and `stroke_width=`. |
+| `stroke_width` | `FloatVal` | `4.0` | `pad=` (or `overhang=` for `strike`), `color=` and `stroke_width=`. |
+| `**props` | `Unpack[VisibilityKeywords]` | variadic | Keyword arguments (`VisibilityKeywords`): `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`. |
+
+**Example:**
+
+```python
+@k.scene
+def marks(s: k.Scene):
+    eq = k.Math(r"a^2 + b^2 = c^2", size=0.8).place(at="center")
+    s.add(eq)
+    s.play(k.draw(k.box(eq["c^2"])))
+    s.play(k.draw(k.underline(eq["a^2"])), k.draw(k.encircle(eq["b^2"])))
+    wrong = k.Text("a + b = c", size=0.5).place(below=eq, gap=1)
+    s.play(k.write(wrong))
+    s.play(k.draw(k.cross(wrong)))
+    s.wait(0.5)
+```
+
+**See also:** [`k.Math`](#k-math), [`k.draw`](verbs.md#k-draw), [`k.fade_out`](verbs.md#k-fade_out).
+
+<a id="k-box"></a>
+### `k.box` *(function)*
+
+```python
+k.box(
+    target: Node,
+    *,
+    pad: float = 0.12,
+    radius: float = 0.08,
+    color: ColorLike = k.YELLOW,
+    stroke_width: FloatVal = 4.0,
+    **props: Unpack[VisibilityKeywords],
+) -> RoundedRect
+```
+
+A rounded box around `target`, `pad` away from its box.
+
+Documented together with [`k.underline`](#k-underline).
+
+**Parameters:**
+
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `target` | `Node` | required | A rounded box around `target`, `pad` away from its box. |
+| `pad` | `float` | `0.12` | A rounded box around `target`, `pad` away from its box. |
+| `radius` | `float` | `0.08` |   |
+| `color` | `ColorLike` | `k.YELLOW` |   |
+| `stroke_width` | `FloatVal` | `4.0` |   |
+| `**props` | `Unpack[VisibilityKeywords]` | variadic | Keyword arguments (`VisibilityKeywords`): `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`. |
+
+<a id="k-cross"></a>
+### `k.cross` *(function)*
+
+```python
+k.cross(
+    target: Node,
+    *,
+    pad: float = 0.06,
+    color: ColorLike = k.RED,
+    stroke_width: FloatVal = 4.0,
+    **props: Unpack[VisibilityKeywords],
+) -> Group
+```
+
+An X over `target`: two lines corner to corner, `pad` past its box.
+
+Documented together with [`k.underline`](#k-underline).
+
+**Parameters:**
+
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `target` | `Node` | required | An X over `target`: two lines corner to corner, `pad` past its box. |
+| `pad` | `float` | `0.06` | An X over `target`: two lines corner to corner, `pad` past its box. |
+| `color` | `ColorLike` | `k.RED` |   |
+| `stroke_width` | `FloatVal` | `4.0` |   |
+| `**props` | `Unpack[VisibilityKeywords]` | variadic | Keyword arguments (`VisibilityKeywords`): `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`. |
+
+<a id="k-encircle"></a>
+### `k.encircle` *(function)*
+
+```python
+k.encircle(
+    target: Node,
+    *,
+    pad: float = 0.18,
+    color: ColorLike = k.YELLOW,
+    stroke_width: FloatVal = 4.0,
+    **props: Unpack[VisibilityKeywords],
+) -> Ellipse
+```
+
+An ellipse around `target` (its box, `pad` larger on each side, times √2 so the corners fit inside).
+
+Documented together with [`k.underline`](#k-underline).
+
+**Parameters:**
+
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `target` | `Node` | required | An ellipse around `target` (its box, `pad` larger on each side, times √2 so the corners fit inside). |
+| `pad` | `float` | `0.18` | An ellipse around `target` (its box, `pad` larger on each side, times √2 so the corners fit inside). |
+| `color` | `ColorLike` | `k.YELLOW` |   |
+| `stroke_width` | `FloatVal` | `4.0` |   |
+| `**props` | `Unpack[VisibilityKeywords]` | variadic | Keyword arguments (`VisibilityKeywords`): `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`. |
+
+<a id="k-strike"></a>
+### `k.strike` *(function)*
+
+```python
+k.strike(
+    target: Node,
+    *,
+    overhang: float = 0.06,
+    color: ColorLike = k.RED,
+    stroke_width: FloatVal = 4.0,
+    **props: Unpack[VisibilityKeywords],
+) -> Line
+```
+
+A line through the middle of `target` (struck out), `overhang` past each side.
+
+Documented together with [`k.underline`](#k-underline).
+
+**Parameters:**
+
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `target` | `Node` | required | A line through the middle of `target` (struck out), `overhang` past each side. |
+| `overhang` | `float` | `0.06` | A line through the middle of `target` (struck out), `overhang` past each side. |
+| `color` | `ColorLike` | `k.RED` |   |
+| `stroke_width` | `FloatVal` | `4.0` |   |
+| `**props` | `Unpack[VisibilityKeywords]` | variadic | Keyword arguments (`VisibilityKeywords`): `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`. |
+
+<a id="k-terminal"></a>
+### `k.Terminal` *(class)*
+
+```python
+k.Terminal(
+    *,
+    title: str = "",
+    prompt: str = "$ ",
+    lang: str = "bash",
+    width: float = 8.0,
+    rows: int = 8,
+    size: float = 0.28,
+    theme: str = "auto",
+    chrome: bool = True,
+    caret: bool = True,
+    **props: Unpack[TransformKeywords],
+)
+```
+
+A terminal or REPL window: `title=`, `prompt=` (`"$ "`, `">>>"`), `lang=` of the commands (`"bash"`, `"python"`...), `width=` and `rows=` on screen, `size=`, `theme="auto"`. `term.type(cmd)` types a command after the prompt as `k.Code`, `term.output(text)` prints monospace lines; the window grows row by row and scrolls up when full. `term.lines` are the rows on screen (an input row has `.prompt` and `.code`), `term.frame`, `term.title` and `term.caret` are the window's parts.
+
+**Parameters:**
+
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `title` | `str` | `""` | A terminal or REPL window: `title=`, `prompt=` (`"$ "`, `">>>"`), `lang=` of the commands (`"bash"`, `"python"`...), `width=` and `rows=` on screen, `size=`, `theme="auto"`. |
+| `prompt` | `str` | `"$ "` | A terminal or REPL window: `title=`, `prompt=` (`"$ "`, `">>>"`), `lang=` of the commands (`"bash"`, `"python"`...), `width=` and `rows=` on screen, `size=`, `theme="auto"`. |
+| `lang` | `str` | `"bash"` | A terminal or REPL window: `title=`, `prompt=` (`"$ "`, `">>>"`), `lang=` of the commands (`"bash"`, `"python"`...), `width=` and `rows=` on screen, `size=`, `theme="auto"`. |
+| `width` | `float` | `8.0` | A terminal or REPL window: `title=`, `prompt=` (`"$ "`, `">>>"`), `lang=` of the commands (`"bash"`, `"python"`...), `width=` and `rows=` on screen, `size=`, `theme="auto"`. |
+| `rows` | `int` | `8` | A terminal or REPL window: `title=`, `prompt=` (`"$ "`, `">>>"`), `lang=` of the commands (`"bash"`, `"python"`...), `width=` and `rows=` on screen, `size=`, `theme="auto"`. |
+| `size` | `float` | `0.28` | A terminal or REPL window: `title=`, `prompt=` (`"$ "`, `">>>"`), `lang=` of the commands (`"bash"`, `"python"`...), `width=` and `rows=` on screen, `size=`, `theme="auto"`. |
+| `theme` | `str` | `"auto"` | A terminal or REPL window: `title=`, `prompt=` (`"$ "`, `">>>"`), `lang=` of the commands (`"bash"`, `"python"`...), `width=` and `rows=` on screen, `size=`, `theme="auto"`. |
+| `chrome` | `bool` | `True` |   |
+| `caret` | `bool` | `True` |   |
+| `**props` | `Unpack[TransformKeywords]` | variadic | Keyword arguments (`TransformKeywords`): `name: str \| None`, `key: str \| None`, `x: FloatVal`, `y: FloatVal`, `position: VecVal`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`. |
+
+Props inherited from [`k.Node`](object-state.md#k-node): `x`, `y`, `rotate`, `scale`, `scale_x`, `scale_y`, `anchor`, `opacity`, `z`, `visible`, `bleed`.
+
+**Example:**
+
+```python
+@k.scene
+def terminal(s: k.Scene):
+    term = k.Terminal(title="zsh", width=9, rows=5).place(at="center")
+    s.play(k.fade_in(term), duration=0.4)
+    s.play(term.type("pip install kinemo"))
+    s.play(term.output("Successfully installed kinemo"))
+    s.play(term.type("kinemo check scene.py"))
+    s.play(term.output("scene.py — scene 'hello' — ok"))
+    s.wait(0.5)
+```
+
+**See also:** [`terminal.type`](#terminal-type), [`terminal.output`](#terminal-output), [`k.Code`](#k-code).
+
+**Members:**
+
+- [`type`](#terminal-type): Named transition: types a command after the prompt, character by character, as `k.Code` in the terminal's language, with the caret following; `cps=` characters per second (22 by default) or `duration=`.
+- [`output`](#terminal-output): Named transition: prints `text` below the last row, one row per line, all at once or `stagger=` seconds apart; lines that do not fit scroll the older ones up.
+- [`clear`](#terminal-clear): Remove every row (they fade out); the next row starts at the top.
+
+Inherited from [`k.Group`](objects.md#k-group): [`children`](objects.md#group-children), [`to`](objects.md#group-to), [`swap`](objects.md#group-swap), [`insert`](objects.md#group-insert), [`pop`](objects.md#group-pop), [`fit`](objects.md#group-fit).
+Inherited from [`k.Node`](object-state.md#k-node): [`set`](object-state.md#node-set), [`unbind`](object-state.md#node-unbind), [`edge`](object-state.md#node-edge), [`age`](object-state.md#node-age), [`entered`](object-state.md#node-entered), [`exited`](object-state.md#node-exited), [`copy`](object-state.md#node-copy), [`place`](object-state.md#node-place), [`to_place`](object-state.md#node-to_place), [`unpin`](object-state.md#node-unpin).
+
+<a id="terminal-type"></a>
+#### `k.Terminal.type` *(method)*
+
+```python
+terminal.type(
+    command: str,
+    *,
+    duration: float | None = None,
+    cps: float = 22.0,
+) -> Animation
+```
+
+Named transition: types a command after the prompt, character by character, as `k.Code` in the terminal's language, with the caret following; `cps=` characters per second (22 by default) or `duration=`.
+
+**Parameters:**
+
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `command` | `str` | required | Type `command` after the prompt, character by character (`cps` per second, or over `duration`), as `k.Code` in the terminal's language; the caret follows the typing. |
+| `duration` | `float \| None` | `None` | Named transition: types a command after the prompt, character by character, as `k.Code` in the terminal's language, with the caret following; `cps=` characters per second (22 by default) or `duration=`. |
+| `cps` | `float` | `22.0` | Named transition: types a command after the prompt, character by character, as `k.Code` in the terminal's language, with the caret following; `cps=` characters per second (22 by default) or `duration=`. |
+
+**Example:**
+
+```python
+@k.scene
+def repl(s: k.Scene):
+    term = k.Terminal(title="python", prompt=">>>", lang="python", rows=4).place(at="center")
+    s.add(term)
+    s.play(term.type("sum(range(10))", cps=12))
+    s.play(term.output("45"))
+    s.wait(0.5)
+```
+
+**See also:** [`k.Terminal`](#k-terminal), [`terminal.output`](#terminal-output).
+
+<a id="terminal-output"></a>
+#### `k.Terminal.output` *(method)*
+
+```python
+terminal.output(
+    text: str,
+    *,
+    stagger: float = 0.0,
+    duration: float | None = None,
+) -> Animation
+```
+
+Named transition: prints `text` below the last row, one row per line, all at once or `stagger=` seconds apart; lines that do not fit scroll the older ones up. `term.clear()` fades every row out and starts again at the top.
+
+**Parameters:**
+
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `text` | `str` | required | Named transition: prints `text` below the last row, one row per line, all at once or `stagger=` seconds apart; lines that do not fit scroll the older ones up. |
+| `stagger` | `float` | `0.0` | Named transition: prints `text` below the last row, one row per line, all at once or `stagger=` seconds apart; lines that do not fit scroll the older ones up. |
+| `duration` | `float \| None` | `None` |   |
+
+**Example:**
+
+```python
+@k.scene
+def build_log(s: k.Scene):
+    term = k.Terminal(title="cargo", rows=4).place(at="center")
+    s.add(term)
+    s.play(term.type("cargo build"))
+    s.play(term.output("Compiling kinemo\nCompiling kinemo-py\nFinished release", stagger=0.4))
+    s.play(term.clear())
+    s.wait(0.5)
+```
+
+**See also:** [`k.Terminal`](#k-terminal), [`terminal.type`](#terminal-type).
+
+<a id="terminal-clear"></a>
+#### `k.Terminal.clear` *(method)*
+
+```python
+terminal.clear(*, duration: float = 0.3) -> Animation
+```
+
+Remove every row (they fade out); the next row starts at the top.
+
+**Parameters:**
+
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `duration` | `float` | `0.3` |   |

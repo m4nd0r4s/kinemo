@@ -21,7 +21,8 @@ export function requestFrame(t, force = false) {
     return;
   }
   const request = { type: "frame", t, id: requestId() };
-  if (state.selectedIds.length) request.select = state.selectedIds;
+  const boxed = [...new Set([...state.selectedIds, ...state.hoverIds])];
+  if (boxed.length) request.select = boxed;
   if (debugFlags().length) request.overlay = true;
   if (send(request)) {
     inFlight = true;
@@ -58,7 +59,7 @@ function drawFrame(bitmap, header) {
   view.frameNumber.textContent = `frame ${header.frame}`;
   if (header.selection !== undefined) {
     state.boxes = new Map(header.selection.map((b) => [b.id, b.pixel_bbox]));
-  } else if (!state.selectedIds.length) {
+  } else if (!state.selectedIds.length && !state.hoverIds.length) {
     state.boxes = new Map();
   }
   if (header.overlay) state.overlay = header.overlay;
@@ -87,11 +88,16 @@ export function redrawHighlightLayer() {
     const [dx, dy] = i === 0 && dragOffset ? dragOffset : [0, 0];
     drawBox(ctx, [box[0] + dx, box[1] + dy, box[2] + dx, box[3] + dy], i === 0);
   });
+  // Objects named under the pointer in the code view.
+  for (const id of state.hoverIds) {
+    const box = state.boxes.get(id);
+    if (box && !state.selectedIds.includes(id)) drawBox(ctx, box, false, "#5fb3f9");
+  }
 }
 
-function drawBox(ctx, [x0, y0, x1, y1], primary) {
+function drawBox(ctx, [x0, y0, x1, y1], primary, color = null) {
   ctx.save();
-  ctx.strokeStyle = primary ? "#f5c542" : "rgba(245, 197, 66, 0.55)";
+  ctx.strokeStyle = color || (primary ? "#f5c542" : "rgba(245, 197, 66, 0.55)");
   ctx.lineWidth = primary ? 1.5 : 1;
   ctx.setLineDash([5, 4]);
   ctx.strokeRect(x0 - 2, y0 - 2, x1 - x0 + 4, y1 - y0 + 4);

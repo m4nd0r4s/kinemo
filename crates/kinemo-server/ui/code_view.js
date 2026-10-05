@@ -5,7 +5,9 @@
 "use strict";
 
 import { hasBreakpoint, toggleBreakpoint } from "./breakpoints.js";
+import { requestFrame } from "./frames.js";
 import { pause, setTime } from "./playback.js";
+import { selectObject } from "./selection.js";
 import { el, listen, state } from "./state.js";
 
 const PANE_KEY = "kinemo-dev-side-pane";
@@ -70,9 +72,51 @@ function whenNode(runs) {
   );
 }
 
+/** Object ids named by an identifier: a label (`tri`) or a list's elements (`squares` → `squares[i]`). */
+function namedObjects() {
+  const out = new Map();
+  for (const [id, info] of Object.entries((state.meta && state.meta.objects) || {})) {
+    const label = info.label || "";
+    const name = label.match(/^([A-Za-z_]\w*)(\[\d+\])?$/);
+    if (!name) continue;
+    const key = name[1];
+    if (!out.has(key)) out.set(key, { exact: null, items: [] });
+    if (name[2]) out.get(key).items.push(Number(id));
+    else out.get(key).exact = Number(id);
+  }
+  return out;
+}
+
+function setHover(ids) {
+  state.hoverIds = ids;
+  requestFrame(state.t, true);
+}
+
+/** A segment of code: a name of an object becomes a link to it (hover draws its box). */
+function segmentNode(text, kind, names) {
+  const named = (kind === "variable" || kind === "plain") && names.get(text);
+  if (!named || (named.exact === null && !named.items.length)) return el("span", { class: `tk-${kind}` }, text);
+  const ids = named.exact !== null ? [named.exact] : named.items;
+  return el(
+    "span",
+    {
+      class: `tk-${kind} obj-ref`,
+      title: named.exact !== null ? `${text}: click to select it` : `${text}[0..${named.items.length - 1}]: click to select the first`,
+      onmouseenter: () => setHover(ids),
+      onmouseleave: () => setHover([]),
+      onclick: (e) => {
+        e.stopPropagation();
+        selectObject(ids[0]);
+      },
+    },
+    text
+  );
+}
+
 function renderLines() {
   const info = codeFiles()[file];
   const runs = runsByLine();
+  const names = namedObjects();
   lineNodes = (info ? info.lines : []).map((segments, i) =>
     el(
       "div",
@@ -90,7 +134,7 @@ function renderLines() {
         String(i + 1)
       ),
       whenNode(runs.get(i + 1)),
-      el("span", { class: "src", onclick: () => pick(i + 1) }, ...segments.map(([text, kind]) => el("span", { class: `tk-${kind}` }, text)), segments.length ? null : " ")
+      el("span", { class: "src", onclick: () => pick(i + 1) }, ...segments.map(([text, kind]) => segmentNode(text, kind, names)), segments.length ? null : " ")
     )
   );
   $("code-lines").replaceChildren(...lineNodes);
@@ -170,7 +214,23 @@ function reveal(path, line) {
   scrollTo(node);
 }
 
+/** The lines of the selected object: where it was made and what animates it. */
+function markObjectLines() {
+  for (const node of $("code-lines").querySelectorAll(".code-line.object-line")) node.classList.remove("object-line");
+  const id = state.selectedIds.length === 1 && state.selectedBar === null ? state.selectedIds[0] : null;
+  if (id === null || !state.meta) return;
+  const lines = new Set();
+  const object = state.pickedObject && state.pickedObject.id === id ? state.pickedObject : null;
+  if (object && object.span && object.span.file === file) lines.add(object.span.line);
+  for (const source of Object.values((object && object.prop_sources) || {})) {
+    if (source && source.span && source.span.file === file) lines.add(source.span.line);
+  }
+  for (const bar of state.meta.timeline) if (bar.file === file && bar.objects.includes(id)) lines.add(bar.line);
+  for (const line of lines) lineNodes[line - 1] && lineNodes[line - 1].classList.add("object-line");
+}
+
 function onSelection() {
+  markObjectLines();
   if (state.selectedBar !== null && state.meta.timeline[state.selectedBar]) {
     const bar = state.meta.timeline[state.selectedBar];
     reveal(bar.file, bar.line);
@@ -214,6 +274,7 @@ export function installCodeView() {
   });
   listen("time", updateLit);
   listen("selection", onSelection);
+  listen("inspector", markObjectLines);
   listen("breakpoints", () => {
     for (const node of lineNodes) node.querySelector(".ln").classList.toggle("bp", !!hasBreakpoint(file, Number(node.dataset.line)));
   });

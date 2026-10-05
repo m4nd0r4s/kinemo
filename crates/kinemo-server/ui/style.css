@@ -422,6 +422,10 @@ a:hover { text-decoration: underline; }
 .code-line.current { background: rgba(245, 197, 66, 0.16); border-left-color: var(--accent); }
 .code-line.picked .src { text-decoration: underline dotted var(--text-faint); text-underline-offset: 3px; }
 .code-bar .step { padding: 2px 6px; font-size: 13px; }
+.obj-ref { cursor: pointer; text-decoration: underline dotted rgba(95, 179, 249, 0.7); text-underline-offset: 3px; }
+.obj-ref:hover { color: var(--accent-2); }
+.code-line.object-line .ln { color: var(--accent-2); }
+.code-line.object-line .src { box-shadow: inset 2px 0 0 rgba(95, 179, 249, 0.6); }
 .code-line.selected { outline: 1px solid rgba(95, 179, 249, 0.6); outline-offset: -1px; }
 .tk-keyword { color: #c792ea; }
 .tk-function { color: #82aaff; }

@@ -52,6 +52,7 @@ export const state = {
   stopAt: null, // playback pauses here (playing one narration line)
   lastHit: null, // the breakpoint run playback last stopped at
   pickedLine: null, // { file, line } clicked in the code view: the target of "run to line"
+  hoverIds: [], // objects whose boxes are drawn while a name is hovered in the code view
   boxes: new Map(), // object id → [x0, y0, x1, y1] in frame pixels, from the last frame
   overlay: null,
   pickedObject: null,

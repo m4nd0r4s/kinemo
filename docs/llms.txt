@@ -470,6 +470,17 @@ def easing(s: k.Scene):
 
 ### Objects
 
+#### `k.Card(content=None, *, title=None, caption=None, accent=None, w=None, h=None, pad=0.35, radius=0.18, title_size=0.32, caption_size=0.28, **props)`
+A panel around `content` (sized to it, or `w=`, `h=`): `title=` in its top-left corner, `caption=` under it, `accent=` a color bar beside the title; `pad=`, `radius=`. Cards line up in a `k.Row` for side-by-side comparisons. Parts: `card.box`, `card.content`, `card.title`, `card.caption`, `card.accent`. See also: `k.Row`, `k.RoundedRect`.
+```python
+@k.scene
+def compare(s: k.Scene):
+    rocket = k.Card(k.Triangle.right(2, 2, scale=0.6), title="Rocket", caption="pushes the gas down", accent=k.ORANGE)
+    gas = k.Card(k.Circle(r=0.6, fill=k.BLUE, fill_opacity=0.6), title="Gas", caption="pushes the rocket up", accent=k.BLUE)
+    s.play(k.fade_in(k.Row(rocket, gas, gap=1).place(at="center")))
+    s.play(k.indicate(gas.content))
+    s.wait(0.5)
+```
 #### `k.Angle(a, vertex, b, *, r=0.5, label=None, show_value=False, unit="deg", color=k.YELLOW, stroke_width=3.0, label_size=0.34, **props)`
 Angle markers. `k.Angle(a, vertex, b, r=0.5)` draws the arc of the smaller angle between the rays vertex→a and vertex→b, with `label="θ"` beside it or `show_value=True` for its measure (`unit="deg"` or `"rad"`); `k.RightAngle(a, vertex, b, size=0.3)` draws the square mark. Points are tuples or reactive points (`dot.world.center`, a `k.vec` of signals), so the marker follows an angle as it opens. Points are world coordinates: use `poly.sides` (not `poly.vertices`) for a polygon's corners. See also: `k.Arc`, `k.vec`.
 ```python

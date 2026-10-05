@@ -366,6 +366,29 @@ def group(s: k.Scene):
 Positions inside a group are local to it. An object has **exactly one parent**: adding it
 to a second group is `K0103`.
 
+## Cards
+
+`k.Card(content, title=..., caption=..., accent=...)` puts content on a rounded panel sized to
+it, with a title in the corner and a caption under it; cards in a `k.Row` compare things side by
+side:
+
+```python
+import kinemo as k
+
+
+@k.scene
+def versus(s: k.Scene):
+    before = k.Card(k.Text("O(n²)", size=0.6), title="Bubble sort", caption="compares every pair", accent=k.RED)
+    after = k.Card(k.Text("O(n log n)", size=0.6), title="Merge sort", caption="splits, then merges", accent=k.GREEN)
+    s.play(k.fade_in(k.Row(before, after, gap=1).place(at="center")))
+    s.wait(0.5)
+```
+
+- `w=` and `h=` fix the panel's size; `pad=` is the space around the content, `radius=` the
+  corners. The caption is dimmer than the title and keeps a readable contrast.
+- The parts are addressable: `card.content`, `card.title`, `card.box`, `card.caption`,
+  `card.accent` (`s.play(k.indicate(card.content))`).
+
 ## Changing parents: `k.reparent`
 
 `k.reparent(obj, new_parent)` moves an object to another group at the scheduled time. The

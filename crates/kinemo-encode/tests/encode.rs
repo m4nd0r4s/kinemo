@@ -45,7 +45,7 @@ fn opts(format: Format) -> EncoderOptions {
 fn encode(path: &Path, o: &EncoderOptions) {
     let mut enc = VideoEncoder::start(path, o).unwrap();
     for i in 0..N {
-        enc.push_frame(&frame(i)).unwrap();
+        enc.push_frame(&o.encoder_frame(frame(i))).unwrap();
     }
     enc.finish().unwrap();
 }
@@ -168,9 +168,10 @@ fn wrong_frame_size_is_error() {
 fn ffmpeg_failure_surfaces_stderr() {
     need_ffmpeg!();
     let path = Path::new("/nonexistent-dir-kinemo/out.mp4");
-    let r = VideoEncoder::start(path, &opts(Format::Mp4)).and_then(|mut e| {
+    let o = opts(Format::Mp4);
+    let r = VideoEncoder::start(path, &o).and_then(|mut e| {
         for i in 0..N {
-            e.push_frame(&frame(i))?;
+            e.push_frame(&o.encoder_frame(frame(i)))?;
         }
         e.finish()
     });

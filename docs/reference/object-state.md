@@ -6,6 +6,13 @@ Changing objects: animated state changes (`.to()`), instant writes (`.set()`), c
 
 **Contents:**
 
+- [`k.StyleKeywords`](#k-stylekeywords): The keyword arguments of shapes and text, as types, to reuse a style with `**` and keep it checked: `k.PaintKeywords` (`fill`, `fill_opacity`, `stroke`, `stroke_width`, `dash`), `k.ColorKeywords` (`color`), `k.TransformKeywords` (position, rotation, scale, opacity, visibility), `k.StyleKeywords` (all of those), and `k.TextKeywords`, `k.RectKeywords`, `k.ArrowKeywords` for the keywords those objects add.
+- [`k.ArrowKeywords`](#k-arrowkeywords): The keyword arguments of shapes and text, as types, to reuse a style with `**` and keep it checked: `k.PaintKeywords` (`fill`, `fill_opacity`, `stroke`, `stroke_width`, `dash`), `k.ColorKeywords` (`color`), `k.TransformKeywords` (position, rotation, scale, opacity, visibility), `k.StyleKeywords` (all of those), and `k.TextKeywords`, `k.RectKeywords`, `k.ArrowKeywords` for the keywords those objects add.
+- [`k.ColorKeywords`](#k-colorkeywords): The keyword arguments of shapes and text, as types, to reuse a style with `**` and keep it checked: `k.PaintKeywords` (`fill`, `fill_opacity`, `stroke`, `stroke_width`, `dash`), `k.ColorKeywords` (`color`), `k.TransformKeywords` (position, rotation, scale, opacity, visibility), `k.StyleKeywords` (all of those), and `k.TextKeywords`, `k.RectKeywords`, `k.ArrowKeywords` for the keywords those objects add.
+- [`k.PaintKeywords`](#k-paintkeywords): The keyword arguments of shapes and text, as types, to reuse a style with `**` and keep it checked: `k.PaintKeywords` (`fill`, `fill_opacity`, `stroke`, `stroke_width`, `dash`), `k.ColorKeywords` (`color`), `k.TransformKeywords` (position, rotation, scale, opacity, visibility), `k.StyleKeywords` (all of those), and `k.TextKeywords`, `k.RectKeywords`, `k.ArrowKeywords` for the keywords those objects add.
+- [`k.RectKeywords`](#k-rectkeywords): The keyword arguments of shapes and text, as types, to reuse a style with `**` and keep it checked: `k.PaintKeywords` (`fill`, `fill_opacity`, `stroke`, `stroke_width`, `dash`), `k.ColorKeywords` (`color`), `k.TransformKeywords` (position, rotation, scale, opacity, visibility), `k.StyleKeywords` (all of those), and `k.TextKeywords`, `k.RectKeywords`, `k.ArrowKeywords` for the keywords those objects add.
+- [`k.TextKeywords`](#k-textkeywords): The keyword arguments of shapes and text, as types, to reuse a style with `**` and keep it checked: `k.PaintKeywords` (`fill`, `fill_opacity`, `stroke`, `stroke_width`, `dash`), `k.ColorKeywords` (`color`), `k.TransformKeywords` (position, rotation, scale, opacity, visibility), `k.StyleKeywords` (all of those), and `k.TextKeywords`, `k.RectKeywords`, `k.ArrowKeywords` for the keywords those objects add.
+- [`k.TransformKeywords`](#k-transformkeywords): Props every object has (groups, containers, charts).
 - [`k.Node`](#k-node): Objects are values: creating one does not put it in the scene (use `s.add` or a verb).
 - [`k.reparent`](#k-reparent): Moves an object to another group at the scheduled time, keeping its world position (inside a container, it takes its place in the flow).
 
@@ -17,6 +24,86 @@ Changing objects: animated state changes (`.to()`), instant writes (`.set()`), c
 - [`obj.copy`](#node-copy): Creates a new identity with the same props.
 
 Back to the [reference index](README.md).
+
+<a id="k-stylekeywords"></a>
+### `k.StyleKeywords` *(class)*
+
+```python
+k.StyleKeywords  # namespace of constants
+```
+
+The keyword arguments of shapes and text, as types, to reuse a style with `**` and keep it checked: `k.PaintKeywords` (`fill`, `fill_opacity`, `stroke`, `stroke_width`, `dash`), `k.ColorKeywords` (`color`), `k.TransformKeywords` (position, rotation, scale, opacity, visibility), `k.StyleKeywords` (all of those), and `k.TextKeywords`, `k.RectKeywords`, `k.ArrowKeywords` for the keywords those objects add. A plain `dict(...)` loses the types: annotate the style instead.
+
+**Example:**
+
+```python
+dashed: k.PaintKeywords = {"stroke": k.GRAY, "dash": (8, 8)}
+note: k.TextKeywords = {"color": k.YELLOW, "mono": True}
+
+@k.scene
+def styles(s: k.Scene):
+    s.add(k.Line(start=(-3, 0), end=(3, 0), **dashed), k.Circle(r=1, **dashed))
+    s.add(k.Text("same dash, typed", size=0.4, **note).place(at="top", margin=1))
+    s.wait(0.5)
+```
+
+**See also:** [`obj.to`](#node-to), [`k.Text`](text.md#k-text).
+
+<a id="k-arrowkeywords"></a>
+### `k.ArrowKeywords` *(class)*
+
+```python
+k.ArrowKeywords  # namespace of constants
+```
+
+Documented together with [`k.StyleKeywords`](#k-stylekeywords). The keyword arguments of shapes and text, as types, to reuse a style with `**` and keep it checked: `k.PaintKeywords` (`fill`, `fill_opacity`, `stroke`, `stroke_width`, `dash`), `k.ColorKeywords` (`color`), `k.TransformKeywords` (position, rotation, scale, opacity, visibility), `k.StyleKeywords` (all of those), and `k.TextKeywords`, `k.RectKeywords`, `k.ArrowKeywords` for the keywords those objects add. A plain `dict(...)` loses the types: annotate the style instead.
+
+<a id="k-colorkeywords"></a>
+### `k.ColorKeywords` *(class)*
+
+```python
+k.ColorKeywords  # namespace of constants
+```
+
+Documented together with [`k.StyleKeywords`](#k-stylekeywords). The keyword arguments of shapes and text, as types, to reuse a style with `**` and keep it checked: `k.PaintKeywords` (`fill`, `fill_opacity`, `stroke`, `stroke_width`, `dash`), `k.ColorKeywords` (`color`), `k.TransformKeywords` (position, rotation, scale, opacity, visibility), `k.StyleKeywords` (all of those), and `k.TextKeywords`, `k.RectKeywords`, `k.ArrowKeywords` for the keywords those objects add. A plain `dict(...)` loses the types: annotate the style instead.
+
+<a id="k-paintkeywords"></a>
+### `k.PaintKeywords` *(class)*
+
+```python
+k.PaintKeywords  # namespace of constants
+```
+
+Documented together with [`k.StyleKeywords`](#k-stylekeywords). The keyword arguments of shapes and text, as types, to reuse a style with `**` and keep it checked: `k.PaintKeywords` (`fill`, `fill_opacity`, `stroke`, `stroke_width`, `dash`), `k.ColorKeywords` (`color`), `k.TransformKeywords` (position, rotation, scale, opacity, visibility), `k.StyleKeywords` (all of those), and `k.TextKeywords`, `k.RectKeywords`, `k.ArrowKeywords` for the keywords those objects add. A plain `dict(...)` loses the types: annotate the style instead.
+
+<a id="k-rectkeywords"></a>
+### `k.RectKeywords` *(class)*
+
+```python
+k.RectKeywords  # namespace of constants
+```
+
+Documented together with [`k.StyleKeywords`](#k-stylekeywords). The keyword arguments of shapes and text, as types, to reuse a style with `**` and keep it checked: `k.PaintKeywords` (`fill`, `fill_opacity`, `stroke`, `stroke_width`, `dash`), `k.ColorKeywords` (`color`), `k.TransformKeywords` (position, rotation, scale, opacity, visibility), `k.StyleKeywords` (all of those), and `k.TextKeywords`, `k.RectKeywords`, `k.ArrowKeywords` for the keywords those objects add. A plain `dict(...)` loses the types: annotate the style instead.
+
+<a id="k-textkeywords"></a>
+### `k.TextKeywords` *(class)*
+
+```python
+k.TextKeywords  # namespace of constants
+```
+
+Documented together with [`k.StyleKeywords`](#k-stylekeywords). The keyword arguments of shapes and text, as types, to reuse a style with `**` and keep it checked: `k.PaintKeywords` (`fill`, `fill_opacity`, `stroke`, `stroke_width`, `dash`), `k.ColorKeywords` (`color`), `k.TransformKeywords` (position, rotation, scale, opacity, visibility), `k.StyleKeywords` (all of those), and `k.TextKeywords`, `k.RectKeywords`, `k.ArrowKeywords` for the keywords those objects add. A plain `dict(...)` loses the types: annotate the style instead.
+
+<a id="k-transformkeywords"></a>
+### `k.TransformKeywords` *(class)*
+
+```python
+k.TransformKeywords  # namespace of constants
+```
+
+Props every object has (groups, containers, charts).
+
+Documented together with [`k.StyleKeywords`](#k-stylekeywords).
 
 <a id="k-node"></a>
 ### `k.Node` *(class)*

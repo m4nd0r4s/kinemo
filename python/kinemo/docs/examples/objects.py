@@ -6,6 +6,29 @@ from ..entry import DocEntry
 
 ENTRIES = (
     DocEntry(
+        "k.StyleKeywords",
+        "Object state",
+        "The keyword arguments of shapes and text, as types, to reuse a style with `**` and keep it "
+        "checked: `k.PaintKeywords` (`fill`, `fill_opacity`, `stroke`, `stroke_width`, `dash`), "
+        "`k.ColorKeywords` (`color`), `k.TransformKeywords` (position, rotation, scale, opacity, "
+        "visibility), `k.StyleKeywords` (all of those), and `k.TextKeywords`, `k.RectKeywords`, "
+        "`k.ArrowKeywords` for the keywords those objects add. A plain `dict(...)` loses the types: "
+        "annotate the style instead.",
+        '''
+import kinemo as k
+
+dashed: k.PaintKeywords = {"stroke": k.GRAY, "dash": (8, 8)}
+note: k.TextKeywords = {"color": k.YELLOW, "mono": True}
+
+@k.scene
+def styles(s: k.Scene):
+    s.add(k.Line(start=(-3, 0), end=(3, 0), **dashed), k.Circle(r=1, **dashed))
+    s.add(k.Text("same dash, typed", size=0.4, **note).place(at="top", margin=1))
+    s.wait(0.5)
+''',
+        related=("Node.to", "k.Text"),
+    ),
+    DocEntry(
         "Node.to",
         "Object state",
         "Animated state change: interpolates each prop from its value at the cursor to the target. "

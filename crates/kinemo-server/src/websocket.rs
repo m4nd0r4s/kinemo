@@ -7,10 +7,10 @@ use serde_json::Value as Json;
 use tokio::sync::broadcast::error::RecvError;
 
 use crate::frame_service::frame_at;
-use crate::pick_service::{inspected_object_json, picked_object_json, selection_json};
+use crate::pick_service::{inspected_object_json, picked_object_json, sampled_values_json, selection_json};
 use crate::preview_state::PreviewState;
 use crate::overlay_service::overlay_json;
-use crate::protocol::{frame_message, notice_message, parse_client_message, ClientMessage};
+use crate::protocol::{frame_message, notice_message, parse_client_message, ClientMessage, SAMPLE_ITEMS, SAMPLE_TIMES};
 
 fn text(message: &Json) -> Message {
     Message::Text(message.to_string().into())
@@ -87,6 +87,12 @@ async fn answer(state: &Arc<PreviewState>, body: &str) -> Option<Message> {
                 frame.header["overlay"] = overlay_json(&publication, frame_time);
             }
             Message::Binary(frame_message(&frame.header, &frame.png).into())
+        }
+        ClientMessage::Sample { id, items, times } => {
+            let items: Vec<(u32, String)> = items.into_iter().take(SAMPLE_ITEMS).map(|i| (i.object, i.prop)).collect();
+            let times: Vec<f64> = times.into_iter().take(SAMPLE_TIMES).collect();
+            let values = sampled_values_json(&publication, &items, &times);
+            text(&serde_json::json!({"type": "sample", "id": id, "values": values}))
         }
         ClientMessage::Inspect { object, t, id } => {
             let snapshot = inspected_object_json(&publication, object, t);

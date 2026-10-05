@@ -3,6 +3,7 @@
 "use strict";
 
 import { clipSections } from "./clip_inspector.js";
+import { isWatched, toggleWatch } from "./watch.js";
 import { positionEditor } from "./canvas.js";
 import { pointEditor, propEditor, runsBadge, siteByKey, siteFor, valueEditor } from "./editing.js";
 import { selectObject, clearSelection } from "./selection.js";
@@ -100,7 +101,7 @@ function positionText(src) {
 function renderObject(object, t) {
   const label = object.label || object.name || `${object.kind}#${object.id}`;
   const rows = Object.keys(object.props).sort().map((name) =>
-    el("tr", {}, el("td", { class: "name" }, name), valueCell(object, name), sourceCell(object.prop_sources && object.prop_sources[name]))
+    el("tr", {}, el("td", { class: "name" }, pinButton(label, name), name), valueCell(object, name), sourceCell(object.prop_sources && object.prop_sources[name]))
   );
   const ancestors = (object.ancestors || []).map((a) =>
     el("div", { class: "object-where" }, el("a", { href: "#", onclick: (e) => (e.preventDefault(), selectObject(a.id)) }, a.label || `${a.kind}#${a.id}`), " ", sourceLink(a.span))
@@ -152,6 +153,25 @@ function renderBar(bar) {
     ...bar.objects.map((id) => el("div", { class: "object-where" }, el("a", { href: "#", onclick: (e) => (e.preventDefault(), selectObject(id)) }, objectName(id))))
   );
   show(true);
+}
+
+/** ☆ pins a prop to the Watch list (★ when watched). */
+function pinButton(label, prop) {
+  const watched = isWatched(label, prop);
+  return el(
+    "button",
+    {
+      class: `pin${watched ? " on" : ""}`,
+      title: watched ? "Stop watching" : "Watch this prop (Code tab)",
+      onclick: (e) => {
+        e.stopPropagation();
+        toggleWatch(label, prop);
+        e.currentTarget.classList.toggle("on");
+        e.currentTarget.textContent = e.currentTarget.classList.contains("on") ? "★" : "☆";
+      },
+    },
+    watched ? "★" : "☆"
+  );
 }
 
 function head(label, kind) {

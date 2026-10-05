@@ -38,6 +38,7 @@ const SCRIPTS: &[(&str, &str)] = &[
     ("code_view.js", include_str!("../ui/code_view.js")),
     ("breakpoints.js", include_str!("../ui/breakpoints.js")),
     ("stepping.js", include_str!("../ui/stepping.js")),
+    ("watch.js", include_str!("../ui/watch.js")),
 ];
 
 fn asset(content_type: &'static str, body: &'static str) -> Response {

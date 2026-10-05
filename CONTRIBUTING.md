@@ -29,6 +29,18 @@ and performance budgets (`tests/python/test_performance.py`; `KINEMO_SKIP_PERF=1
 a busy machine). After an intentional change to rendering, regenerate the golden frames with
 `KINEMO_UPDATE_GOLDEN=1 pytest tests/python/test_golden.py` and say so in the pull request.
 
+## Measure performance
+
+`python -m benchmarks` times every stage of the example scenes and of `benchmarks/scenes`
+(heavy text, math, code and mass objects, and a ten-minute episode-like scene): build, the
+lints, one draft and one final frame, rendering on every core and the end-to-end video.
+`--quick` skips the long scene and the videos, names filter the scenes, and `--json` keeps the
+numbers to compare before and after a change. CI runs it on every push to `main` (job summary
+and a `benchmarks-<sha>` artifact).
+
+Inside one frame, `cargo run --release -p kinemo-render --example stage_timings -- scene.json`
+splits the display list from rasterization (`scene.json` from `scene.builder.to_json()`).
+
 ## Docs are generated, and tested
 
 - The API reference and `docs/llms.txt` come from the code. After changing a public symbol, a

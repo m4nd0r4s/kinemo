@@ -371,6 +371,10 @@ to a second group is `K0103`.
 `k.Card(content, title=..., caption=..., accent=...)` puts content on a rounded panel sized to
 it, with a title in the corner and a caption under it; cards in a `k.Row` compare things side by
 side:
+## Callouts and speech bubbles
+
+`k.Callout(text, to=obj)` puts a box with text beside an object, with a tail pointing at it, and
+keeps it there as the object moves:
 
 ```python
 import kinemo as k
@@ -388,6 +392,18 @@ def versus(s: k.Scene):
   corners. The caption is dimmer than the title and keeps a readable contrast.
 - The parts are addressable: `card.content`, `card.title`, `card.box`, `card.caption`,
   `card.accent` (`s.play(k.indicate(card.content))`).
+def bubble(s: k.Scene):
+    fox = k.Circle(r=0.6, fill=k.ORANGE, fill_opacity=1).place(at="center")
+    s.add(fox)
+    s.play(k.fade_in(k.Callout("Wait... the slope changes at every point?", to=fox, max_width=3)))
+    s.play(fox.to(x=-2, unpin=True), duration=1.5)
+    s.wait(0.5)
+```
+
+- `side=` is where the box goes (`top-right` by default, any corner or side), `gap=` how far.
+- `style="bubble"` is a filled balloon with dark text, `"box"` an outlined box, `"line"` text
+  with a leader line; `max_width=` wraps the text.
+- The contrast lint judges the text against the bubble behind it, not the scene background.
 
 ## Changing parents: `k.reparent`
 

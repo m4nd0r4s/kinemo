@@ -470,6 +470,18 @@ def easing(s: k.Scene):
 
 ### Objects
 
+#### `k.Callout(text, *, to, side="top-right", style="bubble", gap=0.45, max_width=4.0, size=0.32, pad=0.22, color=None, **props)`
+A speech bubble or callout beside `to=` (an object), with a tail pointing at it, that follows it: `side=` (`"top-right"`, `"left"`, ...), `style="bubble"` (filled), `"box"` (outlined) or `"line"` (text with a leader line), `gap=`, `max_width=` (the text wraps), `size=`, `color=`. Parts: `callout.box`, `callout.label`, `callout.tail`. See also: `k.Card`, `k.Text`.
+```python
+@k.scene
+def thought(s: k.Scene):
+    fox = k.Circle(r=0.6, fill=k.ORANGE, fill_opacity=1).place(at="center")
+    s.add(fox)
+    s.play(k.fade_in(k.Callout("Wait... the slope changes at every point?", to=fox, max_width=3)))
+    s.play(k.fade_in(k.Callout("the fox", to=fox, side="left", style="line")))
+    s.play(fox.to(x=-2, unpin=True), duration=1.5)
+    s.wait(0.5)
+```
 #### `k.Gauge(*, value=0.0, range=(0.0, 100.0), ticks=5, sweep=240.0, r=1.5, label="", zones=(), readout=True, needle_color=k.RED, digits=0, **props)`
 A dial whose needle follows `value=` (a number or a signal, clamped to `range=`): numbered `ticks=`, `sweep=` degrees (240), `zones=[(lo, hi, color)]`, a readout with `label=` under the hub. `gauge.value` is the signal and `gauge.to(value=...)` animates it. Parts: `track`, `needle`, `hub`, `readout`, `ticks`, `labels`, `zones`. See also: `k.signal`, `k.Arc`.
 ```python

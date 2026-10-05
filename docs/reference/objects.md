@@ -6,6 +6,7 @@ Shapes, groups, images, SVG and mass objects (points, vector fields, stream line
 
 **Contents:**
 
+- [`k.Callout`](#k-callout): A speech bubble or callout beside `to=` (an object), with a tail pointing at it, that follows it: `side=` (`"top-right"`, `"left"`, ...), `style="bubble"` (filled), `"box"` (outlined) or `"line"` (text with a leader line), `gap=`, `max_width=` (the text wraps), `size=`, `color=`.
 - [`k.Gauge`](#k-gauge): A dial whose needle follows `value=` (a number or a signal, clamped to `range=`): numbered `ticks=`, `sweep=` degrees (240), `zones=[(lo, hi, color)]`, a readout with `label=` under the hub.
 - [`k.Card`](#k-card): A panel around `content` (sized to it, or `w=`, `h=`): `title=` in its top-left corner, `caption=` under it, `accent=` a color bar beside the title; `pad=`, `radius=`.
 - [`k.Angle`](#k-angle): Angle markers.
@@ -35,6 +36,62 @@ Shapes, groups, images, SVG and mass objects (points, vector fields, stream line
 - [`k.StreamLines`](#k-streamlines): Streamlines of a field (a `k.VectorField` or a function), integrated with RK4 in the core from `seeds` (a count or points).
 
 Back to the [reference index](README.md).
+
+<a id="k-callout"></a>
+### `k.Callout` *(class)*
+
+```python
+k.Callout(
+    text: str,
+    *,
+    to: Node,
+    side: Side = "top-right",
+    style: Literal['bubble', 'box', 'line'] = "bubble",
+    gap: float = 0.45,
+    max_width: float = 4.0,
+    size: float = 0.32,
+    pad: float = 0.22,
+    color: ColorLike | None = None,
+    **props: Unpack[VisibilityKeywords],
+)
+```
+
+A speech bubble or callout beside `to=` (an object), with a tail pointing at it, that follows it: `side=` (`"top-right"`, `"left"`, ...), `style="bubble"` (filled), `"box"` (outlined) or `"line"` (text with a leader line), `gap=`, `max_width=` (the text wraps), `size=`, `color=`. Parts: `callout.box`, `callout.label`, `callout.tail`.
+
+**Parameters:**
+
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `text` | `str` | required | `k.Callout("Wait, what?", to=folio, side="top-right")`: a box with `text` (wrapped at `max_width=`) beside `to` (an object), with a tail pointing at it, `gap=` away; it follows the target as it moves. |
+| `to` | `Node` | required | A speech bubble or callout beside `to=` (an object), with a tail pointing at it, that follows it: `side=` (`"top-right"`, `"left"`, ...), `style="bubble"` (filled), `"box"` (outlined) or `"line"` (text with a leader line), `gap=`, `max_width=` (the text wraps), `size=`, `color=`. |
+| `side` | `Side` | `"top-right"` | A speech bubble or callout beside `to=` (an object), with a tail pointing at it, that follows it: `side=` (`"top-right"`, `"left"`, ...), `style="bubble"` (filled), `"box"` (outlined) or `"line"` (text with a leader line), `gap=`, `max_width=` (the text wraps), `size=`, `color=`. |
+| `style` | `Literal['bubble', 'box', 'line']` | `"bubble"` | A speech bubble or callout beside `to=` (an object), with a tail pointing at it, that follows it: `side=` (`"top-right"`, `"left"`, ...), `style="bubble"` (filled), `"box"` (outlined) or `"line"` (text with a leader line), `gap=`, `max_width=` (the text wraps), `size=`, `color=`. |
+| `gap` | `float` | `0.45` | A speech bubble or callout beside `to=` (an object), with a tail pointing at it, that follows it: `side=` (`"top-right"`, `"left"`, ...), `style="bubble"` (filled), `"box"` (outlined) or `"line"` (text with a leader line), `gap=`, `max_width=` (the text wraps), `size=`, `color=`. |
+| `max_width` | `float` | `4.0` | A speech bubble or callout beside `to=` (an object), with a tail pointing at it, that follows it: `side=` (`"top-right"`, `"left"`, ...), `style="bubble"` (filled), `"box"` (outlined) or `"line"` (text with a leader line), `gap=`, `max_width=` (the text wraps), `size=`, `color=`. |
+| `size` | `float` | `0.32` | A speech bubble or callout beside `to=` (an object), with a tail pointing at it, that follows it: `side=` (`"top-right"`, `"left"`, ...), `style="bubble"` (filled), `"box"` (outlined) or `"line"` (text with a leader line), `gap=`, `max_width=` (the text wraps), `size=`, `color=`. |
+| `pad` | `float` | `0.22` |   |
+| `color` | `ColorLike \| None` | `None` | A speech bubble or callout beside `to=` (an object), with a tail pointing at it, that follows it: `side=` (`"top-right"`, `"left"`, ...), `style="bubble"` (filled), `"box"` (outlined) or `"line"` (text with a leader line), `gap=`, `max_width=` (the text wraps), `size=`, `color=`. |
+| `**props` | `Unpack[VisibilityKeywords]` | variadic | Keyword arguments (`VisibilityKeywords`): `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`. |
+
+Props inherited from [`k.Node`](object-state.md#k-node): `x`, `y`, `rotate`, `scale`, `scale_x`, `scale_y`, `anchor`, `opacity`, `z`, `visible`, `bleed`.
+
+**Example:**
+
+```python
+@k.scene
+def thought(s: k.Scene):
+    fox = k.Circle(r=0.6, fill=k.ORANGE, fill_opacity=1).place(at="center")
+    s.add(fox)
+    s.play(k.fade_in(k.Callout("Wait... the slope changes at every point?", to=fox, max_width=3)))
+    s.play(k.fade_in(k.Callout("the fox", to=fox, side="left", style="line")))
+    s.play(fox.to(x=-2, unpin=True), duration=1.5)
+    s.wait(0.5)
+```
+
+**See also:** [`k.Card`](#k-card), [`k.Text`](text.md#k-text).
+
+Inherited from [`k.Group`](#k-group): [`children`](#group-children), [`to`](#group-to), [`swap`](#group-swap), [`insert`](#group-insert), [`pop`](#group-pop), [`fit`](#group-fit).
+Inherited from [`k.Node`](object-state.md#k-node): [`set`](object-state.md#node-set), [`unbind`](object-state.md#node-unbind), [`edge`](object-state.md#node-edge), [`age`](object-state.md#node-age), [`entered`](object-state.md#node-entered), [`exited`](object-state.md#node-exited), [`copy`](object-state.md#node-copy), [`place`](object-state.md#node-place), [`to_place`](object-state.md#node-to_place), [`unpin`](object-state.md#node-unpin).
 
 <a id="k-gauge"></a>
 ### `k.Gauge` *(class)*

@@ -7,6 +7,10 @@ Shapes, groups, images, SVG and mass objects (points, vector fields, stream line
 **Contents:**
 
 - [`k.Callout`](#k-callout): A speech bubble or callout beside `to=` (an object), with a tail pointing at it, that follows it: `side=` (`"top-right"`, `"left"`, ...), `style="bubble"` (filled), `"box"` (outlined) or `"line"` (text with a leader line), `gap=`, `max_width=` (the text wraps), `size=`, `color=`.
+- [`k.Gauge`](#k-gauge): A dial whose needle follows `value=` (a number or a signal, clamped to `range=`): numbered `ticks=`, `sweep=` degrees (240), `zones=[(lo, hi, color)]`, a readout with `label=` under the hub.
+- [`k.Card`](#k-card): A panel around `content` (sized to it, or `w=`, `h=`): `title=` in its top-left corner, `caption=` under it, `accent=` a color bar beside the title; `pad=`, `radius=`.
+- [`k.Angle`](#k-angle): Angle markers.
+- [`k.RightAngle`](#k-rightangle): `k.RightAngle(a, vertex, b, size=0.3)`: the square mark of a right angle at `vertex`, along the rays toward `a` and `b`.
 - [`k.Circle`](#k-circle): Circle of radius `r`, centered on its position.
 - [`k.Dot`](#k-dot): Filled dot (default radius 0.08), with no stroke.
 - [`k.Ellipse`](#k-ellipse): Ellipse of width `w` and height `h`, centered on its position.
@@ -84,7 +88,247 @@ def thought(s: k.Scene):
     s.wait(0.5)
 ```
 
-**See also:** `k.Card`, [`k.Text`](text.md#k-text).
+**See also:** [`k.Card`](#k-card), [`k.Text`](text.md#k-text).
+
+Inherited from [`k.Group`](#k-group): [`children`](#group-children), [`to`](#group-to), [`swap`](#group-swap), [`insert`](#group-insert), [`pop`](#group-pop), [`fit`](#group-fit).
+Inherited from [`k.Node`](object-state.md#k-node): [`set`](object-state.md#node-set), [`unbind`](object-state.md#node-unbind), [`edge`](object-state.md#node-edge), [`age`](object-state.md#node-age), [`entered`](object-state.md#node-entered), [`exited`](object-state.md#node-exited), [`copy`](object-state.md#node-copy), [`place`](object-state.md#node-place), [`to_place`](object-state.md#node-to_place), [`unpin`](object-state.md#node-unpin).
+
+<a id="k-gauge"></a>
+### `k.Gauge` *(class)*
+
+```python
+k.Gauge(
+    *,
+    value: float | Signal[float] = 0.0,
+    range: tuple[float, float] = (0.0, 100.0),
+    ticks: int = 5,
+    sweep: float = 240.0,
+    r: float = 1.5,
+    label: str = "",
+    zones: Sequence[tuple[float, float, ColorLike]] = (),
+    readout: bool = True,
+    needle_color: ColorLike = k.RED,
+    digits: int = 0,
+    **props: Unpack[TransformKeywords],
+)
+```
+
+A dial whose needle follows `value=` (a number or a signal, clamped to `range=`): numbered `ticks=`, `sweep=` degrees (240), `zones=[(lo, hi, color)]`, a readout with `label=` under the hub. `gauge.value` is the signal and `gauge.to(value=...)` animates it. Parts: `track`, `needle`, `hub`, `readout`, `ticks`, `labels`, `zones`.
+
+**Parameters:**
+
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `value` | `float \| Signal[float]` | `0.0` | A dial whose needle follows `value=` (a number or a signal, clamped to `range=`): numbered `ticks=`, `sweep=` degrees (240), `zones=[(lo, hi, color)]`, a readout with `label=` under the hub. |
+| `range` | `tuple[float, float]` | `(0.0, 100.0)` | A dial whose needle follows `value=` (a number or a signal, clamped to `range=`): numbered `ticks=`, `sweep=` degrees (240), `zones=[(lo, hi, color)]`, a readout with `label=` under the hub. |
+| `ticks` | `int` | `5` | A dial whose needle follows `value=` (a number or a signal, clamped to `range=`): numbered `ticks=`, `sweep=` degrees (240), `zones=[(lo, hi, color)]`, a readout with `label=` under the hub. |
+| `sweep` | `float` | `240.0` | A dial whose needle follows `value=` (a number or a signal, clamped to `range=`): numbered `ticks=`, `sweep=` degrees (240), `zones=[(lo, hi, color)]`, a readout with `label=` under the hub. |
+| `r` | `float` | `1.5` |   |
+| `label` | `str` | `""` | A dial whose needle follows `value=` (a number or a signal, clamped to `range=`): numbered `ticks=`, `sweep=` degrees (240), `zones=[(lo, hi, color)]`, a readout with `label=` under the hub. |
+| `zones` | `Sequence[tuple[float, float, ColorLike]]` | `()` | A dial whose needle follows `value=` (a number or a signal, clamped to `range=`): numbered `ticks=`, `sweep=` degrees (240), `zones=[(lo, hi, color)]`, a readout with `label=` under the hub. |
+| `readout` | `bool` | `True` | Parts: `track`, `needle`, `hub`, `readout`, `ticks`, `labels`, `zones`. |
+| `needle_color` | `ColorLike` | `k.RED` |   |
+| `digits` | `int` | `0` |   |
+| `**props` | `Unpack[TransformKeywords]` | variadic | Keyword arguments (`TransformKeywords`): `name: str \| None`, `key: str \| None`, `x: FloatVal`, `y: FloatVal`, `position: VecVal`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`. |
+
+Props inherited from [`k.Node`](object-state.md#k-node): `x`, `y`, `rotate`, `scale`, `scale_x`, `scale_y`, `anchor`, `opacity`, `z`, `visible`, `bleed`.
+
+**Example:**
+
+```python
+@k.scene
+def speedometer(s: k.Scene):
+    gauge = k.Gauge(value=20, range=(0, 120), ticks=6, label="km/h", zones=[(90, 120, k.RED)]).place(at="center")
+    s.play(k.fade_in(gauge))
+    s.play(gauge.to(value=100), duration=2)
+    s.wait(0.5)
+```
+
+**See also:** [`k.signal`](reactive.md#k-signal), [`k.Arc`](#k-arc).
+
+**Members:**
+
+- [`to`](#gauge-to): `gauge.to(value=80)`: the needle (and readout) move to a new value; other props as for any group.
+
+Inherited from [`k.Group`](#k-group): [`children`](#group-children), [`swap`](#group-swap), [`insert`](#group-insert), [`pop`](#group-pop), [`fit`](#group-fit).
+Inherited from [`k.Node`](object-state.md#k-node): [`set`](object-state.md#node-set), [`unbind`](object-state.md#node-unbind), [`edge`](object-state.md#node-edge), [`age`](object-state.md#node-age), [`entered`](object-state.md#node-entered), [`exited`](object-state.md#node-exited), [`copy`](object-state.md#node-copy), [`place`](object-state.md#node-place), [`to_place`](object-state.md#node-to_place), [`unpin`](object-state.md#node-unpin).
+
+<a id="gauge-to"></a>
+#### `k.Gauge.to` *(method)*
+
+```python
+gauge.to(
+    *,
+    value: float | None = None,
+    duration: float | None = None,
+    ease: EaseLike | None = None,
+    **kw: object,
+) -> Animation
+```
+
+`gauge.to(value=80)`: the needle (and readout) move to a new value; other props as for any group.
+
+**Parameters:**
+
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `value` | `float \| None` | `None` | `gauge.to(value=80)`: the needle (and readout) move to a new value; other props as for any group. |
+| `duration` | `float \| None` | `None` |   |
+| `ease` | `EaseLike \| None` | `None` |   |
+| `**kw` | `object` | variadic |   |
+
+<a id="k-card"></a>
+### `k.Card` *(class)*
+
+```python
+k.Card(
+    content: Node | None = None,
+    *,
+    title: str | None = None,
+    caption: str | None = None,
+    accent: ColorLike | None = None,
+    w: float | None = None,
+    h: float | None = None,
+    pad: float = 0.35,
+    radius: float = 0.18,
+    title_size: float = 0.32,
+    caption_size: float = 0.28,
+    **props: Unpack[TransformKeywords],
+)
+```
+
+A panel around `content` (sized to it, or `w=`, `h=`): `title=` in its top-left corner, `caption=` under it, `accent=` a color bar beside the title; `pad=`, `radius=`. Cards line up in a `k.Row` for side-by-side comparisons. Parts: `card.box`, `card.content`, `card.title`, `card.caption`, `card.accent`.
+
+**Parameters:**
+
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `content` | `Node \| None` | `None` | A panel around `content` (sized to it, or `w=`, `h=`): `title=` in its top-left corner, `caption=` under it, `accent=` a color bar beside the title; `pad=`, `radius=`. |
+| `title` | `str \| None` | `None` | A panel around `content` (sized to it, or `w=`, `h=`): `title=` in its top-left corner, `caption=` under it, `accent=` a color bar beside the title; `pad=`, `radius=`. |
+| `caption` | `str \| None` | `None` | A panel around `content` (sized to it, or `w=`, `h=`): `title=` in its top-left corner, `caption=` under it, `accent=` a color bar beside the title; `pad=`, `radius=`. |
+| `accent` | `ColorLike \| None` | `None` | A panel around `content` (sized to it, or `w=`, `h=`): `title=` in its top-left corner, `caption=` under it, `accent=` a color bar beside the title; `pad=`, `radius=`. |
+| `w` | `float \| None` | `None` | A panel around `content` (sized to it, or `w=`, `h=`): `title=` in its top-left corner, `caption=` under it, `accent=` a color bar beside the title; `pad=`, `radius=`. |
+| `h` | `float \| None` | `None` | A panel around `content` (sized to it, or `w=`, `h=`): `title=` in its top-left corner, `caption=` under it, `accent=` a color bar beside the title; `pad=`, `radius=`. |
+| `pad` | `float` | `0.35` | A panel around `content` (sized to it, or `w=`, `h=`): `title=` in its top-left corner, `caption=` under it, `accent=` a color bar beside the title; `pad=`, `radius=`. |
+| `radius` | `float` | `0.18` | A panel around `content` (sized to it, or `w=`, `h=`): `title=` in its top-left corner, `caption=` under it, `accent=` a color bar beside the title; `pad=`, `radius=`. |
+| `title_size` | `float` | `0.32` |   |
+| `caption_size` | `float` | `0.28` |   |
+| `**props` | `Unpack[TransformKeywords]` | variadic | Keyword arguments (`TransformKeywords`): `name: str \| None`, `key: str \| None`, `x: FloatVal`, `y: FloatVal`, `position: VecVal`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`. |
+
+Props inherited from [`k.Node`](object-state.md#k-node): `x`, `y`, `rotate`, `scale`, `scale_x`, `scale_y`, `anchor`, `opacity`, `z`, `visible`, `bleed`.
+
+**Example:**
+
+```python
+@k.scene
+def compare(s: k.Scene):
+    rocket = k.Card(k.Triangle.right(2, 2, scale=0.6), title="Rocket", caption="pushes the gas down", accent=k.ORANGE)
+    gas = k.Card(k.Circle(r=0.6, fill=k.BLUE, fill_opacity=0.6), title="Gas", caption="pushes the rocket up", accent=k.BLUE)
+    s.play(k.fade_in(k.Row(rocket, gas, gap=1).place(at="center")))
+    s.play(k.indicate(gas.content))
+    s.wait(0.5)
+```
+
+**See also:** [`k.Row`](layout.md#k-row), [`k.RoundedRect`](#k-roundedrect).
+
+Inherited from [`k.Group`](#k-group): [`children`](#group-children), [`to`](#group-to), [`swap`](#group-swap), [`insert`](#group-insert), [`pop`](#group-pop), [`fit`](#group-fit).
+Inherited from [`k.Node`](object-state.md#k-node): [`set`](object-state.md#node-set), [`unbind`](object-state.md#node-unbind), [`edge`](object-state.md#node-edge), [`age`](object-state.md#node-age), [`entered`](object-state.md#node-entered), [`exited`](object-state.md#node-exited), [`copy`](object-state.md#node-copy), [`place`](object-state.md#node-place), [`to_place`](object-state.md#node-to_place), [`unpin`](object-state.md#node-unpin).
+
+<a id="k-angle"></a>
+### `k.Angle` *(class)*
+
+```python
+k.Angle(
+    a: VecVal,
+    vertex: VecVal,
+    b: VecVal,
+    *,
+    r: float = 0.5,
+    label: str | None = None,
+    show_value: bool = False,
+    unit: Literal['deg', 'rad'] = "deg",
+    color: ColorLike = k.YELLOW,
+    stroke_width: float = 3.0,
+    label_size: float = 0.34,
+    **props: Unpack[VisibilityKeywords],
+)
+```
+
+Angle markers. `k.Angle(a, vertex, b, r=0.5)` draws the arc of the smaller angle between the rays vertex→a and vertex→b, with `label="θ"` beside it or `show_value=True` for its measure (`unit="deg"` or `"rad"`); `k.RightAngle(a, vertex, b, size=0.3)` draws the square mark. Points are tuples or reactive points (`dot.world.center`, a `k.vec` of signals), so the marker follows an angle as it opens. Points are world coordinates: use `poly.sides` (not `poly.vertices`) for a polygon's corners.
+
+**Parameters:**
+
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `a` | `VecVal` | required |   |
+| `vertex` | `VecVal` | required |   |
+| `b` | `VecVal` | required |   |
+| `r` | `float` | `0.5` | `k.Angle(a, vertex, b, r=0.5)` draws the arc of the smaller angle between the rays vertex→a and vertex→b, with `label="θ"` beside it or `show_value=True` for its measure (`unit="deg"` or `"rad"`); `k.RightAngle(a, vertex, b, size=0.3)` draws the square mark. |
+| `label` | `str \| None` | `None` | `k.Angle(a, vertex, b, r=0.5)` draws the arc of the smaller angle between the rays vertex→a and vertex→b, with `label="θ"` beside it or `show_value=True` for its measure (`unit="deg"` or `"rad"`); `k.RightAngle(a, vertex, b, size=0.3)` draws the square mark. |
+| `show_value` | `bool` | `False` | `k.Angle(a, vertex, b, r=0.5)` draws the arc of the smaller angle between the rays vertex→a and vertex→b, with `label="θ"` beside it or `show_value=True` for its measure (`unit="deg"` or `"rad"`); `k.RightAngle(a, vertex, b, size=0.3)` draws the square mark. |
+| `unit` | `Literal['deg', 'rad']` | `"deg"` | `k.Angle(a, vertex, b, r=0.5)` draws the arc of the smaller angle between the rays vertex→a and vertex→b, with `label="θ"` beside it or `show_value=True` for its measure (`unit="deg"` or `"rad"`); `k.RightAngle(a, vertex, b, size=0.3)` draws the square mark. |
+| `color` | `ColorLike` | `k.YELLOW` |   |
+| `stroke_width` | `float` | `3.0` |   |
+| `label_size` | `float` | `0.34` |   |
+| `**props` | `Unpack[VisibilityKeywords]` | variadic | Keyword arguments (`VisibilityKeywords`): `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`. |
+
+Props inherited from [`k.Node`](object-state.md#k-node): `x`, `y`, `rotate`, `scale`, `scale_x`, `scale_y`, `anchor`, `opacity`, `z`, `visible`, `bleed`.
+
+**Example:**
+
+```python
+@k.scene
+def opening(s: k.Scene):
+    deg = k.signal(30.0)
+    origin = (-1.5, -1.0)
+    tip = k.vec(-1.5 + 3 * k.cos(deg * k.pi / 180), -1 + 3 * k.sin(deg * k.pi / 180))
+    s.add(k.Line(start=origin, end=(1.5, -1.0)), k.Line(start=origin, end=tip))
+    theta = k.Angle((1.5, -1.0), origin, tip, r=0.8, label="θ", show_value=True)
+    s.play(k.draw(theta))
+    s.play(deg.to(90), duration=2)
+    corner = k.RightAngle((1.5, -1.0), origin, tip)
+    s.play(k.fade_out(theta), k.draw(corner))
+    s.wait(0.5)
+```
+
+**See also:** [`k.Arc`](#k-arc), [`k.vec`](native-blocks.md#k-vec).
+
+Inherited from [`k.Group`](#k-group): [`children`](#group-children), [`to`](#group-to), [`swap`](#group-swap), [`insert`](#group-insert), [`pop`](#group-pop), [`fit`](#group-fit).
+Inherited from [`k.Node`](object-state.md#k-node): [`set`](object-state.md#node-set), [`unbind`](object-state.md#node-unbind), [`edge`](object-state.md#node-edge), [`age`](object-state.md#node-age), [`entered`](object-state.md#node-entered), [`exited`](object-state.md#node-exited), [`copy`](object-state.md#node-copy), [`place`](object-state.md#node-place), [`to_place`](object-state.md#node-to_place), [`unpin`](object-state.md#node-unpin).
+
+<a id="k-rightangle"></a>
+### `k.RightAngle` *(class)*
+
+```python
+k.RightAngle(
+    a: VecVal,
+    vertex: VecVal,
+    b: VecVal,
+    *,
+    size: float = 0.3,
+    color: ColorLike = k.YELLOW,
+    stroke_width: float = 3.0,
+    **props: Unpack[VisibilityKeywords],
+)
+```
+
+`k.RightAngle(a, vertex, b, size=0.3)`: the square mark of a right angle at `vertex`, along the rays toward `a` and `b`. Parts: `mark.lines`.
+
+Documented together with [`k.Angle`](#k-angle).
+
+**Parameters:**
+
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `a` | `VecVal` | required | `k.RightAngle(a, vertex, b, size=0.3)`: the square mark of a right angle at `vertex`, along the rays toward `a` and `b`. |
+| `vertex` | `VecVal` | required | `k.RightAngle(a, vertex, b, size=0.3)`: the square mark of a right angle at `vertex`, along the rays toward `a` and `b`. |
+| `b` | `VecVal` | required | `k.RightAngle(a, vertex, b, size=0.3)`: the square mark of a right angle at `vertex`, along the rays toward `a` and `b`. |
+| `size` | `float` | `0.3` | `k.RightAngle(a, vertex, b, size=0.3)`: the square mark of a right angle at `vertex`, along the rays toward `a` and `b`. |
+| `color` | `ColorLike` | `k.YELLOW` |   |
+| `stroke_width` | `float` | `3.0` |   |
+| `**props` | `Unpack[VisibilityKeywords]` | variadic | Keyword arguments (`VisibilityKeywords`): `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`. |
+
+Props inherited from [`k.Node`](object-state.md#k-node): `x`, `y`, `rotate`, `scale`, `scale_x`, `scale_y`, `anchor`, `opacity`, `z`, `visible`, `bleed`.
 
 Inherited from [`k.Group`](#k-group): [`children`](#group-children), [`to`](#group-to), [`swap`](#group-swap), [`insert`](#group-insert), [`pop`](#group-pop), [`fit`](#group-fit).
 Inherited from [`k.Node`](object-state.md#k-node): [`set`](object-state.md#node-set), [`unbind`](object-state.md#node-unbind), [`edge`](object-state.md#node-edge), [`age`](object-state.md#node-age), [`entered`](object-state.md#node-entered), [`exited`](object-state.md#node-exited), [`copy`](object-state.md#node-copy), [`place`](object-state.md#node-place), [`to_place`](object-state.md#node-to_place), [`unpin`](object-state.md#node-unpin).

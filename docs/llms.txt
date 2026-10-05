@@ -471,7 +471,7 @@ def easing(s: k.Scene):
 ### Objects
 
 #### `k.Callout(text, *, to, side="top-right", style="bubble", gap=0.45, max_width=4.0, size=0.32, pad=0.22, color=None, **props)`
-A speech bubble or callout beside `to=` (an object), with a tail pointing at it, that follows it: `side=` (`"top-right"`, `"left"`, ...), `style="bubble"` (filled), `"box"` (outlined) or `"line"` (text with a leader line), `gap=`, `max_width=` (the text wraps), `size=`, `color=`. Parts: `callout.box`, `callout.label`, `callout.tail`. See also: `k.Text`.
+A speech bubble or callout beside `to=` (an object), with a tail pointing at it, that follows it: `side=` (`"top-right"`, `"left"`, ...), `style="bubble"` (filled), `"box"` (outlined) or `"line"` (text with a leader line), `gap=`, `max_width=` (the text wraps), `size=`, `color=`. Parts: `callout.box`, `callout.label`, `callout.tail`. See also: `k.Card`, `k.Text`.
 ```python
 @k.scene
 def thought(s: k.Scene):
@@ -480,6 +480,43 @@ def thought(s: k.Scene):
     s.play(k.fade_in(k.Callout("Wait... the slope changes at every point?", to=fox, max_width=3)))
     s.play(k.fade_in(k.Callout("the fox", to=fox, side="left", style="line")))
     s.play(fox.to(x=-2, unpin=True), duration=1.5)
+    s.wait(0.5)
+```
+#### `k.Gauge(*, value=0.0, range=(0.0, 100.0), ticks=5, sweep=240.0, r=1.5, label="", zones=(), readout=True, needle_color=k.RED, digits=0, **props)`
+A dial whose needle follows `value=` (a number or a signal, clamped to `range=`): numbered `ticks=`, `sweep=` degrees (240), `zones=[(lo, hi, color)]`, a readout with `label=` under the hub. `gauge.value` is the signal and `gauge.to(value=...)` animates it. Parts: `track`, `needle`, `hub`, `readout`, `ticks`, `labels`, `zones`. See also: `k.signal`, `k.Arc`.
+```python
+@k.scene
+def speedometer(s: k.Scene):
+    gauge = k.Gauge(value=20, range=(0, 120), ticks=6, label="km/h", zones=[(90, 120, k.RED)]).place(at="center")
+    s.play(k.fade_in(gauge))
+    s.play(gauge.to(value=100), duration=2)
+    s.wait(0.5)
+```
+#### `k.Card(content=None, *, title=None, caption=None, accent=None, w=None, h=None, pad=0.35, radius=0.18, title_size=0.32, caption_size=0.28, **props)`
+A panel around `content` (sized to it, or `w=`, `h=`): `title=` in its top-left corner, `caption=` under it, `accent=` a color bar beside the title; `pad=`, `radius=`. Cards line up in a `k.Row` for side-by-side comparisons. Parts: `card.box`, `card.content`, `card.title`, `card.caption`, `card.accent`. See also: `k.Row`, `k.RoundedRect`.
+```python
+@k.scene
+def compare(s: k.Scene):
+    rocket = k.Card(k.Triangle.right(2, 2, scale=0.6), title="Rocket", caption="pushes the gas down", accent=k.ORANGE)
+    gas = k.Card(k.Circle(r=0.6, fill=k.BLUE, fill_opacity=0.6), title="Gas", caption="pushes the rocket up", accent=k.BLUE)
+    s.play(k.fade_in(k.Row(rocket, gas, gap=1).place(at="center")))
+    s.play(k.indicate(gas.content))
+    s.wait(0.5)
+```
+#### `k.Angle(a, vertex, b, *, r=0.5, label=None, show_value=False, unit="deg", color=k.YELLOW, stroke_width=3.0, label_size=0.34, **props)`
+Angle markers. `k.Angle(a, vertex, b, r=0.5)` draws the arc of the smaller angle between the rays vertex→a and vertex→b, with `label="θ"` beside it or `show_value=True` for its measure (`unit="deg"` or `"rad"`); `k.RightAngle(a, vertex, b, size=0.3)` draws the square mark. Points are tuples or reactive points (`dot.world.center`, a `k.vec` of signals), so the marker follows an angle as it opens. Points are world coordinates: use `poly.sides` (not `poly.vertices`) for a polygon's corners. See also: `k.Arc`, `k.vec`.
+```python
+@k.scene
+def opening(s: k.Scene):
+    deg = k.signal(30.0)
+    origin = (-1.5, -1.0)
+    tip = k.vec(-1.5 + 3 * k.cos(deg * k.pi / 180), -1 + 3 * k.sin(deg * k.pi / 180))
+    s.add(k.Line(start=origin, end=(1.5, -1.0)), k.Line(start=origin, end=tip))
+    theta = k.Angle((1.5, -1.0), origin, tip, r=0.8, label="θ", show_value=True)
+    s.play(k.draw(theta))
+    s.play(deg.to(90), duration=2)
+    corner = k.RightAngle((1.5, -1.0), origin, tip)
+    s.play(k.fade_out(theta), k.draw(corner))
     s.wait(0.5)
 ```
 #### `k.Circle(r=1.0, **props)`
@@ -718,6 +755,20 @@ def add(a, b):
 def code_block(s: k.Scene):
     code = k.Code(SRC, lang="python", line_numbers=True).place(at="center")
     s.play(k.write(code))
+    s.wait(0.5)
+```
+#### `k.underline(target, *, pad=0.08, color=k.YELLOW, stroke_width=4.0, **props) -> Line`
+Annotation marks on any object or part of a text or formula (`eq["dx"]`): `k.underline(target)`, `k.box(target)`, `k.encircle(target)`, `k.strike(target)` (crossed out) and `k.cross(target)` (an X). Each is an ordinary object bound to the target's box in world coordinates, so it follows the target; it enters with `k.draw` and leaves with `k.fade_out`. `pad=` (or `overhang=` for `strike`), `color=` and `stroke_width=`. See also: `k.Math`, `k.draw`, `k.fade_out`.
+```python
+@k.scene
+def marks(s: k.Scene):
+    eq = k.Math(r"a^2 + b^2 = c^2", size=0.8).place(at="center")
+    s.add(eq)
+    s.play(k.draw(k.box(eq["c^2"])))
+    s.play(k.draw(k.underline(eq["a^2"])), k.draw(k.encircle(eq["b^2"])))
+    wrong = k.Text("a + b = c", size=0.5).place(below=eq, gap=1)
+    s.play(k.write(wrong))
+    s.play(k.draw(k.cross(wrong)))
     s.wait(0.5)
 ```
 #### `k.Terminal(*, title="", prompt="$ ", lang="bash", width=8.0, rows=8, size=0.28, theme="auto", chrome=True, caret=True, **props)`
@@ -1022,6 +1073,39 @@ def point(s: k.Scene):
     label = k.Text("(3, 9)", size=0.35).place(right_of=pin, gap=0.2)
     s.play(k.draw(ax))
     s.play(k.fade_in(pin, label))
+```
+#### `ax.add(*objs, enter_with_axes=True)`
+Puts objects inside the axes, in its own coordinates, so they follow zooms like plots do; place them with `position=ax.local_point(x, y)` or `ax.origin()`. They enter with the axes; with `enter_with_axes=False` they stay hidden until a verb brings them in. See also: `ax.origin`, `ax.in_view`, `ax.point`.
+```python
+@k.scene
+def marker(s: k.Scene):
+    ax = k.Axes(x=(0, 10, 2), y=(0, 10, 2)).place(at="center")
+    peak = k.Dot(r=0.12, fill=k.RED, position=ax.local_point(4, 8))
+    ax.add(peak, enter_with_axes=False)
+    s.play(k.draw(ax))
+    s.play(k.fade_in(peak))
+    s.play(ax.zoom_to(x=(2, 6), y=(4, 10)), duration=1.5)
+```
+#### `ax.origin() -> Expr[Vec]`
+Where the two axes cross, in the axes' own coordinates: the data origin clamped to the visible ranges. Reactive, so it moves with zooms. See also: `ax.add`, `k.Axes`.
+```python
+@k.scene
+def origin(s: k.Scene):
+    ax = k.Axes(x=(-2, 8, 2), y=(-2, 8, 2)).place(at="center")
+    ax.add(k.Dot(r=0.1, fill=k.YELLOW, position=ax.origin()))
+    s.play(k.draw(ax))
+    s.play(ax.zoom_to(x=(2, 8)), duration=1.5)
+```
+#### `ax.in_view(*, x=None, y=None) -> Expr[bool]`
+Whether a data value is inside the visible ranges, as a reactive bool for `visible=`: `ax.in_view(x=3)`, `ax.in_view(y=5)` or both. Markers hide when a zoom leaves them out. See also: `ax.add`, `ax.zoom_to`.
+```python
+@k.scene
+def in_view(s: k.Scene):
+    ax = k.Axes(x=(0, 10, 2), y=(0, 10, 2)).place(at="center")
+    tag = k.Text("x = 8", size=0.3, position=ax.local_point(8, 9), visible=ax.in_view(x=8))
+    ax.add(tag)
+    s.play(k.draw(ax))
+    s.play(ax.zoom_to(x=(0, 5)), duration=1.5)
 ```
 #### `curve.point_at(x) -> Expr[Vec]`
 World position of the curve at `x`; reactive when `x` is a signal. With `place(at=...)` it makes a dot slide along the curve. `curve.value_at(x)` gives the y value. See also: `curve.tangent_at`, `curve.slope_at`, `ax.point`.

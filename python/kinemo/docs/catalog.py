@@ -56,12 +56,17 @@ DOCUMENTED_BY: dict[str, str] = {
     "Color": "k.rgb",
     "Vec": "k.vec",
     "Movie": "k.movie",
+    "RightAngle": "k.Angle",
     "PaintKeywords": "k.StyleKeywords",
     "ColorKeywords": "k.StyleKeywords",
     "TransformKeywords": "k.StyleKeywords",
     "TextKeywords": "k.StyleKeywords",
     "RectKeywords": "k.StyleKeywords",
     "ArrowKeywords": "k.StyleKeywords",
+    "box": "k.underline",
+    "encircle": "k.underline",
+    "strike": "k.underline",
+    "cross": "k.underline",
 }
 
 #: Public names that are not part of what a scene author writes, and why.

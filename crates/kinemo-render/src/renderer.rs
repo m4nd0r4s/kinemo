@@ -110,6 +110,34 @@ impl From<EncodeError> for RenderError {
     }
 }
 
+/// Renders `count` frames at `0, 1/fps, 2/fps, ...` as numbered PNG files (`00000.png`, ...)
+/// in `folder`, in parallel: rendering, PNG encoding and writing all run on every core.
+/// `progress(done, total)` is called as files are written (from any thread).
+pub fn render_png_frames(
+    scene: &Scene,
+    folder: &Path,
+    count: usize,
+    fps: f64,
+    opts: &RenderOptions,
+    progress: &(dyn Fn(usize, usize) + Sync),
+) -> std::io::Result<()> {
+    std::fs::create_dir_all(folder)?;
+    let index = Arc::new(TimelineIndex::new(scene));
+    let done = std::sync::atomic::AtomicUsize::new(0);
+    (0..count).into_par_iter().try_for_each_init(
+        || Evaluator::with_index(scene, index.clone()),
+        |evaluator, i| {
+            evaluator.clear();
+            let layout = Layout::new(evaluator);
+            let list = display_list_with(&layout, i as f64 / fps, opts.size(), opts.transparent);
+            let png = crate::raster::encode_png(&rasterize(&list, opts.antialias));
+            std::fs::write(folder.join(format!("{i:05}.png")), png)?;
+            progress(done.fetch_add(1, std::sync::atomic::Ordering::Relaxed) + 1, count);
+            Ok(())
+        },
+    )
+}
+
 /// Renders the whole scene to a video file. `progress(done, total)` is called per frame.
 pub fn render_video(
     scene: &Scene,

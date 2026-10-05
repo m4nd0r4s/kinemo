@@ -9,6 +9,7 @@ Axes, number lines, polar axes, plots and data charts.
 - [`k.PolarAxes`](#k-polaraxes): Polar axes (rings and spokes): `r=(0, r_max, step)`, `radius=` in units, `spokes=`.
 - [`k.Axes`](#k-axes): Cartesian axes with ticks, labels and an optional grid: `x=(min, max, step)`, `y=(min, max)`, `labels=("x", "y")`, `width=`/`height=` in units.
 - [`k.NumberLine`](#k-numberline): A horizontal number line: a `k.Axes` with only the x axis.
+- [`k.NumberPlane`](#k-numberplane): A coordinate grid with axes and the basis vectors î (green) and ĵ (red): `x=(min, max, step)`, `y=...`, `unit=` scene units per step.
 - [`Plot`](#plot): A curve `y = fn(x)` of an axes.
 - [`k.BarChart`](#k-barchart): Bar chart from a table: `x=` is the category column, `y=` the value column and `key=` identifies each bar.
 - [`k.LineChart`](#k-linechart): A `k.Axes` with one line per `y=` column (one or several), connecting the table's points in `x=` order.
@@ -17,6 +18,8 @@ Axes, number lines, polar axes, plots and data charts.
 **Methods in this area:**
 
 - [`ax.parametric`](#axes-parametric): Parametric curve `(fx(t), fy(t))` for `t=(start, end)`; clipped to the visible ranges.
+- [`numberplane.apply`](#numberplane-apply): Animated transformation of the plane, composed after the ones already applied: a matrix `[[a, b], [c, d]]` sends î to `(a, c)` and ĵ to `(b, d)`; a function `(x, y) -> (x2, y2)` bends the grid for non-linear maps.
+- [`numberplane.polygon`](#numberplane-polygon): A filled shape with vertices in data coordinates that deforms with the plane.
 - [`ax.plot`](#axes-plot): Draws the curve `y = fn(x)` on the axes, with adaptive sampling.
 - [`ax.area`](#axes-area): Filled region under a curve (down to the x axis) or between two curves (`between=`).
 - [`ax.vline`](#axes-vline): Vertical line on the axes at `at=` (accepts a signal: the line moves with it); `style="dashed"` makes it dashed.
@@ -752,6 +755,220 @@ def number_line(s: k.Scene):
 Inherited from [`k.Axes`](#k-axes): [`map_x`](#axes-map_x), [`map_y`](#axes-map_y), [`local_point`](#axes-local_point), [`point`](#axes-point), [`add`](#axes-add), [`origin`](#axes-origin), [`in_view`](#axes-in_view), [`plot`](#axes-plot), [`area`](#axes-area), [`vline`](#axes-vline), [`hline`](#axes-hline), [`scatter`](#axes-scatter), [`parametric`](#axes-parametric), [`bars`](#axes-bars), [`zoom_to`](#axes-zoom_to).
 Inherited from [`k.Group`](objects.md#k-group): [`children`](objects.md#group-children), [`to`](objects.md#group-to), [`swap`](objects.md#group-swap), [`insert`](objects.md#group-insert), [`pop`](objects.md#group-pop), [`fit`](objects.md#group-fit).
 Inherited from [`k.Node`](object-state.md#k-node): [`set`](object-state.md#node-set), [`unbind`](object-state.md#node-unbind), [`edge`](object-state.md#node-edge), [`age`](object-state.md#node-age), [`entered`](object-state.md#node-entered), [`exited`](object-state.md#node-exited), [`copy`](object-state.md#node-copy), [`place`](object-state.md#node-place), [`to_place`](object-state.md#node-to_place), [`unpin`](object-state.md#node-unpin).
+
+<a id="k-numberplane"></a>
+### `k.NumberPlane` *(class)*
+
+```python
+k.NumberPlane(
+    x: Sequence[float] = (-7, 7, 1),
+    y: Sequence[float] = (-4, 4, 1),
+    *,
+    unit: float = 1.0,
+    basis: bool = True,
+    samples: int = 24,
+    color: ColorLike | None = None,
+    **props: Unpack[UnplacedKeywords],
+)
+```
+
+A coordinate grid with axes and the basis vectors î (green) and ĵ (red): `x=(min, max, step)`, `y=...`, `unit=` scene units per step. `plane.apply(matrix)` deforms it; `plane.vector(x, y)`, `plane.dot(x, y)`, `plane.polygon(points)` and `plane.add(obj, at=(x, y))` put objects on it that the transformations carry.
+
+**Parameters:**
+
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `x` | `Sequence[float]` | `(-7, 7, 1)` | A coordinate grid with axes and the basis vectors î (green) and ĵ (red): `x=(min, max, step)`, `y=...`, `unit=` scene units per step. |
+| `y` | `Sequence[float]` | `(-4, 4, 1)` | A coordinate grid with axes and the basis vectors î (green) and ĵ (red): `x=(min, max, step)`, `y=...`, `unit=` scene units per step. |
+| `unit` | `float` | `1.0` | A coordinate grid with axes and the basis vectors î (green) and ĵ (red): `x=(min, max, step)`, `y=...`, `unit=` scene units per step. |
+| `basis` | `bool` | `True` |   |
+| `samples` | `int` | `24` |   |
+| `color` | `ColorLike \| None` | `None` |   |
+| `**props` | `Unpack[UnplacedKeywords]` | variadic | Keyword arguments (`UnplacedKeywords`): `name: str \| None`, `key: str \| None`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`. |
+
+Props inherited from [`k.Node`](object-state.md#k-node): `x`, `y`, `rotate`, `scale`, `scale_x`, `scale_y`, `anchor`, `opacity`, `z`, `visible`, `bleed`.
+
+**Example:**
+
+```python
+@k.scene
+def plane(s: k.Scene):
+    plane = k.NumberPlane(x=(-6, 6, 1), y=(-3, 3, 1))
+    v = plane.vector(2, 1, color=k.YELLOW)
+    s.play(k.draw(plane))
+    s.play(k.indicate(v))
+```
+
+**See also:** [`numberplane.apply`](#numberplane-apply), [`numberplane.polygon`](#numberplane-polygon), [`k.Axes`](#k-axes).
+
+**Members:**
+
+- [`coords`](#numberplane-coords): Where the data point `(x, y)` is now, in the plane's own coordinates (after the transformations applied so far).
+- [`vector`](#numberplane-vector): An arrow from the origin to `(x, y)` that the transformations carry.
+- [`dot`](#numberplane-dot): A dot at `(x, y)` that the transformations carry.
+- [`polygon`](#numberplane-polygon): A filled shape with vertices in data coordinates that deforms with the plane.
+- [`add`](#numberplane-add): Put an object on the plane at the data point `at`: transformations move it (its shape stays as it is; use `plane.polygon` for shapes that deform).
+- [`apply`](#numberplane-apply): Animated transformation of the plane, composed after the ones already applied: a matrix `[[a, b], [c, d]]` sends î to `(a, c)` and ĵ to `(b, d)`; a function `(x, y) -> (x2, y2)` bends the grid for non-linear maps.
+- [`reset`](#numberplane-reset): Animated return to the untransformed plane.
+
+Inherited from [`k.Group`](objects.md#k-group): [`children`](objects.md#group-children), [`to`](objects.md#group-to), [`swap`](objects.md#group-swap), [`insert`](objects.md#group-insert), [`pop`](objects.md#group-pop), [`fit`](objects.md#group-fit).
+Inherited from [`k.Node`](object-state.md#k-node): [`set`](object-state.md#node-set), [`unbind`](object-state.md#node-unbind), [`edge`](object-state.md#node-edge), [`age`](object-state.md#node-age), [`entered`](object-state.md#node-entered), [`exited`](object-state.md#node-exited), [`copy`](object-state.md#node-copy), [`place`](object-state.md#node-place), [`to_place`](object-state.md#node-to_place), [`unpin`](object-state.md#node-unpin).
+
+<a id="numberplane-coords"></a>
+#### `k.NumberPlane.coords` *(method)*
+
+```python
+numberplane.coords(x: float, y: float) -> tuple[float, float]
+```
+
+Where the data point `(x, y)` is now, in the plane's own coordinates (after the transformations applied so far).
+
+**Parameters:**
+
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `x` | `float` | required |   |
+| `y` | `float` | required |   |
+
+<a id="numberplane-vector"></a>
+#### `k.NumberPlane.vector` *(method)*
+
+```python
+numberplane.vector(x: float, y: float, **style: Unpack[UnplacedStyleKeywords]) -> Arrow
+```
+
+An arrow from the origin to `(x, y)` that the transformations carry.
+
+**Parameters:**
+
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `x` | `float` | required |   |
+| `y` | `float` | required |   |
+| `**style` | `Unpack[UnplacedStyleKeywords]` | variadic | Keyword arguments (`UnplacedStyleKeywords`): `name: str \| None`, `key: str \| None`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`, `fill: ColorVal`, `fill_opacity: FloatVal`, `stroke: ColorVal`, `stroke_width: FloatVal`, `dash: FloatsVal`, `color: ColorVal`. |
+
+<a id="numberplane-dot"></a>
+#### `k.NumberPlane.dot` *(method)*
+
+```python
+numberplane.dot(
+    x: float,
+    y: float,
+    *,
+    radius: float = 0.1,
+    **style: Unpack[UnplacedStyleKeywords],
+) -> Dot
+```
+
+A dot at `(x, y)` that the transformations carry.
+
+**Parameters:**
+
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `x` | `float` | required |   |
+| `y` | `float` | required |   |
+| `radius` | `float` | `0.1` |   |
+| `**style` | `Unpack[UnplacedStyleKeywords]` | variadic | Keyword arguments (`UnplacedStyleKeywords`): `name: str \| None`, `key: str \| None`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`, `fill: ColorVal`, `fill_opacity: FloatVal`, `stroke: ColorVal`, `stroke_width: FloatVal`, `dash: FloatsVal`, `color: ColorVal`. |
+
+<a id="numberplane-polygon"></a>
+#### `k.NumberPlane.polygon` *(method)*
+
+```python
+numberplane.polygon(
+    points: Sequence[tuple[float, float]],
+    **style: Unpack[UnplacedStyleKeywords],
+) -> Polygon
+```
+
+A filled shape with vertices in data coordinates that deforms with the plane. The unit square shows the determinant: its area after `apply(m)` is `det(m)`.
+
+**Parameters:**
+
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `points` | `Sequence[tuple[float, float]]` | required |   |
+| `**style` | `Unpack[UnplacedStyleKeywords]` | variadic | Keyword arguments (`UnplacedStyleKeywords`): `name: str \| None`, `key: str \| None`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`, `fill: ColorVal`, `fill_opacity: FloatVal`, `stroke: ColorVal`, `stroke_width: FloatVal`, `dash: FloatsVal`, `color: ColorVal`. |
+
+**Example:**
+
+```python
+@k.scene
+def determinant(s: k.Scene):
+    plane = k.NumberPlane(x=(-6, 6, 1), y=(-3, 3, 1))
+    square = plane.polygon([(0, 0), (1, 0), (1, 1), (0, 1)], fill=k.YELLOW)
+    s.play(k.draw(plane))
+    s.play(plane.apply([[2, 1], [0, 1.5]]), duration=2)
+    s.play(k.indicate(square))  # area 3 = det
+```
+
+**See also:** [`numberplane.apply`](#numberplane-apply), [`k.NumberPlane`](#k-numberplane).
+
+<a id="numberplane-add"></a>
+#### `k.NumberPlane.add` *(method)*
+
+```python
+numberplane.add(obj: NodeT, *, at: tuple[float, float]) -> NodeT
+```
+
+Put an object on the plane at the data point `at`: transformations move it (its shape stays as it is; use `plane.polygon` for shapes that deform).
+
+**Parameters:**
+
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `obj` | `NodeT` | required |   |
+| `at` | `tuple[float, float]` | required | Put an object on the plane at the data point `at`: transformations move it (its shape stays as it is; use `plane.polygon` for shapes that deform). |
+
+<a id="numberplane-apply"></a>
+#### `k.NumberPlane.apply` *(method)*
+
+```python
+numberplane.apply(transform: PlaneTransform, **kw: Unpack[AnimationTiming]) -> Animation
+```
+
+Animated transformation of the plane, composed after the ones already applied: a matrix `[[a, b], [c, d]]` sends î to `(a, c)` and ĵ to `(b, d)`; a function `(x, y) -> (x2, y2)` bends the grid for non-linear maps. Grid lines, basis vectors and the objects made on the plane all move. `plane.reset()` goes back.
+
+**Parameters:**
+
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `transform` | `PlaneTransform` | required |   |
+| `**kw` | `Unpack[AnimationTiming]` | variadic | Keyword arguments (`AnimationTiming`): `duration: float \| None`, `ease: EaseLike \| None`, `delay: float`. |
+
+**Example:**
+
+```python
+import math
+import kinemo as k
+
+@k.scene
+def shear(s: k.Scene):
+    plane = k.NumberPlane(x=(-6, 6, 1), y=(-3, 3, 1))
+    eigen = plane.vector(1, 0, color=k.YELLOW)
+    s.play(k.draw(plane))
+    s.play(plane.apply([[1, 1], [0, 1]]), duration=2)
+    s.play(k.indicate(eigen))  # an eigenvector: still on its span
+    s.play(plane.apply(lambda x, y: (x + 0.3 * math.sin(y), y)), duration=2)
+    s.play(plane.reset())
+```
+
+**See also:** [`k.NumberPlane`](#k-numberplane), [`numberplane.polygon`](#numberplane-polygon).
+
+<a id="numberplane-reset"></a>
+#### `k.NumberPlane.reset` *(method)*
+
+```python
+numberplane.reset(**kw: Unpack[AnimationTiming]) -> Animation
+```
+
+Animated return to the untransformed plane.
+
+**Parameters:**
+
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `**kw` | `Unpack[AnimationTiming]` | variadic | Keyword arguments (`AnimationTiming`): `duration: float \| None`, `ease: EaseLike \| None`, `delay: float`. |
 
 <a id="plot"></a>
 ### `Plot` *(class)*

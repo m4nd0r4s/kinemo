@@ -945,6 +945,43 @@ def number_line(s: k.Scene):
     s.play(k.draw(nl), k.fade_in(dot))
     s.play(x.to(2), duration=2)
 ```
+#### `k.NumberPlane(x=(-7, 7, 1), y=(-4, 4, 1), *, unit=1.0, basis=True, samples=24, color=None, **props)`
+A coordinate grid with axes and the basis vectors î (green) and ĵ (red): `x=(min, max, step)`, `y=...`, `unit=` scene units per step. `plane.apply(matrix)` deforms it; `plane.vector(x, y)`, `plane.dot(x, y)`, `plane.polygon(points)` and `plane.add(obj, at=(x, y))` put objects on it that the transformations carry. See also: `numberplane.apply`, `numberplane.polygon`, `k.Axes`.
+```python
+@k.scene
+def plane(s: k.Scene):
+    plane = k.NumberPlane(x=(-6, 6, 1), y=(-3, 3, 1))
+    v = plane.vector(2, 1, color=k.YELLOW)
+    s.play(k.draw(plane))
+    s.play(k.indicate(v))
+```
+#### `numberplane.apply(transform, **kw) -> Animation`
+Animated transformation of the plane, composed after the ones already applied: a matrix `[[a, b], [c, d]]` sends î to `(a, c)` and ĵ to `(b, d)`; a function `(x, y) -> (x2, y2)` bends the grid for non-linear maps. Grid lines, basis vectors and the objects made on the plane all move. `plane.reset()` goes back. See also: `k.NumberPlane`, `numberplane.polygon`.
+```python
+import math
+import kinemo as k
+
+@k.scene
+def shear(s: k.Scene):
+    plane = k.NumberPlane(x=(-6, 6, 1), y=(-3, 3, 1))
+    eigen = plane.vector(1, 0, color=k.YELLOW)
+    s.play(k.draw(plane))
+    s.play(plane.apply([[1, 1], [0, 1]]), duration=2)
+    s.play(k.indicate(eigen))  # an eigenvector: still on its span
+    s.play(plane.apply(lambda x, y: (x + 0.3 * math.sin(y), y)), duration=2)
+    s.play(plane.reset())
+```
+#### `numberplane.polygon(points, **style) -> Polygon`
+A filled shape with vertices in data coordinates that deforms with the plane. The unit square shows the determinant: its area after `apply(m)` is `det(m)`. See also: `numberplane.apply`, `k.NumberPlane`.
+```python
+@k.scene
+def determinant(s: k.Scene):
+    plane = k.NumberPlane(x=(-6, 6, 1), y=(-3, 3, 1))
+    square = plane.polygon([(0, 0), (1, 0), (1, 1), (0, 1)], fill=k.YELLOW)
+    s.play(k.draw(plane))
+    s.play(plane.apply([[2, 1], [0, 1.5]]), duration=2)
+    s.play(k.indicate(square))  # area 3 = det
+```
 #### `ax.plot(fn, *, until=None, from_=None, domain=None, color=None, label=None, samples=160, enter_with_axes=True, **style) -> Plot`
 Draws the curve `y = fn(x)` on the axes, with adaptive sampling. `fn` uses `k` functions (`k.sin`, `k.max`...), so the same function works for floats and signals. `until=`/`from_=` accept signals: the curve grows as the signal moves. `label=` puts a label at the end of the curve. See also: `curve.point_at`, `ax.area`, `k.sin`.
 ```python

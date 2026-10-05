@@ -353,8 +353,13 @@ def test_row_34_python_depending_on_a_param_is_w1302() -> None:
     assert "W1302" in lints_of(scene)
 
 
-def test_dev_warns_when_two_builds_differ(tmp_path: Any, capsys: Any) -> None:
+def test_dev_warns_when_two_builds_differ(tmp_path: Any, capsys: Any, monkeypatch: Any) -> None:
+    from kinemo.cli import dev_session
     from kinemo.cli.dev import Session
+    from test_dev_determinism import wait_for_checks
+
+    # The check runs in the background after a quiet moment: no wait here, then join it.
+    monkeypatch.setattr(dev_session, "DETERMINISM_IDLE_SECONDS", 0.0)
 
     path = tmp_path / "impure.py"
     path.write_text(
@@ -363,4 +368,5 @@ def test_dev_warns_when_two_builds_differ(tmp_path: Any, capsys: Any) -> None:
     , encoding="utf-8")
     session = Session(str(path), None, {}, FakeServer())  # type: ignore[arg-type]
     assert session.rebuild()
+    wait_for_checks()
     assert "gave different results" in capsys.readouterr().out

@@ -10,7 +10,10 @@ use std::time::Instant;
 
 use kinemo_ir::Scene;
 use kinemo_render::raster::{rasterize, DisplayList};
-use kinemo_render::{display_list, FrameSize};
+use kinemo_eval::{Evaluator, TimelineIndex};
+use kinemo_layout::Layout;
+use kinemo_render::{display_list_with, FrameSize};
+use std::sync::Arc;
 use rayon::prelude::*;
 
 fn main() {
@@ -22,10 +25,14 @@ fn main() {
     let duration = scene.duration.max(0.1);
     let time_of = |index: usize| duration * index as f64 / frames as f64;
 
+    // As the renderer does: one timeline index per render, one evaluator per thread.
+    let timeline = Arc::new(TimelineIndex::new(&scene));
+    let evaluator = Evaluator::with_index(&scene, timeline.clone());
     let (mut building, mut rasterizing, mut items) = (0.0, 0.0, 0usize);
     for index in 0..frames {
         let start = Instant::now();
-        let list = display_list(&scene, time_of(index), size, false);
+        evaluator.clear();
+        let list = display_list_with(&Layout::new(&evaluator), time_of(index), size, false);
         let built = Instant::now();
         std::hint::black_box(rasterize(&list, true));
         rasterizing += built.elapsed().as_secs_f64();
@@ -41,9 +48,13 @@ fn main() {
     let fixed = start.elapsed().as_secs_f64();
 
     let start = Instant::now();
-    (0..frames).into_par_iter().for_each(|index| {
-        std::hint::black_box(rasterize(&display_list(&scene, time_of(index), size, false), true));
-    });
+    (0..frames).into_par_iter().for_each_init(
+        || Evaluator::with_index(&scene, timeline.clone()),
+        |evaluator, index| {
+            evaluator.clear();
+            std::hint::black_box(rasterize(&display_list_with(&Layout::new(evaluator), time_of(index), size, false), true));
+        },
+    );
     let parallel = start.elapsed().as_secs_f64();
 
     let per_frame = |seconds: f64| seconds * 1000.0 / frames as f64;

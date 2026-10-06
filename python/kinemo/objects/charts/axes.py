@@ -6,12 +6,14 @@ from typing import TYPE_CHECKING, Any, Callable, Literal, Sequence, Unpack
 
 from ...diagnostics import KinemoError
 from ...reactive.expr import Expr, Op, lift
-from ...reactive.native import clamp, vec
+from ...reactive.native import clamp, vec, where
+from ...reactive.native import max as native_max
+from ...reactive.native import min as native_min
 from ...theme.tokens import ThemeToken
 from ..groups import Group
 from ..node import Node
 from ..props import PropSpec
-from ..shapes import Dot, Line
+from ..shapes import Dot, Line, Rect
 from ..text import Text
 from .plot import FAR, Area, Plot
 from .sampling import nice_step, sample, ticks
@@ -341,6 +343,63 @@ class Axes(Group):
         _name_from_call(region, Axes.area)
         return region
 
+    def segment(self, start: tuple[float, float], end: tuple[float, float], *, clip: bool = True, enter_with_axes: bool = True, **props: Unpack[StyleKeywords]) -> Line:
+        """A line between two data points. With `clip=True` it is cut to the visible ranges
+        (and hidden when entirely outside them), following zooms."""
+        (x0, y0), (x1, y1) = (float(start[0]), float(start[1])), (float(end[0]), float(end[1]))
+        props.setdefault("stroke_width", 3.0)
+        if not clip:
+            line = Line(start=self.local_point(x0, y0), end=self.local_point(x1, y1), **props)
+        else:
+            # Liang–Barsky on the visible ranges: the part of the segment, as fractions `s`
+            # along it, that lies inside both ranges.
+            low, high = self._clip_fractions(x0, y0, x1, y1)
+            at = lambda s: self.local_point(x0 + (x1 - x0) * s, y0 + (y1 - y0) * s)  # noqa: E731
+            props.setdefault("visible", low <= high)
+            line = Line(start=at(low), end=at(high), **props)
+        self._append(line, enter_with_axes)
+        _name_from_call(line, Axes.segment)
+        return line
+
+    def _clip_fractions(self, x0: float, y0: float, x1: float, y1: float) -> tuple[Expr[float], Expr[float]]:
+        low: Expr[float] = lift(0.0)
+        high: Expr[float] = lift(1.0)
+        for start, delta, visible in ((x0, x1 - x0, self.x_range), (y0, y1 - y0, self.y_range)):
+            if abs(delta) < 1e-12:
+                # Parallel to this axis: wholly in or out of its range.
+                inside = (visible.x <= start) & (visible.y >= start)
+                high = native_min(high, where(inside, 1.0, -1.0))
+                continue
+            first, second = (visible.x - start) / delta, (visible.y - start) / delta
+            low = native_max(low, native_min(first, second))
+            high = native_min(high, native_max(first, second))
+        return low, high
+
+    def hband(self, y0: float, y1: float, *, enter_with_axes: bool = True, **props: Unpack[UnplacedStyleKeywords]) -> Rect:
+        """A horizontal band between data `y0` and `y1`, across the plot, cut to the visible y
+        range (hidden outside it); it follows zooms."""
+        yr, w = self.y_range, self.size
+        lo, hi = clamp(min(y0, y1), yr.x, yr.y), clamp(max(y0, y1), yr.x, yr.y)
+        bottom, top = self.map_y(lo), self.map_y(hi)
+        return self._band(w.x, top - bottom, lift(0.0), (top + bottom) / 2, hi > lo, enter_with_axes, Axes.hband, dict(props))
+
+    def vband(self, x0: float, x1: float, *, enter_with_axes: bool = True, **props: Unpack[UnplacedStyleKeywords]) -> Rect:
+        """A vertical band between data `x0` and `x1`, up the plot, cut to the visible x range
+        (hidden outside it); it follows zooms."""
+        xr, h = self.x_range, self.size
+        lo, hi = clamp(min(x0, x1), xr.x, xr.y), clamp(max(x0, x1), xr.x, xr.y)
+        left, right = self.map_x(lo), self.map_x(hi)
+        return self._band(right - left, h.y, (left + right) / 2, lift(0.0), hi > lo, enter_with_axes, Axes.vband, dict(props))
+
+    def _band(self, width: Any, height: Any, x: Any, y: Any, shown: Expr[bool], enter_with_axes: bool, factory: Callable[..., Any], props: dict[str, Any]) -> Rect:
+        options: dict[str, Any] = {"fill": self._scene.theme.accent, "fill_opacity": 0.15, "stroke_width": 0.0, **props}
+        options.setdefault("visible", shown)
+        band = Rect(w=width, h=height, x=x, y=y, **options)
+        # Under the curves, over the grid.
+        self._append(band, enter_with_axes)
+        _name_from_call(band, factory)
+        return band
+
     def vline(self, at: FloatVal, *, style: LineStyle = "solid", enter_with_axes: bool = True, **props: Unpack[StyleKeywords]) -> Line:
         h = self.size
         if style == "dashed":
@@ -399,7 +458,6 @@ class Axes(Group):
         """Vertical bars at data `xs` with data `heights` (from the x axis); `width` is in
         data units. Bars follow the axes when it zooms."""
         from ...data.arrow import to_float_list
-        from ..shapes import Rect
 
         options_in: dict[str, Any] = dict(props)
         fill = options_in.pop("color", None) or self._scene.theme.accent

@@ -307,6 +307,45 @@ def marker(s: k.Scene):
         related=("Axes.origin", "Axes.in_view", "Axes.point"),
     ),
     DocEntry(
+        "Axes.segment",
+        "Charts",
+        "A line between two data points `(x, y)`, cut to the visible ranges with `clip=True` (the "
+        "default) and hidden when it falls entirely outside them; it follows zooms.",
+        '''
+import kinemo as k
+
+@k.scene
+def secant(s: k.Scene):
+    ax = k.Axes(x=(0, 10, 2), y=(0, 10, 2)).place(at="center")
+    ax.plot(lambda x: 0.1 * x * x)
+    line = ax.segment((-2, -1), (12, 11), stroke=k.YELLOW)
+    s.play(k.draw(ax))
+    s.play(k.indicate(line))
+    s.play(ax.zoom_to(x=(4, 10), y=(4, 10)), duration=1.5)
+''',
+        related=("Axes.hband", "Axes.zoom_to"),
+    ),
+    DocEntry(
+        "Axes.hband",
+        "Charts",
+        "`ax.hband(y0, y1)`: a translucent band across the plot between two data values; "
+        "`ax.vband(x0, x1)` the same up the plot. Cut to the visible range, hidden outside it, "
+        "following zooms. Style with `fill=`, `fill_opacity=`.",
+        '''
+import kinemo as k
+
+@k.scene
+def comfort(s: k.Scene):
+    ax = k.Axes(x=(0, 24, 6), y=(0, 30, 10), labels=("h", "°C")).place(at="center")
+    ax.hband(18, 24)
+    ax.vband(9, 17, fill=k.GREEN)
+    ax.plot(lambda h: 15 + 8 * k.sin((h - 9) * 3.14159 / 12))
+    s.play(k.draw(ax))
+''',
+        related=("Axes.segment", "Axes.vline"),
+        aliases=("Axes.vband",),
+    ),
+    DocEntry(
         "Axes.origin",
         "Charts",
         "Where the two axes cross, in the axes' own coordinates: the data origin clamped "

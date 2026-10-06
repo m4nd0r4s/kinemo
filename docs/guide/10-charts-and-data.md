@@ -119,6 +119,10 @@ s.play(k.fade_in(tan))    # now the tangent
   so the area can grow.
 - `ax.vline(at=x)` and `ax.hline(at=y)` draw vertical and horizontal lines. `at=` accepts a
   signal, and `style="dashed"` makes them dashed.
+- `ax.segment((x0, y0), (x1, y1))` draws a line between two data points, cut to the visible
+  ranges (and hidden when it falls outside them) as the axes zoom.
+- `ax.hband(y0, y1)` and `ax.vband(x0, x1)` shade a band between two values, across or up
+  the plot, cut to the visible range.
 
 ```python
 import kinemo as k

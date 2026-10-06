@@ -17,10 +17,11 @@ body:
       description: Paste the `kinemo check` output or the traceback if there is one.
     validations:
       required: true
-  - type: input
-    id: version
+  - type: textarea
+    id: doctor
     attributes:
-      label: Versions
-      description: Output of `python -c "import kinemo, sys, platform; print(kinemo.__version__, sys.version.split()[0], platform.platform())"`
+      label: kinemo doctor
+      description: Output of `kinemo doctor` (versions, platform, ffmpeg, extras).
+      render: text
     validations:
       required: true

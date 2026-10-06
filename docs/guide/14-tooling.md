@@ -11,6 +11,7 @@ to render a video to know whether a scene is right:
 | `kinemo dev` | Live preview with hot reload and a draggable timeline |
 | `kinemo explain` / `kinemo docs` | What does this code mean? How is this symbol used? |
 | `kinemo upgrade` | Rewrite deprecated forms after a version change |
+| `kinemo doctor` | What does kinemo find on this machine (ffmpeg, Python, extras)? |
 | `kinemo.testing` | The same checks inside pytest, plus golden-frame snapshots |
 
 The full option list is in the [command line reference](../reference/cli.md). This guide
@@ -22,6 +23,11 @@ shows how to use the commands together, then covers determinism and performance.
 kinemo new demo        # demo/kinemo.toml, demo/scene.py, demo/pyrightconfig.json, .gitignore
 cd demo && kinemo check scene.py && kinemo render scene.py
 ```
+
+Video output needs `ffmpeg`. When it is missing, `kinemo render` says so with the install
+command for your system (`brew install ffmpeg`, `sudo apt install ffmpeg`,
+`winget install Gyan.FFmpeg`); `kinemo doctor` shows what kinemo finds (versions, ffmpeg,
+optional extras, the project file), which is also what to paste into a bug report.
 
 `kinemo.toml` holds the project defaults (size, fps, theme, lints, TTS provider). It is
 looked up from the **working directory** upwards, so run `kinemo` from inside the project.

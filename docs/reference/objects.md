@@ -30,6 +30,8 @@ Shapes, groups, images, SVG and mass objects (points, vector fields, stream line
 - [`k.Bar`](#k-bar): A value shown as a bar that grows from its base, with an optional label (`label=True`).
 - [`k.Group`](#k-group): Groups objects: transforms compose and opacity multiplies.
 - [`k.Graph`](#k-graph): Nodes and edges: `k.Graph(nodes, edges, layout=...)` with names as nodes and `(u, v)` or `(u, v, weight)` edges (arrows with `directed=True`).
+- [`k.Matrix`](#k-matrix): A matrix whose entries are objects in a grid: numbers, TeX strings (typeset with `k.Math`) or any object, between `brackets=` (`"["`, `"("`, `"|"`, `"none"`).
+- [`k.matrix_product`](#k-matrix_product): Shows a product row by column: `k.matrix_product(a, b, a @ b)` draws the product's brackets, then for each entry indicates its row of `a` and its column of `b` while the entry appears (`step=` seconds each).
 - [`k.Bits`](#k-bits): A binary register: the bits of a value, most significant first, lit when 1.
 - [`k.TitleCard`](#k-titlecard): An episode's opening card: the title, a `kicker=` above it, an accent rule under it and a `subtitle=`.
 - [`k.EndCard`](#k-endcard): What comes next: `heading=` ("Next") over the next title, then `brand=`, `series=` and an `invite=`.
@@ -1717,6 +1719,158 @@ def network(s: k.Scene):
 ```
 
 **See also:** [`k.Graph`](#k-graph), [`graph.add_node`](#graph-add_node).
+
+<a id="k-matrix"></a>
+### `k.Matrix` *(class)*
+
+```python
+k.Matrix(
+    entries: Sequence[Sequence[Entry]],
+    *,
+    brackets: Brackets = "[",
+    size: float = 0.5,
+    column_gap: float | None = None,
+    row_gap: float | None = None,
+    **props: Unpack[TransformKeywords],
+)
+```
+
+A matrix whose entries are objects in a grid: numbers, TeX strings (typeset with `k.Math`) or any object, between `brackets=` (`"["`, `"("`, `"|"`, `"none"`). `m[i, j]` is an entry, `m.row(i)` / `m.column(j)` list them, `m.box(row=i)` frames a row to draw, and `a @ b` is the product of numeric matrices (a new matrix).
+
+**Parameters:**
+
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `entries` | `Sequence[Sequence[Entry]]` | required |   |
+| `brackets` | `Brackets` | `"["` | A matrix whose entries are objects in a grid: numbers, TeX strings (typeset with `k.Math`) or any object, between `brackets=` (`"["`, `"("`, `"\|"`, `"none"`). |
+| `size` | `float` | `0.5` |   |
+| `column_gap` | `float \| None` | `None` |   |
+| `row_gap` | `float \| None` | `None` |   |
+| `**props` | `Unpack[TransformKeywords]` | variadic | Keyword arguments (`TransformKeywords`): `name: str \| None`, `key: str \| None`, `x: FloatVal`, `y: FloatVal`, `position: VecVal`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`. |
+
+Props inherited from [`k.Node`](object-state.md#k-node): `x`, `y`, `rotate`, `scale`, `scale_x`, `scale_y`, `anchor`, `opacity`, `z`, `visible`, `bleed`.
+
+**Example:**
+
+```python
+@k.scene
+def grid(s: k.Scene):
+    m = k.Matrix([[1, 2], [3, 4]]).place(at="center")
+    s.play(k.fade_in(m))
+    s.play(k.draw(m.box(column=1)))
+    s.play(m[1, 0].to(color=k.YELLOW))
+```
+
+**See also:** [`k.matrix_product`](#k-matrix_product), [`k.Math`](text.md#k-math).
+
+**Members:**
+
+- [`shape`](#matrix-shape): (rows, columns).
+- [`row`](#matrix-row): The entries of row `index`.
+- [`column`](#matrix-column): The entries of column `index`.
+- [`box`](#matrix-box): A rounded frame around a row or a column (in the matrix: it moves with it), not yet in the scene: draw it (`k.draw(m.box(row=0))`).
+
+Inherited from [`k.Group`](#k-group): [`children`](#group-children), [`to`](#group-to), [`swap`](#group-swap), [`insert`](#group-insert), [`pop`](#group-pop), [`fit`](#group-fit).
+Inherited from [`k.Node`](object-state.md#k-node): [`set`](object-state.md#node-set), [`unbind`](object-state.md#node-unbind), [`edge`](object-state.md#node-edge), [`age`](object-state.md#node-age), [`entered`](object-state.md#node-entered), [`exited`](object-state.md#node-exited), [`copy`](object-state.md#node-copy), [`place`](object-state.md#node-place), [`to_place`](object-state.md#node-to_place), [`unpin`](object-state.md#node-unpin).
+
+<a id="matrix-shape"></a>
+#### `k.Matrix.shape` *(property)*
+
+```python
+matrix.shape: tuple[int, int]  # read-only
+```
+
+(rows, columns).
+
+<a id="matrix-row"></a>
+#### `k.Matrix.row` *(method)*
+
+```python
+matrix.row(index: int) -> list[Node]
+```
+
+The entries of row `index`.
+
+**Parameters:**
+
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `index` | `int` | required | The entries of row `index`. |
+
+<a id="matrix-column"></a>
+#### `k.Matrix.column` *(method)*
+
+```python
+matrix.column(index: int) -> list[Node]
+```
+
+The entries of column `index`.
+
+**Parameters:**
+
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `index` | `int` | required | The entries of column `index`. |
+
+<a id="matrix-box"></a>
+#### `k.Matrix.box` *(method)*
+
+```python
+matrix.box(
+    *,
+    row: int | None = None,
+    column: int | None = None,
+    color: ColorLike | None = None,
+) -> RoundedRect
+```
+
+A rounded frame around a row or a column (in the matrix: it moves with it), not yet in the scene: draw it (`k.draw(m.box(row=0))`).
+
+**Parameters:**
+
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `row` | `int \| None` | `None` | A rounded frame around a row or a column (in the matrix: it moves with it), not yet in the scene: draw it (`k.draw(m.box(row=0))`). |
+| `column` | `int \| None` | `None` |   |
+| `color` | `ColorLike \| None` | `None` |   |
+
+<a id="k-matrix_product"></a>
+### `k.matrix_product` *(function)*
+
+```python
+k.matrix_product(
+    a: Matrix,
+    b: Matrix,
+    product: Matrix,
+    *,
+    step: float = 0.8,
+) -> Animation
+```
+
+Shows a product row by column: `k.matrix_product(a, b, a @ b)` draws the product's brackets, then for each entry indicates its row of `a` and its column of `b` while the entry appears (`step=` seconds each).
+
+**Parameters:**
+
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `a` | `Matrix` | required | Shows a product row by column: `k.matrix_product(a, b, a @ b)` draws the product's brackets, then for each entry indicates its row of `a` and its column of `b` while the entry appears (`step=` seconds each). |
+| `b` | `Matrix` | required | Shows a product row by column: `k.matrix_product(a, b, a @ b)` draws the product's brackets, then for each entry indicates its row of `a` and its column of `b` while the entry appears (`step=` seconds each). |
+| `product` | `Matrix` | required | Show `product` (from `a @ b`) cell by cell: for each entry, its row of `a` and its column of `b` are indicated while the entry appears. |
+| `step` | `float` | `0.8` | Shows a product row by column: `k.matrix_product(a, b, a @ b)` draws the product's brackets, then for each entry indicates its row of `a` and its column of `b` while the entry appears (`step=` seconds each). |
+
+**Example:**
+
+```python
+@k.scene
+def product(s: k.Scene):
+    a = k.Matrix([[1, 2], [3, 4]]).place(at=(-3.5, 0))
+    b = k.Matrix([[5, 6], [7, 8]]).place(at=(-0.5, 0))
+    c = (a @ b).place(at=(3, 0))
+    s.play(k.fade_in(a, b))
+    s.play(k.matrix_product(a, b, c, step=0.6))
+```
+
+**See also:** [`k.Matrix`](#k-matrix).
 
 <a id="k-bits"></a>
 ### `k.Bits` *(class)*

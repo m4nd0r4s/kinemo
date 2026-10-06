@@ -32,6 +32,7 @@ from .objects.brace import Brace
 from .objects.charts.axes import Axes, NumberLine
 from .objects.charts.polar import PolarAxes
 from .objects.charts.bar_chart import BarChart
+from .objects.charts.pie_chart import PieChart
 from .objects.charts.line_chart import LineChart
 from .objects.charts.table import Table
 from .objects.groups import Column, Grid, Group, Row, Stack
@@ -51,7 +52,7 @@ from .objects.series_cards import EndCard, LowerThird, TitleCard
 from .objects.number_plane import NumberPlane
 from .objects.terminal import Terminal
 from .objects.reparent import reparent
-from .objects.shapes import Arc, Arrow, Circle, Dot, Ellipse, Line, Path, Polygon, Rect, RoundedRect, Square, Triangle
+from .objects.shapes import Arc, Arrow, Circle, Dot, Ellipse, Line, Path, Polygon, Rect, RoundedRect, Sector, Square, Triangle
 from .objects.svg import SVG
 from .objects.code import Code
 from .objects.image import Image
@@ -133,7 +134,7 @@ __all__ = [
     "Points", "StreamLines", "VectorField",
     "Brace", "Image", "SVG",
     "Axes", "NumberLine", "PolarAxes", "BarChart", "LineChart", "Table", "Component", "Context", "Event", "EventInfo", "EventSource", "State", "intersect", "spline", "subtract", "union", "reparent", "Code", "Math", "morph", "Movie", "crossfade", "cut", "morph_cut", "movie", "ListSignal", "list", "flash", "follow", "squash", "Trail", "trace", "integrate", "simulate", "when", "Out", "Prop", "clip", "context", "field", "from_context",
-    "prop", "provide", "Terminal", "box", "cross", "encircle", "strike", "underline", "Angle", "RightAngle", "Card", "Gauge", "Callout", "Array", "NumberPlane", "Graph", "scene_preset", "EndCard", "LowerThird", "TitleCard", "Bits", "Matrix", "matrix_product",
+    "prop", "provide", "Terminal", "box", "cross", "encircle", "strike", "underline", "Angle", "RightAngle", "Card", "Gauge", "Callout", "Array", "NumberPlane", "Graph", "scene_preset", "EndCard", "LowerThird", "TitleCard", "Bits", "Matrix", "matrix_product", "PieChart", "Sector",
     "ArrowKeywords", "ColorKeywords", "PaintKeywords", "RectKeywords", "StyleKeywords", "TextKeywords", "TransformKeywords",
     "Animation", "Arc", "Arrow", "BLACK", "BLUE", "Bar", "Bool", "Choice", "Circle", "Color", "Column",
     "Diagnostic", "Dot", "Ellipse", "Expr", "Float", "GRAY", "GREEN", "Grid", "Group", "IR_VERSION", "Int",

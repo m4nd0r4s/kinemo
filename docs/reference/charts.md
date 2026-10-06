@@ -12,6 +12,7 @@ Axes, number lines, polar axes, plots and data charts.
 - [`k.NumberPlane`](#k-numberplane): A coordinate grid with axes and the basis vectors î (green) and ĵ (red): `x=(min, max, step)`, `y=...`, `unit=` scene units per step.
 - [`Plot`](#plot): A curve `y = fn(x)` of an axes.
 - [`k.BarChart`](#k-barchart): Bar chart from a table: `x=` is the category column, `y=` the value column and `key=` identifies each bar.
+- [`k.PieChart`](#k-piechart): One slice per row of a table: `labels=` names the category column and `values=` the numbers; `donut=0.5` leaves a hole (a fraction of `radius=`).
 - [`k.LineChart`](#k-linechart): A `k.Axes` with one line per `y=` column (one or several), connecting the table's points in `x=` order.
 - [`k.Table`](#k-table): Table of `k.Text` with a highlighted header; `columns=` selects and orders the columns.
 
@@ -1375,6 +1376,119 @@ barchart.to(*, data: DataTable | None = None, **kw: Unpack[ChangeKeywords]) -> A
 | Name | Type | Default | Description |
 | --- | --- | --- | --- |
 | `data` | `DataTable \| None` | `None` | `chart.to(data=df2)`: animated change of data (plus any other props). |
+| `**kw` | `Unpack[ChangeKeywords]` | variadic |   |
+
+<a id="k-piechart"></a>
+### `k.PieChart` *(class)*
+
+```python
+k.PieChart(
+    data: DataTable,
+    labels: str,
+    values: str,
+    *,
+    key: str | None = None,
+    radius: float = 2.0,
+    donut: float = 0.0,
+    color: ColorLike | Mapping[str, ColorLike] | None = None,
+    percent: bool = True,
+    label_size: float = 0.26,
+    **props: Unpack[ChartKeywords],
+)
+```
+
+One slice per row of a table: `labels=` names the category column and `values=` the numbers; `donut=0.5` leaves a hole (a fraction of `radius=`). Slices start at the top and go clockwise, labelled outside with their percentage (narrow ones get a leader line). `pie.to(data=df2)` animates the shares; new keys grow in, missing ones shrink away. `pie.slice("IT")` is a slice (`.sector`, `.label`, `.percent`).
+
+**Parameters:**
+
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `data` | `DataTable` | required | `pie.to(data=df2)` animates the shares; new keys grow in, missing ones shrink away. |
+| `labels` | `str` | required | One slice per row of a table: `labels=` names the category column and `values=` the numbers; `donut=0.5` leaves a hole (a fraction of `radius=`). |
+| `values` | `str` | required | One slice per row of a table: `labels=` names the category column and `values=` the numbers; `donut=0.5` leaves a hole (a fraction of `radius=`). |
+| `key` | `str \| None` | `None` |   |
+| `radius` | `float` | `2.0` | One slice per row of a table: `labels=` names the category column and `values=` the numbers; `donut=0.5` leaves a hole (a fraction of `radius=`). |
+| `donut` | `float` | `0.0` | One slice per row of a table: `labels=` names the category column and `values=` the numbers; `donut=0.5` leaves a hole (a fraction of `radius=`). |
+| `color` | `ColorLike \| Mapping[str, ColorLike] \| None` | `None` |   |
+| `percent` | `bool` | `True` |   |
+| `label_size` | `float` | `0.26` |   |
+| `**props` | `Unpack[ChartKeywords]` | variadic | Keyword arguments (`ChartKeywords`): `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`, `name: str \| None`. |
+
+Props inherited from [`k.Node`](object-state.md#k-node): `x`, `y`, `rotate`, `scale`, `scale_x`, `scale_y`, `anchor`, `opacity`, `z`, `visible`, `bleed`.
+
+**Example:**
+
+```python
+MIX = {"source": ["Solar", "Wind", "Hydro", "Gas"], "twh": [10, 25, 30, 35]}
+LATER = {"source": ["Solar", "Wind", "Hydro", "Gas"], "twh": [35, 30, 25, 10]}
+
+@k.scene
+def mix(s: k.Scene):
+    pie = k.PieChart(MIX, labels="source", values="twh", donut=0.45).place(at="center")
+    s.play(k.draw(pie))
+    s.play(pie.to(data=LATER), duration=2)
+    s.play(k.indicate(pie.slice("Solar")))
+```
+
+**See also:** [`k.BarChart`](#k-barchart), [`k.Sector`](objects.md#k-sector).
+
+**Members:**
+
+- [`keys`](#piechart-keys): Keys of the slices, in order (as of the last scheduled transition).
+- [`slice`](#piechart-slice): The slice of `key`.
+- [`enter`](#piechart-enter): `k.draw(pie)`: the slices are drawn one after the other, then their labels appear.
+- [`to`](#piechart-to): `pie.to(data=df2)`: animated change of data (plus any other props).
+
+Inherited from [`k.Group`](objects.md#k-group): [`children`](objects.md#group-children), [`swap`](objects.md#group-swap), [`insert`](objects.md#group-insert), [`pop`](objects.md#group-pop), [`fit`](objects.md#group-fit).
+Inherited from [`k.Node`](object-state.md#k-node): [`set`](object-state.md#node-set), [`unbind`](object-state.md#node-unbind), [`edge`](object-state.md#node-edge), [`age`](object-state.md#node-age), [`entered`](object-state.md#node-entered), [`exited`](object-state.md#node-exited), [`copy`](object-state.md#node-copy), [`place`](object-state.md#node-place), [`to_place`](object-state.md#node-to_place), [`unpin`](object-state.md#node-unpin).
+
+<a id="piechart-keys"></a>
+#### `k.PieChart.keys` *(property)*
+
+```python
+piechart.keys: list[str]  # read-only
+```
+
+Keys of the slices, in order (as of the last scheduled transition).
+
+<a id="piechart-slice"></a>
+#### `k.PieChart.slice` *(method)*
+
+```python
+piechart.slice(key: object) -> PieSlice
+```
+
+The slice of `key`.
+
+**Parameters:**
+
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `key` | `object` | required | The slice of `key`. |
+
+<a id="piechart-enter"></a>
+#### `k.PieChart.enter` *(method)*
+
+```python
+piechart.enter() -> Animation
+```
+
+`k.draw(pie)`: the slices are drawn one after the other, then their labels appear.
+
+<a id="piechart-to"></a>
+#### `k.PieChart.to` *(method)*
+
+```python
+piechart.to(*, data: DataTable | None = None, **kw: Unpack[ChangeKeywords]) -> Animation
+```
+
+`pie.to(data=df2)`: animated change of data (plus any other props).
+
+**Parameters:**
+
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `data` | `DataTable \| None` | `None` | `pie.to(data=df2)`: animated change of data (plus any other props). |
 | `**kw` | `Unpack[ChangeKeywords]` | variadic |   |
 
 <a id="k-linechart"></a>

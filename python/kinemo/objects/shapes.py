@@ -263,6 +263,24 @@ class Arc(Shape):
         super().__init__(r=r, start_angle=start_angle, angle=angle, **props)
 
 
+class Sector(Shape):
+    """`k.Sector(r=1, angle=90, start_angle=0, inner=0)`: a pie slice from the center, or a ring
+    slice with `inner=` (its inner radius). Angles in degrees, counterclockwise from +x; all
+    props animate."""
+
+    kind = "sector"
+    PROPS = {"r": PropSpec("float", 1.0), "inner": PropSpec("float", 0.0), "start_angle": PropSpec("float", 0.0), "angle": PropSpec("float", 90.0)}
+
+    if TYPE_CHECKING:
+        r: PropAccessor[float]
+        inner: PropAccessor[float]
+        start_angle: PropAccessor[float]
+        angle: PropAccessor[float]
+
+    def __init__(self, r: FloatVal = 1.0, angle: FloatVal = 90.0, start_angle: FloatVal = 0.0, *, inner: FloatVal = 0.0, **props: Unpack[StyleKeywords]) -> None:
+        super().__init__(r=r, inner=inner, start_angle=start_angle, angle=angle, **props)
+
+
 class Path(Shape):
     """An SVG path (`d="M 0 0 L 1 1"`) or a polyline through points."""
 

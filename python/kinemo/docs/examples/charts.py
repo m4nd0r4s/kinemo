@@ -461,6 +461,29 @@ def energy(s: k.Scene):
         related=("k.LineChart", "k.Table", "k.Bar"),
     ),
     DocEntry(
+        "k.PieChart",
+        "Charts",
+        "One slice per row of a table: `labels=` names the category column and `values=` the "
+        "numbers; `donut=0.5` leaves a hole (a fraction of `radius=`). Slices start at the top and "
+        "go clockwise, labelled outside with their percentage (narrow ones get a leader line). "
+        "`pie.to(data=df2)` animates the shares; new keys grow in, missing ones shrink away. "
+        "`pie.slice(\"IT\")` is a slice (`.sector`, `.label`, `.percent`).",
+        '''
+import kinemo as k
+
+MIX = {"source": ["Solar", "Wind", "Hydro", "Gas"], "twh": [10, 25, 30, 35]}
+LATER = {"source": ["Solar", "Wind", "Hydro", "Gas"], "twh": [35, 30, 25, 10]}
+
+@k.scene
+def mix(s: k.Scene):
+    pie = k.PieChart(MIX, labels="source", values="twh", donut=0.45).place(at="center")
+    s.play(k.draw(pie))
+    s.play(pie.to(data=LATER), duration=2)
+    s.play(k.indicate(pie.slice("Solar")))
+''',
+        related=("k.BarChart", "k.Sector"),
+    ),
+    DocEntry(
         "k.LineChart",
         "Charts",
         "A `k.Axes` with one line per `y=` column (one or several), connecting the table's "

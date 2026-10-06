@@ -126,6 +126,9 @@ s.play(k.fade_in(tan))    # now the tangent
 - `ax.dot(x, y)` marks a data point; `open=True` draws it hollow, for the endpoint a
   piecewise function leaves out. `ax.plot(f, holes=[2])` puts open dots on the curve where
   it is not defined (at the limit of `f`), and they appear as a growing curve reaches them.
+- `ax.vector((3, 1), at=(0, 0), label="F", components=True)` draws a vector in data units
+  with its dashed components; `v=` and `at=` are signals (`vector.to(v=...)` turns it), and
+  `k.vector_sum(a, b, a + b)` adds two vectors tip to tail.
 
 ```python
 import kinemo as k

@@ -1071,7 +1071,7 @@ A pie slice from the center, or a ring slice with `inner=` (its inner radius): `
 | `angle` | `FloatVal` | `90.0` | A pie slice from the center, or a ring slice with `inner=` (its inner radius): `r=`, `angle=` (degrees, counterclockwise; negative goes clockwise) and `start_angle=` from +x. |
 | `start_angle` | `FloatVal` | `0.0` | A pie slice from the center, or a ring slice with `inner=` (its inner radius): `r=`, `angle=` (degrees, counterclockwise; negative goes clockwise) and `start_angle=` from +x. |
 | `inner` | `FloatVal` | `0.0` | A pie slice from the center, or a ring slice with `inner=` (its inner radius): `r=`, `angle=` (degrees, counterclockwise; negative goes clockwise) and `start_angle=` from +x. |
-| `**props` | `Unpack[StyleKeywords]` | variadic | Keyword arguments (`StyleKeywords`): `name: str \| None`, `key: str \| None`, `x: FloatVal`, `y: FloatVal`, `position: VecVal`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`, `fill: ColorVal`, `fill_opacity: FloatVal`, `stroke: ColorVal`, `stroke_width: FloatVal`, `dash: FloatsVal`, `color: ColorVal`. |
+| `**props` | `Unpack[StyleKeywords]` | variadic | Keyword arguments (`StyleKeywords`): `name: str \| None`, `key: str \| None`, `x: FloatVal`, `y: FloatVal`, `position: VecVal`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`, `fill: ColorVal`, `fill_opacity: FloatVal`, `stroke: ColorVal`, `stroke_width: FloatVal`, `dash: FloatsVal`, `glow: FloatVal`, `glow_color: ColorVal`, `color: ColorVal`. |
 
 **Props** (animatable with `.to()`, settable with `.set()` or in the constructor):
 
@@ -1082,6 +1082,8 @@ A pie slice from the center, or a ring slice with `inner=` (its inner radius): `
 | `stroke` | color | `theme.fg` | linear |
 | `stroke_width` | float | `theme.stroke_width` | linear |
 | `dash` | floats | `()` | step_end |
+| `glow` | float | `0.0` | linear |
+| `glow_color` | color | `theme.no_color` | linear |
 | `r` | float | `1.0` | linear |
 | `inner` | float | `0.0` | linear |
 | `start_angle` | float | `0.0` | linear |

@@ -10,6 +10,7 @@ Axes, number lines, polar axes, plots and data charts.
 - [`k.Axes`](#k-axes): Cartesian axes with ticks, labels and an optional grid: `x=(min, max, step)`, `y=(min, max)`, `labels=("x", "y")`, `width=`/`height=` in units.
 - [`k.NumberLine`](#k-numberline): A horizontal number line: a `k.Axes` with only the x axis.
 - [`k.NumberPlane`](#k-numberplane): A coordinate grid with axes and the basis vectors î (green) and ĵ (red): `x=(min, max, step)`, `y=...`, `unit=` scene units per step.
+- [`k.vector_sum`](#k-vector_sum): Adds two axes vectors tip to tail: `b` slides so its tail sits on `a`'s tip, then the resultant (`a + b`) is drawn from `a`'s tail.
 - [`Plot`](#plot): A curve `y = fn(x)` of an axes.
 - [`k.BarChart`](#k-barchart): Bar chart from a table: `x=` is the category column, `y=` the value column and `key=` identifies each bar.
 - [`k.PieChart`](#k-piechart): One slice per row of a table: `labels=` names the category column and `values=` the numbers; `donut=0.5` leaves a hole (a fraction of `radius=`).
@@ -31,6 +32,7 @@ Axes, number lines, polar axes, plots and data charts.
 - [`ax.add`](#axes-add): Puts objects inside the axes, in its own coordinates, so they follow zooms like plots do; place them with `position=ax.local_point(x, y)` or `ax.origin()`.
 - [`ax.segment`](#axes-segment): A line between two data points `(x, y)`, cut to the visible ranges with `clip=True` (the default) and hidden when it falls entirely outside them; it follows zooms.
 - [`ax.hband`](#axes-hband): `ax.hband(y0, y1)`: a translucent band across the plot between two data values; `ax.vband(x0, x1)` the same up the plot.
+- [`ax.vector`](#axes-vector): An arrow of components `v` from the data point `at=`, in data units; both are signals, so `vector.to(v=(2, 1))` turns it and it follows zooms.
 - [`ax.dot`](#axes-dot): A dot at a data point that follows zooms; `open=True` draws it hollow (filled with the background) for an endpoint a piecewise function leaves out.
 - [`ax.origin`](#axes-origin): Where the two axes cross, in the axes' own coordinates: the data origin clamped to the visible ranges.
 - [`ax.in_view`](#axes-in_view): Whether a data value is inside the visible ranges, as a reactive bool for `visible=`: `ax.in_view(x=3)`, `ax.in_view(y=5)` or both.
@@ -240,6 +242,7 @@ def custom_ticks(s: k.Scene):
 - [`segment`](#axes-segment): A line between two data points `(x, y)`, cut to the visible ranges with `clip=True` (the default) and hidden when it falls entirely outside them; it follows zooms.
 - [`hband`](#axes-hband): `ax.hband(y0, y1)`: a translucent band across the plot between two data values; `ax.vband(x0, x1)` the same up the plot.
 - [`vband`](#axes-vband): A vertical band between data `x0` and `x1`, up the plot, cut to the visible x range (hidden outside it); it follows zooms.
+- [`vector`](#axes-vector): An arrow of components `v` from the data point `at=`, in data units; both are signals, so `vector.to(v=(2, 1))` turns it and it follows zooms.
 - [`vline`](#axes-vline): Vertical line on the axes at `at=` (accepts a signal: the line moves with it); `style="dashed"` makes it dashed.
 - [`hline`](#axes-hline): Horizontal line on the axes at `at=` (accepts a signal); `style="dashed"` makes it dashed.
 - [`scatter`](#axes-scatter): Points `(xs[i], ys[i])` on the axes, as a group of `k.Dot`.
@@ -488,7 +491,7 @@ A dot at a data point that follows zooms; `open=True` draws it hollow (filled wi
 | `open` | `bool` | `False` | A dot at a data point that follows zooms; `open=True` draws it hollow (filled with the background) for an endpoint a piecewise function leaves out. |
 | `radius` | `float` | `0.09` |   |
 | `enter_with_axes` | `bool` | `True` |   |
-| `**props` | `Unpack[UnplacedStyleKeywords]` | variadic | Keyword arguments (`UnplacedStyleKeywords`): `name: str \| None`, `key: str \| None`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`, `fill: ColorVal`, `fill_opacity: FloatVal`, `stroke: ColorVal`, `stroke_width: FloatVal`, `dash: FloatsVal`, `color: ColorVal`. |
+| `**props` | `Unpack[UnplacedStyleKeywords]` | variadic | Keyword arguments (`UnplacedStyleKeywords`): `name: str \| None`, `key: str \| None`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`, `fill: ColorVal`, `fill_opacity: FloatVal`, `stroke: ColorVal`, `stroke_width: FloatVal`, `dash: FloatsVal`, `glow: FloatVal`, `glow_color: ColorVal`, `color: ColorVal`. |
 
 **Example:**
 
@@ -654,6 +657,50 @@ A vertical band between data `x0` and `x1`, up the plot, cut to the visible x ra
 | `x1` | `float` | required | A vertical band between data `x0` and `x1`, up the plot, cut to the visible x range (hidden outside it); it follows zooms. |
 | `enter_with_axes` | `bool` | `True` |   |
 | `**props` | `Unpack[UnplacedStyleKeywords]` | variadic | Keyword arguments (`UnplacedStyleKeywords`): `name: str \| None`, `key: str \| None`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`, `fill: ColorVal`, `fill_opacity: FloatVal`, `stroke: ColorVal`, `stroke_width: FloatVal`, `dash: FloatsVal`, `glow: FloatVal`, `glow_color: ColorVal`, `color: ColorVal`. |
+
+<a id="axes-vector"></a>
+#### `k.Axes.vector` *(method)*
+
+```python
+ax.vector(
+    v: tuple[FloatVal, FloatVal],
+    at: tuple[FloatVal, FloatVal] = (0.0, 0.0),
+    *,
+    label: str | None = None,
+    components: bool = False,
+    color: ColorLike | None = None,
+    size: float = 0.3,
+    enter_with_axes: bool = True,
+) -> AxesVector
+```
+
+An arrow of components `v` from the data point `at=`, in data units; both are signals, so `vector.to(v=(2, 1))` turns it and it follows zooms. `components=True` adds its dashed x and y components (labelled with `label=`). `a + b` is the resultant, shown tip to tail by `k.vector_sum(a, b, a + b)`.
+
+**Parameters:**
+
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `v` | `tuple[FloatVal, FloatVal]` | required | An arrow of components `v` from the data point `at=`, in data units; both are signals, so `vector.to(v=(2, 1))` turns it and it follows zooms. |
+| `at` | `tuple[FloatVal, FloatVal]` | `(0.0, 0.0)` | An arrow of components `v` from the data point `at=`, in data units; both are signals, so `vector.to(v=(2, 1))` turns it and it follows zooms. |
+| `label` | `str \| None` | `None` | `components=True` adds its dashed x and y components (labelled with `label=`). |
+| `components` | `bool` | `False` | `components=True` adds its dashed x and y components (labelled with `label=`). |
+| `color` | `ColorLike \| None` | `None` |   |
+| `size` | `float` | `0.3` |   |
+| `enter_with_axes` | `bool` | `True` |   |
+
+**Example:**
+
+```python
+@k.scene
+def forces(s: k.Scene):
+    ax = k.Axes(x=(-1, 6, 1), y=(-1, 5, 1), grid=True).place(at="center")
+    a = ax.vector((3, 1), label="F", components=True)
+    b = ax.vector((1, 2.5), label="G")
+    s.play(k.draw(ax))
+    s.play(k.vector_sum(a, b, a + b))
+```
+
+**See also:** [`k.vector_sum`](#k-vector_sum), [`k.Arrow`](objects.md#k-arrow).
 
 <a id="axes-vline"></a>
 #### `k.Axes.vline` *(method)*
@@ -919,7 +966,7 @@ def number_line(s: k.Scene):
 
 **See also:** [`k.Axes`](#k-axes), [`ax.point`](#axes-point).
 
-Inherited from [`k.Axes`](#k-axes): [`map_x`](#axes-map_x), [`map_y`](#axes-map_y), [`local_point`](#axes-local_point), [`point`](#axes-point), [`add`](#axes-add), [`origin`](#axes-origin), [`in_view`](#axes-in_view), [`plot`](#axes-plot), [`dot`](#axes-dot), [`area`](#axes-area), [`segment`](#axes-segment), [`hband`](#axes-hband), [`vband`](#axes-vband), [`vline`](#axes-vline), [`hline`](#axes-hline), [`scatter`](#axes-scatter), [`parametric`](#axes-parametric), [`bars`](#axes-bars), [`zoom_to`](#axes-zoom_to).
+Inherited from [`k.Axes`](#k-axes): [`map_x`](#axes-map_x), [`map_y`](#axes-map_y), [`local_point`](#axes-local_point), [`point`](#axes-point), [`add`](#axes-add), [`origin`](#axes-origin), [`in_view`](#axes-in_view), [`plot`](#axes-plot), [`dot`](#axes-dot), [`area`](#axes-area), [`segment`](#axes-segment), [`hband`](#axes-hband), [`vband`](#axes-vband), [`vector`](#axes-vector), [`vline`](#axes-vline), [`hline`](#axes-hline), [`scatter`](#axes-scatter), [`parametric`](#axes-parametric), [`bars`](#axes-bars), [`zoom_to`](#axes-zoom_to).
 Inherited from [`k.Group`](objects.md#k-group): [`children`](objects.md#group-children), [`to`](objects.md#group-to), [`swap`](objects.md#group-swap), [`insert`](objects.md#group-insert), [`pop`](objects.md#group-pop), [`fit`](objects.md#group-fit).
 Inherited from [`k.Node`](object-state.md#k-node): [`set`](object-state.md#node-set), [`unbind`](object-state.md#node-unbind), [`edge`](object-state.md#node-edge), [`age`](object-state.md#node-age), [`entered`](object-state.md#node-entered), [`exited`](object-state.md#node-exited), [`copy`](object-state.md#node-copy), [`place`](object-state.md#node-place), [`to_place`](object-state.md#node-to_place), [`unpin`](object-state.md#node-unpin).
 
@@ -1136,6 +1183,43 @@ Animated return to the untransformed plane.
 | Name | Type | Default | Description |
 | --- | --- | --- | --- |
 | `**kw` | `Unpack[AnimationTiming]` | variadic | Keyword arguments (`AnimationTiming`): `duration: float \| None`, `ease: EaseLike \| None`, `delay: float`. |
+
+<a id="k-vector_sum"></a>
+### `k.vector_sum` *(function)*
+
+```python
+k.vector_sum(
+    a: AxesVector,
+    b: AxesVector,
+    resultant: AxesVector,
+    *,
+    duration: float = 1.0,
+) -> Animation
+```
+
+Adds two axes vectors tip to tail: `b` slides so its tail sits on `a`'s tip, then the resultant (`a + b`) is drawn from `a`'s tail.
+
+**Parameters:**
+
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `a` | `AxesVector` | required | Adds two axes vectors tip to tail: `b` slides so its tail sits on `a`'s tip, then the resultant (`a + b`) is drawn from `a`'s tail. |
+| `b` | `AxesVector` | required | Adds two axes vectors tip to tail: `b` slides so its tail sits on `a`'s tip, then the resultant (`a + b`) is drawn from `a`'s tail. |
+| `resultant` | `AxesVector` | required | Adds two vectors tip to tail: `b` slides so its tail sits on `a`'s tip, then `resultant` (from `a + b`) is drawn from `a`'s tail to the end of the chain. |
+| `duration` | `float` | `1.0` |   |
+
+**Example:**
+
+```python
+@k.scene
+def resultant(s: k.Scene):
+    ax = k.Axes(x=(0, 6, 1), y=(0, 4, 1)).place(at="center")
+    a, b = ax.vector((3, 0), label="a"), ax.vector((1, 3), label="b")
+    s.play(k.draw(ax))
+    s.play(k.vector_sum(a, b, a + b, duration=0.8))
+```
+
+**See also:** [`ax.vector`](#axes-vector).
 
 <a id="plot"></a>
 ### `Plot` *(class)*
@@ -1598,7 +1682,7 @@ def lines(s: k.Scene):
 
 - [`to`](#linechart-to): `chart.to(data=df2)`: the lines morph to the new values (plus any other props).
 
-Inherited from [`k.Axes`](#k-axes): [`map_x`](#axes-map_x), [`map_y`](#axes-map_y), [`local_point`](#axes-local_point), [`point`](#axes-point), [`add`](#axes-add), [`origin`](#axes-origin), [`in_view`](#axes-in_view), [`plot`](#axes-plot), [`dot`](#axes-dot), [`area`](#axes-area), [`segment`](#axes-segment), [`hband`](#axes-hband), [`vband`](#axes-vband), [`vline`](#axes-vline), [`hline`](#axes-hline), [`scatter`](#axes-scatter), [`parametric`](#axes-parametric), [`bars`](#axes-bars), [`zoom_to`](#axes-zoom_to).
+Inherited from [`k.Axes`](#k-axes): [`map_x`](#axes-map_x), [`map_y`](#axes-map_y), [`local_point`](#axes-local_point), [`point`](#axes-point), [`add`](#axes-add), [`origin`](#axes-origin), [`in_view`](#axes-in_view), [`plot`](#axes-plot), [`dot`](#axes-dot), [`area`](#axes-area), [`segment`](#axes-segment), [`hband`](#axes-hband), [`vband`](#axes-vband), [`vector`](#axes-vector), [`vline`](#axes-vline), [`hline`](#axes-hline), [`scatter`](#axes-scatter), [`parametric`](#axes-parametric), [`bars`](#axes-bars), [`zoom_to`](#axes-zoom_to).
 Inherited from [`k.Group`](objects.md#k-group): [`children`](objects.md#group-children), [`swap`](objects.md#group-swap), [`insert`](objects.md#group-insert), [`pop`](objects.md#group-pop), [`fit`](objects.md#group-fit).
 Inherited from [`k.Node`](object-state.md#k-node): [`set`](object-state.md#node-set), [`unbind`](object-state.md#node-unbind), [`edge`](object-state.md#node-edge), [`age`](object-state.md#node-age), [`entered`](object-state.md#node-entered), [`exited`](object-state.md#node-exited), [`copy`](object-state.md#node-copy), [`place`](object-state.md#node-place), [`to_place`](object-state.md#node-to_place), [`unpin`](object-state.md#node-unpin).
 

@@ -37,6 +37,9 @@ Shapes, groups, images, SVG and mass objects (points, vector fields, stream line
 - [`k.TitleCard`](#k-titlecard): An episode's opening card: the title, a `kicker=` above it, an accent rule under it and a `subtitle=`.
 - [`k.EndCard`](#k-endcard): What comes next: `heading=` ("Next") over the next title, then `brand=`, `series=` and an `invite=`.
 - [`k.LowerThird`](#k-lowerthird): A name and a role beside an accent bar, for a corner (`side="right"` mirrors it); place it as usual.
+- [`k.BrowserWindow`](#k-browserwindow): Device frames that hold content, styled to the theme: `k.BrowserWindow(content, url=, w=, h=)` (dots and an address bar), `k.Phone(content, w=, h=)` and `k.Laptop(content, w=)`.
+- [`k.Laptop`](#k-laptop): `k.Laptop(content, w=7)`: a laptop screen in its bezel above a keyboard base; the content fills the screen.
+- [`k.Phone`](#k-phone): `k.Phone(content, w=2.4, h=5)`: a phone body with its screen, a camera pill and a home bar; the content fills the screen.
 - [`k.Epicycles`](#k-epicycles): The Fourier series of a closed path (points as tuples or complex numbers), as a chain of `n` rotating circles, largest first, whose tip traces the path; or `coefficients=` (frequency → complex amplitude) directly.
 - [`k.Icon`](#k-icon): A built-in icon, drawn with strokes on a square of side `size=`: `"check"`, `"x"`, `"warning"`, `"lightbulb"`, `"gear"`, `"user"`, `"cpu"`, … (`k.ICON_NAMES` lists them).
 - [`k.ICON_NAMES`](#k-icon_names): A built-in icon, drawn with strokes on a square of side `size=`: `"check"`, `"x"`, `"warning"`, `"lightbulb"`, `"gear"`, `"user"`, `"cpu"`, … (`k.ICON_NAMES` lists them).
@@ -2223,6 +2226,109 @@ Inherited from [`k.Node`](object-state.md#k-node): [`set`](object-state.md#node-
 ```python
 lowerthird.enter() -> Animation
 ```
+
+<a id="k-browserwindow"></a>
+### `k.BrowserWindow` *(class)*
+
+```python
+k.BrowserWindow(
+    content: Node | None = None,
+    *,
+    url: str = "example.com",
+    w: float = 8.0,
+    h: float = 5.0,
+    **props: Unpack[TransformKeywords],
+)
+```
+
+Device frames that hold content, styled to the theme: `k.BrowserWindow(content, url=, w=, h=)` (dots and an address bar), `k.Phone(content, w=, h=)` and `k.Laptop(content, w=)`. The content sits in the screen, scaled down to fit when it is larger. Parts such as `window.page`, `phone.screen`, `laptop.base` and `.content`.
+
+**Parameters:**
+
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `content` | `Node \| None` | `None` |   |
+| `url` | `str` | `"example.com"` | Device frames that hold content, styled to the theme: `k.BrowserWindow(content, url=, w=, h=)` (dots and an address bar), `k.Phone(content, w=, h=)` and `k.Laptop(content, w=)`. |
+| `w` | `float` | `8.0` | Device frames that hold content, styled to the theme: `k.BrowserWindow(content, url=, w=, h=)` (dots and an address bar), `k.Phone(content, w=, h=)` and `k.Laptop(content, w=)`. |
+| `h` | `float` | `5.0` | Device frames that hold content, styled to the theme: `k.BrowserWindow(content, url=, w=, h=)` (dots and an address bar), `k.Phone(content, w=, h=)` and `k.Laptop(content, w=)`. |
+| `**props` | `Unpack[TransformKeywords]` | variadic | Keyword arguments (`TransformKeywords`): `name: str \| None`, `key: str \| None`, `x: FloatVal`, `y: FloatVal`, `position: VecVal`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`. |
+
+Props inherited from [`k.Node`](object-state.md#k-node): `x`, `y`, `rotate`, `scale`, `scale_x`, `scale_y`, `anchor`, `opacity`, `z`, `visible`, `bleed`.
+
+**Example:**
+
+```python
+@k.scene
+def screens(s: k.Scene):
+    page = k.BrowserWindow(k.Text("Docs", size=0.6), url="kinemo.dev/docs", w=6, h=3.6).place(at=(-2.5, 0))
+    phone = k.Phone(k.Circle(r=0.5, fill=k.GREEN, fill_opacity=1), w=1.8, h=3.6).place(at=(3, 0))
+    s.play(k.fade_in(page, phone))
+```
+
+**See also:** [`k.Terminal`](text.md#k-terminal), [`k.Card`](#k-card).
+
+Inherited from [`k.Group`](#k-group): [`children`](#group-children), [`to`](#group-to), [`swap`](#group-swap), [`insert`](#group-insert), [`pop`](#group-pop), [`fit`](#group-fit).
+Inherited from [`k.Node`](object-state.md#k-node): [`set`](object-state.md#node-set), [`unbind`](object-state.md#node-unbind), [`edge`](object-state.md#node-edge), [`age`](object-state.md#node-age), [`entered`](object-state.md#node-entered), [`exited`](object-state.md#node-exited), [`copy`](object-state.md#node-copy), [`place`](object-state.md#node-place), [`to_place`](object-state.md#node-to_place), [`unpin`](object-state.md#node-unpin).
+
+<a id="k-laptop"></a>
+### `k.Laptop` *(class)*
+
+```python
+k.Laptop(
+    content: Node | None = None,
+    *,
+    w: float = 7.0,
+    **props: Unpack[TransformKeywords],
+)
+```
+
+`k.Laptop(content, w=7)`: a laptop screen in its bezel above a keyboard base; the content fills the screen. Parts: `laptop.lid`, `laptop.screen`, `laptop.base`, `laptop.content`.
+
+Documented together with [`k.BrowserWindow`](#k-browserwindow).
+
+**Parameters:**
+
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `content` | `Node \| None` | `None` |   |
+| `w` | `float` | `7.0` | `k.Laptop(content, w=7)`: a laptop screen in its bezel above a keyboard base; the content fills the screen. |
+| `**props` | `Unpack[TransformKeywords]` | variadic | Keyword arguments (`TransformKeywords`): `name: str \| None`, `key: str \| None`, `x: FloatVal`, `y: FloatVal`, `position: VecVal`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`. |
+
+Props inherited from [`k.Node`](object-state.md#k-node): `x`, `y`, `rotate`, `scale`, `scale_x`, `scale_y`, `anchor`, `opacity`, `z`, `visible`, `bleed`.
+
+Inherited from [`k.Group`](#k-group): [`children`](#group-children), [`to`](#group-to), [`swap`](#group-swap), [`insert`](#group-insert), [`pop`](#group-pop), [`fit`](#group-fit).
+Inherited from [`k.Node`](object-state.md#k-node): [`set`](object-state.md#node-set), [`unbind`](object-state.md#node-unbind), [`edge`](object-state.md#node-edge), [`age`](object-state.md#node-age), [`entered`](object-state.md#node-entered), [`exited`](object-state.md#node-exited), [`copy`](object-state.md#node-copy), [`place`](object-state.md#node-place), [`to_place`](object-state.md#node-to_place), [`unpin`](object-state.md#node-unpin).
+
+<a id="k-phone"></a>
+### `k.Phone` *(class)*
+
+```python
+k.Phone(
+    content: Node | None = None,
+    *,
+    w: float = 2.4,
+    h: float = 5.0,
+    **props: Unpack[TransformKeywords],
+)
+```
+
+`k.Phone(content, w=2.4, h=5)`: a phone body with its screen, a camera pill and a home bar; the content fills the screen. Parts: `phone.body`, `phone.screen`, `phone.content`.
+
+Documented together with [`k.BrowserWindow`](#k-browserwindow).
+
+**Parameters:**
+
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `content` | `Node \| None` | `None` |   |
+| `w` | `float` | `2.4` | `k.Phone(content, w=2.4, h=5)`: a phone body with its screen, a camera pill and a home bar; the content fills the screen. |
+| `h` | `float` | `5.0` | `k.Phone(content, w=2.4, h=5)`: a phone body with its screen, a camera pill and a home bar; the content fills the screen. |
+| `**props` | `Unpack[TransformKeywords]` | variadic | Keyword arguments (`TransformKeywords`): `name: str \| None`, `key: str \| None`, `x: FloatVal`, `y: FloatVal`, `position: VecVal`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`. |
+
+Props inherited from [`k.Node`](object-state.md#k-node): `x`, `y`, `rotate`, `scale`, `scale_x`, `scale_y`, `anchor`, `opacity`, `z`, `visible`, `bleed`.
+
+Inherited from [`k.Group`](#k-group): [`children`](#group-children), [`to`](#group-to), [`swap`](#group-swap), [`insert`](#group-insert), [`pop`](#group-pop), [`fit`](#group-fit).
+Inherited from [`k.Node`](object-state.md#k-node): [`set`](object-state.md#node-set), [`unbind`](object-state.md#node-unbind), [`edge`](object-state.md#node-edge), [`age`](object-state.md#node-age), [`entered`](object-state.md#node-entered), [`exited`](object-state.md#node-exited), [`copy`](object-state.md#node-copy), [`place`](object-state.md#node-place), [`to_place`](object-state.md#node-to_place), [`unpin`](object-state.md#node-unpin).
 
 <a id="k-epicycles"></a>
 ### `k.Epicycles` *(class)*

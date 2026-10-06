@@ -543,6 +543,11 @@ def search(s: k.Scene):
 `x`, `warning`, `info`, `lightbulb`, `gear`, `user`, `cpu`, `database`, `globe`, `lock`,
 `mail`, `clock`, `chart`, ...) with strokes, so it can be drawn, recolored and animated like
 a shape: `k.draw(icon)`, `icon.to(stroke=k.RED)`.
+## Device frames
+
+`k.BrowserWindow(content, url=...)`, `k.Phone(content)` and `k.Laptop(content)` show a screen
+in context: the content sits in the screen, scaled down to fit when it is larger, and the
+frame follows the theme (dark or light).
 
 ## Series cards
 

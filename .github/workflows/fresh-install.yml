@@ -1,0 +1,95 @@
+name: fresh install
+
+# What a newcomer goes through: `pip install kinemo` from PyPI on a clean machine, then a new
+# project checked and rendered, each step timed in the run summary. Runs after each release
+# (the release's own `try` job tests the wheels before publishing; this tests what PyPI
+# serves), every Monday, and by hand for any version.
+
+on:
+  workflow_run:
+    workflows: [release]
+    types: [completed]
+  schedule:
+    - cron: "0 6 * * 1"
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version to install (empty: the latest)"
+        required: false
+
+permissions:
+  contents: read
+
+jobs:
+  install:
+    name: fresh install (${{ matrix.os }})
+    # After a release, only when it published (a tag, and the run succeeded).
+    if: github.event_name != 'workflow_run' || (github.event.workflow_run.conclusion == 'success' && startsWith(github.event.workflow_run.head_branch, 'v'))
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    defaults:
+      run:
+        shell: bash
+    steps:
+      # No checkout: nothing from the repository, only what PyPI serves.
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.x"
+      - name: Pick the version
+        env:
+          INPUT_VERSION: ${{ github.event.inputs.version }}
+          TAG: ${{ github.event.workflow_run.head_branch }}
+        run: |
+          version="${INPUT_VERSION:-}"
+          if [ -z "$version" ] && [ -n "${TAG:-}" ]; then version="${TAG#v}"; fi
+          echo "SPEC=kinemo${version:+==$version}" >> "$GITHUB_ENV"
+          echo "## ${{ matrix.os }}: kinemo${version:+ $version} on Python $(python -c 'import sys; print(sys.version.split()[0])')" >> "$GITHUB_STEP_SUMMARY"
+          echo "| step | seconds |" >> "$GITHUB_STEP_SUMMARY"
+          echo "|---|---|" >> "$GITHUB_STEP_SUMMARY"
+      - name: pip install
+        run: |
+          # A release just published can take a moment to reach the index.
+          start=$SECONDS
+          for attempt in 1 2 3 4 5 6; do
+            python -m pip install --no-cache-dir "$SPEC" && break
+            [ "$attempt" = 6 ] && exit 1
+            sleep 30
+          done
+          echo "| pip install | $((SECONDS - start)) |" >> "$GITHUB_STEP_SUMMARY"
+          python -c "import kinemo; print(kinemo.__version__)"
+      # Runner images may already have ffmpeg; when one does not, the missing-ffmpeg message
+      # is checked before installing it.
+      - name: Without ffmpeg, a clear message
+        run: |
+          if command -v ffmpeg >/dev/null; then echo "ffmpeg is preinstalled here"; exit 0; fi
+          kinemo new without-ffmpeg && cd without-ffmpeg
+          status=0; kinemo render scene.py > out.txt 2>&1 || status=$?
+          cat out.txt
+          test "$status" = 2
+          grep -q "install it:" out.txt
+          ! grep -q Traceback out.txt
+      - name: Install ffmpeg
+        run: |
+          case "$RUNNER_OS" in
+            Linux) command -v ffmpeg || (sudo apt-get update -q && sudo apt-get install -y -q ffmpeg) ;;
+            macOS) command -v ffmpeg || brew install ffmpeg ;;
+            Windows) command -v ffmpeg || choco install ffmpeg -y --no-progress ;;
+          esac
+      - name: kinemo doctor
+        run: kinemo doctor
+      - name: new, check, render
+        run: |
+          step() {
+            local name="$1"; shift
+            local start=$SECONDS
+            "$@"
+            echo "| $name | $((SECONDS - start)) |" >> "$GITHUB_STEP_SUMMARY"
+          }
+          step "kinemo new" kinemo new hello
+          cd hello
+          step "kinemo check" kinemo check scene.py
+          step "kinemo render" kinemo render scene.py
+          test -s out/intro.mp4

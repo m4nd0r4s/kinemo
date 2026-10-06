@@ -58,6 +58,8 @@ class PaintKeywords(TypedDict, total=False):
     stroke: ColorVal
     stroke_width: FloatVal
     dash: FloatsVal
+    glow: FloatVal
+    glow_color: ColorVal
 
 
 class ColorKeywords(TypedDict, total=False):

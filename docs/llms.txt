@@ -640,6 +640,15 @@ def arrow(s: k.Scene):
     s.add(a, b)
     s.play(k.draw(link))
 ```
+#### `k.Sector(r=1.0, angle=90.0, start_angle=0.0, *, inner=0.0, **props)`
+A pie slice from the center, or a ring slice with `inner=` (its inner radius): `r=`, `angle=` (degrees, counterclockwise; negative goes clockwise) and `start_angle=` from +x. Every prop animates, so a slice can open or turn. See also: `k.Arc`, `k.PieChart`.
+```python
+@k.scene
+def slice_(s: k.Scene):
+    wedge = k.Sector(r=2, angle=60, start_angle=90, inner=0.8, fill=k.YELLOW, fill_opacity=0.9).place(at="center")
+    s.play(k.draw(wedge))
+    s.play(wedge.to(angle=300), duration=1.5)
+```
 #### `k.Arc(r=1.0, start_angle=0.0, angle=90.0, **props)`
 Circular arc of radius `r`, starting at `start_angle` and sweeping `angle` degrees (counterclockwise). See also: `k.Circle`.
 ```python
@@ -729,6 +738,27 @@ def relayout(s: k.Scene):
     s.play(k.draw(g))
     s.play(g.relayout("circle"), duration=1.5)
 ```
+#### `k.Matrix(entries, *, brackets="[", size=0.5, column_gap=None, row_gap=None, **props)`
+A matrix whose entries are objects in a grid: numbers, TeX strings (typeset with `k.Math`) or any object, between `brackets=` (`"["`, `"("`, `"|"`, `"none"`). `m[i, j]` is an entry, `m.row(i)` / `m.column(j)` list them, `m.box(row=i)` frames a row to draw, and `a @ b` is the product of numeric matrices (a new matrix). See also: `k.matrix_product`, `k.Math`.
+```python
+@k.scene
+def grid(s: k.Scene):
+    m = k.Matrix([[1, 2], [3, 4]]).place(at="center")
+    s.play(k.fade_in(m))
+    s.play(k.draw(m.box(column=1)))
+    s.play(m[1, 0].to(color=k.YELLOW))
+```
+#### `k.matrix_product(a, b, product, *, step=0.8) -> Animation`
+Shows a product row by column: `k.matrix_product(a, b, a @ b)` draws the product's brackets, then for each entry indicates its row of `a` and its column of `b` while the entry appears (`step=` seconds each). See also: `k.Matrix`.
+```python
+@k.scene
+def product(s: k.Scene):
+    a = k.Matrix([[1, 2], [3, 4]]).place(at=(-3.5, 0))
+    b = k.Matrix([[5, 6], [7, 8]]).place(at=(-0.5, 0))
+    c = (a @ b).place(at=(3, 0))
+    s.play(k.fade_in(a, b))
+    s.play(k.matrix_product(a, b, c, step=0.6))
+```
 #### `k.Bits(value=0, width=8, *, signed=False, place_values=False, group=None, fields=None, size=0.5, color=None, **props)`
 A binary register: the bits of a value, most significant first, lit when 1. `bits.to(value=n)` flips the cells that change, from the least significant up. `signed=True` (two's complement), `place_values=True` (128 64 … 1 above), `group=4` (a gap every 4 bits) and `fields={"sign": (0, 1), ...}` (labelled ranges of cells). `bits.bit(0)` is the least significant cell (`.box`, `.digit`). See also: `k.Array`.
 ```python
@@ -766,6 +796,15 @@ def speaker(s: k.Scene):
     s.play(k.draw(who))
     s.wait(1)
     s.play(k.fade_out(who))
+```
+#### `k.Icon(icon, *, size=1.0, color=None, stroke_width=3.0, **props)`
+A built-in icon, drawn with strokes on a square of side `size=`: `"check"`, `"x"`, `"warning"`, `"lightbulb"`, `"gear"`, `"user"`, `"cpu"`, … (`k.ICON_NAMES` lists them). `color=` sets the stroke; `icon.to(stroke=...)` recolors it. An unknown name is K0105 with the closest names. See also: `k.SVG`.
+```python
+@k.scene
+def idea(s: k.Scene):
+    bulb = k.Icon("lightbulb", size=1.5, color=k.YELLOW).place(at="center")
+    s.play(k.draw(bulb))
+    s.play(bulb.to(stroke=k.ORANGE))
 ```
 #### `k.Image(path, width=None, height=None, **props)`
 Raster image (PNG or JPEG) drawn by the renderer, centered on its position. Without a size it is 3 units tall; with `width=` or `height=` the other side follows the file's aspect ratio (props `w` and `h`, animatable). Relative paths start from the folder of the scene file. Accepts `scale`, `rotate` and `opacity`; morphs and layout treat it as its rectangle, and the exported SVG embeds the file. See also: `k.SVG`, `k.morph`.
@@ -1151,7 +1190,7 @@ def determinant(s: k.Scene):
     s.play(plane.apply([[2, 1], [0, 1.5]]), duration=2)
     s.play(k.indicate(square))  # area 3 = det
 ```
-#### `ax.plot(fn, *, until=None, from_=None, domain=None, color=None, label=None, samples=160, enter_with_axes=True, **style) -> Plot`
+#### `ax.plot(fn, *, until=None, from_=None, domain=None, color=None, label=None, holes=(), samples=160, enter_with_axes=True, **style) -> Plot`
 Draws the curve `y = fn(x)` on the axes, with adaptive sampling. `fn` uses `k` functions (`k.sin`, `k.max`...), so the same function works for floats and signals. `until=`/`from_=` accept signals: the curve grows as the signal moves. `label=` puts a label at the end of the curve. See also: `curve.point_at`, `ax.area`, `k.sin`.
 ```python
 def wave(x: float) -> float:
@@ -1266,6 +1305,39 @@ def comfort(s: k.Scene):
     ax.plot(lambda h: 15 + 8 * k.sin((h - 9) * 3.14159 / 12))
     s.play(k.draw(ax))
 ```
+#### `ax.vector(v, at=(0.0, 0.0), *, label=None, components=False, color=None, size=0.3, enter_with_axes=True) -> AxesVector`
+An arrow of components `v` from the data point `at=`, in data units; both are signals, so `vector.to(v=(2, 1))` turns it and it follows zooms. `components=True` adds its dashed x and y components (labelled with `label=`). `a + b` is the resultant, shown tip to tail by `k.vector_sum(a, b, a + b)`. See also: `k.vector_sum`, `k.Arrow`.
+```python
+@k.scene
+def forces(s: k.Scene):
+    ax = k.Axes(x=(-1, 6, 1), y=(-1, 5, 1), grid=True).place(at="center")
+    a = ax.vector((3, 1), label="F", components=True)
+    b = ax.vector((1, 2.5), label="G")
+    s.play(k.draw(ax))
+    s.play(k.vector_sum(a, b, a + b))
+```
+#### `k.vector_sum(a, b, resultant, *, duration=1.0) -> Animation`
+Adds two axes vectors tip to tail: `b` slides so its tail sits on `a`'s tip, then the resultant (`a + b`) is drawn from `a`'s tail. See also: `ax.vector`.
+```python
+@k.scene
+def resultant(s: k.Scene):
+    ax = k.Axes(x=(0, 6, 1), y=(0, 4, 1)).place(at="center")
+    a, b = ax.vector((3, 0), label="a"), ax.vector((1, 3), label="b")
+    s.play(k.draw(ax))
+    s.play(k.vector_sum(a, b, a + b, duration=0.8))
+```
+#### `ax.dot(x, y, *, open=False, radius=0.09, enter_with_axes=True, **props) -> Dot`
+A dot at a data point that follows zooms; `open=True` draws it hollow (filled with the background) for an endpoint a piecewise function leaves out. `ax.plot(f, holes=[2])` puts open dots on a curve (at the limit of `f` where it is undefined): `curve.holes`. See also: `ax.plot`, `ax.segment`.
+```python
+@k.scene
+def piecewise(s: k.Scene):
+    ax = k.Axes(x=(0, 4, 1), y=(0, 6, 1)).place(at="center")
+    curve = ax.plot(lambda x: (x * x - 4) / (x - 2), holes=[2])
+    ax.dot(3, 1, open=True, color=k.RED)
+    ax.dot(3, 5, color=k.RED)
+    s.play(k.draw(ax))
+    s.play(k.indicate(curve.holes[0]))
+```
 #### `ax.origin() -> Expr[Vec]`
 Where the two axes cross, in the axes' own coordinates: the data origin clamped to the visible ranges. Reactive, so it moves with zooms. See also: `ax.add`, `k.Axes`.
 ```python
@@ -1334,6 +1406,19 @@ def energy(s: k.Scene):
     chart = k.BarChart({"country": ["PT", "ES"], "gwh": [50, 260]}, x="country", y="gwh").place(at="center")
     s.play(k.draw(chart))
     s.play(chart.to(data={"country": ["ES", "PT", "FR"], "gwh": [300, 80, 540]}), duration=2)
+```
+#### `k.PieChart(data, labels, values, *, key=None, radius=2.0, donut=0.0, color=None, percent=True, label_size=0.26, **props)`
+One slice per row of a table: `labels=` names the category column and `values=` the numbers; `donut=0.5` leaves a hole (a fraction of `radius=`). Slices start at the top and go clockwise, labelled outside with their percentage (narrow ones get a leader line). `pie.to(data=df2)` animates the shares; new keys grow in, missing ones shrink away. `pie.slice("IT")` is a slice (`.sector`, `.label`, `.percent`). See also: `k.BarChart`, `k.Sector`.
+```python
+MIX = {"source": ["Solar", "Wind", "Hydro", "Gas"], "twh": [10, 25, 30, 35]}
+LATER = {"source": ["Solar", "Wind", "Hydro", "Gas"], "twh": [35, 30, 25, 10]}
+
+@k.scene
+def mix(s: k.Scene):
+    pie = k.PieChart(MIX, labels="source", values="twh", donut=0.45).place(at="center")
+    s.play(k.draw(pie))
+    s.play(pie.to(data=LATER), duration=2)
+    s.play(k.indicate(pie.slice("Solar")))
 ```
 #### `k.LineChart(data, x, y, *, x_range=None, y_range=None, width=8.0, height=4.5, colors=None, dots=False, legend=True, **props)`
 A `k.Axes` with one line per `y=` column (one or several), connecting the table's points in `x=` order. `chart.to(data=df2)` morphs the lines point by point; the axis ranges stay fixed (use `y_range=` to cover all the data). See also: `k.Axes`, `k.BarChart`.

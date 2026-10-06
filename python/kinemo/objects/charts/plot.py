@@ -8,7 +8,7 @@ from ...reactive.expr import Expr, lift
 from ...reactive.native import sqrt, vec
 from ...reactive.tracer import trace_call
 from ..props import STYLE, PropSpec
-from ..shapes import Line, Shape
+from ..shapes import Dot, Line, Shape
 
 if TYPE_CHECKING:
     from ...reactive.native import FloatExpr
@@ -55,6 +55,8 @@ class Plot(Shape):
         _step: float
         #: The curve's label (only with `ax.plot(..., label=...)`).
         label: Text
+        #: Open dots at `ax.plot(..., holes=[...])`.
+        holes: list[Dot]
 
     def __init__(self, axes: "Axes", fn: PlotFunction, segments: list[list[tuple[float, float]]], clip: Vec | Expr[Vec], **props: Unpack[StyleKeywords]) -> None:
         object.__setattr__(self, "axes", axes)

@@ -52,6 +52,10 @@ fn backdrop(sample: &FrameSample, index: usize, scene_background: [f64; 3], visi
         if leaf.is_text || !leaf.revealed || !leaf.is_visible(visible_opacity) || !leaf.world_bbox.contains(center) {
             continue;
         }
+        // The box is a loose stand-in for some shapes (a pie slice): test the outline itself.
+        if leaf.outline.as_ref().is_some_and(|outline| !kurbo::Shape::contains(outline, center)) {
+            continue;
+        }
         let Some(fill) = leaf.fill else { continue };
         let alpha = fill[3] * leaf.fill_opacity * leaf.opacity;
         if alpha > visible_opacity {

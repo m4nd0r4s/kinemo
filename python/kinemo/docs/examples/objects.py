@@ -705,6 +705,27 @@ def speaker(s: k.Scene):
         related=("k.TitleCard",),
     ),
     DocEntry(
+        "k.Epicycles",
+        "Objects",
+        "The Fourier series of a closed path (points as tuples or complex numbers), as a chain of "
+        "`n` rotating circles, largest first, whose tip traces the path; or `coefficients=` "
+        "(frequency → complex amplitude) directly. `epi.run(turns=1)` turns the chain and the "
+        "curve appears behind the tip. Parts: `epi.circles`, `epi.arms`, `epi.curve`, `epi.tip`.",
+        '''
+import math
+import kinemo as k
+
+SQUARE = [(2 * math.copysign(min(1, abs(math.cos(a)) * 1.5), math.cos(a)), 2 * math.copysign(min(1, abs(math.sin(a)) * 1.5), math.sin(a))) for a in (2 * math.pi * i / 120 for i in range(120))]
+
+@k.scene
+def fourier(s: k.Scene):
+    epi = k.Epicycles(SQUARE, n=20).place(at="center")
+    s.play(k.draw(epi))
+    s.play(epi.run(turns=1, duration=4))
+''',
+        related=("k.Circle", "k.trace"),
+    ),
+    DocEntry(
         "k.Icon",
         "Objects",
         "A built-in icon, drawn with strokes on a square of side `size=`: `\"check\"`, `\"x\"`, "

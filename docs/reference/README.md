@@ -121,6 +121,7 @@ Shapes, groups, images, SVG and mass objects (points, vector fields, stream line
 - [`k.TitleCard`](objects.md#k-titlecard): An episode's opening card: the title, a `kicker=` above it, an accent rule under it and a `subtitle=`.
 - [`k.EndCard`](objects.md#k-endcard): What comes next: `heading=` ("Next") over the next title, then `brand=`, `series=` and an `invite=`.
 - [`k.LowerThird`](objects.md#k-lowerthird): A name and a role beside an accent bar, for a corner (`side="right"` mirrors it); place it as usual.
+- [`k.Epicycles`](objects.md#k-epicycles): The Fourier series of a closed path (points as tuples or complex numbers), as a chain of `n` rotating circles, largest first, whose tip traces the path; or `coefficients=` (frequency → complex amplitude) directly.
 - [`k.Icon`](objects.md#k-icon): A built-in icon, drawn with strokes on a square of side `size=`: `"check"`, `"x"`, `"warning"`, `"lightbulb"`, `"gear"`, `"user"`, `"cpu"`, … (`k.ICON_NAMES` lists them).
 - [`k.ICON_NAMES`](objects.md#k-icon_names): A built-in icon, drawn with strokes on a square of side `size=`: `"check"`, `"x"`, `"warning"`, `"lightbulb"`, `"gear"`, `"user"`, `"cpu"`, … (`k.ICON_NAMES` lists them).
 - [`k.Image`](objects.md#k-image): Raster image (PNG or JPEG) drawn by the renderer, centered on its position.

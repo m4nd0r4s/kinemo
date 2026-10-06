@@ -37,6 +37,7 @@ Shapes, groups, images, SVG and mass objects (points, vector fields, stream line
 - [`k.TitleCard`](#k-titlecard): An episode's opening card: the title, a `kicker=` above it, an accent rule under it and a `subtitle=`.
 - [`k.EndCard`](#k-endcard): What comes next: `heading=` ("Next") over the next title, then `brand=`, `series=` and an `invite=`.
 - [`k.LowerThird`](#k-lowerthird): A name and a role beside an accent bar, for a corner (`side="right"` mirrors it); place it as usual.
+- [`k.Epicycles`](#k-epicycles): The Fourier series of a closed path (points as tuples or complex numbers), as a chain of `n` rotating circles, largest first, whose tip traces the path; or `coefficients=` (frequency → complex amplitude) directly.
 - [`k.Icon`](#k-icon): A built-in icon, drawn with strokes on a square of side `size=`: `"check"`, `"x"`, `"warning"`, `"lightbulb"`, `"gear"`, `"user"`, `"cpu"`, … (`k.ICON_NAMES` lists them).
 - [`k.ICON_NAMES`](#k-icon_names): A built-in icon, drawn with strokes on a square of side `size=`: `"check"`, `"x"`, `"warning"`, `"lightbulb"`, `"gear"`, `"user"`, `"cpu"`, … (`k.ICON_NAMES` lists them).
 - [`k.Image`](#k-image): Raster image (PNG or JPEG) drawn by the renderer, centered on its position.
@@ -2222,6 +2223,98 @@ Inherited from [`k.Node`](object-state.md#k-node): [`set`](object-state.md#node-
 ```python
 lowerthird.enter() -> Animation
 ```
+
+<a id="k-epicycles"></a>
+### `k.Epicycles` *(class)*
+
+```python
+k.Epicycles(
+    points: Sequence[Any] | None = None,
+    n: int = 50,
+    *,
+    coefficients: Mapping[int, complex] | None = None,
+    color: ColorLike | None = None,
+    circle_color: ColorLike | None = None,
+    **props: Unpack[UnplacedKeywords],
+)
+```
+
+The Fourier series of a closed path (points as tuples or complex numbers), as a chain of `n` rotating circles, largest first, whose tip traces the path; or `coefficients=` (frequency → complex amplitude) directly. `epi.run(turns=1)` turns the chain and the curve appears behind the tip. Parts: `epi.circles`, `epi.arms`, `epi.curve`, `epi.tip`.
+
+**Parameters:**
+
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `points` | `Sequence[Any] \| None` | `None` | `k.Epicycles(points, n=50)`: the Fourier series of the closed path through `points` (tuples or complex numbers), drawn as a chain of `n` rotating circles, largest first, whose tip traces the path; or `coefficients={1: 1+0j, -1: 0.5j, ...}` directly. |
+| `n` | `int` | `50` | The Fourier series of a closed path (points as tuples or complex numbers), as a chain of `n` rotating circles, largest first, whose tip traces the path; or `coefficients=` (frequency → complex amplitude) directly. |
+| `coefficients` | `Mapping[int, complex] \| None` | `None` | The Fourier series of a closed path (points as tuples or complex numbers), as a chain of `n` rotating circles, largest first, whose tip traces the path; or `coefficients=` (frequency → complex amplitude) directly. |
+| `color` | `ColorLike \| None` | `None` |   |
+| `circle_color` | `ColorLike \| None` | `None` |   |
+| `**props` | `Unpack[UnplacedKeywords]` | variadic | Keyword arguments (`UnplacedKeywords`): `name: str \| None`, `key: str \| None`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`. |
+
+**Props** (animatable with `.to()`, settable with `.set()` or in the constructor):
+
+| Prop | Kind | Default | Interpolation |
+| --- | --- | --- | --- |
+| `t` | float | `0.0` | linear |
+
+Props inherited from [`k.Node`](object-state.md#k-node): `x`, `y`, `rotate`, `scale`, `scale_x`, `scale_y`, `anchor`, `opacity`, `z`, `visible`, `bleed`.
+
+**Example:**
+
+```python
+import math
+import kinemo as k
+
+SQUARE = [(2 * math.copysign(min(1, abs(math.cos(a)) * 1.5), math.cos(a)), 2 * math.copysign(min(1, abs(math.sin(a)) * 1.5), math.sin(a))) for a in (2 * math.pi * i / 120 for i in range(120))]
+
+@k.scene
+def fourier(s: k.Scene):
+    epi = k.Epicycles(SQUARE, n=20).place(at="center")
+    s.play(k.draw(epi))
+    s.play(epi.run(turns=1, duration=4))
+```
+
+**See also:** [`k.Circle`](#k-circle), [`k.trace`](stateful-systems.md#k-trace).
+
+**Members:**
+
+- [`enter`](#epicycles-enter): `k.draw(epi)`: the circles and arms are drawn, the tip appears (the curve waits for `run`).
+- [`run`](#epicycles-run): Turn the chain `turns` times at a steady speed (the tip traces the path once per turn; `ease=` for another speed profile).
+
+Inherited from [`k.Group`](#k-group): [`children`](#group-children), [`to`](#group-to), [`swap`](#group-swap), [`insert`](#group-insert), [`pop`](#group-pop), [`fit`](#group-fit).
+Inherited from [`k.Node`](object-state.md#k-node): [`set`](object-state.md#node-set), [`unbind`](object-state.md#node-unbind), [`edge`](object-state.md#node-edge), [`age`](object-state.md#node-age), [`entered`](object-state.md#node-entered), [`exited`](object-state.md#node-exited), [`copy`](object-state.md#node-copy), [`place`](object-state.md#node-place), [`to_place`](object-state.md#node-to_place), [`unpin`](object-state.md#node-unpin).
+
+<a id="epicycles-enter"></a>
+#### `k.Epicycles.enter` *(method)*
+
+```python
+epicycles.enter() -> Animation
+```
+
+`k.draw(epi)`: the circles and arms are drawn, the tip appears (the curve waits for `run`).
+
+<a id="epicycles-run"></a>
+#### `k.Epicycles.run` *(method)*
+
+```python
+epicycles.run(
+    turns: float = 1.0,
+    *,
+    duration: float | None = None,
+    ease: EaseLike | None = None,
+) -> Animation
+```
+
+Turn the chain `turns` times at a steady speed (the tip traces the path once per turn; `ease=` for another speed profile).
+
+**Parameters:**
+
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `turns` | `float` | `1.0` | Turn the chain `turns` times at a steady speed (the tip traces the path once per turn; `ease=` for another speed profile). |
+| `duration` | `float \| None` | `None` |   |
+| `ease` | `EaseLike \| None` | `None` | Turn the chain `turns` times at a steady speed (the tip traces the path once per turn; `ease=` for another speed profile). |
 
 <a id="k-icon"></a>
 ### `k.Icon` *(class)*

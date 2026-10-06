@@ -240,6 +240,13 @@ def shear(s: k.Scene):
     s.play(k.indicate(square))
 ```
 
+### Timelines
+
+`k.Timeline(events, range=(start, end))` lays events `(time, label)` along a time axis; each
+label takes the first row above or below the axis where it clears the others. With
+`reveal=True` the events wait for `tl.reveal(name)`, and `tl.zoom_to(range=(a, b))` pans and
+zooms like an axes.
+
 ## Data charts
 
 ### Where data comes from

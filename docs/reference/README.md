@@ -178,6 +178,7 @@ Axes, number lines, polar axes, plots and data charts.
 
 - [`k.PolarAxes`](charts.md#k-polaraxes): Polar axes (rings and spokes): `r=(0, r_max, step)`, `radius=` in units, `spokes=`.
 - [`k.Axes`](charts.md#k-axes): Cartesian axes with ticks, labels and an optional grid: `x=(min, max, step)`, `y=(min, max)`, `labels=("x", "y")`, `width=`/`height=` in units.
+- [`k.Timeline`](charts.md#k-timeline): Events along a time axis: `k.Timeline([(1687, "Principia"), ...], range=(1600, 2000))` draws labelled ticks and a marker per event, its label on the first row above or below the axis where it clears the others.
 - [`k.NumberLine`](charts.md#k-numberline): A horizontal number line: a `k.Axes` with only the x axis.
 - [`k.NumberPlane`](charts.md#k-numberplane): A coordinate grid with axes and the basis vectors î (green) and ĵ (red): `x=(min, max, step)`, `y=...`, `unit=` scene units per step.
 - [`Plot`](charts.md#plot): A curve `y = fn(x)` of an axes.

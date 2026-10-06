@@ -8,6 +8,7 @@ Axes, number lines, polar axes, plots and data charts.
 
 - [`k.PolarAxes`](#k-polaraxes): Polar axes (rings and spokes): `r=(0, r_max, step)`, `radius=` in units, `spokes=`.
 - [`k.Axes`](#k-axes): Cartesian axes with ticks, labels and an optional grid: `x=(min, max, step)`, `y=(min, max)`, `labels=("x", "y")`, `width=`/`height=` in units.
+- [`k.Timeline`](#k-timeline): Events along a time axis: `k.Timeline([(1687, "Principia"), ...], range=(1600, 2000))` draws labelled ticks and a marker per event, its label on the first row above or below the axis where it clears the others.
 - [`k.NumberLine`](#k-numberline): A horizontal number line: a `k.Axes` with only the x axis.
 - [`k.NumberPlane`](#k-numberplane): A coordinate grid with axes and the basis vectors î (green) and ĵ (red): `x=(min, max, step)`, `y=...`, `unit=` scene units per step.
 - [`Plot`](#plot): A curve `y = fn(x)` of an axes.
@@ -830,6 +831,123 @@ def zoom(s: k.Scene):
 ```
 
 **See also:** [`k.Axes`](#k-axes), [`ax.plot`](#axes-plot).
+
+<a id="k-timeline"></a>
+### `k.Timeline` *(class)*
+
+```python
+k.Timeline(
+    events: Sequence[tuple[float, str]],
+    *,
+    range: tuple[float, float] | None = None,
+    step: float | None = None,
+    width: float = 12.0,
+    reveal: bool = False,
+    color: ColorLike | None = None,
+    size: float = 0.26,
+    **props: Unpack[UnplacedKeywords],
+)
+```
+
+Events along a time axis: `k.Timeline([(1687, "Principia"), ...], range=(1600, 2000))` draws labelled ticks and a marker per event, its label on the first row above or below the axis where it clears the others. `reveal=True` keeps events hidden until `tl.reveal(name)`; `tl.zoom_to(range=(a, b))` pans and zooms (ticks are regenerated, events out of view hide). `tl.event(name)` is an event (`.marker`, `.stem`, `.label`).
+
+**Parameters:**
+
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `events` | `Sequence[tuple[float, str]]` | required |   |
+| `range` | `tuple[float, float] \| None` | `None` | Events along a time axis: `k.Timeline([(1687, "Principia"), ...], range=(1600, 2000))` draws labelled ticks and a marker per event, its label on the first row above or below the axis where it clears the others. |
+| `step` | `float \| None` | `None` |   |
+| `width` | `float` | `12.0` |   |
+| `reveal` | `bool` | `False` | `reveal=True` keeps events hidden until `tl.reveal(name)`; `tl.zoom_to(range=(a, b))` pans and zooms (ticks are regenerated, events out of view hide). |
+| `color` | `ColorLike \| None` | `None` |   |
+| `size` | `float` | `0.26` |   |
+| `**props` | `Unpack[UnplacedKeywords]` | variadic | Keyword arguments (`UnplacedKeywords`): `name: str \| None`, `key: str \| None`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`. |
+
+Props inherited from [`k.Axes`](#k-axes): `x_range`, `y_range`, `size`.
+
+Props inherited from [`k.Node`](object-state.md#k-node): `x`, `y`, `rotate`, `scale`, `scale_x`, `scale_y`, `anchor`, `opacity`, `z`, `visible`, `bleed`.
+
+**Example:**
+
+```python
+EVENTS = [(1687, "Principia"), (1859, "Darwin"), (1865, "Maxwell"), (1905, "Relativity")]
+
+@k.scene
+def history(s: k.Scene):
+    tl = k.Timeline(EVENTS, range=(1650, 1950), reveal=True).place(at="center")
+    s.play(k.draw(tl))
+    for _, name in EVENTS:
+        s.play(tl.reveal(name), duration=0.4)
+    s.play(tl.zoom_to(range=(1680, 1920)), duration=1.5)
+```
+
+**See also:** [`k.NumberLine`](#k-numberline), [`ax.zoom_to`](#axes-zoom_to).
+
+**Members:**
+
+- [`event`](#timeline-event): The event labelled `name`.
+- [`reveal`](#timeline-reveal): Show an event (for a timeline made with `reveal=True`).
+- [`zoom_to`](#timeline-zoom_to): Pan and zoom to the time span `range=(start, end)`.
+
+Inherited from [`k.Axes`](#k-axes): [`map_x`](#axes-map_x), [`map_y`](#axes-map_y), [`local_point`](#axes-local_point), [`point`](#axes-point), [`add`](#axes-add), [`origin`](#axes-origin), [`in_view`](#axes-in_view), [`plot`](#axes-plot), [`area`](#axes-area), [`segment`](#axes-segment), [`hband`](#axes-hband), [`vband`](#axes-vband), [`vline`](#axes-vline), [`hline`](#axes-hline), [`scatter`](#axes-scatter), [`parametric`](#axes-parametric), [`bars`](#axes-bars).
+Inherited from [`k.Group`](objects.md#k-group): [`children`](objects.md#group-children), [`to`](objects.md#group-to), [`swap`](objects.md#group-swap), [`insert`](objects.md#group-insert), [`pop`](objects.md#group-pop), [`fit`](objects.md#group-fit).
+Inherited from [`k.Node`](object-state.md#k-node): [`set`](object-state.md#node-set), [`unbind`](object-state.md#node-unbind), [`edge`](object-state.md#node-edge), [`age`](object-state.md#node-age), [`entered`](object-state.md#node-entered), [`exited`](object-state.md#node-exited), [`copy`](object-state.md#node-copy), [`place`](object-state.md#node-place), [`to_place`](object-state.md#node-to_place), [`unpin`](object-state.md#node-unpin).
+
+<a id="timeline-event"></a>
+#### `k.Timeline.event` *(method)*
+
+```python
+timeline.event(name: str) -> TimelineEvent
+```
+
+The event labelled `name`.
+
+**Parameters:**
+
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `name` | `str` | required | The event labelled `name`. |
+
+<a id="timeline-reveal"></a>
+#### `k.Timeline.reveal` *(method)*
+
+```python
+timeline.reveal(name: str, **kw: Unpack[AnimationTiming]) -> Animation
+```
+
+Show an event (for a timeline made with `reveal=True`).
+
+**Parameters:**
+
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `name` | `str` | required |   |
+| `**kw` | `Unpack[AnimationTiming]` | variadic | Keyword arguments (`AnimationTiming`): `duration: float \| None`, `ease: EaseLike \| None`, `delay: float`. |
+
+<a id="timeline-zoom_to"></a>
+#### `k.Timeline.zoom_to` *(method)*
+
+```python
+timeline.zoom_to(
+    *,
+    range: tuple[float, float] | None = None,
+    x: Sequence[float] | None = None,
+    y: Sequence[float] | None = None,
+    **kw: Unpack[AnimationTiming],
+) -> Animation
+```
+
+Pan and zoom to the time span `range=(start, end)`.
+
+**Parameters:**
+
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `range` | `tuple[float, float] \| None` | `None` | Pan and zoom to the time span `range=(start, end)`. |
+| `x` | `Sequence[float] \| None` | `None` |   |
+| `y` | `Sequence[float] \| None` | `None` |   |
+| `**kw` | `Unpack[AnimationTiming]` | variadic | Keyword arguments (`AnimationTiming`): `duration: float \| None`, `ease: EaseLike \| None`, `delay: float`. |
 
 <a id="k-numberline"></a>
 ### `k.NumberLine` *(class)*

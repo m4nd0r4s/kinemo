@@ -1114,6 +1114,19 @@ def custom_ticks(s: k.Scene):
     ax = k.Axes(x=(0, 30), y=(0, 1, 0.25), x_ticks=[4, 9, 16, 25], tick_format="{:.2f}").place(at="center")
     s.play(k.draw(ax))
 ```
+#### `k.Timeline(events, *, range=None, step=None, width=12.0, reveal=False, color=None, size=0.26, **props)`
+Events along a time axis: `k.Timeline([(1687, "Principia"), ...], range=(1600, 2000))` draws labelled ticks and a marker per event, its label on the first row above or below the axis where it clears the others. `reveal=True` keeps events hidden until `tl.reveal(name)`; `tl.zoom_to(range=(a, b))` pans and zooms (ticks are regenerated, events out of view hide). `tl.event(name)` is an event (`.marker`, `.stem`, `.label`). See also: `k.NumberLine`, `ax.zoom_to`.
+```python
+EVENTS = [(1687, "Principia"), (1859, "Darwin"), (1865, "Maxwell"), (1905, "Relativity")]
+
+@k.scene
+def history(s: k.Scene):
+    tl = k.Timeline(EVENTS, range=(1650, 1950), reveal=True).place(at="center")
+    s.play(k.draw(tl))
+    for _, name in EVENTS:
+        s.play(tl.reveal(name), duration=0.4)
+    s.play(tl.zoom_to(range=(1680, 1920)), duration=1.5)
+```
 #### `k.NumberLine(x=(0, 10, 1), *, width=10.0, **props)`
 A horizontal number line: a `k.Axes` with only the x axis. Use `nl.point(x, 0)` to position markers. See also: `k.Axes`, `ax.point`.
 ```python

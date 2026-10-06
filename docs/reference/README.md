@@ -12,6 +12,7 @@ Scenes, the timeline cursor and the blocks that shape time (`s.play`, `s.start`,
 
 - [`k.scene`](scene.md#k-scene): Turns a function `def name(s: k.Scene)` into a scene.
 - [`k.SceneDef`](scene.md#k-scenedef): A scene function plus its configuration.
+- [`k.scene_preset`](scene.md#k-scene_preset): A scene decorator with defaults of its own, for a series or a shared library: `episode = k.scene_preset(tail=1.0, theme="light")`, then `@episode` or `@episode(params=...)`.
 - [`k.Scene`](scene.md#k-scene-class): Timeline of one scene.
 - [`k.TimeSpan`](scene.md#k-timespan): Where a `play`/`start` landed.
 - [`k.Voice`](scene.md#k-voice): A narration line: when it starts and ends in the scene, and when each word is said.

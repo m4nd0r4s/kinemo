@@ -86,7 +86,7 @@ from .reactive.native import (
 from .reactive.spline import spline
 from .reactive.collections import ListSignal, list_signal as list
 from .reactive.signal import Signal, computed, lerp, signal
-from .scene.decorator import SceneDef, scene
+from .scene.decorator import SceneDef, scene, scene_preset
 from .scene.scene import Scene
 from .scene.timespan import TimeSpan
 from .audio.script import Script
@@ -130,7 +130,7 @@ __all__ = [
     "Points", "StreamLines", "VectorField",
     "Brace", "Image", "SVG",
     "Axes", "NumberLine", "PolarAxes", "BarChart", "LineChart", "Table", "Component", "Context", "Event", "EventInfo", "EventSource", "State", "intersect", "spline", "subtract", "union", "reparent", "Code", "Math", "morph", "Movie", "crossfade", "cut", "morph_cut", "movie", "ListSignal", "list", "flash", "follow", "squash", "Trail", "trace", "integrate", "simulate", "when", "Out", "Prop", "clip", "context", "field", "from_context",
-    "prop", "provide", "Terminal", "box", "cross", "encircle", "strike", "underline", "Angle", "RightAngle", "Card", "Gauge", "Callout", "Array", "NumberPlane", "Graph",
+    "prop", "provide", "Terminal", "box", "cross", "encircle", "strike", "underline", "Angle", "RightAngle", "Card", "Gauge", "Callout", "Array", "NumberPlane", "Graph", "scene_preset",
     "ArrowKeywords", "ColorKeywords", "PaintKeywords", "RectKeywords", "StyleKeywords", "TextKeywords", "TransformKeywords",
     "Animation", "Arc", "Arrow", "BLACK", "BLUE", "Bar", "Bool", "Choice", "Circle", "Color", "Column",
     "Diagnostic", "Dot", "Ellipse", "Expr", "Float", "GRAY", "GREEN", "Grid", "Group", "IR_VERSION", "Int",

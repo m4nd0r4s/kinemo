@@ -11,7 +11,7 @@ ENTRIES = (
         "Turns a function `def name(s: k.Scene)` into a scene. The body runs exactly once, "
         "in the build phase, and produces a timeline; the frame at time t is a pure function of t. "
         "The decorator arguments (size, fps, background, seed, tail, theme, parameters) take "
-        "precedence over `kinemo.toml`.",
+        "precedence over `kinemo.toml`; `preset=\"short\"` starts from a `[presets.short]` table there.",
         '''
 import kinemo as k
 
@@ -23,7 +23,26 @@ def hello(s: k.Scene):
     s.wait(1)
 ''',
         related=("Scene.play", "k.Text", "k.Int"),
-        signature='@k.scene(size="1080p", fps=60, background=None, seed=0, tail=0.5, theme=None, camera="2d", params=None, name=None)',
+        signature='@k.scene(size="1080p", fps=60, background=None, seed=0, tail=0.5, theme=None, camera="2d", params=None, name=None, preset=None)',
+    ),
+    DocEntry(
+        "k.scene_preset",
+        "Scene",
+        "A scene decorator with defaults of its own, for a series or a shared library: "
+        "`episode = k.scene_preset(tail=1.0, theme=\"light\")`, then `@episode` or "
+        "`@episode(params=...)`. It accepts the arguments of `@k.scene`; a decoration's own "
+        "arguments win over the preset's.",
+        '''
+import kinemo as k
+
+short = k.scene_preset(size="vertical", tail=1.0)
+
+@short  # as @k.scene(size="vertical", tail=1.0)
+def teaser(s: k.Scene):
+    title = k.Text("One minute of math").place(at="center")
+    s.play(k.write(title))
+''',
+        related=("k.scene",),
     ),
     DocEntry(
         "Scene.play",

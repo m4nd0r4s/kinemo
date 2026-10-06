@@ -4,6 +4,40 @@ All notable changes to kinemo are listed here. The project follows
 [semantic versioning](https://semver.org/); until 1.0, a minor version may change the API, and
 `kinemo upgrade` rewrites the forms it replaces.
 
+## 0.15.0
+
+Charts and series extras: new components for math, computing and data videos, tools a series
+needs (presets, shared components, title and end cards), and fixes to chart motion and emphasis.
+
+**Added**
+
+- **Math and data components:** `k.Matrix` (addressable entries, `a @ b`, `k.matrix_product`),
+  `k.Bits` (a binary register that flips; signed, place values, fields), `k.PieChart` and donut
+  charts on a native `k.Sector` shape, `k.ComplexPlane` (`cp.apply(1j)`, functions of `z`),
+  `k.Epicycles` (Fourier circles that draw a path), `k.Timeline` (events along a time axis,
+  labels kept apart, reveals and zooms).
+- **Axes:** `ax.segment` (clipped to the view), `ax.hband` / `ax.vband`, `ax.dot(open=True)` and
+  `ax.plot(holes=[...])`, `ax.vector(..., components=True)` with `a + b` and `k.vector_sum`.
+- **Look:** `glow=` and `glow_color=`, a soft halo rendered natively under shapes, lines, texts
+  and groups; `k.Icon` (30 built-in stroked icons); device frames `k.BrowserWindow`, `k.Phone`,
+  `k.Laptop`.
+- **Series tools:** `k.TitleCard`, `k.EndCard`, `k.LowerThird`; scene presets
+  (`[presets.<name>]` in kinemo.toml with `@k.scene(preset=)`, and `k.scene_preset(...)`);
+  `[python] paths` to share components across scene files, with project-wide reloads in
+  `kinemo dev`; a file's scenes are the ones it defines (component previews stay out of
+  episodes).
+- `k.Table(reserve=[later], widths=[...])` keeps column widths stable as rows arrive;
+  `row.swap(i, j, path="straight")` (and `insert`, `pop`, `to(children=)`).
+
+**Changed**
+
+- In `chart.to(data=...)`, bars that pass each other narrow and hide their labels mid-way.
+- `k.indicate(bar)` keeps the value label above the pulsing bar.
+- Emphasizing a group (an SVG element, a text) keeps the lightness of its parts apart, so
+  details stay visible.
+- W1003 tests the outline of a filled shape, not its box, when the box holds a text.
+- Documented `color=` on `k.Math` and its parts.
+
 ## 0.14.0
 
 A performance release: lints, frames and video encoding are several times faster, with the same

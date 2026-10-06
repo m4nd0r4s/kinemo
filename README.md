@@ -33,6 +33,19 @@ kinemo check scene.py      # errors, lints and timeline summary, without renderi
 kinemo render scene.py     # MP4 (also webm, mov, gif, png, slides)
 ```
 
+## The live preview
+
+`kinemo dev` opens the scene in your browser and rebuilds it on every save. The timeline
+shows each animation with its line; drag it to any instant, and the code view follows.
+
+![kinemo dev: the timeline scrubbed while the code view highlights the running line](docs/media/editor.gif)
+
+Click an object to see where each value came from (the constructor, a `place`, an animation)
+and edit the literals in place: dragging a number or picking a color writes it back to your
+source file.
+
+![kinemo dev: the inspector showing a dot's props and where each was set](docs/media/editor-inspector.png)
+
 ## Why kinemo
 
 - **See it while you write it.** `kinemo dev` re-renders on save and lets you scrub to any

@@ -10,9 +10,9 @@ Explanatory animations (math, algorithms, engineering, data) written in Python, 
 preview and a native core in Rust. The API was designed to be written by people and by AI
 without errors: one form per concept, full typing, and errors that already carry the fix.
 
-![A tangent sliding along a curve, with the code that makes it](docs/media/hero.gif)
+![A tangent sliding along a curve, with the code that makes it](https://raw.githubusercontent.com/m4nd0r4s/kinemo/main/docs/media/hero.gif)
 
-<sub>Made with kinemo: [docs/media/hero.py](docs/media/hero.py).</sub>
+<sub>Made with kinemo: [docs/media/hero.py](https://github.com/m4nd0r4s/kinemo/blob/main/docs/media/hero.py).</sub>
 
 ```python
 import kinemo as k
@@ -38,13 +38,13 @@ kinemo render scene.py     # MP4 (also webm, mov, gif, png, slides)
 `kinemo dev` opens the scene in your browser and rebuilds it on every save. The timeline
 shows each animation with its line; drag it to any instant, and the code view follows.
 
-![kinemo dev: the timeline scrubbed while the code view highlights the running line](docs/media/editor.gif)
+![kinemo dev: the timeline scrubbed while the code view highlights the running line](https://raw.githubusercontent.com/m4nd0r4s/kinemo/main/docs/media/editor.gif)
 
 Click an object to see where each value came from (the constructor, a `place`, an animation)
 and edit the literals in place: dragging a number or picking a color writes it back to your
 source file.
 
-![kinemo dev: the inspector showing a dot's props and where each was set](docs/media/editor-inspector.png)
+![kinemo dev: the inspector showing a dot's props and where each was set](https://raw.githubusercontent.com/m4nd0r4s/kinemo/main/docs/media/editor-inspector.png)
 
 ## Why kinemo
 
@@ -76,7 +76,7 @@ inspired kinemo. Choose by what you need:
 | Narration | Plugins | Built in: TTS or recorded audio, word timing, subtitles |
 
 Coming from Manim: `Create`, `.animate` and other Manim names are recognized and the error
-names the kinemo form; the [mental model](docs/guide/02-mental-model.md) explains the
+names the kinemo form; the [mental model](https://github.com/m4nd0r4s/kinemo/blob/main/docs/guide/02-mental-model.md) explains the
 differences.
 
 ## What kinemo does
@@ -128,7 +128,7 @@ narration (speech recognition).
 ### Status
 
 kinemo is before 1.0: the API can still change between minor versions. When it does,
-`kinemo upgrade scene.py` rewrites the old forms, and the [changelog](CHANGELOG.md) says what
+`kinemo upgrade scene.py` rewrites the old forms, and the [changelog](https://github.com/m4nd0r4s/kinemo/blob/main/CHANGELOG.md) says what
 changed.
 
 kinemo runs 100% on your machine: rendering is local, the `kinemo dev` preview listens only on
@@ -144,7 +144,7 @@ Questions, ideas and things you made go in
 ### From source
 
 Requirements: stable Rust, Python ≥ 3.11, [uv](https://github.com/astral-sh/uv) and `ffmpeg`.
-See [CONTRIBUTING.md](CONTRIBUTING.md) for the tests and conventions.
+See [CONTRIBUTING.md](https://github.com/m4nd0r4s/kinemo/blob/main/CONTRIBUTING.md) for the tests and conventions.
 
 ```bash
 uv venv .venv
@@ -190,21 +190,21 @@ crates/kinemo-py      PyO3 bindings (the only crate that knows about Python)
 
 ## Documentation
 
-Start with the [documentation index](docs/README.md): numbered guides from
-[getting started](docs/guide/01-getting-started.md) onwards, the complete
-[API reference](docs/reference/README.md), [examples](docs/examples/README.md) with
-rendered frames, and [caveats](docs/caveats.md). The design document is
-[docs/specs.md](docs/specs.md).
+Start with the [documentation index](https://github.com/m4nd0r4s/kinemo/blob/main/docs/README.md): numbered guides from
+[getting started](https://github.com/m4nd0r4s/kinemo/blob/main/docs/guide/01-getting-started.md) onwards, the complete
+[API reference](https://github.com/m4nd0r4s/kinemo/blob/main/docs/reference/README.md), [examples](https://github.com/m4nd0r4s/kinemo/blob/main/docs/examples/README.md) with
+rendered frames, and [caveats](https://github.com/m4nd0r4s/kinemo/blob/main/docs/caveats.md). The design document is
+[docs/specs.md](https://github.com/m4nd0r4s/kinemo/blob/main/docs/specs.md).
 
 The same docs, with a landing page and the examples as videos, build into a static SvelteKit
-website: see [website/README.md](website/README.md).
+website: see [website/README.md](https://github.com/m4nd0r4s/kinemo/blob/main/website/README.md).
 
 ## License
 
-Licensed under either of [Apache License 2.0](LICENSE-APACHE) or [MIT](LICENSE-MIT), at your
+Licensed under either of [Apache License 2.0](https://github.com/m4nd0r4s/kinemo/blob/main/LICENSE-APACHE) or [MIT](https://github.com/m4nd0r4s/kinemo/blob/main/LICENSE-MIT), at your
 option. Unless you state otherwise, any contribution you submit for inclusion in kinemo is
 dual-licensed as above, without any additional terms.
 
-The embedded DejaVu fonts follow [their license](assets/fonts/LICENSE_DEJAVU). The licenses of
-the Rust crates compiled into the wheels are in [THIRD_PARTY_LICENSES.md](THIRD_PARTY_LICENSES.md)
+The embedded DejaVu fonts follow [their license](https://github.com/m4nd0r4s/kinemo/blob/main/assets/fonts/LICENSE_DEJAVU). The licenses of
+the Rust crates compiled into the wheels are in [THIRD_PARTY_LICENSES.md](https://github.com/m4nd0r4s/kinemo/blob/main/THIRD_PARTY_LICENSES.md)
 (`scripts/third_party_licenses.py` regenerates it).

@@ -120,7 +120,7 @@ from .values.color import (
 )
 from .values.vec import Vec
 
-__version__ = "0.14.0"
+__version__ = "0.15.0"
 
 #: Global scene time in seconds (read-only signal).
 time: Expr[float] = Time()

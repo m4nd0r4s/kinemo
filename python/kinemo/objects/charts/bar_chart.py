@@ -16,6 +16,7 @@ from ...anim.prop import PropTo
 from ...anim.verbs import draw, grow
 from ...data.arrow import column, columns
 from ...diagnostics import KinemoError
+from ...reactive.native import vec
 from ..groups import Group, Reorder
 from ..node import Node
 from ..props import PropSpec, accent
@@ -34,6 +35,8 @@ if TYPE_CHECKING:
 
 CATEGORY_GAP = 0.3
 VALUE_GAP = 0.1
+#: Width of a bar, relative to its slot, when it passes another during a data transition.
+CROSSING_WIDTH = 0.35
 #: Room left of the plot for tick labels and above/below it for value and category labels.
 BOUNDS_LEFT = 1.1
 BOUNDS_MARGIN = 0.55
@@ -105,22 +108,40 @@ class ChartBar(Group):
         if labels:
             text = _value_text(v, decimals)
             value_label = Text(text, size=label_size).place(above=rect, gap=VALUE_GAP)
+            # Rides on the pulse of `k.indicate(bar)`: the bar grows from its base by
+            # `(pulse - 1) × height`, and the label rises as much, so it stays above the bar.
+            pulse = rect._sig("_pulse")
+            self._scene._push_set(value_label._sig("_shift"), vec(0.0, (pulse - 1.0) * h), value_label._span)
             object.__setattr__(self, "value_label", value_label)
             object.__setattr__(value_label, "_part", "value_label")
             parts.append(value_label)
         return parts
 
+    def _labels(self) -> list[Node]:
+        labels: list[Node] = [self.category]
+        if "value_label" in self.__dict__:
+            labels.append(self.value_label)
+        return labels
+
     def _indicate_target(self) -> Node:
         return self.rect
 
     def _grow_parts(self) -> tuple[list[Node], list[Node]]:
-        faded: list[Node] = [self.category]
-        if "value_label" in self.__dict__:
-            faded.append(self.value_label)
-        return [self.rect], faded
+        return [self.rect], self._labels()
 
     def _color_targets(self) -> list[tuple[Node, str]]:
         return [(self.rect, "fill")]
+
+
+def _crossing_keys(before: list[str], after: list[str]) -> set[str]:
+    """Keys whose order relative to another kept key changes: their bars pass each other."""
+    position = {key: i for i, key in enumerate(before)}
+    crossing: set[str] = set()
+    for i, a in enumerate(after):
+        for b in after[i + 1 :]:
+            if position[a] > position[b]:
+                crossing.update((a, b))
+    return crossing
 
 
 def _value_text(v: Expr[float], decimals: int) -> Callable[[], str]:
@@ -269,6 +290,11 @@ class BarChart(Group):
             del bars[k]
         entering: list[ChartBar] = []
         renamed: list[tuple[Any, Any]] = []
+        crossing = _crossing_keys([k for k in self._order if k in wanted], [r.key for r in rows if r.key in bars])
+        # Bars that pass each other narrow and hide their labels at the midpoint, so they do
+        # not overlap on the way (two halves: narrow and fade, then widen and show).
+        half_out: list[tuple[Any, Any]] = []
+        half_in: list[tuple[Any, Any]] = []
         n = len(rows)
         for i, row in enumerate(rows):
             x, bar_width = self._slot(i, n)
@@ -281,13 +307,21 @@ class BarChart(Group):
             elif self._categories[row.key] != row.category:
                 renamed.append((bar.category._sig("text"), row.category))
             self._categories[row.key] = row.category
-            targets += [(bar._sig("value"), row.value), (bar._sig("x"), x), (bar._sig("bar_width"), bar_width)]
+            targets += [(bar._sig("value"), row.value), (bar._sig("x"), x)]
+            if row.key in crossing:
+                narrow = min(bar_width, float(bar.bar_width.now)) * CROSSING_WIDTH
+                half_out += [(bar._sig("bar_width"), narrow), *((label._sig("opacity"), 0.0) for label in bar._labels())]
+                half_in += [(bar._sig("bar_width"), bar_width), *((label._sig("opacity"), 1.0) for label in bar._labels())]
+            else:
+                targets.append((bar._sig("bar_width"), bar_width))
         group: Group = self.bars
         if entering:
             Reorder(group, group._children_at(start) + entering, span, entering=entering)._emit(s, start, 0.0, ease)
         set_at(s, renamed, start, span)
         targets += [(b._sig(p), 0.0) for b in leaving for p in ("value", "opacity", "bar_width")]
         animate(s, targets, start, duration, ease, span)
+        animate(s, half_out, start, duration / 2, ease, span)
+        animate(s, half_in, start + duration / 2, duration / 2, ease, span)
         for b in leaving:
             s._exit(b, start + duration)
         object.__setattr__(self, "_order", [r.key for r in rows])

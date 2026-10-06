@@ -2,7 +2,7 @@
 
 # kinemo API reference
 
-kinemo 0.15.0 (IR 1.0.0). Every name in `kinemo.__all__` and every public method of a public class, with signatures, parameters, props and canonical examples. Examples start with `import kinemo as k` and pass `kinemo check --strict`.
+kinemo 0.15.1 (IR 1.0.0). Every name in `kinemo.__all__` and every public method of a public class, with signatures, parameters, props and canonical examples. Examples start with `import kinemo as k` and pass `kinemo check --strict`.
 
 Also: [Diagnostics](diagnostics.md), [Command line](cli.md), [Configuration](configuration.md).
 

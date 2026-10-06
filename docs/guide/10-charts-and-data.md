@@ -321,13 +321,17 @@ def day(s: k.Scene):
 ### `k.Table`
 
 ```python signature
-k.Table(data, columns=None, *, size=0.32, header_color=None, rule=True)
+k.Table(data, columns=None, *, size=0.32, header_color=None, rule=True, widths=None, reserve=())
 ```
 
 A table of `k.Text` with a highlighted header. `columns=` selects and orders the columns.
 `table.to(data=df2)` updates the cells: changed texts fade out and back in with the new
 value, new rows fade in while the table makes room, and removed rows fade out.
 `table.cells[r][c]` are the body cells and `table.header[c]` the header texts.
+
+Columns are as wide as their longest text. For a table that will grow, `reserve=[AFTER]`
+sizes them for the data shown later too, so they keep their width when rows arrive;
+`widths=[2.0, None]` sets minimum widths per column (in units).
 
 ```python
 import pyarrow as pa
@@ -340,7 +344,7 @@ AFTER = pa.table({"site": ["A", "B", "C"], "mw": [14.0, 8.0, 3.2]})
 
 @k.scene
 def sites(s: k.Scene):
-    table = k.Table(BEFORE, size=0.4).place(at="center")
+    table = k.Table(BEFORE, size=0.4, reserve=[AFTER]).place(at="center")
     s.play(k.fade_in(table))
     s.play(table.to(data=AFTER))
     s.play(table.cells[0][1].to(color=k.YELLOW))

@@ -1470,11 +1470,13 @@ k.Table(
     size: float = 0.32,
     header_color: ColorLike | None = None,
     rule: bool = True,
+    widths: Sequence[float | None] | None = None,
+    reserve: Sequence[DataTable] = (),
     **props: Unpack[TransformKeywords],
 )
 ```
 
-Table of `k.Text` with a highlighted header; `columns=` selects and orders the columns. `table.to(data=df2)` updates the cells: changed texts flash with the new value, new rows appear and removed ones leave. `table.cells[r][c]` are the cells.
+Table of `k.Text` with a highlighted header; `columns=` selects and orders the columns. `table.to(data=df2)` updates the cells: changed texts flash with the new value, new rows appear and removed ones leave. `table.cells[r][c]` are the cells. Columns fit their text; `reserve=[df2]` sizes them for data shown later (they keep their width as rows arrive) and `widths=` sets minimum widths per column.
 
 **Parameters:**
 
@@ -1485,6 +1487,8 @@ Table of `k.Text` with a highlighted header; `columns=` selects and orders the c
 | `size` | `float` | `0.32` | `k.Table(df, columns=["pais", "gwh"], size=0.32)`. |
 | `header_color` | `ColorLike \| None` | `None` |   |
 | `rule` | `bool` | `True` |   |
+| `widths` | `Sequence[float \| None] \| None` | `None` | Columns fit their text; `reserve=[df2]` sizes them for data shown later (they keep their width as rows arrive) and `widths=` sets minimum widths per column. |
+| `reserve` | `Sequence[DataTable]` | `()` | Columns fit their text; `reserve=[df2]` sizes them for data shown later (they keep their width as rows arrive) and `widths=` sets minimum widths per column. |
 | `**props` | `Unpack[TransformKeywords]` | variadic | Keyword arguments (`TransformKeywords`): `name: str \| None`, `key: str \| None`, `x: FloatVal`, `y: FloatVal`, `position: VecVal`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`. |
 
 Props inherited from [`k.Node`](object-state.md#k-node): `x`, `y`, `rotate`, `scale`, `scale_x`, `scale_y`, `anchor`, `opacity`, `z`, `visible`, `bleed`.

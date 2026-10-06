@@ -578,6 +578,26 @@ def relayout(s: k.Scene):
         related=("k.Graph", "Graph.path"),
     ),
     DocEntry(
+        "k.Bits",
+        "Objects",
+        "A binary register: the bits of a value, most significant first, lit when 1. "
+        "`bits.to(value=n)` flips the cells that change, from the least significant up. "
+        "`signed=True` (two's complement), `place_values=True` (128 64 … 1 above), `group=4` "
+        "(a gap every 4 bits) and `fields={\"sign\": (0, 1), ...}` (labelled ranges of cells). "
+        "`bits.bit(0)` is the least significant cell (`.box`, `.digit`).",
+        '''
+import kinemo as k
+
+@k.scene
+def counting(s: k.Scene):
+    reg = k.Bits(13, width=8, place_values=True, group=4).place(at="center")
+    s.play(k.fade_in(reg))
+    s.play(reg.to(value=14))
+    s.play(k.indicate(reg.bit(0)))
+''',
+        related=("k.Array",),
+    ),
+    DocEntry(
         "k.TitleCard",
         "Objects",
         "An episode's opening card: the title, a `kicker=` above it, an accent rule under it and a "

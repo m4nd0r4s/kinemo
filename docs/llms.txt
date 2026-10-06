@@ -729,6 +729,16 @@ def relayout(s: k.Scene):
     s.play(k.draw(g))
     s.play(g.relayout("circle"), duration=1.5)
 ```
+#### `k.Bits(value=0, width=8, *, signed=False, place_values=False, group=None, fields=None, size=0.5, color=None, **props)`
+A binary register: the bits of a value, most significant first, lit when 1. `bits.to(value=n)` flips the cells that change, from the least significant up. `signed=True` (two's complement), `place_values=True` (128 64 … 1 above), `group=4` (a gap every 4 bits) and `fields={"sign": (0, 1), ...}` (labelled ranges of cells). `bits.bit(0)` is the least significant cell (`.box`, `.digit`). See also: `k.Array`.
+```python
+@k.scene
+def counting(s: k.Scene):
+    reg = k.Bits(13, width=8, place_values=True, group=4).place(at="center")
+    s.play(k.fade_in(reg))
+    s.play(reg.to(value=14))
+    s.play(k.indicate(reg.bit(0)))
+```
 #### `k.TitleCard(title, *, kicker=None, subtitle=None, accent=None, size=0.9, **props)`
 An episode's opening card: the title, a `kicker=` above it, an accent rule under it and a `subtitle=`. `k.draw(card)` fades the kicker in and writes the title, draws the rule, then shows the subtitle. Parts: `card.kicker`, `card.title`, `card.rule`, `card.subtitle`. See also: `k.EndCard`, `k.LowerThird`.
 ```python

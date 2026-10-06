@@ -30,6 +30,7 @@ Shapes, groups, images, SVG and mass objects (points, vector fields, stream line
 - [`k.Bar`](#k-bar): A value shown as a bar that grows from its base, with an optional label (`label=True`).
 - [`k.Group`](#k-group): Groups objects: transforms compose and opacity multiplies.
 - [`k.Graph`](#k-graph): Nodes and edges: `k.Graph(nodes, edges, layout=...)` with names as nodes and `(u, v)` or `(u, v, weight)` edges (arrows with `directed=True`).
+- [`k.Bits`](#k-bits): A binary register: the bits of a value, most significant first, lit when 1.
 - [`k.TitleCard`](#k-titlecard): An episode's opening card: the title, a `kicker=` above it, an accent rule under it and a `subtitle=`.
 - [`k.EndCard`](#k-endcard): What comes next: `heading=` ("Next") over the next title, then `brand=`, `series=` and an `invite=`.
 - [`k.LowerThird`](#k-lowerthird): A name and a role beside an accent bar, for a corner (`side="right"` mirrors it); place it as usual.
@@ -1716,6 +1717,105 @@ def network(s: k.Scene):
 ```
 
 **See also:** [`k.Graph`](#k-graph), [`graph.add_node`](#graph-add_node).
+
+<a id="k-bits"></a>
+### `k.Bits` *(class)*
+
+```python
+k.Bits(
+    value: int = 0,
+    width: int = 8,
+    *,
+    signed: bool = False,
+    place_values: bool = False,
+    group: int | None = None,
+    fields: Mapping[str, tuple[int, int]] | None = None,
+    size: float = 0.5,
+    color: ColorLike | None = None,
+    **props: Unpack[TransformKeywords],
+)
+```
+
+A binary register: the bits of a value, most significant first, lit when 1. `bits.to(value=n)` flips the cells that change, from the least significant up. `signed=True` (two's complement), `place_values=True` (128 64 … 1 above), `group=4` (a gap every 4 bits) and `fields={"sign": (0, 1), ...}` (labelled ranges of cells). `bits.bit(0)` is the least significant cell (`.box`, `.digit`).
+
+**Parameters:**
+
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `value` | `int` | `0` | `bits.to(value=n)` flips the cells that change, from the least significant up. |
+| `width` | `int` | `8` | `k.Bits(13, width=8)`: the bits of a value, most significant first. |
+| `signed` | `bool` | `False` | `signed=True` (two's complement), `place_values=True` (128 64 … 1 above), `group=4` (a gap every 4 bits) and `fields={"sign": (0, 1), ...}` (labelled ranges of cells). |
+| `place_values` | `bool` | `False` | `signed=True` (two's complement), `place_values=True` (128 64 … 1 above), `group=4` (a gap every 4 bits) and `fields={"sign": (0, 1), ...}` (labelled ranges of cells). |
+| `group` | `int \| None` | `None` | `signed=True` (two's complement), `place_values=True` (128 64 … 1 above), `group=4` (a gap every 4 bits) and `fields={"sign": (0, 1), ...}` (labelled ranges of cells). |
+| `fields` | `Mapping[str, tuple[int, int]] \| None` | `None` | `signed=True` (two's complement), `place_values=True` (128 64 … 1 above), `group=4` (a gap every 4 bits) and `fields={"sign": (0, 1), ...}` (labelled ranges of cells). |
+| `size` | `float` | `0.5` |   |
+| `color` | `ColorLike \| None` | `None` |   |
+| `**props` | `Unpack[TransformKeywords]` | variadic | Keyword arguments (`TransformKeywords`): `name: str \| None`, `key: str \| None`, `x: FloatVal`, `y: FloatVal`, `position: VecVal`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`. |
+
+Props inherited from [`k.Node`](object-state.md#k-node): `x`, `y`, `rotate`, `scale`, `scale_x`, `scale_y`, `anchor`, `opacity`, `z`, `visible`, `bleed`.
+
+**Example:**
+
+```python
+@k.scene
+def counting(s: k.Scene):
+    reg = k.Bits(13, width=8, place_values=True, group=4).place(at="center")
+    s.play(k.fade_in(reg))
+    s.play(reg.to(value=14))
+    s.play(k.indicate(reg.bit(0)))
+```
+
+**See also:** [`k.Array`](#k-array).
+
+**Members:**
+
+- [`value`](#bits-value): The value shown (after the changes scheduled so far).
+- [`bit`](#bits-bit): The cell of bit `index`, 0 being the least significant.
+- [`to`](#bits-to): Change the value: the cells whose bit changes flip (digit and fill), from the least significant up, `lag` seconds apart.
+
+Inherited from [`k.Group`](#k-group): [`children`](#group-children), [`swap`](#group-swap), [`insert`](#group-insert), [`pop`](#group-pop), [`fit`](#group-fit).
+Inherited from [`k.Node`](object-state.md#k-node): [`set`](object-state.md#node-set), [`unbind`](object-state.md#node-unbind), [`edge`](object-state.md#node-edge), [`age`](object-state.md#node-age), [`entered`](object-state.md#node-entered), [`exited`](object-state.md#node-exited), [`copy`](object-state.md#node-copy), [`place`](object-state.md#node-place), [`to_place`](object-state.md#node-to_place), [`unpin`](object-state.md#node-unpin).
+
+<a id="bits-value"></a>
+#### `k.Bits.value` *(property)*
+
+```python
+bits.value: int  # read-only
+```
+
+The value shown (after the changes scheduled so far).
+
+<a id="bits-bit"></a>
+#### `k.Bits.bit` *(method)*
+
+```python
+bits.bit(index: int) -> BitCell
+```
+
+The cell of bit `index`, 0 being the least significant.
+
+**Parameters:**
+
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `index` | `int` | required | The cell of bit `index`, 0 being the least significant. |
+
+<a id="bits-to"></a>
+#### `k.Bits.to` *(method)*
+
+```python
+bits.to(*, value: int, lag: float = 0.04, duration: float | None = None) -> Animation
+```
+
+Change the value: the cells whose bit changes flip (digit and fill), from the least significant up, `lag` seconds apart.
+
+**Parameters:**
+
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `value` | `int` | required |   |
+| `lag` | `float` | `0.04` | Change the value: the cells whose bit changes flip (digit and fill), from the least significant up, `lag` seconds apart. |
+| `duration` | `float \| None` | `None` |   |
 
 <a id="k-titlecard"></a>
 ### `k.TitleCard` *(class)*

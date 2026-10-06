@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import json
-from typing import TYPE_CHECKING, Any, Generic, Iterator, Mapping, Sequence, TypedDict, TypeVar, Unpack, cast
+from typing import TYPE_CHECKING, Any, Generic, Iterator, Literal, Mapping, Sequence, TypedDict, TypeVar, Unpack, cast
 
 from .._runtime.spans import Span, user_span
 from ..anim.animation import Animation
@@ -128,10 +128,12 @@ class Group(Node, Generic[ChildT]):
         blend: Blend = "replace",
         place: PlaceKeywords | Mapping[str, object] | None = None,
         children: Sequence[Node] | None = None,
+        path: SwapPath = "arc",
         **props: Unpack[PropChanges],
     ) -> Animation:
         """Animated change of state; `children=` reorders, inserts or removes children
-        with an animated reflow."""
+        with an animated reflow (`path="straight"`: children that pass each other move in
+        straight lines instead of arcs)."""
         anim = super().to(duration=duration, ease=ease, delay=delay, blend=blend, place=place, **props)
         if children is not None:
             assert isinstance(anim, PropTo)
@@ -139,7 +141,7 @@ class Group(Node, Generic[ChildT]):
             # Like insert()/pop(): new children enter with the reflow, removed ones leave.
             entering = [c for c in new if c not in before]
             leaving = [c for c in before if c not in new]
-            anim.extra.append(Reorder(self, new, user_span(), entering=entering, leaving=leaving))
+            anim.extra.append(Reorder(self, new, user_span(), entering=entering, leaving=leaving, path=path))
         return anim
 
     def _reorder(self, new: Sequence[Node], **kw: Unpack[ReorderKeywords]) -> Animation:
@@ -174,11 +176,18 @@ class Group(Node, Generic[ChildT]):
 
 
 
+#: How children that pass each other in a row or column travel: on opposite arcs, clearing each
+#: other (the default), or in straight lines (reads calmer for bar-like rows at high tempo).
+SwapPath = Literal["arc", "straight"]
+SWAP_PATHS: tuple[str, ...] = ("arc", "straight")
+
+
 class ReorderTiming(TypedDict, total=False):
-    """`row.swap(i, j, duration=, ease=)` (and `insert`, `pop`)."""
+    """`row.swap(i, j, duration=, ease=, path=)` (and `insert`, `pop`)."""
 
     duration: float | None
     ease: EaseLike | None
+    path: SwapPath
 
 
 class ReorderKeywords(ReorderTiming, total=False):
@@ -189,12 +198,15 @@ class ReorderKeywords(ReorderTiming, total=False):
 class Reorder(Animation):
     """Animated change of a group's children; containers reflow during the transition."""
 
-    def __init__(self, group: Group[Any], children: Sequence[Node], span: Span, entering: Sequence[Node] = (), leaving: Sequence[Node] = (), duration: float | None = None, ease: EaseLike | None = None) -> None:
+    def __init__(self, group: Group[Any], children: Sequence[Node], span: Span, entering: Sequence[Node] = (), leaving: Sequence[Node] = (), duration: float | None = None, ease: EaseLike | None = None, path: SwapPath = "arc") -> None:
         super().__init__(duration, ease, 0.0, span)
+        if path not in SWAP_PATHS:
+            raise KinemoError.make("K0105", f"path={path!r}: use \"arc\" or \"straight\"", spans=[span])
         self.group = group
         self.new = children
         self.entering = list(entering)
         self.leaving = list(leaving)
+        self.path = path
 
     def describe(self) -> str:
         return f"{self.group._label()}.reorder"
@@ -213,6 +225,9 @@ class Reorder(Animation):
                 # Grows in while its neighbours make room.
                 _ramp(s, c, "_fade", start, duration, ease, 0.0, 1.0, self.span)
                 _ramp(s, c, "_grow", start, duration, ease, 0.0, 1.0, self.span)
+        if g._spec("swap_path") is not None:
+            # Read by the layout for this transition (and kept until the next reorder).
+            _set(s, g, "swap_path", start, self.path, self.span)
         sig = g._children_sig
         src = {"k": "val", "v": encode(self.new, "objects")}
         if duration <= 0:
@@ -236,11 +251,12 @@ class Container(Group[ChildT]):
 
 class Row(Container[ChildT]):
     kind = "row"
-    PROPS = {"gap": PropSpec("float", 0.25), "align": PropSpec("str", "center", "step_end", ALIGNMENTS)}
+    PROPS = {"gap": PropSpec("float", 0.25), "align": PropSpec("str", "center", "step_end", ALIGNMENTS), "swap_path": PropSpec("str", "arc", "step_end", SWAP_PATHS)}
 
     if TYPE_CHECKING:
         gap: PropAccessor[float]
         align: PropAccessor[str]
+        swap_path: PropAccessor[str]
 
     def __init__(self, *children: ChildT | Sequence[ChildT], gap: FloatVal = 0.25, align: Align = "center", **props: Unpack[TransformKeywords]) -> None:
         super().__init__(*children, gap=gap, align=align, **props)
@@ -248,11 +264,12 @@ class Row(Container[ChildT]):
 
 class Column(Container[ChildT]):
     kind = "column"
-    PROPS = {"gap": PropSpec("float", 0.25), "align": PropSpec("str", "center", "step_end", ALIGNMENTS)}
+    PROPS = {"gap": PropSpec("float", 0.25), "align": PropSpec("str", "center", "step_end", ALIGNMENTS), "swap_path": PropSpec("str", "arc", "step_end", SWAP_PATHS)}
 
     if TYPE_CHECKING:
         gap: PropAccessor[float]
         align: PropAccessor[str]
+        swap_path: PropAccessor[str]
 
     def __init__(self, *children: ChildT | Sequence[ChildT], gap: FloatVal = 0.25, align: Align = "center", **props: Unpack[TransformKeywords]) -> None:
         super().__init__(*children, gap=gap, align=align, **props)

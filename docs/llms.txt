@@ -968,7 +968,7 @@ def fit(s: k.Scene):
     s.wait(0.5)
 ```
 #### `group.swap(i, j, **kw) -> Animation`
-Named transition: swaps the places of two children and the container animates the reflow. Equivalent to `group.to(children=[...])` with `i` and `j` swapped. See also: `group.insert`, `group.pop`, `k.Row`.
+Named transition: swaps the places of two children and the container animates the reflow. Equivalent to `group.to(children=[...])` with `i` and `j` swapped. Children that pass each other travel on opposite arcs; `path="straight"` moves them in straight lines (calmer for bar-like rows at high tempo). See also: `group.insert`, `group.pop`, `k.Row`.
 ```python
 @k.scene
 def swap(s: k.Scene):

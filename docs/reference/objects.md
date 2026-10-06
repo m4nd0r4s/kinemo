@@ -129,7 +129,7 @@ Exchange the cells at `i` and `j` (they move along arcs).
 | --- | --- | --- | --- |
 | `i` | `int` | required | Exchange the cells at `i` and `j` (they move along arcs). |
 | `j` | `int` | required | Exchange the cells at `i` and `j` (they move along arcs). |
-| `**kw` | `Unpack[ReorderTiming]` | variadic | Keyword arguments (`ReorderTiming`): `duration: float \| None`, `ease: EaseLike \| None`. |
+| `**kw` | `Unpack[ReorderTiming]` | variadic | Keyword arguments (`ReorderTiming`): `duration: float \| None`, `ease: EaseLike \| None`, `path: SwapPath`. |
 
 <a id="array-compare"></a>
 #### `k.Array.compare` *(method)*
@@ -1283,7 +1283,7 @@ def group(s: k.Scene):
 **Members:**
 
 - [`children`](#group-children): Children at the cursor, in order (reflects reorders already scheduled).
-- [`to`](#group-to): Animated change of state; `children=` reorders, inserts or removes children with an animated reflow.
+- [`to`](#group-to): Animated change of state; `children=` reorders, inserts or removes children with an animated reflow (`path="straight"`: children that pass each other move in straight lines instead of arcs).
 - [`swap`](#group-swap): Named transition: swaps the places of two children and the container animates the reflow.
 - [`insert`](#group-insert): Named transition: inserts a child at position `i`; it enters together with the reflow.
 - [`pop`](#group-pop): Named transition: removes the child at position `i` (default: the last one); it exits together with the reflow.
@@ -1312,11 +1312,12 @@ group.to(
     blend: Blend = "replace",
     place: PlaceKeywords | Mapping[str, object] | None = None,
     children: Sequence[Node] | None = None,
+    path: SwapPath = "arc",
     **props: Unpack[PropChanges],
 ) -> Animation
 ```
 
-Animated change of state; `children=` reorders, inserts or removes children with an animated reflow.
+Animated change of state; `children=` reorders, inserts or removes children with an animated reflow (`path="straight"`: children that pass each other move in straight lines instead of arcs).
 
 **Parameters:**
 
@@ -1327,7 +1328,8 @@ Animated change of state; `children=` reorders, inserts or removes children with
 | `delay` | `float` | `0.0` |   |
 | `blend` | `Blend` | `"replace"` |   |
 | `place` | `PlaceKeywords \| Mapping[str, object] \| None` | `None` |   |
-| `children` | `Sequence[Node] \| None` | `None` | Animated change of state; `children=` reorders, inserts or removes children with an animated reflow. |
+| `children` | `Sequence[Node] \| None` | `None` | Animated change of state; `children=` reorders, inserts or removes children with an animated reflow (`path="straight"`: children that pass each other move in straight lines instead of arcs). |
+| `path` | `SwapPath` | `"arc"` | Animated change of state; `children=` reorders, inserts or removes children with an animated reflow (`path="straight"`: children that pass each other move in straight lines instead of arcs). |
 | `**props` | `Unpack[PropChanges]` | variadic |   |
 
 <a id="group-swap"></a>
@@ -1337,7 +1339,7 @@ Animated change of state; `children=` reorders, inserts or removes children with
 group.swap(i: int, j: int, **kw: Unpack[ReorderTiming]) -> Animation
 ```
 
-Named transition: swaps the places of two children and the container animates the reflow. Equivalent to `group.to(children=[...])` with `i` and `j` swapped.
+Named transition: swaps the places of two children and the container animates the reflow. Equivalent to `group.to(children=[...])` with `i` and `j` swapped. Children that pass each other travel on opposite arcs; `path="straight"` moves them in straight lines (calmer for bar-like rows at high tempo).
 
 **Parameters:**
 
@@ -1345,7 +1347,7 @@ Named transition: swaps the places of two children and the container animates th
 | --- | --- | --- | --- |
 | `i` | `int` | required | Equivalent to `group.to(children=[...])` with `i` and `j` swapped. |
 | `j` | `int` | required | Equivalent to `group.to(children=[...])` with `i` and `j` swapped. |
-| `**kw` | `Unpack[ReorderTiming]` | variadic | Keyword arguments (`ReorderTiming`): `duration: float \| None`, `ease: EaseLike \| None`. |
+| `**kw` | `Unpack[ReorderTiming]` | variadic | Keyword arguments (`ReorderTiming`): `duration: float \| None`, `ease: EaseLike \| None`, `path: SwapPath`. |
 
 **Example:**
 
@@ -1376,7 +1378,7 @@ Named transition: inserts a child at position `i`; it enters together with the r
 | --- | --- | --- | --- |
 | `i` | `int` | required | Named transition: inserts a child at position `i`; it enters together with the reflow. |
 | `obj` | `Node` | required |   |
-| `**kw` | `Unpack[ReorderTiming]` | variadic | Keyword arguments (`ReorderTiming`): `duration: float \| None`, `ease: EaseLike \| None`. |
+| `**kw` | `Unpack[ReorderTiming]` | variadic | Keyword arguments (`ReorderTiming`): `duration: float \| None`, `ease: EaseLike \| None`, `path: SwapPath`. |
 
 **Example:**
 
@@ -1405,7 +1407,7 @@ Named transition: removes the child at position `i` (default: the last one); it 
 | Name | Type | Default | Description |
 | --- | --- | --- | --- |
 | `i` | `int` | `-1` | Named transition: removes the child at position `i` (default: the last one); it exits together with the reflow. |
-| `**kw` | `Unpack[ReorderTiming]` | variadic | Keyword arguments (`ReorderTiming`): `duration: float \| None`, `ease: EaseLike \| None`. |
+| `**kw` | `Unpack[ReorderTiming]` | variadic | Keyword arguments (`ReorderTiming`): `duration: float \| None`, `ease: EaseLike \| None`, `path: SwapPath`. |
 
 **Example:**
 
@@ -1585,7 +1587,7 @@ A new node and its `edges=` grow in; without `at=` the graph is laid out again w
 | `name` | `NodeName` | required |   |
 | `edges` | `Sequence[EdgeSpec]` | `()` | A new node and its `edges=` grow in; without `at=` the graph is laid out again with it and the other nodes move to make room. |
 | `at` | `Position \| None` | `None` | A new node and its `edges=` grow in; without `at=` the graph is laid out again with it and the other nodes move to make room. |
-| `**kw` | `Unpack[ReorderTiming]` | variadic | Keyword arguments (`ReorderTiming`): `duration: float \| None`, `ease: EaseLike \| None`. |
+| `**kw` | `Unpack[ReorderTiming]` | variadic | Keyword arguments (`ReorderTiming`): `duration: float \| None`, `ease: EaseLike \| None`, `path: SwapPath`. |
 
 **Example:**
 
@@ -1622,7 +1624,7 @@ A new edge grows in between two existing nodes.
 | `u` | `NodeName` | required |   |
 | `v` | `NodeName` | required |   |
 | `weight` | `object` | `None` |   |
-| `**kw` | `Unpack[ReorderTiming]` | variadic | Keyword arguments (`ReorderTiming`): `duration: float \| None`, `ease: EaseLike \| None`. |
+| `**kw` | `Unpack[ReorderTiming]` | variadic | Keyword arguments (`ReorderTiming`): `duration: float \| None`, `ease: EaseLike \| None`, `path: SwapPath`. |
 
 <a id="graph-remove"></a>
 #### `k.Graph.remove` *(method)*
@@ -1641,7 +1643,7 @@ Remove nodes (with their edges) or edges given as `(u, v)`: they shrink away.
 | Name | Type | Default | Description |
 | --- | --- | --- | --- |
 | `*targets` | `NodeName \| tuple[NodeName, NodeName]` | variadic |   |
-| `**kw` | `Unpack[ReorderTiming]` | variadic | Keyword arguments (`ReorderTiming`): `duration: float \| None`, `ease: EaseLike \| None`. |
+| `**kw` | `Unpack[ReorderTiming]` | variadic | Keyword arguments (`ReorderTiming`): `duration: float \| None`, `ease: EaseLike \| None`, `path: SwapPath`. |
 
 <a id="graph-relayout"></a>
 #### `k.Graph.relayout` *(method)*
@@ -1660,7 +1662,7 @@ Moves the nodes to a new layout as a transition (another named layout, positions
 | Name | Type | Default | Description |
 | --- | --- | --- | --- |
 | `layout` | `GraphLayout \| None` | `None` |   |
-| `**kw` | `Unpack[ReorderTiming]` | variadic | Keyword arguments (`ReorderTiming`): `duration: float \| None`, `ease: EaseLike \| None`. |
+| `**kw` | `Unpack[ReorderTiming]` | variadic | Keyword arguments (`ReorderTiming`): `duration: float \| None`, `ease: EaseLike \| None`, `path: SwapPath`. |
 
 **Example:**
 

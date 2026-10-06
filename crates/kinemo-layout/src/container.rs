@@ -39,6 +39,12 @@ impl<'a> Layout<'a> {
                 let (old, new) = (obj_list(&from), obj_list(&to));
                 let a = self.arrange(c, &old, t);
                 let b = self.arrange(c, &new, t);
+                if self.prop_str(c, "swap_path", t).as_deref() == Some("straight") {
+                    // Straight lines: children that pass each other do not step aside.
+                    let a = blend(&a, &b, alpha);
+                    self.store_arrangement(c, t, a.clone());
+                    return a;
+                }
                 let vertical = self.scene().object(c).kind == "column";
                 let across = |id: ObjectId| {
                     let r = self.shape_box(id, t);

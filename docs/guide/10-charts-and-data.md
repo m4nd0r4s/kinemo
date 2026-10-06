@@ -123,6 +123,12 @@ s.play(k.fade_in(tan))    # now the tangent
   ranges (and hidden when it falls outside them) as the axes zoom.
 - `ax.hband(y0, y1)` and `ax.vband(x0, x1)` shade a band between two values, across or up
   the plot, cut to the visible range.
+- `ax.dot(x, y)` marks a data point; `open=True` draws it hollow, for the endpoint a
+  piecewise function leaves out. `ax.plot(f, holes=[2])` puts open dots on the curve where
+  it is not defined (at the limit of `f`), and they appear as a growing curve reaches them.
+- `ax.vector((3, 1), at=(0, 0), label="F", components=True)` draws a vector in data units
+  with its dashed components; `v=` and `at=` are signals (`vector.to(v=...)` turns it), and
+  `k.vector_sum(a, b, a + b)` adds two vectors tip to tail.
 
 ```python
 import kinemo as k
@@ -288,6 +294,33 @@ def generation(s: k.Scene):
     s.play(chart.to(data=Y2025), duration=2)
     s.play(k.indicate(chart.bar("IT")))
     s.wait(0.5)
+```
+
+### `k.PieChart`
+
+```python signature
+k.PieChart(data, labels, values, *, key=None, radius=2.0, donut=0.0, color=None, percent=True, label_size=0.26)
+```
+
+One slice per row: `labels=` names the category column and `values=` the numbers.
+`donut=0.5` leaves a hole. Slices start at the top and go clockwise; labels sit outside
+with their percentage, and narrow slices get a leader line. `pie.to(data=df2)` animates the
+shares by `key` (new keys grow in, missing ones shrink away), and `pie.slice("Solar")` is a
+slice to indicate or recolor.
+
+```python
+import kinemo as k
+
+MIX = {"source": ["Solar", "Wind", "Hydro", "Gas"], "twh": [10, 25, 30, 35]}
+LATER = {"source": ["Solar", "Wind", "Hydro", "Nuclear"], "twh": [35, 30, 25, 10]}
+
+
+@k.scene
+def mix(s: k.Scene):
+    pie = k.PieChart(MIX, labels="source", values="twh", donut=0.45).place(at="center")
+    s.play(k.draw(pie))
+    s.play(pie.to(data=LATER), duration=2)
+    s.play(k.indicate(pie.slice("Solar")))
 ```
 
 ### `k.LineChart`

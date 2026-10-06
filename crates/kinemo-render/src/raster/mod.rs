@@ -7,7 +7,7 @@ mod paint;
 mod png;
 
 pub use backend::{backend, install_gpu_backend_factory, BackendKind, CpuBackend, GpuBackendFactory, RenderBackend, SharedRenderBackend};
-pub use display_list::{Bitmap, Cap, DisplayList, DotCloud, DrawItem, Fill, Image, ImagePaint, Join, Stroke};
+pub use display_list::{Bitmap, Cap, DisplayList, DotCloud, DrawItem, Fill, Glow, Image, ImagePaint, Join, Stroke};
 pub use paint::rasterize;
 pub use png::encode_png;
 

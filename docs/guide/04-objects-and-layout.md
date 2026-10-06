@@ -71,13 +71,17 @@ They share a common set:
 | Group | Props |
 | --- | --- |
 | Transform | `x`, `y`, `position`, `rotate` (degrees), `scale`, `scale_x`, `scale_y`, `anchor` |
-| Style | `color` (shorthand for `stroke` and `fill`), `fill`, `fill_opacity`, `stroke`, `stroke_width`, `dash`, `opacity` |
+| Style | `color` (shorthand for `stroke` and `fill`), `fill`, `fill_opacity`, `stroke`, `stroke_width`, `dash`, `opacity`, `glow` (a soft halo, 0–1), `glow_color` |
 | Composition | `z` (draw order), `visible`, `bleed` (cropped by the frame edge on purpose) |
 | Read-only (derived from layout) | `width`, `height`, `bbox`, `left`, `right`, `top`, `bottom`, `center` |
 
 Shapes add their own (`r` for `k.Circle`, `w`/`h` for `k.Rect`, `start`/`end` for
 `k.Line`, `text` for `k.Text`, `value` for `k.Bar`...). Every constructor argument accepts a
 value, a signal or a lambda.
+
+`glow=0.6` paints a soft blurred halo under a shape, a line or a text (in its stroke or fill
+color, or `glow_color=`); it animates like any prop (`dot.to(glow=1)`), and on a group it
+glows every part.
 
 Objects are drawn by `z` (higher on top); with equal `z`, the one that entered the scene
 later is on top, so `s.add(background, label)` puts the label above. Inside a group,
@@ -470,6 +474,36 @@ def copies(s: k.Scene):
 ```
 
 A component's `copy()` rebuilds it with the same arguments.
+
+## Bits
+
+`k.Bits(value, width=8)` shows the bits of a number as cells that light up when 1;
+`bits.to(value=n)` flips the cells that change. `signed=True` uses two's complement,
+`place_values=True` writes 128 64 … 1 above the cells, `group=4` leaves a gap every
+nibble, and `fields=` labels ranges of cells, such as the parts of a float:
+## Matrices
+
+`k.Matrix(rows)` lays its entries out as objects in a grid, so each one can be colored,
+moved or indicated: `m[i, j]`, `m.row(i)`, `m.column(j)`. Entries are numbers, TeX strings
+or any object; `brackets=` picks `[`, `(`, `|` or none. `a @ b` computes the product of two
+numeric matrices, and `k.matrix_product(a, b, a @ b)` shows it row by column:
+
+```python
+import kinemo as k
+
+
+@k.scene
+def half_float(s: k.Scene):
+    f = k.Bits(0, width=16, fields={"sign": (0, 1), "exponent": (1, 6), "mantissa": (6, 16)}, size=0.4).place(at="center")
+    s.play(k.fade_in(f))
+    s.play(f.to(value=15360))  # 1.0 in IEEE 754 half precision
+def product(s: k.Scene):
+    a = k.Matrix([[1, 2], [3, 4]]).place(at=(-3.5, 0))
+    b = k.Matrix([[5, 6], [7, 8]]).place(at=(-0.5, 0))
+    c = (a @ b).place(at=(3, 0))
+    s.play(k.fade_in(a, b))
+    s.play(k.matrix_product(a, b, c))
+```
 
 ## Graphs
 

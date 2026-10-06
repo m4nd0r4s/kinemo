@@ -116,8 +116,11 @@ narration (speech recognition).
 
 kinemo is before 1.0: the API can still change between minor versions. When it does,
 `kinemo upgrade scene.py` rewrites the old forms, and the [changelog](CHANGELOG.md) says what
-changed. kinemo collects no telemetry and makes no network requests of its own (a TTS
-provider you configure for narration is the only exception).
+changed.
+
+kinemo runs 100% on your machine: rendering is local, the `kinemo dev` preview listens only on
+localhost, and nothing is sent anywhere (a TTS provider you configure for narration is the only
+network call).
 
 ### Questions and bugs
 

@@ -164,6 +164,24 @@ def pythagoras(s: k.Scene):
     s.wait(0.5)
 ```
 
+### Coloring a formula
+
+`color=` colors a whole formula, and every part takes `color=` too: set it on a part for an
+instant change, or animate it with `.to(color=...)`. No `.set(fill=..., stroke=...)` helpers
+are needed (`color=` sets both).
+
+```python
+import kinemo as k
+
+
+@k.scene
+def colors(s: k.Scene):
+    eq = k.Math(r"E = m c^2", size=0.9, color=k.BLUE).place(at="center")
+    eq["E"].set(color=k.YELLOW)
+    s.play(k.write(eq))
+    s.play(eq["c^2"].to(color=k.GREEN))
+```
+
 ### Morphing equations
 
 `k.morph(eq1, eq2)` takes `eq1` out of the scene, puts `eq2` in, and moves matching parts

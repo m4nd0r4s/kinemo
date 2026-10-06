@@ -34,7 +34,11 @@ def load_module(path: str, text: str | None = None) -> ModuleType:
     spec = importlib.util.spec_from_file_location(name, path, loader=loader)
     assert spec and spec.loader
     module = importlib.util.module_from_spec(spec)
-    sys.path.insert(0, os.path.dirname(path))
+    # The scene's folder, then the project's `[python] paths` (shared components).
+    from ..project import load as load_project
+
+    folders = [os.path.dirname(path), *load_project(os.path.dirname(path)).python_paths]
+    sys.path[:0] = folders
     try:
         sys.modules[name] = module
         spec.loader.exec_module(module)
@@ -43,12 +47,17 @@ def load_module(path: str, text: str | None = None) -> ModuleType:
     except Exception as e:  # noqa: BLE001 - surfaced as a diagnostic
         raise LoadError(python_error(e, path)) from e
     finally:
-        sys.path.remove(os.path.dirname(path))
+        for folder in folders:
+            sys.path.remove(folder)
     return module
 
 
 def find_scenes(module: ModuleType) -> list[SceneDef]:
-    return [v for v in vars(module).values() if isinstance(v, SceneDef)]
+    """The scenes a file defines. Scenes it imports (a component module's own preview scene)
+    are not its scenes, unless it defines none and only re-exports them."""
+    scenes = [v for v in vars(module).values() if isinstance(v, SceneDef)]
+    own = [s for s in scenes if getattr(s.fn, "__module__", None) == module.__name__]
+    return own or scenes
 
 
 def select(scenes: list[SceneDef], name: str | None) -> list[SceneDef]:

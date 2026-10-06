@@ -514,6 +514,26 @@ def search(s: k.Scene):
 - `g.add_node(name, edges=...)` lays the graph out again with the new node; `at=(x, y)`
   puts it somewhere instead. `g.add_edge(u, v)` and `g.remove(name, (u, v))` change edges.
 
+## Series cards
+
+`k.TitleCard`, `k.EndCard` and `k.LowerThird` are the cards a series repeats: an
+episode's opening, what comes next, and a name over a corner. They follow the theme, have
+named parts (`card.title`, `card.next`, ...) and enter with a choreography of their own
+through `k.draw(card)`:
+
+```python
+import kinemo as k
+
+
+@k.scene
+def episode(s: k.Scene):
+    card = k.TitleCard("How a Computer Adds", kicker="EPISODE 2", subtitle="How computers do math").place(at="center")
+    s.play(k.draw(card))
+    s.play(k.fade_out(card))
+    end = k.EndCard("Floating Point, Unmasked", brand="Until It Clicks").place(at="center")
+    s.play(k.draw(end))
+```
+
 ## Identity and keys
 
 An object's identity is its Python identity: there are no string ids. `key=` is only needed

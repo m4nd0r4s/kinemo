@@ -35,6 +35,9 @@ class ProjectConfig:
     cache_dir: str = ".kinemo-cache"
     editor: str = "vscode"
     python_workers_threshold: float = 2.0
+    #: `[python] paths`: folders of the project (relative to its root) that scene files import
+    #: from, e.g. a shared `lib/` of components.
+    python_paths: tuple[str, ...] = ()
 
 
 def find_root(start: str) -> str | None:
@@ -80,6 +83,7 @@ def load(start: str) -> ProjectConfig:
         cache_dir=os.path.join(root, cache.get("dir", ".kinemo-cache")),
         editor=data.get("editor", {}).get("command", "vscode"),
         python_workers_threshold=float(data.get("python", {}).get("workers_threshold", 2.0)),
+        python_paths=tuple(os.path.normpath(os.path.join(root, folder)) for folder in data.get("python", {}).get("paths", ())),
     )
 
 

@@ -189,7 +189,7 @@ Trail: the last `length` seconds of the path of a moving point (usually `obj.wor
 | --- | --- | --- | --- |
 | `point` | `VecVal` | required |   |
 | `length` | `float` | `2.0` | Trail: the last `length` seconds of the path of a moving point (usually `obj.world.position`), drawn as a stroke. |
-| `**style` | `Unpack[StyleKeywords]` | variadic | Keyword arguments (`StyleKeywords`): `name: str \| None`, `key: str \| None`, `x: FloatVal`, `y: FloatVal`, `position: VecVal`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`, `fill: ColorVal`, `fill_opacity: FloatVal`, `stroke: ColorVal`, `stroke_width: FloatVal`, `dash: FloatsVal`, `color: ColorVal`. |
+| `**style` | `Unpack[StyleKeywords]` | variadic | Keyword arguments (`StyleKeywords`): `name: str \| None`, `key: str \| None`, `x: FloatVal`, `y: FloatVal`, `position: VecVal`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`, `fill: ColorVal`, `fill_opacity: FloatVal`, `stroke: ColorVal`, `stroke_width: FloatVal`, `dash: FloatsVal`, `glow: FloatVal`, `glow_color: ColorVal`, `color: ColorVal`. |
 
 **Example:**
 
@@ -219,7 +219,7 @@ Documented together with [`k.trace`](#k-trace). Trail: the last `length` seconds
 | --- | --- | --- | --- |
 | `point` | `VecVal` | required |   |
 | `length` | `float` | `2.0` |   |
-| `**props` | `Unpack[StyleKeywords]` | variadic | Keyword arguments (`StyleKeywords`): `name: str \| None`, `key: str \| None`, `x: FloatVal`, `y: FloatVal`, `position: VecVal`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`, `fill: ColorVal`, `fill_opacity: FloatVal`, `stroke: ColorVal`, `stroke_width: FloatVal`, `dash: FloatsVal`, `color: ColorVal`. |
+| `**props` | `Unpack[StyleKeywords]` | variadic | Keyword arguments (`StyleKeywords`): `name: str \| None`, `key: str \| None`, `x: FloatVal`, `y: FloatVal`, `position: VecVal`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`, `fill: ColorVal`, `fill_opacity: FloatVal`, `stroke: ColorVal`, `stroke_width: FloatVal`, `dash: FloatsVal`, `glow: FloatVal`, `glow_color: ColorVal`, `color: ColorVal`. |
 
 **Props** (animatable with `.to()`, settable with `.set()` or in the constructor):
 
@@ -230,6 +230,8 @@ Documented together with [`k.trace`](#k-trace). Trail: the last `length` seconds
 | `stroke` | color | `theme.fg` | linear |
 | `stroke_width` | float | `theme.stroke_width` | linear |
 | `dash` | floats | `()` | step_end |
+| `glow` | float | `0.0` | linear |
+| `glow_color` | color | `theme.no_color` | linear |
 | `point` | vec2 | `(0.0, 0.0)` | linear |
 | `length` | float | `2.0` | linear |
 

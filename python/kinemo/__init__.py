@@ -31,7 +31,9 @@ from .objects.bar import Bar
 from .objects.brace import Brace
 from .objects.charts.axes import Axes, NumberLine
 from .objects.charts.polar import PolarAxes
+from .objects.charts.axes_vector import vector_sum
 from .objects.charts.bar_chart import BarChart
+from .objects.charts.pie_chart import PieChart
 from .objects.charts.timeline import Timeline
 from .objects.charts.line_chart import LineChart
 from .objects.charts.table import Table
@@ -47,12 +49,16 @@ from .objects.array import Array
 from .objects.graphs import Graph
 from .objects.bits import Bits
 from .objects.matrix import Matrix, matrix_product
+from .objects.icons import ICON_NAMES, Icon
+from .objects.epicycles import Epicycles
+from .objects.device_frames import BrowserWindow, Laptop, Phone
 from .objects.node import Node
 from .objects.series_cards import EndCard, LowerThird, TitleCard
+from .objects.complex_plane import ComplexPlane
 from .objects.number_plane import NumberPlane
 from .objects.terminal import Terminal
 from .objects.reparent import reparent
-from .objects.shapes import Arc, Arrow, Circle, Dot, Ellipse, Line, Path, Polygon, Rect, RoundedRect, Square, Triangle
+from .objects.shapes import Arc, Arrow, Circle, Dot, Ellipse, Line, Path, Polygon, Rect, RoundedRect, Sector, Square, Triangle
 from .objects.svg import SVG
 from .objects.code import Code
 from .objects.image import Image
@@ -134,7 +140,7 @@ __all__ = [
     "Points", "StreamLines", "VectorField",
     "Brace", "Image", "SVG",
     "Axes", "NumberLine", "PolarAxes", "BarChart", "LineChart", "Table", "Component", "Context", "Event", "EventInfo", "EventSource", "State", "intersect", "spline", "subtract", "union", "reparent", "Code", "Math", "morph", "Movie", "crossfade", "cut", "morph_cut", "movie", "ListSignal", "list", "flash", "follow", "squash", "Trail", "trace", "integrate", "simulate", "when", "Out", "Prop", "clip", "context", "field", "from_context",
-    "prop", "provide", "Terminal", "box", "cross", "encircle", "strike", "underline", "Angle", "RightAngle", "Card", "Gauge", "Callout", "Array", "NumberPlane", "Graph", "scene_preset", "EndCard", "LowerThird", "TitleCard", "Bits", "Matrix", "matrix_product", "Timeline",
+    "prop", "provide", "Terminal", "box", "cross", "encircle", "strike", "underline", "Angle", "RightAngle", "Card", "Gauge", "Callout", "Array", "NumberPlane", "Graph", "scene_preset", "EndCard", "LowerThird", "TitleCard", "Bits", "Matrix", "matrix_product", "PieChart", "Sector", "vector_sum", "ICON_NAMES", "Icon", "ComplexPlane", "Epicycles", "BrowserWindow", "Laptop", "Phone", "Timeline",
     "ArrowKeywords", "ColorKeywords", "PaintKeywords", "RectKeywords", "StyleKeywords", "TextKeywords", "TransformKeywords",
     "Animation", "Arc", "Arrow", "BLACK", "BLUE", "Bar", "Bool", "Choice", "Circle", "Color", "Column",
     "Diagnostic", "Dot", "Ellipse", "Expr", "Float", "GRAY", "GREEN", "Grid", "Group", "IR_VERSION", "Int",

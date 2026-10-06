@@ -22,6 +22,7 @@ Shapes, groups, images, SVG and mass objects (points, vector fields, stream line
 - [`k.Triangle`](#k-triangle): Triangle from its three vertices (no arguments: equilateral with radius 1).
 - [`k.Line`](#k-line): Segment from `start` to `end` (local coordinates), or centered with `length=`.
 - [`k.Arrow`](#k-arrow): Arrow from `start` to `end` with a tip of size `tip`.
+- [`k.Sector`](#k-sector): A pie slice from the center, or a ring slice with `inner=` (its inner radius): `r=`, `angle=` (degrees, counterclockwise; negative goes clockwise) and `start_angle=` from +x.
 - [`k.Arc`](#k-arc): Circular arc of radius `r`, starting at `start_angle` and sweeping `angle` degrees (counterclockwise).
 - [`k.Path`](#k-path): Path from SVG commands (`d="M 0 0 L 1 1"`) or a polyline from a list of points; `closed=True` closes the outline.
 - [`k.union`](#k-union): Boolean operations between shapes: `k.union(a, b)`, `k.intersect(a, b)` and `k.subtract(a, b)` return a new `k.Path` computed from the outlines at the cursor (with the style of `a`, unless another one is passed).
@@ -36,6 +37,12 @@ Shapes, groups, images, SVG and mass objects (points, vector fields, stream line
 - [`k.TitleCard`](#k-titlecard): An episode's opening card: the title, a `kicker=` above it, an accent rule under it and a `subtitle=`.
 - [`k.EndCard`](#k-endcard): What comes next: `heading=` ("Next") over the next title, then `brand=`, `series=` and an `invite=`.
 - [`k.LowerThird`](#k-lowerthird): A name and a role beside an accent bar, for a corner (`side="right"` mirrors it); place it as usual.
+- [`k.BrowserWindow`](#k-browserwindow): Device frames that hold content, styled to the theme: `k.BrowserWindow(content, url=, w=, h=)` (dots and an address bar), `k.Phone(content, w=, h=)` and `k.Laptop(content, w=)`.
+- [`k.Laptop`](#k-laptop): `k.Laptop(content, w=7)`: a laptop screen in its bezel above a keyboard base; the content fills the screen.
+- [`k.Phone`](#k-phone): `k.Phone(content, w=2.4, h=5)`: a phone body with its screen, a camera pill and a home bar; the content fills the screen.
+- [`k.Epicycles`](#k-epicycles): The Fourier series of a closed path (points as tuples or complex numbers), as a chain of `n` rotating circles, largest first, whose tip traces the path; or `coefficients=` (frequency → complex amplitude) directly.
+- [`k.Icon`](#k-icon): A built-in icon, drawn with strokes on a square of side `size=`: `"check"`, `"x"`, `"warning"`, `"lightbulb"`, `"gear"`, `"user"`, `"cpu"`, … (`k.ICON_NAMES` lists them).
+- [`k.ICON_NAMES`](#k-icon_names): A built-in icon, drawn with strokes on a square of side `size=`: `"check"`, `"x"`, `"warning"`, `"lightbulb"`, `"gear"`, `"user"`, `"cpu"`, … (`k.ICON_NAMES` lists them).
 - [`k.Image`](#k-image): Raster image (PNG or JPEG) drawn by the renderer, centered on its position.
 - [`k.SVG`](#k-svg): Imports an SVG illustration (a file or inline markup): each shape becomes a `k.Path` with the SVG's fill, stroke and stroke width, and each `<g>` becomes a `k.Group`.
 - [`k.Brace`](#k-brace): Curly brace (`}`) along one side of an object's box: `direction=` "down", "up", "left" or "right", `gap` units away from it, with the tip pointing outward.
@@ -512,7 +519,7 @@ Circle of radius `r`, centered on its position. Like every shape, it accepts the
 | Name | Type | Default | Description |
 | --- | --- | --- | --- |
 | `r` | `FloatVal` | `1.0` | Circle of radius `r`, centered on its position. |
-| `**props` | `Unpack[StyleKeywords]` | variadic | Keyword arguments (`StyleKeywords`): `name: str \| None`, `key: str \| None`, `x: FloatVal`, `y: FloatVal`, `position: VecVal`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`, `fill: ColorVal`, `fill_opacity: FloatVal`, `stroke: ColorVal`, `stroke_width: FloatVal`, `dash: FloatsVal`, `color: ColorVal`. |
+| `**props` | `Unpack[StyleKeywords]` | variadic | Keyword arguments (`StyleKeywords`): `name: str \| None`, `key: str \| None`, `x: FloatVal`, `y: FloatVal`, `position: VecVal`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`, `fill: ColorVal`, `fill_opacity: FloatVal`, `stroke: ColorVal`, `stroke_width: FloatVal`, `dash: FloatsVal`, `glow: FloatVal`, `glow_color: ColorVal`, `color: ColorVal`. |
 
 **Props** (animatable with `.to()`, settable with `.set()` or in the constructor):
 
@@ -523,6 +530,8 @@ Circle of radius `r`, centered on its position. Like every shape, it accepts the
 | `stroke` | color | `theme.fg` | linear |
 | `stroke_width` | float | `theme.stroke_width` | linear |
 | `dash` | floats | `()` | step_end |
+| `glow` | float | `0.0` | linear |
+| `glow_color` | color | `theme.no_color` | linear |
 | `r` | float | `1.0` | linear |
 
 Props inherited from [`k.Node`](object-state.md#k-node): `x`, `y`, `rotate`, `scale`, `scale_x`, `scale_y`, `anchor`, `opacity`, `z`, `visible`, `bleed`.
@@ -555,7 +564,7 @@ Filled dot (default radius 0.08), with no stroke. It is the marker used in chart
 | Name | Type | Default | Description |
 | --- | --- | --- | --- |
 | `r` | `FloatVal` | `0.08` |   |
-| `**props` | `Unpack[StyleKeywords]` | variadic | Keyword arguments (`StyleKeywords`): `name: str \| None`, `key: str \| None`, `x: FloatVal`, `y: FloatVal`, `position: VecVal`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`, `fill: ColorVal`, `fill_opacity: FloatVal`, `stroke: ColorVal`, `stroke_width: FloatVal`, `dash: FloatsVal`, `color: ColorVal`. |
+| `**props` | `Unpack[StyleKeywords]` | variadic | Keyword arguments (`StyleKeywords`): `name: str \| None`, `key: str \| None`, `x: FloatVal`, `y: FloatVal`, `position: VecVal`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`, `fill: ColorVal`, `fill_opacity: FloatVal`, `stroke: ColorVal`, `stroke_width: FloatVal`, `dash: FloatsVal`, `glow: FloatVal`, `glow_color: ColorVal`, `color: ColorVal`. |
 
 **Props** (animatable with `.to()`, settable with `.set()` or in the constructor):
 
@@ -566,6 +575,8 @@ Filled dot (default radius 0.08), with no stroke. It is the marker used in chart
 | `stroke` | color | `theme.fg` | linear |
 | `stroke_width` | float | `0.0` | linear |
 | `dash` | floats | `()` | step_end |
+| `glow` | float | `0.0` | linear |
+| `glow_color` | color | `theme.no_color` | linear |
 | `r` | float | `0.08` | linear |
 
 Props inherited from [`k.Node`](object-state.md#k-node): `x`, `y`, `rotate`, `scale`, `scale_x`, `scale_y`, `anchor`, `opacity`, `z`, `visible`, `bleed`.
@@ -600,7 +611,7 @@ Ellipse of width `w` and height `h`, centered on its position.
 | --- | --- | --- | --- |
 | `w` | `FloatVal` | `2.0` | Ellipse of width `w` and height `h`, centered on its position. |
 | `h` | `FloatVal` | `1.0` | Ellipse of width `w` and height `h`, centered on its position. |
-| `**props` | `Unpack[StyleKeywords]` | variadic | Keyword arguments (`StyleKeywords`): `name: str \| None`, `key: str \| None`, `x: FloatVal`, `y: FloatVal`, `position: VecVal`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`, `fill: ColorVal`, `fill_opacity: FloatVal`, `stroke: ColorVal`, `stroke_width: FloatVal`, `dash: FloatsVal`, `color: ColorVal`. |
+| `**props` | `Unpack[StyleKeywords]` | variadic | Keyword arguments (`StyleKeywords`): `name: str \| None`, `key: str \| None`, `x: FloatVal`, `y: FloatVal`, `position: VecVal`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`, `fill: ColorVal`, `fill_opacity: FloatVal`, `stroke: ColorVal`, `stroke_width: FloatVal`, `dash: FloatsVal`, `glow: FloatVal`, `glow_color: ColorVal`, `color: ColorVal`. |
 
 **Props** (animatable with `.to()`, settable with `.set()` or in the constructor):
 
@@ -611,6 +622,8 @@ Ellipse of width `w` and height `h`, centered on its position.
 | `stroke` | color | `theme.fg` | linear |
 | `stroke_width` | float | `theme.stroke_width` | linear |
 | `dash` | floats | `()` | step_end |
+| `glow` | float | `0.0` | linear |
+| `glow_color` | color | `theme.no_color` | linear |
 | `w` | float | `2.0` | linear |
 | `h` | float | `1.0` | linear |
 
@@ -645,7 +658,7 @@ Rectangle of width `w` and height `h`, centered on its position; `radius=` round
 | --- | --- | --- | --- |
 | `w` | `FloatVal` | `2.0` | Rectangle of width `w` and height `h`, centered on its position; `radius=` rounds the corners (for rounded corners prefer `k.RoundedRect`). |
 | `h` | `FloatVal` | `1.0` | Rectangle of width `w` and height `h`, centered on its position; `radius=` rounds the corners (for rounded corners prefer `k.RoundedRect`). |
-| `**props` | `Unpack[RectKeywords]` | variadic | Keyword arguments (`RectKeywords`): `name: str \| None`, `key: str \| None`, `x: FloatVal`, `y: FloatVal`, `position: VecVal`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`, `fill: ColorVal`, `fill_opacity: FloatVal`, `stroke: ColorVal`, `stroke_width: FloatVal`, `dash: FloatsVal`, `color: ColorVal`, `radius: FloatVal`. |
+| `**props` | `Unpack[RectKeywords]` | variadic | Keyword arguments (`RectKeywords`): `name: str \| None`, `key: str \| None`, `x: FloatVal`, `y: FloatVal`, `position: VecVal`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`, `fill: ColorVal`, `fill_opacity: FloatVal`, `stroke: ColorVal`, `stroke_width: FloatVal`, `dash: FloatsVal`, `glow: FloatVal`, `glow_color: ColorVal`, `color: ColorVal`, `radius: FloatVal`. |
 
 **Props** (animatable with `.to()`, settable with `.set()` or in the constructor):
 
@@ -656,6 +669,8 @@ Rectangle of width `w` and height `h`, centered on its position; `radius=` round
 | `stroke` | color | `theme.fg` | linear |
 | `stroke_width` | float | `theme.stroke_width` | linear |
 | `dash` | floats | `()` | step_end |
+| `glow` | float | `0.0` | linear |
+| `glow_color` | color | `theme.no_color` | linear |
 | `w` | float | `2.0` | linear |
 | `h` | float | `1.0` | linear |
 | `radius` | float | `0.0` | linear |
@@ -697,9 +712,9 @@ Rectangle with rounded corners (`radius=0.15` by default). Good for boxes and ca
 | `w` | `FloatVal` | `2.0` |   |
 | `h` | `FloatVal` | `1.0` |   |
 | `radius` | `FloatVal` | `0.15` | Rectangle with rounded corners (`radius=0.15` by default). |
-| `**props` | `Unpack[StyleKeywords]` | variadic | Keyword arguments (`StyleKeywords`): `name: str \| None`, `key: str \| None`, `x: FloatVal`, `y: FloatVal`, `position: VecVal`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`, `fill: ColorVal`, `fill_opacity: FloatVal`, `stroke: ColorVal`, `stroke_width: FloatVal`, `dash: FloatsVal`, `color: ColorVal`. |
+| `**props` | `Unpack[StyleKeywords]` | variadic | Keyword arguments (`StyleKeywords`): `name: str \| None`, `key: str \| None`, `x: FloatVal`, `y: FloatVal`, `position: VecVal`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`, `fill: ColorVal`, `fill_opacity: FloatVal`, `stroke: ColorVal`, `stroke_width: FloatVal`, `dash: FloatsVal`, `glow: FloatVal`, `glow_color: ColorVal`, `color: ColorVal`. |
 
-Props inherited from [`k.Rect`](#k-rect): `fill`, `fill_opacity`, `stroke`, `stroke_width`, `dash`, `w`, `h`, `radius`.
+Props inherited from [`k.Rect`](#k-rect): `fill`, `fill_opacity`, `stroke`, `stroke_width`, `dash`, `glow`, `glow_color`, `w`, `h`, `radius`.
 
 Props inherited from [`k.Node`](object-state.md#k-node): `x`, `y`, `rotate`, `scale`, `scale_x`, `scale_y`, `anchor`, `opacity`, `z`, `visible`, `bleed`.
 
@@ -732,9 +747,9 @@ Square with side `side`, centered on its position. It is a `k.Rect` with `w == h
 | Name | Type | Default | Description |
 | --- | --- | --- | --- |
 | `side` | `FloatVal` | `1.0` | Square with side `side`, centered on its position. |
-| `**props` | `Unpack[RectKeywords]` | variadic | Keyword arguments (`RectKeywords`): `name: str \| None`, `key: str \| None`, `x: FloatVal`, `y: FloatVal`, `position: VecVal`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`, `fill: ColorVal`, `fill_opacity: FloatVal`, `stroke: ColorVal`, `stroke_width: FloatVal`, `dash: FloatsVal`, `color: ColorVal`, `radius: FloatVal`. |
+| `**props` | `Unpack[RectKeywords]` | variadic | Keyword arguments (`RectKeywords`): `name: str \| None`, `key: str \| None`, `x: FloatVal`, `y: FloatVal`, `position: VecVal`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`, `fill: ColorVal`, `fill_opacity: FloatVal`, `stroke: ColorVal`, `stroke_width: FloatVal`, `dash: FloatsVal`, `glow: FloatVal`, `glow_color: ColorVal`, `color: ColorVal`, `radius: FloatVal`. |
 
-Props inherited from [`k.Rect`](#k-rect): `fill`, `fill_opacity`, `stroke`, `stroke_width`, `dash`, `w`, `h`, `radius`.
+Props inherited from [`k.Rect`](#k-rect): `fill`, `fill_opacity`, `stroke`, `stroke_width`, `dash`, `glow`, `glow_color`, `w`, `h`, `radius`.
 
 Props inherited from [`k.Node`](object-state.md#k-node): `x`, `y`, `rotate`, `scale`, `scale_x`, `scale_y`, `anchor`, `opacity`, `z`, `visible`, `bleed`.
 
@@ -775,7 +790,7 @@ The square built on a polygon edge, outside (or inside) the polygon.
 | --- | --- | --- | --- |
 | `side` | `Side` | required |   |
 | `outward` | `bool` | `True` |   |
-| `**props` | `Unpack[UnplacedStyleKeywords]` | variadic | Keyword arguments (`UnplacedStyleKeywords`): `name: str \| None`, `key: str \| None`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`, `fill: ColorVal`, `fill_opacity: FloatVal`, `stroke: ColorVal`, `stroke_width: FloatVal`, `dash: FloatsVal`, `color: ColorVal`. |
+| `**props` | `Unpack[UnplacedStyleKeywords]` | variadic | Keyword arguments (`UnplacedStyleKeywords`): `name: str \| None`, `key: str \| None`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`, `fill: ColorVal`, `fill_opacity: FloatVal`, `stroke: ColorVal`, `stroke_width: FloatVal`, `dash: FloatsVal`, `glow: FloatVal`, `glow_color: ColorVal`, `color: ColorVal`. |
 
 <a id="k-polygon"></a>
 ### `k.Polygon` *(class)*
@@ -791,7 +806,7 @@ Polygon from its vertices (`k.Polygon((0, 0), (2, 0), (1, 1))`), centered on its
 | Name | Type | Default | Description |
 | --- | --- | --- | --- |
 | `*points` | `VecLike \| list[VecLike]` | variadic |   |
-| `**props` | `Unpack[StyleKeywords]` | variadic | Keyword arguments (`StyleKeywords`): `name: str \| None`, `key: str \| None`, `x: FloatVal`, `y: FloatVal`, `position: VecVal`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`, `fill: ColorVal`, `fill_opacity: FloatVal`, `stroke: ColorVal`, `stroke_width: FloatVal`, `dash: FloatsVal`, `color: ColorVal`. |
+| `**props` | `Unpack[StyleKeywords]` | variadic | Keyword arguments (`StyleKeywords`): `name: str \| None`, `key: str \| None`, `x: FloatVal`, `y: FloatVal`, `position: VecVal`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`, `fill: ColorVal`, `fill_opacity: FloatVal`, `stroke: ColorVal`, `stroke_width: FloatVal`, `dash: FloatsVal`, `glow: FloatVal`, `glow_color: ColorVal`, `color: ColorVal`. |
 
 **Props** (animatable with `.to()`, settable with `.set()` or in the constructor):
 
@@ -802,6 +817,8 @@ Polygon from its vertices (`k.Polygon((0, 0), (2, 0), (1, 1))`), centered on its
 | `stroke` | color | `theme.fg` | linear |
 | `stroke_width` | float | `theme.stroke_width` | linear |
 | `dash` | floats | `()` | step_end |
+| `glow` | float | `0.0` | linear |
+| `glow_color` | color | `theme.no_color` | linear |
 | `points` | points | `[]` | pointwise |
 
 Props inherited from [`k.Node`](object-state.md#k-node): `x`, `y`, `rotate`, `scale`, `scale_x`, `scale_y`, `anchor`, `opacity`, `z`, `visible`, `bleed`.
@@ -845,7 +862,7 @@ Regular polygon with `n` sides (a signal works: the shape follows it) and circum
 | --- | --- | --- | --- |
 | `n` | `FloatVal` | required | Regular polygon with `n` sides (a signal works: the shape follows it) and circumradius `r`, a vertex on top. |
 | `r` | `FloatVal` | `1.0` | Regular polygon with `n` sides (a signal works: the shape follows it) and circumradius `r`, a vertex on top. |
-| `**props` | `Unpack[StyleKeywords]` | variadic | Keyword arguments (`StyleKeywords`): `name: str \| None`, `key: str \| None`, `x: FloatVal`, `y: FloatVal`, `position: VecVal`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`, `fill: ColorVal`, `fill_opacity: FloatVal`, `stroke: ColorVal`, `stroke_width: FloatVal`, `dash: FloatsVal`, `color: ColorVal`. |
+| `**props` | `Unpack[StyleKeywords]` | variadic | Keyword arguments (`StyleKeywords`): `name: str \| None`, `key: str \| None`, `x: FloatVal`, `y: FloatVal`, `position: VecVal`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`, `fill: ColorVal`, `fill_opacity: FloatVal`, `stroke: ColorVal`, `stroke_width: FloatVal`, `dash: FloatsVal`, `glow: FloatVal`, `glow_color: ColorVal`, `color: ColorVal`. |
 
 <a id="polygon-sides"></a>
 #### `k.Polygon.sides` *(property)*
@@ -879,9 +896,9 @@ Triangle from its three vertices (no arguments: equilateral with radius 1). `k.T
 | Name | Type | Default | Description |
 | --- | --- | --- | --- |
 | `*points` | `VecLike \| list[VecLike]` | variadic |   |
-| `**props` | `Unpack[StyleKeywords]` | variadic | Keyword arguments (`StyleKeywords`): `name: str \| None`, `key: str \| None`, `x: FloatVal`, `y: FloatVal`, `position: VecVal`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`, `fill: ColorVal`, `fill_opacity: FloatVal`, `stroke: ColorVal`, `stroke_width: FloatVal`, `dash: FloatsVal`, `color: ColorVal`. |
+| `**props` | `Unpack[StyleKeywords]` | variadic | Keyword arguments (`StyleKeywords`): `name: str \| None`, `key: str \| None`, `x: FloatVal`, `y: FloatVal`, `position: VecVal`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`, `fill: ColorVal`, `fill_opacity: FloatVal`, `stroke: ColorVal`, `stroke_width: FloatVal`, `dash: FloatsVal`, `glow: FloatVal`, `glow_color: ColorVal`, `color: ColorVal`. |
 
-Props inherited from [`k.Polygon`](#k-polygon): `fill`, `fill_opacity`, `stroke`, `stroke_width`, `dash`, `points`.
+Props inherited from [`k.Polygon`](#k-polygon): `fill`, `fill_opacity`, `stroke`, `stroke_width`, `dash`, `glow`, `glow_color`, `points`.
 
 Props inherited from [`k.Node`](object-state.md#k-node): `x`, `y`, `rotate`, `scale`, `scale_x`, `scale_y`, `anchor`, `opacity`, `z`, `visible`, `bleed`.
 
@@ -925,7 +942,7 @@ Right triangle with legs `a` (horizontal) and `b` (vertical).
 | `a` | `float` | required | Right triangle with legs `a` (horizontal) and `b` (vertical). |
 | `b` | `float` | required | Right triangle with legs `a` (horizontal) and `b` (vertical). |
 | `scale` | `float` | `1.0` |   |
-| `**props` | `Unpack[UnscaledStyleKeywords]` | variadic | Keyword arguments (`UnscaledStyleKeywords`): `name: str \| None`, `key: str \| None`, `x: FloatVal`, `y: FloatVal`, `position: VecVal`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`, `fill: ColorVal`, `fill_opacity: FloatVal`, `stroke: ColorVal`, `stroke_width: FloatVal`, `dash: FloatsVal`, `color: ColorVal`. |
+| `**props` | `Unpack[UnscaledStyleKeywords]` | variadic | Keyword arguments (`UnscaledStyleKeywords`): `name: str \| None`, `key: str \| None`, `x: FloatVal`, `y: FloatVal`, `position: VecVal`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`, `fill: ColorVal`, `fill_opacity: FloatVal`, `stroke: ColorVal`, `stroke_width: FloatVal`, `dash: FloatsVal`, `glow: FloatVal`, `glow_color: ColorVal`, `color: ColorVal`. |
 
 <a id="k-line"></a>
 ### `k.Line` *(class)*
@@ -949,7 +966,7 @@ Segment from `start` to `end` (local coordinates), or centered with `length=`. T
 | `start` | `VecVal \| None` | `None` | Segment from `start` to `end` (local coordinates), or centered with `length=`. |
 | `end` | `VecVal \| None` | `None` | Segment from `start` to `end` (local coordinates), or centered with `length=`. |
 | `length` | `float \| None` | `None` | Segment from `start` to `end` (local coordinates), or centered with `length=`. |
-| `**props` | `Unpack[StyleKeywords]` | variadic | Keyword arguments (`StyleKeywords`): `name: str \| None`, `key: str \| None`, `x: FloatVal`, `y: FloatVal`, `position: VecVal`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`, `fill: ColorVal`, `fill_opacity: FloatVal`, `stroke: ColorVal`, `stroke_width: FloatVal`, `dash: FloatsVal`, `color: ColorVal`. |
+| `**props` | `Unpack[StyleKeywords]` | variadic | Keyword arguments (`StyleKeywords`): `name: str \| None`, `key: str \| None`, `x: FloatVal`, `y: FloatVal`, `position: VecVal`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`, `fill: ColorVal`, `fill_opacity: FloatVal`, `stroke: ColorVal`, `stroke_width: FloatVal`, `dash: FloatsVal`, `glow: FloatVal`, `glow_color: ColorVal`, `color: ColorVal`. |
 
 **Props** (animatable with `.to()`, settable with `.set()` or in the constructor):
 
@@ -960,6 +977,8 @@ Segment from `start` to `end` (local coordinates), or centered with `length=`. T
 | `stroke` | color | `theme.fg` | linear |
 | `stroke_width` | float | `theme.stroke_width` | linear |
 | `dash` | floats | `()` | step_end |
+| `glow` | float | `0.0` | linear |
+| `glow_color` | color | `theme.no_color` | linear |
 | `start` | vec2 | `(-1.0, 0.0)` | linear |
 | `end` | vec2 | `(1.0, 0.0)` | linear |
 
@@ -999,7 +1018,7 @@ Arrow from `start` to `end` with a tip of size `tip`. The endpoints accept signa
 | --- | --- | --- | --- |
 | `start` | `VecVal \| None` | `None` | Arrow from `start` to `end` with a tip of size `tip`. |
 | `end` | `VecVal \| None` | `None` | Arrow from `start` to `end` with a tip of size `tip`. |
-| `**props` | `Unpack[ArrowKeywords]` | variadic | Keyword arguments (`ArrowKeywords`): `name: str \| None`, `key: str \| None`, `x: FloatVal`, `y: FloatVal`, `position: VecVal`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`, `fill: ColorVal`, `fill_opacity: FloatVal`, `stroke: ColorVal`, `stroke_width: FloatVal`, `dash: FloatsVal`, `color: ColorVal`, `tip: FloatVal`. |
+| `**props` | `Unpack[ArrowKeywords]` | variadic | Keyword arguments (`ArrowKeywords`): `name: str \| None`, `key: str \| None`, `x: FloatVal`, `y: FloatVal`, `position: VecVal`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`, `fill: ColorVal`, `fill_opacity: FloatVal`, `stroke: ColorVal`, `stroke_width: FloatVal`, `dash: FloatsVal`, `glow: FloatVal`, `glow_color: ColorVal`, `color: ColorVal`, `tip: FloatVal`. |
 
 **Props** (animatable with `.to()`, settable with `.set()` or in the constructor):
 
@@ -1010,6 +1029,8 @@ Arrow from `start` to `end` with a tip of size `tip`. The endpoints accept signa
 | `stroke` | color | `theme.fg` | linear |
 | `stroke_width` | float | `theme.stroke_width` | linear |
 | `dash` | floats | `()` | step_end |
+| `glow` | float | `0.0` | linear |
+| `glow_color` | color | `theme.no_color` | linear |
 | `start` | vec2 | `(-1.0, 0.0)` | linear |
 | `end` | vec2 | `(1.0, 0.0)` | linear |
 | `tip` | float | `0.25` | linear |
@@ -1029,6 +1050,64 @@ def arrow(s: k.Scene):
 ```
 
 **See also:** [`k.Line`](#k-line).
+
+Inherited from [`k.Node`](object-state.md#k-node): [`set`](object-state.md#node-set), [`to`](object-state.md#node-to), [`unbind`](object-state.md#node-unbind), [`edge`](object-state.md#node-edge), [`age`](object-state.md#node-age), [`entered`](object-state.md#node-entered), [`exited`](object-state.md#node-exited), [`copy`](object-state.md#node-copy), [`place`](object-state.md#node-place), [`to_place`](object-state.md#node-to_place), [`unpin`](object-state.md#node-unpin).
+
+<a id="k-sector"></a>
+### `k.Sector` *(class)*
+
+```python
+k.Sector(
+    r: FloatVal = 1.0,
+    angle: FloatVal = 90.0,
+    start_angle: FloatVal = 0.0,
+    *,
+    inner: FloatVal = 0.0,
+    **props: Unpack[StyleKeywords],
+)
+```
+
+A pie slice from the center, or a ring slice with `inner=` (its inner radius): `r=`, `angle=` (degrees, counterclockwise; negative goes clockwise) and `start_angle=` from +x. Every prop animates, so a slice can open or turn.
+
+**Parameters:**
+
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `r` | `FloatVal` | `1.0` | A pie slice from the center, or a ring slice with `inner=` (its inner radius): `r=`, `angle=` (degrees, counterclockwise; negative goes clockwise) and `start_angle=` from +x. |
+| `angle` | `FloatVal` | `90.0` | A pie slice from the center, or a ring slice with `inner=` (its inner radius): `r=`, `angle=` (degrees, counterclockwise; negative goes clockwise) and `start_angle=` from +x. |
+| `start_angle` | `FloatVal` | `0.0` | A pie slice from the center, or a ring slice with `inner=` (its inner radius): `r=`, `angle=` (degrees, counterclockwise; negative goes clockwise) and `start_angle=` from +x. |
+| `inner` | `FloatVal` | `0.0` | A pie slice from the center, or a ring slice with `inner=` (its inner radius): `r=`, `angle=` (degrees, counterclockwise; negative goes clockwise) and `start_angle=` from +x. |
+| `**props` | `Unpack[StyleKeywords]` | variadic | Keyword arguments (`StyleKeywords`): `name: str \| None`, `key: str \| None`, `x: FloatVal`, `y: FloatVal`, `position: VecVal`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`, `fill: ColorVal`, `fill_opacity: FloatVal`, `stroke: ColorVal`, `stroke_width: FloatVal`, `dash: FloatsVal`, `glow: FloatVal`, `glow_color: ColorVal`, `color: ColorVal`. |
+
+**Props** (animatable with `.to()`, settable with `.set()` or in the constructor):
+
+| Prop | Kind | Default | Interpolation |
+| --- | --- | --- | --- |
+| `fill` | color | `theme.fg` | linear |
+| `fill_opacity` | float | `0.0` | linear |
+| `stroke` | color | `theme.fg` | linear |
+| `stroke_width` | float | `theme.stroke_width` | linear |
+| `dash` | floats | `()` | step_end |
+| `glow` | float | `0.0` | linear |
+| `glow_color` | color | `theme.no_color` | linear |
+| `r` | float | `1.0` | linear |
+| `inner` | float | `0.0` | linear |
+| `start_angle` | float | `0.0` | linear |
+| `angle` | float | `90.0` | linear |
+
+Props inherited from [`k.Node`](object-state.md#k-node): `x`, `y`, `rotate`, `scale`, `scale_x`, `scale_y`, `anchor`, `opacity`, `z`, `visible`, `bleed`.
+
+**Example:**
+
+```python
+@k.scene
+def slice_(s: k.Scene):
+    wedge = k.Sector(r=2, angle=60, start_angle=90, inner=0.8, fill=k.YELLOW, fill_opacity=0.9).place(at="center")
+    s.play(k.draw(wedge))
+    s.play(wedge.to(angle=300), duration=1.5)
+```
+
+**See also:** [`k.Arc`](#k-arc), [`k.PieChart`](charts.md#k-piechart).
 
 Inherited from [`k.Node`](object-state.md#k-node): [`set`](object-state.md#node-set), [`to`](object-state.md#node-to), [`unbind`](object-state.md#node-unbind), [`edge`](object-state.md#node-edge), [`age`](object-state.md#node-age), [`entered`](object-state.md#node-entered), [`exited`](object-state.md#node-exited), [`copy`](object-state.md#node-copy), [`place`](object-state.md#node-place), [`to_place`](object-state.md#node-to_place), [`unpin`](object-state.md#node-unpin).
 
@@ -1053,7 +1132,7 @@ Circular arc of radius `r`, starting at `start_angle` and sweeping `angle` degre
 | `r` | `FloatVal` | `1.0` | Circular arc of radius `r`, starting at `start_angle` and sweeping `angle` degrees (counterclockwise). |
 | `start_angle` | `FloatVal` | `0.0` | Circular arc of radius `r`, starting at `start_angle` and sweeping `angle` degrees (counterclockwise). |
 | `angle` | `FloatVal` | `90.0` | Circular arc of radius `r`, starting at `start_angle` and sweeping `angle` degrees (counterclockwise). |
-| `**props` | `Unpack[StyleKeywords]` | variadic | Keyword arguments (`StyleKeywords`): `name: str \| None`, `key: str \| None`, `x: FloatVal`, `y: FloatVal`, `position: VecVal`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`, `fill: ColorVal`, `fill_opacity: FloatVal`, `stroke: ColorVal`, `stroke_width: FloatVal`, `dash: FloatsVal`, `color: ColorVal`. |
+| `**props` | `Unpack[StyleKeywords]` | variadic | Keyword arguments (`StyleKeywords`): `name: str \| None`, `key: str \| None`, `x: FloatVal`, `y: FloatVal`, `position: VecVal`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`, `fill: ColorVal`, `fill_opacity: FloatVal`, `stroke: ColorVal`, `stroke_width: FloatVal`, `dash: FloatsVal`, `glow: FloatVal`, `glow_color: ColorVal`, `color: ColorVal`. |
 
 **Props** (animatable with `.to()`, settable with `.set()` or in the constructor):
 
@@ -1064,6 +1143,8 @@ Circular arc of radius `r`, starting at `start_angle` and sweeping `angle` degre
 | `stroke` | color | `theme.fg` | linear |
 | `stroke_width` | float | `theme.stroke_width` | linear |
 | `dash` | floats | `()` | step_end |
+| `glow` | float | `0.0` | linear |
+| `glow_color` | color | `theme.no_color` | linear |
 | `r` | float | `1.0` | linear |
 | `start_angle` | float | `0.0` | linear |
 | `angle` | float | `90.0` | linear |
@@ -1104,7 +1185,7 @@ Path from SVG commands (`d="M 0 0 L 1 1"`) or a polyline from a list of points; 
 | --- | --- | --- | --- |
 | `d` | `str \| Sequence[VecLike]` | `""` | Path from SVG commands (`d="M 0 0 L 1 1"`) or a polyline from a list of points; `closed=True` closes the outline. |
 | `closed` | `bool` | `False` | Path from SVG commands (`d="M 0 0 L 1 1"`) or a polyline from a list of points; `closed=True` closes the outline. |
-| `**props` | `Unpack[StyleKeywords]` | variadic | Keyword arguments (`StyleKeywords`): `name: str \| None`, `key: str \| None`, `x: FloatVal`, `y: FloatVal`, `position: VecVal`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`, `fill: ColorVal`, `fill_opacity: FloatVal`, `stroke: ColorVal`, `stroke_width: FloatVal`, `dash: FloatsVal`, `color: ColorVal`. |
+| `**props` | `Unpack[StyleKeywords]` | variadic | Keyword arguments (`StyleKeywords`): `name: str \| None`, `key: str \| None`, `x: FloatVal`, `y: FloatVal`, `position: VecVal`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`, `fill: ColorVal`, `fill_opacity: FloatVal`, `stroke: ColorVal`, `stroke_width: FloatVal`, `dash: FloatsVal`, `glow: FloatVal`, `glow_color: ColorVal`, `color: ColorVal`. |
 
 **Props** (animatable with `.to()`, settable with `.set()` or in the constructor):
 
@@ -1115,6 +1196,8 @@ Path from SVG commands (`d="M 0 0 L 1 1"`) or a polyline from a list of points; 
 | `stroke` | color | `theme.fg` | linear |
 | `stroke_width` | float | `theme.stroke_width` | linear |
 | `dash` | floats | `()` | step_end |
+| `glow` | float | `0.0` | linear |
+| `glow_color` | color | `theme.no_color` | linear |
 | `d` | str | `""` | step_end |
 | `closed` | bool | `False` | step_end |
 
@@ -1149,7 +1232,7 @@ Boolean operations between shapes: `k.union(a, b)`, `k.intersect(a, b)` and `k.s
 | --- | --- | --- | --- |
 | `a` | `Node` | required | Boolean operations between shapes: `k.union(a, b)`, `k.intersect(a, b)` and `k.subtract(a, b)` return a new `k.Path` computed from the outlines at the cursor (with the style of `a`, unless another one is passed). |
 | `b` | `Node` | required | Shape covering `a` or `b` (style of `a` unless given). |
-| `**style` | `Unpack[StyleKeywords]` | variadic | Keyword arguments (`StyleKeywords`): `name: str \| None`, `key: str \| None`, `x: FloatVal`, `y: FloatVal`, `position: VecVal`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`, `fill: ColorVal`, `fill_opacity: FloatVal`, `stroke: ColorVal`, `stroke_width: FloatVal`, `dash: FloatsVal`, `color: ColorVal`. |
+| `**style` | `Unpack[StyleKeywords]` | variadic | Keyword arguments (`StyleKeywords`): `name: str \| None`, `key: str \| None`, `x: FloatVal`, `y: FloatVal`, `position: VecVal`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`, `fill: ColorVal`, `fill_opacity: FloatVal`, `stroke: ColorVal`, `stroke_width: FloatVal`, `dash: FloatsVal`, `glow: FloatVal`, `glow_color: ColorVal`, `color: ColorVal`. |
 
 **Example:**
 
@@ -1181,7 +1264,7 @@ Documented together with [`k.union`](#k-union).
 | --- | --- | --- | --- |
 | `a` | `Node` | required | Shape covering both `a` and `b`. |
 | `b` | `Node` | required | Shape covering both `a` and `b`. |
-| `**style` | `Unpack[StyleKeywords]` | variadic | Keyword arguments (`StyleKeywords`): `name: str \| None`, `key: str \| None`, `x: FloatVal`, `y: FloatVal`, `position: VecVal`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`, `fill: ColorVal`, `fill_opacity: FloatVal`, `stroke: ColorVal`, `stroke_width: FloatVal`, `dash: FloatsVal`, `color: ColorVal`. |
+| `**style` | `Unpack[StyleKeywords]` | variadic | Keyword arguments (`StyleKeywords`): `name: str \| None`, `key: str \| None`, `x: FloatVal`, `y: FloatVal`, `position: VecVal`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`, `fill: ColorVal`, `fill_opacity: FloatVal`, `stroke: ColorVal`, `stroke_width: FloatVal`, `dash: FloatsVal`, `glow: FloatVal`, `glow_color: ColorVal`, `color: ColorVal`. |
 
 <a id="k-subtract"></a>
 ### `k.subtract` *(function)*
@@ -1200,7 +1283,7 @@ Documented together with [`k.union`](#k-union).
 | --- | --- | --- | --- |
 | `a` | `Node` | required | `a` with `b` cut out. |
 | `b` | `Node` | required | `a` with `b` cut out. |
-| `**style` | `Unpack[StyleKeywords]` | variadic | Keyword arguments (`StyleKeywords`): `name: str \| None`, `key: str \| None`, `x: FloatVal`, `y: FloatVal`, `position: VecVal`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`, `fill: ColorVal`, `fill_opacity: FloatVal`, `stroke: ColorVal`, `stroke_width: FloatVal`, `dash: FloatsVal`, `color: ColorVal`. |
+| `**style` | `Unpack[StyleKeywords]` | variadic | Keyword arguments (`StyleKeywords`): `name: str \| None`, `key: str \| None`, `x: FloatVal`, `y: FloatVal`, `position: VecVal`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`, `fill: ColorVal`, `fill_opacity: FloatVal`, `stroke: ColorVal`, `stroke_width: FloatVal`, `dash: FloatsVal`, `glow: FloatVal`, `glow_color: ColorVal`, `color: ColorVal`. |
 
 <a id="k-bar"></a>
 ### `k.Bar` *(class)*
@@ -2143,6 +2226,260 @@ Inherited from [`k.Node`](object-state.md#k-node): [`set`](object-state.md#node-
 ```python
 lowerthird.enter() -> Animation
 ```
+
+<a id="k-browserwindow"></a>
+### `k.BrowserWindow` *(class)*
+
+```python
+k.BrowserWindow(
+    content: Node | None = None,
+    *,
+    url: str = "example.com",
+    w: float = 8.0,
+    h: float = 5.0,
+    **props: Unpack[TransformKeywords],
+)
+```
+
+Device frames that hold content, styled to the theme: `k.BrowserWindow(content, url=, w=, h=)` (dots and an address bar), `k.Phone(content, w=, h=)` and `k.Laptop(content, w=)`. The content sits in the screen, scaled down to fit when it is larger. Parts such as `window.page`, `phone.screen`, `laptop.base` and `.content`.
+
+**Parameters:**
+
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `content` | `Node \| None` | `None` |   |
+| `url` | `str` | `"example.com"` | Device frames that hold content, styled to the theme: `k.BrowserWindow(content, url=, w=, h=)` (dots and an address bar), `k.Phone(content, w=, h=)` and `k.Laptop(content, w=)`. |
+| `w` | `float` | `8.0` | Device frames that hold content, styled to the theme: `k.BrowserWindow(content, url=, w=, h=)` (dots and an address bar), `k.Phone(content, w=, h=)` and `k.Laptop(content, w=)`. |
+| `h` | `float` | `5.0` | Device frames that hold content, styled to the theme: `k.BrowserWindow(content, url=, w=, h=)` (dots and an address bar), `k.Phone(content, w=, h=)` and `k.Laptop(content, w=)`. |
+| `**props` | `Unpack[TransformKeywords]` | variadic | Keyword arguments (`TransformKeywords`): `name: str \| None`, `key: str \| None`, `x: FloatVal`, `y: FloatVal`, `position: VecVal`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`. |
+
+Props inherited from [`k.Node`](object-state.md#k-node): `x`, `y`, `rotate`, `scale`, `scale_x`, `scale_y`, `anchor`, `opacity`, `z`, `visible`, `bleed`.
+
+**Example:**
+
+```python
+@k.scene
+def screens(s: k.Scene):
+    page = k.BrowserWindow(k.Text("Docs", size=0.6), url="kinemo.dev/docs", w=6, h=3.6).place(at=(-2.5, 0))
+    phone = k.Phone(k.Circle(r=0.5, fill=k.GREEN, fill_opacity=1), w=1.8, h=3.6).place(at=(3, 0))
+    s.play(k.fade_in(page, phone))
+```
+
+**See also:** [`k.Terminal`](text.md#k-terminal), [`k.Card`](#k-card).
+
+Inherited from [`k.Group`](#k-group): [`children`](#group-children), [`to`](#group-to), [`swap`](#group-swap), [`insert`](#group-insert), [`pop`](#group-pop), [`fit`](#group-fit).
+Inherited from [`k.Node`](object-state.md#k-node): [`set`](object-state.md#node-set), [`unbind`](object-state.md#node-unbind), [`edge`](object-state.md#node-edge), [`age`](object-state.md#node-age), [`entered`](object-state.md#node-entered), [`exited`](object-state.md#node-exited), [`copy`](object-state.md#node-copy), [`place`](object-state.md#node-place), [`to_place`](object-state.md#node-to_place), [`unpin`](object-state.md#node-unpin).
+
+<a id="k-laptop"></a>
+### `k.Laptop` *(class)*
+
+```python
+k.Laptop(
+    content: Node | None = None,
+    *,
+    w: float = 7.0,
+    **props: Unpack[TransformKeywords],
+)
+```
+
+`k.Laptop(content, w=7)`: a laptop screen in its bezel above a keyboard base; the content fills the screen. Parts: `laptop.lid`, `laptop.screen`, `laptop.base`, `laptop.content`.
+
+Documented together with [`k.BrowserWindow`](#k-browserwindow).
+
+**Parameters:**
+
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `content` | `Node \| None` | `None` |   |
+| `w` | `float` | `7.0` | `k.Laptop(content, w=7)`: a laptop screen in its bezel above a keyboard base; the content fills the screen. |
+| `**props` | `Unpack[TransformKeywords]` | variadic | Keyword arguments (`TransformKeywords`): `name: str \| None`, `key: str \| None`, `x: FloatVal`, `y: FloatVal`, `position: VecVal`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`. |
+
+Props inherited from [`k.Node`](object-state.md#k-node): `x`, `y`, `rotate`, `scale`, `scale_x`, `scale_y`, `anchor`, `opacity`, `z`, `visible`, `bleed`.
+
+Inherited from [`k.Group`](#k-group): [`children`](#group-children), [`to`](#group-to), [`swap`](#group-swap), [`insert`](#group-insert), [`pop`](#group-pop), [`fit`](#group-fit).
+Inherited from [`k.Node`](object-state.md#k-node): [`set`](object-state.md#node-set), [`unbind`](object-state.md#node-unbind), [`edge`](object-state.md#node-edge), [`age`](object-state.md#node-age), [`entered`](object-state.md#node-entered), [`exited`](object-state.md#node-exited), [`copy`](object-state.md#node-copy), [`place`](object-state.md#node-place), [`to_place`](object-state.md#node-to_place), [`unpin`](object-state.md#node-unpin).
+
+<a id="k-phone"></a>
+### `k.Phone` *(class)*
+
+```python
+k.Phone(
+    content: Node | None = None,
+    *,
+    w: float = 2.4,
+    h: float = 5.0,
+    **props: Unpack[TransformKeywords],
+)
+```
+
+`k.Phone(content, w=2.4, h=5)`: a phone body with its screen, a camera pill and a home bar; the content fills the screen. Parts: `phone.body`, `phone.screen`, `phone.content`.
+
+Documented together with [`k.BrowserWindow`](#k-browserwindow).
+
+**Parameters:**
+
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `content` | `Node \| None` | `None` |   |
+| `w` | `float` | `2.4` | `k.Phone(content, w=2.4, h=5)`: a phone body with its screen, a camera pill and a home bar; the content fills the screen. |
+| `h` | `float` | `5.0` | `k.Phone(content, w=2.4, h=5)`: a phone body with its screen, a camera pill and a home bar; the content fills the screen. |
+| `**props` | `Unpack[TransformKeywords]` | variadic | Keyword arguments (`TransformKeywords`): `name: str \| None`, `key: str \| None`, `x: FloatVal`, `y: FloatVal`, `position: VecVal`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`. |
+
+Props inherited from [`k.Node`](object-state.md#k-node): `x`, `y`, `rotate`, `scale`, `scale_x`, `scale_y`, `anchor`, `opacity`, `z`, `visible`, `bleed`.
+
+Inherited from [`k.Group`](#k-group): [`children`](#group-children), [`to`](#group-to), [`swap`](#group-swap), [`insert`](#group-insert), [`pop`](#group-pop), [`fit`](#group-fit).
+Inherited from [`k.Node`](object-state.md#k-node): [`set`](object-state.md#node-set), [`unbind`](object-state.md#node-unbind), [`edge`](object-state.md#node-edge), [`age`](object-state.md#node-age), [`entered`](object-state.md#node-entered), [`exited`](object-state.md#node-exited), [`copy`](object-state.md#node-copy), [`place`](object-state.md#node-place), [`to_place`](object-state.md#node-to_place), [`unpin`](object-state.md#node-unpin).
+
+<a id="k-epicycles"></a>
+### `k.Epicycles` *(class)*
+
+```python
+k.Epicycles(
+    points: Sequence[Any] | None = None,
+    n: int = 50,
+    *,
+    coefficients: Mapping[int, complex] | None = None,
+    color: ColorLike | None = None,
+    circle_color: ColorLike | None = None,
+    **props: Unpack[UnplacedKeywords],
+)
+```
+
+The Fourier series of a closed path (points as tuples or complex numbers), as a chain of `n` rotating circles, largest first, whose tip traces the path; or `coefficients=` (frequency → complex amplitude) directly. `epi.run(turns=1)` turns the chain and the curve appears behind the tip. Parts: `epi.circles`, `epi.arms`, `epi.curve`, `epi.tip`.
+
+**Parameters:**
+
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `points` | `Sequence[Any] \| None` | `None` | `k.Epicycles(points, n=50)`: the Fourier series of the closed path through `points` (tuples or complex numbers), drawn as a chain of `n` rotating circles, largest first, whose tip traces the path; or `coefficients={1: 1+0j, -1: 0.5j, ...}` directly. |
+| `n` | `int` | `50` | The Fourier series of a closed path (points as tuples or complex numbers), as a chain of `n` rotating circles, largest first, whose tip traces the path; or `coefficients=` (frequency → complex amplitude) directly. |
+| `coefficients` | `Mapping[int, complex] \| None` | `None` | The Fourier series of a closed path (points as tuples or complex numbers), as a chain of `n` rotating circles, largest first, whose tip traces the path; or `coefficients=` (frequency → complex amplitude) directly. |
+| `color` | `ColorLike \| None` | `None` |   |
+| `circle_color` | `ColorLike \| None` | `None` |   |
+| `**props` | `Unpack[UnplacedKeywords]` | variadic | Keyword arguments (`UnplacedKeywords`): `name: str \| None`, `key: str \| None`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`. |
+
+**Props** (animatable with `.to()`, settable with `.set()` or in the constructor):
+
+| Prop | Kind | Default | Interpolation |
+| --- | --- | --- | --- |
+| `t` | float | `0.0` | linear |
+
+Props inherited from [`k.Node`](object-state.md#k-node): `x`, `y`, `rotate`, `scale`, `scale_x`, `scale_y`, `anchor`, `opacity`, `z`, `visible`, `bleed`.
+
+**Example:**
+
+```python
+import math
+import kinemo as k
+
+SQUARE = [(2 * math.copysign(min(1, abs(math.cos(a)) * 1.5), math.cos(a)), 2 * math.copysign(min(1, abs(math.sin(a)) * 1.5), math.sin(a))) for a in (2 * math.pi * i / 120 for i in range(120))]
+
+@k.scene
+def fourier(s: k.Scene):
+    epi = k.Epicycles(SQUARE, n=20).place(at="center")
+    s.play(k.draw(epi))
+    s.play(epi.run(turns=1, duration=4))
+```
+
+**See also:** [`k.Circle`](#k-circle), [`k.trace`](stateful-systems.md#k-trace).
+
+**Members:**
+
+- [`enter`](#epicycles-enter): `k.draw(epi)`: the circles and arms are drawn, the tip appears (the curve waits for `run`).
+- [`run`](#epicycles-run): Turn the chain `turns` times at a steady speed (the tip traces the path once per turn; `ease=` for another speed profile).
+
+Inherited from [`k.Group`](#k-group): [`children`](#group-children), [`to`](#group-to), [`swap`](#group-swap), [`insert`](#group-insert), [`pop`](#group-pop), [`fit`](#group-fit).
+Inherited from [`k.Node`](object-state.md#k-node): [`set`](object-state.md#node-set), [`unbind`](object-state.md#node-unbind), [`edge`](object-state.md#node-edge), [`age`](object-state.md#node-age), [`entered`](object-state.md#node-entered), [`exited`](object-state.md#node-exited), [`copy`](object-state.md#node-copy), [`place`](object-state.md#node-place), [`to_place`](object-state.md#node-to_place), [`unpin`](object-state.md#node-unpin).
+
+<a id="epicycles-enter"></a>
+#### `k.Epicycles.enter` *(method)*
+
+```python
+epicycles.enter() -> Animation
+```
+
+`k.draw(epi)`: the circles and arms are drawn, the tip appears (the curve waits for `run`).
+
+<a id="epicycles-run"></a>
+#### `k.Epicycles.run` *(method)*
+
+```python
+epicycles.run(
+    turns: float = 1.0,
+    *,
+    duration: float | None = None,
+    ease: EaseLike | None = None,
+) -> Animation
+```
+
+Turn the chain `turns` times at a steady speed (the tip traces the path once per turn; `ease=` for another speed profile).
+
+**Parameters:**
+
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `turns` | `float` | `1.0` | Turn the chain `turns` times at a steady speed (the tip traces the path once per turn; `ease=` for another speed profile). |
+| `duration` | `float \| None` | `None` |   |
+| `ease` | `EaseLike \| None` | `None` | Turn the chain `turns` times at a steady speed (the tip traces the path once per turn; `ease=` for another speed profile). |
+
+<a id="k-icon"></a>
+### `k.Icon` *(class)*
+
+```python
+k.Icon(
+    icon: str,
+    *,
+    size: float = 1.0,
+    color: ColorLike | None = None,
+    stroke_width: float = 3.0,
+    **props: Unpack[TransformKeywords],
+)
+```
+
+A built-in icon, drawn with strokes on a square of side `size=`: `"check"`, `"x"`, `"warning"`, `"lightbulb"`, `"gear"`, `"user"`, `"cpu"`, … (`k.ICON_NAMES` lists them). `color=` sets the stroke; `icon.to(stroke=...)` recolors it. An unknown name is K0105 with the closest names.
+
+**Parameters:**
+
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `icon` | `str` | required |   |
+| `size` | `float` | `1.0` | A built-in icon, drawn with strokes on a square of side `size=`: `"check"`, `"x"`, `"warning"`, `"lightbulb"`, `"gear"`, `"user"`, `"cpu"`, … (`k.ICON_NAMES` lists them). |
+| `color` | `ColorLike \| None` | `None` | `color=` sets the stroke; `icon.to(stroke=...)` recolors it. |
+| `stroke_width` | `float` | `3.0` | `stroke` and `stroke_width` are the icon's own props: `icon.to(stroke=k.RED)` recolors every stroke. |
+| `**props` | `Unpack[TransformKeywords]` | variadic | Keyword arguments (`TransformKeywords`): `name: str \| None`, `key: str \| None`, `x: FloatVal`, `y: FloatVal`, `position: VecVal`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`. |
+
+**Props** (animatable with `.to()`, settable with `.set()` or in the constructor):
+
+| Prop | Kind | Default | Interpolation |
+| --- | --- | --- | --- |
+| `stroke` | color | `theme.fg` | linear |
+| `stroke_width` | float | `3.0` | linear |
+
+Props inherited from [`k.Node`](object-state.md#k-node): `x`, `y`, `rotate`, `scale`, `scale_x`, `scale_y`, `anchor`, `opacity`, `z`, `visible`, `bleed`.
+
+**Example:**
+
+```python
+@k.scene
+def idea(s: k.Scene):
+    bulb = k.Icon("lightbulb", size=1.5, color=k.YELLOW).place(at="center")
+    s.play(k.draw(bulb))
+    s.play(bulb.to(stroke=k.ORANGE))
+```
+
+**See also:** [`k.SVG`](#k-svg).
+
+Inherited from [`k.Group`](#k-group): [`children`](#group-children), [`to`](#group-to), [`swap`](#group-swap), [`insert`](#group-insert), [`pop`](#group-pop), [`fit`](#group-fit).
+Inherited from [`k.Node`](object-state.md#k-node): [`set`](object-state.md#node-set), [`unbind`](object-state.md#node-unbind), [`edge`](object-state.md#node-edge), [`age`](object-state.md#node-age), [`entered`](object-state.md#node-entered), [`exited`](object-state.md#node-exited), [`copy`](object-state.md#node-copy), [`place`](object-state.md#node-place), [`to_place`](object-state.md#node-to_place), [`unpin`](object-state.md#node-unpin).
+
+<a id="k-icon_names"></a>
+### `k.ICON_NAMES` *(value)*
+
+```python
+k.ICON_NAMES: tuple = ('arrow-down', 'arrow-left', 'arrow-right', 'arrow-up', 'bolt', 'book', 'chart', 'check', 'clock', 'cloud', 'cpu', 'database', 'flag', 'gear', 'globe', 'home', 'info', 'lightbulb', 'lock', 'mail', 'minus', 'pause', 'play', 'plus', 'question', 'search', 'star', 'user', 'warning', 'x')
+```
+
+Documented together with [`k.Icon`](#k-icon). A built-in icon, drawn with strokes on a square of side `size=`: `"check"`, `"x"`, `"warning"`, `"lightbulb"`, `"gear"`, `"user"`, `"cpu"`, … (`k.ICON_NAMES` lists them). `color=` sets the stroke; `icon.to(stroke=...)` recolors it. An unknown name is K0105 with the closest names.
 
 <a id="k-image"></a>
 ### `k.Image` *(class)*

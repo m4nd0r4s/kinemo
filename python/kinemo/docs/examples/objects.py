@@ -401,6 +401,23 @@ def arrow(s: k.Scene):
         related=("k.Line",),
     ),
     DocEntry(
+        "k.Sector",
+        "Objects",
+        "A pie slice from the center, or a ring slice with `inner=` (its inner radius): `r=`, "
+        "`angle=` (degrees, counterclockwise; negative goes clockwise) and `start_angle=` from +x. "
+        "Every prop animates, so a slice can open or turn.",
+        '''
+import kinemo as k
+
+@k.scene
+def slice_(s: k.Scene):
+    wedge = k.Sector(r=2, angle=60, start_angle=90, inner=0.8, fill=k.YELLOW, fill_opacity=0.9).place(at="center")
+    s.play(k.draw(wedge))
+    s.play(wedge.to(angle=300), duration=1.5)
+''',
+        related=("k.Arc", "k.PieChart"),
+    ),
+    DocEntry(
         "k.Arc",
         "Objects",
         "Circular arc of radius `r`, starting at `start_angle` and sweeping `angle` degrees "
@@ -686,5 +703,63 @@ def speaker(s: k.Scene):
     s.play(k.fade_out(who))
 ''',
         related=("k.TitleCard",),
+    ),
+    DocEntry(
+        "k.BrowserWindow",
+        "Objects",
+        "Device frames that hold content, styled to the theme: `k.BrowserWindow(content, url=, w=, "
+        "h=)` (dots and an address bar), `k.Phone(content, w=, h=)` and `k.Laptop(content, w=)`. "
+        "The content sits in the screen, scaled down to fit when it is larger. Parts such as "
+        "`window.page`, `phone.screen`, `laptop.base` and `.content`.",
+        '''
+import kinemo as k
+
+@k.scene
+def screens(s: k.Scene):
+    page = k.BrowserWindow(k.Text("Docs", size=0.6), url="kinemo.dev/docs", w=6, h=3.6).place(at=(-2.5, 0))
+    phone = k.Phone(k.Circle(r=0.5, fill=k.GREEN, fill_opacity=1), w=1.8, h=3.6).place(at=(3, 0))
+    s.play(k.fade_in(page, phone))
+''',
+        related=("k.Terminal", "k.Card"),
+        aliases=("k.Phone", "k.Laptop"),
+    ),
+    DocEntry(
+        "k.Epicycles",
+        "Objects",
+        "The Fourier series of a closed path (points as tuples or complex numbers), as a chain of "
+        "`n` rotating circles, largest first, whose tip traces the path; or `coefficients=` "
+        "(frequency → complex amplitude) directly. `epi.run(turns=1)` turns the chain and the "
+        "curve appears behind the tip. Parts: `epi.circles`, `epi.arms`, `epi.curve`, `epi.tip`.",
+        '''
+import math
+import kinemo as k
+
+SQUARE = [(2 * math.copysign(min(1, abs(math.cos(a)) * 1.5), math.cos(a)), 2 * math.copysign(min(1, abs(math.sin(a)) * 1.5), math.sin(a))) for a in (2 * math.pi * i / 120 for i in range(120))]
+
+@k.scene
+def fourier(s: k.Scene):
+    epi = k.Epicycles(SQUARE, n=20).place(at="center")
+    s.play(k.draw(epi))
+    s.play(epi.run(turns=1, duration=4))
+''',
+        related=("k.Circle", "k.trace"),
+    ),
+    DocEntry(
+        "k.Icon",
+        "Objects",
+        "A built-in icon, drawn with strokes on a square of side `size=`: `\"check\"`, `\"x\"`, "
+        "`\"warning\"`, `\"lightbulb\"`, `\"gear\"`, `\"user\"`, `\"cpu\"`, … (`k.ICON_NAMES` lists "
+        "them). `color=` sets the stroke; `icon.to(stroke=...)` recolors it. An unknown name is "
+        "K0105 with the closest names.",
+        '''
+import kinemo as k
+
+@k.scene
+def idea(s: k.Scene):
+    bulb = k.Icon("lightbulb", size=1.5, color=k.YELLOW).place(at="center")
+    s.play(k.draw(bulb))
+    s.play(bulb.to(stroke=k.ORANGE))
+''',
+        related=("k.SVG",),
     ),
 )

@@ -3,7 +3,7 @@
 use kurbo::{BezPath, PathEl};
 use tiny_skia as sk;
 
-use super::{Cap, DisplayList, DotCloud, DrawItem, Image, Join, Stroke};
+use super::{Cap, DisplayList, DotCloud, DrawItem, Glow, Image, Join, Stroke};
 
 fn to_sk_path(p: &BezPath) -> Option<sk::Path> {
     let mut b = sk::PathBuilder::new();
@@ -160,9 +160,86 @@ fn fill_dots(pm: &mut sk::Pixmap, dots: &DotCloud, color: [f64; 4], opacity: f64
     }
 }
 
+/// Multiplies the blurred coverage of a glow (a blurred thin stroke is faint).
+const GLOW_GAIN: f32 = 3.0;
+
+/// Box-blurs a coverage plane in place, `passes` times along each axis (three passes look
+/// close to a gaussian of the same radius).
+fn blur(plane: &mut [f32], width: usize, height: usize, radius: usize, passes: usize) {
+    if radius == 0 {
+        return;
+    }
+    let mut line = vec![0.0f32; width.max(height)];
+    let window = (2 * radius + 1) as f32;
+    for _ in 0..passes {
+        for axis in 0..2 {
+            let (count, length, stride, step) = if axis == 0 { (height, width, width, 1) } else { (width, height, 1, width) };
+            for index in 0..count {
+                let base = index * stride;
+                let value = |i: isize| -> f32 {
+                    if i < 0 || i >= length as isize { 0.0 } else { plane[base + i as usize * step] }
+                };
+                let mut sum: f32 = (-(radius as isize)..=radius as isize).map(value).sum();
+                for (i, out) in line.iter_mut().enumerate().take(length) {
+                    *out = sum / window;
+                    sum += value(i as isize + radius as isize + 1) - value(i as isize - radius as isize);
+                }
+                for (i, &v) in line.iter().enumerate().take(length) {
+                    plane[base + i * step] = v;
+                }
+            }
+        }
+    }
+}
+
+/// Paints the soft halo of an item under it: its shape (fill and stroke) rasterized into a
+/// coverage plane around it, blurred, then blended in the glow's color.
+fn draw_glow(pm: &mut sk::Pixmap, item: &DrawItem, glow: &Glow, antialias: bool) {
+    let Some(path) = to_sk_path(&item.path) else { return };
+    let stroke_half = item.stroke.as_ref().map_or(0.0, |s| s.width / 2.0);
+    let reach = stroke_half + glow.radius * 3.0;
+    let bounds = kurbo::Shape::bounding_box(&item.path).inflate(reach, reach);
+    let (frame_w, frame_h) = (pm.width() as f64, pm.height() as f64);
+    let (x0, y0) = (bounds.x0.max(0.0).floor(), bounds.y0.max(0.0).floor());
+    let (x1, y1) = (bounds.x1.min(frame_w).ceil(), bounds.y1.min(frame_h).ceil());
+    if x1 <= x0 || y1 <= y0 {
+        return;
+    }
+    let (width, height) = ((x1 - x0) as u32, (y1 - y0) as u32);
+    let Some(mut shape) = sk::Pixmap::new(width, height) else { return };
+    let white = paint_for([1.0, 1.0, 1.0, 1.0], 1.0, antialias);
+    let shift = sk::Transform::from_translate(-x0 as f32, -y0 as f32);
+    let rule = if item.fill_rule_even_odd { sk::FillRule::EvenOdd } else { sk::FillRule::Winding };
+    if item.fill.is_some() || item.stroke.is_none() {
+        shape.fill_path(&path, &white, rule, shift, None);
+    }
+    if let Some(stroke) = &item.stroke {
+        shape.stroke_path(&path, &white, &to_sk_stroke(stroke), shift, None);
+    }
+    let mut plane: Vec<f32> = shape.pixels().iter().map(|p| p.alpha() as f32 / 255.0).collect();
+    blur(&mut plane, width as usize, height as usize, (glow.radius / 2.0).round().max(1.0) as usize, 3);
+    let alpha = (glow.color[3] * item.opacity).clamp(0.0, 1.0) as f32;
+    let source = [glow.color[0] as f32 * alpha, glow.color[1] as f32 * alpha, glow.color[2] as f32 * alpha, alpha];
+    let stride = pm.width() as usize;
+    let pixels = pm.data_mut().as_chunks_mut::<4>().0;
+    for row in 0..height as usize {
+        for column in 0..width as usize {
+            // Blurring spreads a thin shape thin: a gain brings the halo up near the shape.
+            let coverage = (plane[row * width as usize + column] * GLOW_GAIN).min(1.0);
+            let coverage = (coverage * 255.0).round() as u8;
+            if coverage > 0 {
+                blend(&mut pixels[(y0 as usize + row) * stride + x0 as usize + column], source, coverage);
+            }
+        }
+    }
+}
+
 fn draw_item(pm: &mut sk::Pixmap, item: &DrawItem, antialias: bool) {
     if item.opacity <= 0.0 {
         return;
+    }
+    if let Some(glow) = &item.glow {
+        draw_glow(pm, item, glow, antialias);
     }
     let Some(path) = to_sk_path(&item.path) else { return };
     let mask = match &item.clip {

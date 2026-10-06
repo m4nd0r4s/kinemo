@@ -136,6 +136,25 @@ def plane(s: k.Scene):
         related=("NumberPlane.apply", "NumberPlane.polygon", "k.Axes"),
     ),
     DocEntry(
+        "k.ComplexPlane",
+        "Charts",
+        "A `k.NumberPlane` labelled as the complex plane (real ticks, `i` ticks, `Re`/`Im`) whose "
+        "points are complex numbers: `cp.dot(2 + 1j)`, `cp.vector(1 - 2j)`, `cp.coords(z)`. "
+        "`cp.apply(1j)` multiplies everything by a complex number (a quarter turn), "
+        "`cp.apply(lambda z: z ** 2)` maps the plane with a function of `z`.",
+        '''
+import kinemo as k
+
+@k.scene
+def rotation(s: k.Scene):
+    cp = k.ComplexPlane(re=(-4, 4, 1), im=(-3, 3, 1))
+    cp.vector(2 + 1j, color=k.YELLOW)
+    s.play(k.draw(cp))
+    s.play(cp.apply(1j), duration=2)
+''',
+        related=("k.NumberPlane", "NumberPlane.apply"),
+    ),
+    DocEntry(
         "NumberPlane.apply",
         "Charts",
         "Animated transformation of the plane, composed after the ones already applied: a "
@@ -369,6 +388,63 @@ def comfort(s: k.Scene):
         aliases=("Axes.vband",),
     ),
     DocEntry(
+        "Axes.vector",
+        "Charts",
+        "An arrow of components `v` from the data point `at=`, in data units; both are signals, so "
+        "`vector.to(v=(2, 1))` turns it and it follows zooms. `components=True` adds its dashed x "
+        "and y components (labelled with `label=`). `a + b` is the resultant, shown tip to tail by "
+        "`k.vector_sum(a, b, a + b)`.",
+        '''
+import kinemo as k
+
+@k.scene
+def forces(s: k.Scene):
+    ax = k.Axes(x=(-1, 6, 1), y=(-1, 5, 1), grid=True).place(at="center")
+    a = ax.vector((3, 1), label="F", components=True)
+    b = ax.vector((1, 2.5), label="G")
+    s.play(k.draw(ax))
+    s.play(k.vector_sum(a, b, a + b))
+''',
+        related=("k.vector_sum", "k.Arrow"),
+    ),
+    DocEntry(
+        "k.vector_sum",
+        "Charts",
+        "Adds two axes vectors tip to tail: `b` slides so its tail sits on `a`'s tip, then the "
+        "resultant (`a + b`) is drawn from `a`'s tail.",
+        '''
+import kinemo as k
+
+@k.scene
+def resultant(s: k.Scene):
+    ax = k.Axes(x=(0, 6, 1), y=(0, 4, 1)).place(at="center")
+    a, b = ax.vector((3, 0), label="a"), ax.vector((1, 3), label="b")
+    s.play(k.draw(ax))
+    s.play(k.vector_sum(a, b, a + b, duration=0.8))
+''',
+        related=("Axes.vector",),
+    ),
+    DocEntry(
+        "Axes.dot",
+        "Charts",
+        "A dot at a data point that follows zooms; `open=True` draws it hollow (filled with the "
+        "background) for an endpoint a piecewise function leaves out. `ax.plot(f, holes=[2])` "
+        "puts open dots on a curve (at the limit of `f` where it is undefined): `curve.holes`.",
+        '''
+import kinemo as k
+
+@k.scene
+def piecewise(s: k.Scene):
+    ax = k.Axes(x=(0, 4, 1), y=(0, 6, 1)).place(at="center")
+    curve = ax.plot(lambda x: (x * x - 4) / (x - 2), holes=[2])
+    ax.dot(3, 1, open=True, color=k.RED)
+    ax.dot(3, 5, color=k.RED)
+    s.play(k.draw(ax))
+    s.play(k.indicate(curve.holes[0]))
+''',
+        related=("Axes.plot", "Axes.segment"),
+    ),
+    DocEntry(
         "Axes.origin",
         "Charts",
         "Where the two axes cross, in the axes' own coordinates: the data origin clamped "
@@ -482,6 +558,29 @@ def energy(s: k.Scene):
     s.play(chart.to(data={"country": ["ES", "PT", "FR"], "gwh": [300, 80, 540]}), duration=2)
 ''',
         related=("k.LineChart", "k.Table", "k.Bar"),
+    ),
+    DocEntry(
+        "k.PieChart",
+        "Charts",
+        "One slice per row of a table: `labels=` names the category column and `values=` the "
+        "numbers; `donut=0.5` leaves a hole (a fraction of `radius=`). Slices start at the top and "
+        "go clockwise, labelled outside with their percentage (narrow ones get a leader line). "
+        "`pie.to(data=df2)` animates the shares; new keys grow in, missing ones shrink away. "
+        "`pie.slice(\"IT\")` is a slice (`.sector`, `.label`, `.percent`).",
+        '''
+import kinemo as k
+
+MIX = {"source": ["Solar", "Wind", "Hydro", "Gas"], "twh": [10, 25, 30, 35]}
+LATER = {"source": ["Solar", "Wind", "Hydro", "Gas"], "twh": [35, 30, 25, 10]}
+
+@k.scene
+def mix(s: k.Scene):
+    pie = k.PieChart(MIX, labels="source", values="twh", donut=0.45).place(at="center")
+    s.play(k.draw(pie))
+    s.play(pie.to(data=LATER), duration=2)
+    s.play(k.indicate(pie.slice("Solar")))
+''',
+        related=("k.BarChart", "k.Sector"),
     ),
     DocEntry(
         "k.LineChart",

@@ -15,7 +15,7 @@ fn square_item(fill: Option<Fill>, stroke: Option<Stroke>) -> DrawItem {
         clip: None,
         fill_rule_even_odd: false,
         image: None,
-        dots: None,
+        dots: None, glow: None,
     }
 }
 
@@ -104,7 +104,7 @@ fn image_item(transform: kurbo::Affine, outline: Rect, opacity: f64) -> DrawItem
         clip: None,
         fill_rule_even_odd: false,
         image: Some(ImagePaint { bitmap: checker_bitmap(), transform }),
-        dots: None,
+        dots: None, glow: None,
     }
 }
 
@@ -143,7 +143,7 @@ fn dots_item(color: [f64; 4], centers: Vec<[f32; 2]>, radius: f32) -> DrawItem {
     for &[x, y] in &centers {
         path.extend(kurbo::Circle::new((x as f64, y as f64), radius as f64).path_elements(0.1));
     }
-    DrawItem { path, fill: Some(Fill { color }), stroke: None, opacity: 1.0, clip: None, fill_rule_even_odd: false, image: None, dots: Some(DotCloud { centers, radii }) }
+    DrawItem { path, fill: Some(Fill { color }), stroke: None, opacity: 1.0, clip: None, fill_rule_even_odd: false, image: None, dots: Some(DotCloud { centers, radii }), glow: None }
 }
 
 #[test]
@@ -174,4 +174,17 @@ fn dots_match_the_path_fill_closely() {
     let total = |img: &Image| img.rgba.iter().map(|&v| v as u64).sum::<u64>();
     let (a, b) = (total(&stamped) as f64, total(&filled) as f64);
     assert!((a - b).abs() / b < 0.02, "stamped {a} vs filled {b}");
+}
+
+#[test]
+fn glow_paints_a_halo_around_the_shape_only_when_set() {
+    let red = Fill { color: [1.0, 0.0, 0.0, 1.0] };
+    let plain = rasterize(&dl(vec![square_item(Some(red.clone()), None)]), true);
+    let mut glowing = square_item(Some(red), None);
+    glowing.glow = Some(Glow { color: [1.0, 0.0, 0.0, 1.0], radius: 3.0 });
+    let halo = rasterize(&dl(vec![glowing]), true);
+    // Just outside the square (8..24): black without glow, reddish with it; inside unchanged.
+    assert_eq!(px(&plain, 26, 16), [0, 0, 0, 255]);
+    assert!(px(&halo, 26, 16)[0] > 40);
+    assert_eq!(px(&halo, 16, 16), [255, 0, 0, 255]);
 }

@@ -31,6 +31,12 @@ Shapes, groups, images, SVG and mass objects (points, vector fields, stream line
 - [`k.Bar`](#k-bar): A value shown as a bar that grows from its base, with an optional label (`label=True`).
 - [`k.Group`](#k-group): Groups objects: transforms compose and opacity multiplies.
 - [`k.Graph`](#k-graph): Nodes and edges: `k.Graph(nodes, edges, layout=...)` with names as nodes and `(u, v)` or `(u, v, weight)` edges (arrows with `directed=True`).
+- [`k.Matrix`](#k-matrix): A matrix whose entries are objects in a grid: numbers, TeX strings (typeset with `k.Math`) or any object, between `brackets=` (`"["`, `"("`, `"|"`, `"none"`).
+- [`k.matrix_product`](#k-matrix_product): Shows a product row by column: `k.matrix_product(a, b, a @ b)` draws the product's brackets, then for each entry indicates its row of `a` and its column of `b` while the entry appears (`step=` seconds each).
+- [`k.Bits`](#k-bits): A binary register: the bits of a value, most significant first, lit when 1.
+- [`k.TitleCard`](#k-titlecard): An episode's opening card: the title, a `kicker=` above it, an accent rule under it and a `subtitle=`.
+- [`k.EndCard`](#k-endcard): What comes next: `heading=` ("Next") over the next title, then `brand=`, `series=` and an `invite=`.
+- [`k.LowerThird`](#k-lowerthird): A name and a role beside an accent bar, for a corner (`side="right"` mirrors it); place it as usual.
 - [`k.Image`](#k-image): Raster image (PNG or JPEG) drawn by the renderer, centered on its position.
 - [`k.SVG`](#k-svg): Imports an SVG illustration (a file or inline markup): each shape becomes a `k.Path` with the SVG's fill, stroke and stroke width, and each `<g>` becomes a `k.Group`.
 - [`k.Brace`](#k-brace): Curly brace (`}`) along one side of an object's box: `direction=` "down", "up", "left" or "right", `gap` units away from it, with the tip pointing outward.
@@ -1770,6 +1776,430 @@ def network(s: k.Scene):
 ```
 
 **See also:** [`k.Graph`](#k-graph), [`graph.add_node`](#graph-add_node).
+
+<a id="k-matrix"></a>
+### `k.Matrix` *(class)*
+
+```python
+k.Matrix(
+    entries: Sequence[Sequence[Entry]],
+    *,
+    brackets: Brackets = "[",
+    size: float = 0.5,
+    column_gap: float | None = None,
+    row_gap: float | None = None,
+    **props: Unpack[TransformKeywords],
+)
+```
+
+A matrix whose entries are objects in a grid: numbers, TeX strings (typeset with `k.Math`) or any object, between `brackets=` (`"["`, `"("`, `"|"`, `"none"`). `m[i, j]` is an entry, `m.row(i)` / `m.column(j)` list them, `m.box(row=i)` frames a row to draw, and `a @ b` is the product of numeric matrices (a new matrix).
+
+**Parameters:**
+
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `entries` | `Sequence[Sequence[Entry]]` | required |   |
+| `brackets` | `Brackets` | `"["` | A matrix whose entries are objects in a grid: numbers, TeX strings (typeset with `k.Math`) or any object, between `brackets=` (`"["`, `"("`, `"\|"`, `"none"`). |
+| `size` | `float` | `0.5` |   |
+| `column_gap` | `float \| None` | `None` |   |
+| `row_gap` | `float \| None` | `None` |   |
+| `**props` | `Unpack[TransformKeywords]` | variadic | Keyword arguments (`TransformKeywords`): `name: str \| None`, `key: str \| None`, `x: FloatVal`, `y: FloatVal`, `position: VecVal`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`. |
+
+Props inherited from [`k.Node`](object-state.md#k-node): `x`, `y`, `rotate`, `scale`, `scale_x`, `scale_y`, `anchor`, `opacity`, `z`, `visible`, `bleed`.
+
+**Example:**
+
+```python
+@k.scene
+def grid(s: k.Scene):
+    m = k.Matrix([[1, 2], [3, 4]]).place(at="center")
+    s.play(k.fade_in(m))
+    s.play(k.draw(m.box(column=1)))
+    s.play(m[1, 0].to(color=k.YELLOW))
+```
+
+**See also:** [`k.matrix_product`](#k-matrix_product), [`k.Math`](text.md#k-math).
+
+**Members:**
+
+- [`shape`](#matrix-shape): (rows, columns).
+- [`row`](#matrix-row): The entries of row `index`.
+- [`column`](#matrix-column): The entries of column `index`.
+- [`box`](#matrix-box): A rounded frame around a row or a column (in the matrix: it moves with it), not yet in the scene: draw it (`k.draw(m.box(row=0))`).
+
+Inherited from [`k.Group`](#k-group): [`children`](#group-children), [`to`](#group-to), [`swap`](#group-swap), [`insert`](#group-insert), [`pop`](#group-pop), [`fit`](#group-fit).
+Inherited from [`k.Node`](object-state.md#k-node): [`set`](object-state.md#node-set), [`unbind`](object-state.md#node-unbind), [`edge`](object-state.md#node-edge), [`age`](object-state.md#node-age), [`entered`](object-state.md#node-entered), [`exited`](object-state.md#node-exited), [`copy`](object-state.md#node-copy), [`place`](object-state.md#node-place), [`to_place`](object-state.md#node-to_place), [`unpin`](object-state.md#node-unpin).
+
+<a id="matrix-shape"></a>
+#### `k.Matrix.shape` *(property)*
+
+```python
+matrix.shape: tuple[int, int]  # read-only
+```
+
+(rows, columns).
+
+<a id="matrix-row"></a>
+#### `k.Matrix.row` *(method)*
+
+```python
+matrix.row(index: int) -> list[Node]
+```
+
+The entries of row `index`.
+
+**Parameters:**
+
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `index` | `int` | required | The entries of row `index`. |
+
+<a id="matrix-column"></a>
+#### `k.Matrix.column` *(method)*
+
+```python
+matrix.column(index: int) -> list[Node]
+```
+
+The entries of column `index`.
+
+**Parameters:**
+
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `index` | `int` | required | The entries of column `index`. |
+
+<a id="matrix-box"></a>
+#### `k.Matrix.box` *(method)*
+
+```python
+matrix.box(
+    *,
+    row: int | None = None,
+    column: int | None = None,
+    color: ColorLike | None = None,
+) -> RoundedRect
+```
+
+A rounded frame around a row or a column (in the matrix: it moves with it), not yet in the scene: draw it (`k.draw(m.box(row=0))`).
+
+**Parameters:**
+
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `row` | `int \| None` | `None` | A rounded frame around a row or a column (in the matrix: it moves with it), not yet in the scene: draw it (`k.draw(m.box(row=0))`). |
+| `column` | `int \| None` | `None` |   |
+| `color` | `ColorLike \| None` | `None` |   |
+
+<a id="k-matrix_product"></a>
+### `k.matrix_product` *(function)*
+
+```python
+k.matrix_product(
+    a: Matrix,
+    b: Matrix,
+    product: Matrix,
+    *,
+    step: float = 0.8,
+) -> Animation
+```
+
+Shows a product row by column: `k.matrix_product(a, b, a @ b)` draws the product's brackets, then for each entry indicates its row of `a` and its column of `b` while the entry appears (`step=` seconds each).
+
+**Parameters:**
+
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `a` | `Matrix` | required | Shows a product row by column: `k.matrix_product(a, b, a @ b)` draws the product's brackets, then for each entry indicates its row of `a` and its column of `b` while the entry appears (`step=` seconds each). |
+| `b` | `Matrix` | required | Shows a product row by column: `k.matrix_product(a, b, a @ b)` draws the product's brackets, then for each entry indicates its row of `a` and its column of `b` while the entry appears (`step=` seconds each). |
+| `product` | `Matrix` | required | Show `product` (from `a @ b`) cell by cell: for each entry, its row of `a` and its column of `b` are indicated while the entry appears. |
+| `step` | `float` | `0.8` | Shows a product row by column: `k.matrix_product(a, b, a @ b)` draws the product's brackets, then for each entry indicates its row of `a` and its column of `b` while the entry appears (`step=` seconds each). |
+
+**Example:**
+
+```python
+@k.scene
+def product(s: k.Scene):
+    a = k.Matrix([[1, 2], [3, 4]]).place(at=(-3.5, 0))
+    b = k.Matrix([[5, 6], [7, 8]]).place(at=(-0.5, 0))
+    c = (a @ b).place(at=(3, 0))
+    s.play(k.fade_in(a, b))
+    s.play(k.matrix_product(a, b, c, step=0.6))
+```
+
+**See also:** [`k.Matrix`](#k-matrix).
+
+<a id="k-bits"></a>
+### `k.Bits` *(class)*
+
+```python
+k.Bits(
+    value: int = 0,
+    width: int = 8,
+    *,
+    signed: bool = False,
+    place_values: bool = False,
+    group: int | None = None,
+    fields: Mapping[str, tuple[int, int]] | None = None,
+    size: float = 0.5,
+    color: ColorLike | None = None,
+    **props: Unpack[TransformKeywords],
+)
+```
+
+A binary register: the bits of a value, most significant first, lit when 1. `bits.to(value=n)` flips the cells that change, from the least significant up. `signed=True` (two's complement), `place_values=True` (128 64 … 1 above), `group=4` (a gap every 4 bits) and `fields={"sign": (0, 1), ...}` (labelled ranges of cells). `bits.bit(0)` is the least significant cell (`.box`, `.digit`).
+
+**Parameters:**
+
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `value` | `int` | `0` | `bits.to(value=n)` flips the cells that change, from the least significant up. |
+| `width` | `int` | `8` | `k.Bits(13, width=8)`: the bits of a value, most significant first. |
+| `signed` | `bool` | `False` | `signed=True` (two's complement), `place_values=True` (128 64 … 1 above), `group=4` (a gap every 4 bits) and `fields={"sign": (0, 1), ...}` (labelled ranges of cells). |
+| `place_values` | `bool` | `False` | `signed=True` (two's complement), `place_values=True` (128 64 … 1 above), `group=4` (a gap every 4 bits) and `fields={"sign": (0, 1), ...}` (labelled ranges of cells). |
+| `group` | `int \| None` | `None` | `signed=True` (two's complement), `place_values=True` (128 64 … 1 above), `group=4` (a gap every 4 bits) and `fields={"sign": (0, 1), ...}` (labelled ranges of cells). |
+| `fields` | `Mapping[str, tuple[int, int]] \| None` | `None` | `signed=True` (two's complement), `place_values=True` (128 64 … 1 above), `group=4` (a gap every 4 bits) and `fields={"sign": (0, 1), ...}` (labelled ranges of cells). |
+| `size` | `float` | `0.5` |   |
+| `color` | `ColorLike \| None` | `None` |   |
+| `**props` | `Unpack[TransformKeywords]` | variadic | Keyword arguments (`TransformKeywords`): `name: str \| None`, `key: str \| None`, `x: FloatVal`, `y: FloatVal`, `position: VecVal`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`. |
+
+Props inherited from [`k.Node`](object-state.md#k-node): `x`, `y`, `rotate`, `scale`, `scale_x`, `scale_y`, `anchor`, `opacity`, `z`, `visible`, `bleed`.
+
+**Example:**
+
+```python
+@k.scene
+def counting(s: k.Scene):
+    reg = k.Bits(13, width=8, place_values=True, group=4).place(at="center")
+    s.play(k.fade_in(reg))
+    s.play(reg.to(value=14))
+    s.play(k.indicate(reg.bit(0)))
+```
+
+**See also:** [`k.Array`](#k-array).
+
+**Members:**
+
+- [`value`](#bits-value): The value shown (after the changes scheduled so far).
+- [`bit`](#bits-bit): The cell of bit `index`, 0 being the least significant.
+- [`to`](#bits-to): Change the value: the cells whose bit changes flip (digit and fill), from the least significant up, `lag` seconds apart.
+
+Inherited from [`k.Group`](#k-group): [`children`](#group-children), [`swap`](#group-swap), [`insert`](#group-insert), [`pop`](#group-pop), [`fit`](#group-fit).
+Inherited from [`k.Node`](object-state.md#k-node): [`set`](object-state.md#node-set), [`unbind`](object-state.md#node-unbind), [`edge`](object-state.md#node-edge), [`age`](object-state.md#node-age), [`entered`](object-state.md#node-entered), [`exited`](object-state.md#node-exited), [`copy`](object-state.md#node-copy), [`place`](object-state.md#node-place), [`to_place`](object-state.md#node-to_place), [`unpin`](object-state.md#node-unpin).
+
+<a id="bits-value"></a>
+#### `k.Bits.value` *(property)*
+
+```python
+bits.value: int  # read-only
+```
+
+The value shown (after the changes scheduled so far).
+
+<a id="bits-bit"></a>
+#### `k.Bits.bit` *(method)*
+
+```python
+bits.bit(index: int) -> BitCell
+```
+
+The cell of bit `index`, 0 being the least significant.
+
+**Parameters:**
+
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `index` | `int` | required | The cell of bit `index`, 0 being the least significant. |
+
+<a id="bits-to"></a>
+#### `k.Bits.to` *(method)*
+
+```python
+bits.to(*, value: int, lag: float = 0.04, duration: float | None = None) -> Animation
+```
+
+Change the value: the cells whose bit changes flip (digit and fill), from the least significant up, `lag` seconds apart.
+
+**Parameters:**
+
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `value` | `int` | required |   |
+| `lag` | `float` | `0.04` | Change the value: the cells whose bit changes flip (digit and fill), from the least significant up, `lag` seconds apart. |
+| `duration` | `float \| None` | `None` |   |
+
+<a id="k-titlecard"></a>
+### `k.TitleCard` *(class)*
+
+```python
+k.TitleCard(
+    title: str,
+    *,
+    kicker: str | None = None,
+    subtitle: str | None = None,
+    accent: ColorLike | None = None,
+    size: float = 0.9,
+    **props: Unpack[TransformKeywords],
+)
+```
+
+An episode's opening card: the title, a `kicker=` above it, an accent rule under it and a `subtitle=`. `k.draw(card)` fades the kicker in and writes the title, draws the rule, then shows the subtitle. Parts: `card.kicker`, `card.title`, `card.rule`, `card.subtitle`.
+
+**Parameters:**
+
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `title` | `str` | required |   |
+| `kicker` | `str \| None` | `None` | An episode's opening card: the title, a `kicker=` above it, an accent rule under it and a `subtitle=`. |
+| `subtitle` | `str \| None` | `None` | An episode's opening card: the title, a `kicker=` above it, an accent rule under it and a `subtitle=`. |
+| `accent` | `ColorLike \| None` | `None` |   |
+| `size` | `float` | `0.9` |   |
+| `**props` | `Unpack[TransformKeywords]` | variadic | Keyword arguments (`TransformKeywords`): `name: str \| None`, `key: str \| None`, `x: FloatVal`, `y: FloatVal`, `position: VecVal`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`. |
+
+Props inherited from [`k.Node`](object-state.md#k-node): `x`, `y`, `rotate`, `scale`, `scale_x`, `scale_y`, `anchor`, `opacity`, `z`, `visible`, `bleed`.
+
+**Example:**
+
+```python
+@k.scene
+def opening(s: k.Scene):
+    card = k.TitleCard("How a Computer Adds", kicker="EPISODE 2", subtitle="How computers do math").place(at="center")
+    s.play(k.draw(card))
+    s.wait(1)
+```
+
+**See also:** [`k.EndCard`](#k-endcard), [`k.LowerThird`](#k-lowerthird).
+
+**Members:**
+
+- [`enter`](#titlecard-enter): method.
+
+Inherited from [`k.Group`](#k-group): [`children`](#group-children), [`to`](#group-to), [`swap`](#group-swap), [`insert`](#group-insert), [`pop`](#group-pop), [`fit`](#group-fit).
+Inherited from [`k.Node`](object-state.md#k-node): [`set`](object-state.md#node-set), [`unbind`](object-state.md#node-unbind), [`edge`](object-state.md#node-edge), [`age`](object-state.md#node-age), [`entered`](object-state.md#node-entered), [`exited`](object-state.md#node-exited), [`copy`](object-state.md#node-copy), [`place`](object-state.md#node-place), [`to_place`](object-state.md#node-to_place), [`unpin`](object-state.md#node-unpin).
+
+<a id="titlecard-enter"></a>
+#### `k.TitleCard.enter` *(method)*
+
+```python
+titlecard.enter() -> Animation
+```
+
+<a id="k-endcard"></a>
+### `k.EndCard` *(class)*
+
+```python
+k.EndCard(
+    next_title: str | None = None,
+    *,
+    heading: str = "Next",
+    brand: str | None = None,
+    series: str | None = None,
+    invite: str | None = None,
+    accent: ColorLike | None = None,
+    size: float = 0.7,
+    **props: Unpack[TransformKeywords],
+)
+```
+
+What comes next: `heading=` ("Next") over the next title, then `brand=`, `series=` and an `invite=`. `k.draw(card)` writes the heading and the title, then fades the rest in. Parts: `card.heading`, `card.next`, `card.brand`, `card.series`, `card.invite`.
+
+**Parameters:**
+
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `next_title` | `str \| None` | `None` |   |
+| `heading` | `str` | `"Next"` | What comes next: `heading=` ("Next") over the next title, then `brand=`, `series=` and an `invite=`. |
+| `brand` | `str \| None` | `None` | What comes next: `heading=` ("Next") over the next title, then `brand=`, `series=` and an `invite=`. |
+| `series` | `str \| None` | `None` | What comes next: `heading=` ("Next") over the next title, then `brand=`, `series=` and an `invite=`. |
+| `invite` | `str \| None` | `None` | What comes next: `heading=` ("Next") over the next title, then `brand=`, `series=` and an `invite=`. |
+| `accent` | `ColorLike \| None` | `None` |   |
+| `size` | `float` | `0.7` |   |
+| `**props` | `Unpack[TransformKeywords]` | variadic | Keyword arguments (`TransformKeywords`): `name: str \| None`, `key: str \| None`, `x: FloatVal`, `y: FloatVal`, `position: VecVal`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`. |
+
+Props inherited from [`k.Node`](object-state.md#k-node): `x`, `y`, `rotate`, `scale`, `scale_x`, `scale_y`, `anchor`, `opacity`, `z`, `visible`, `bleed`.
+
+**Example:**
+
+```python
+@k.scene
+def closing(s: k.Scene):
+    card = k.EndCard("Floating Point, Unmasked", brand="Until It Clicks", series="How computers do math").place(at="center")
+    s.play(k.draw(card))
+    s.play(k.indicate(card.heading, scale=1.05))
+```
+
+**See also:** [`k.TitleCard`](#k-titlecard).
+
+**Members:**
+
+- [`enter`](#endcard-enter): method.
+
+Inherited from [`k.Group`](#k-group): [`children`](#group-children), [`to`](#group-to), [`swap`](#group-swap), [`insert`](#group-insert), [`pop`](#group-pop), [`fit`](#group-fit).
+Inherited from [`k.Node`](object-state.md#k-node): [`set`](object-state.md#node-set), [`unbind`](object-state.md#node-unbind), [`edge`](object-state.md#node-edge), [`age`](object-state.md#node-age), [`entered`](object-state.md#node-entered), [`exited`](object-state.md#node-exited), [`copy`](object-state.md#node-copy), [`place`](object-state.md#node-place), [`to_place`](object-state.md#node-to_place), [`unpin`](object-state.md#node-unpin).
+
+<a id="endcard-enter"></a>
+#### `k.EndCard.enter` *(method)*
+
+```python
+endcard.enter() -> Animation
+```
+
+<a id="k-lowerthird"></a>
+### `k.LowerThird` *(class)*
+
+```python
+k.LowerThird(
+    title: str,
+    role: str | None = None,
+    *,
+    side: LowerThirdSide = "left",
+    accent: ColorLike | None = None,
+    size: float = 0.42,
+    **props: Unpack[TransformKeywords],
+)
+```
+
+A name and a role beside an accent bar, for a corner (`side="right"` mirrors it); place it as usual. `k.draw(card)` grows the bar, then slides the texts in. Parts: `card.bar`, `card.title`, `card.role`.
+
+**Parameters:**
+
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `title` | `str` | required |   |
+| `role` | `str \| None` | `None` | `k.LowerThird("Ada Lovelace", role="Mathematician")`: a name and a role beside an accent bar, for the bottom-left corner (`side="right"` for the other one; place it as usual). |
+| `side` | `LowerThirdSide` | `"left"` | A name and a role beside an accent bar, for a corner (`side="right"` mirrors it); place it as usual. |
+| `accent` | `ColorLike \| None` | `None` |   |
+| `size` | `float` | `0.42` |   |
+| `**props` | `Unpack[TransformKeywords]` | variadic | Keyword arguments (`TransformKeywords`): `name: str \| None`, `key: str \| None`, `x: FloatVal`, `y: FloatVal`, `position: VecVal`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`. |
+
+Props inherited from [`k.Node`](object-state.md#k-node): `x`, `y`, `rotate`, `scale`, `scale_x`, `scale_y`, `anchor`, `opacity`, `z`, `visible`, `bleed`.
+
+**Example:**
+
+```python
+@k.scene
+def speaker(s: k.Scene):
+    who = k.LowerThird("Ada Lovelace", role="Mathematician").place(at="bottom-left", gap=0.6)
+    s.play(k.draw(who))
+    s.wait(1)
+    s.play(k.fade_out(who))
+```
+
+**See also:** [`k.TitleCard`](#k-titlecard).
+
+**Members:**
+
+- [`enter`](#lowerthird-enter): method.
+
+Inherited from [`k.Group`](#k-group): [`children`](#group-children), [`to`](#group-to), [`swap`](#group-swap), [`insert`](#group-insert), [`pop`](#group-pop), [`fit`](#group-fit).
+Inherited from [`k.Node`](object-state.md#k-node): [`set`](object-state.md#node-set), [`unbind`](object-state.md#node-unbind), [`edge`](object-state.md#node-edge), [`age`](object-state.md#node-age), [`entered`](object-state.md#node-entered), [`exited`](object-state.md#node-exited), [`copy`](object-state.md#node-copy), [`place`](object-state.md#node-place), [`to_place`](object-state.md#node-to_place), [`unpin`](object-state.md#node-unpin).
+
+<a id="lowerthird-enter"></a>
+#### `k.LowerThird.enter` *(method)*
+
+```python
+lowerthird.enter() -> Animation
+```
 
 <a id="k-image"></a>
 ### `k.Image` *(class)*

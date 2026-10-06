@@ -1153,6 +1153,16 @@ def plane(s: k.Scene):
     s.play(k.draw(plane))
     s.play(k.indicate(v))
 ```
+#### `k.ComplexPlane(re=(-6, 6, 1), im=(-3, 3, 1), *, unit=1.0, labels=True, samples=24, **props)`
+A `k.NumberPlane` labelled as the complex plane (real ticks, `i` ticks, `Re`/`Im`) whose points are complex numbers: `cp.dot(2 + 1j)`, `cp.vector(1 - 2j)`, `cp.coords(z)`. `cp.apply(1j)` multiplies everything by a complex number (a quarter turn), `cp.apply(lambda z: z ** 2)` maps the plane with a function of `z`. See also: `k.NumberPlane`, `numberplane.apply`.
+```python
+@k.scene
+def rotation(s: k.Scene):
+    cp = k.ComplexPlane(re=(-4, 4, 1), im=(-3, 3, 1))
+    cp.vector(2 + 1j, color=k.YELLOW)
+    s.play(k.draw(cp))
+    s.play(cp.apply(1j), duration=2)
+```
 #### `numberplane.apply(transform, **kw) -> Animation`
 Animated transformation of the plane, composed after the ones already applied: a matrix `[[a, b], [c, d]]` sends î to `(a, c)` and ĵ to `(b, d)`; a function `(x, y) -> (x2, y2)` bends the grid for non-linear maps. Grid lines, basis vectors and the objects made on the plane all move. `plane.reset()` goes back. See also: `k.NumberPlane`, `numberplane.polygon`.
 ```python

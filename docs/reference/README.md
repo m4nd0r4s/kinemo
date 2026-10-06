@@ -183,6 +183,7 @@ Axes, number lines, polar axes, plots and data charts.
 - [`k.Axes`](charts.md#k-axes): Cartesian axes with ticks, labels and an optional grid: `x=(min, max, step)`, `y=(min, max)`, `labels=("x", "y")`, `width=`/`height=` in units.
 - [`k.NumberLine`](charts.md#k-numberline): A horizontal number line: a `k.Axes` with only the x axis.
 - [`k.NumberPlane`](charts.md#k-numberplane): A coordinate grid with axes and the basis vectors î (green) and ĵ (red): `x=(min, max, step)`, `y=...`, `unit=` scene units per step.
+- [`k.ComplexPlane`](charts.md#k-complexplane): A `k.NumberPlane` labelled as the complex plane (real ticks, `i` ticks, `Re`/`Im`) whose points are complex numbers: `cp.dot(2 + 1j)`, `cp.vector(1 - 2j)`, `cp.coords(z)`.
 - [`k.vector_sum`](charts.md#k-vector_sum): Adds two axes vectors tip to tail: `b` slides so its tail sits on `a`'s tip, then the resultant (`a + b`) is drawn from `a`'s tail.
 - [`Plot`](charts.md#plot): A curve `y = fn(x)` of an axes.
 - [`k.BarChart`](charts.md#k-barchart): Bar chart from a table: `x=` is the category column, `y=` the value column and `key=` identifies each bar.

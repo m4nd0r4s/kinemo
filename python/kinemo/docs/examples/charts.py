@@ -113,6 +113,25 @@ def plane(s: k.Scene):
         related=("NumberPlane.apply", "NumberPlane.polygon", "k.Axes"),
     ),
     DocEntry(
+        "k.ComplexPlane",
+        "Charts",
+        "A `k.NumberPlane` labelled as the complex plane (real ticks, `i` ticks, `Re`/`Im`) whose "
+        "points are complex numbers: `cp.dot(2 + 1j)`, `cp.vector(1 - 2j)`, `cp.coords(z)`. "
+        "`cp.apply(1j)` multiplies everything by a complex number (a quarter turn), "
+        "`cp.apply(lambda z: z ** 2)` maps the plane with a function of `z`.",
+        '''
+import kinemo as k
+
+@k.scene
+def rotation(s: k.Scene):
+    cp = k.ComplexPlane(re=(-4, 4, 1), im=(-3, 3, 1))
+    cp.vector(2 + 1j, color=k.YELLOW)
+    s.play(k.draw(cp))
+    s.play(cp.apply(1j), duration=2)
+''',
+        related=("k.NumberPlane", "NumberPlane.apply"),
+    ),
+    DocEntry(
         "NumberPlane.apply",
         "Charts",
         "Animated transformation of the plane, composed after the ones already applied: a "

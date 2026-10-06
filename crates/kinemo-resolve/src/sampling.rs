@@ -138,6 +138,9 @@ pub struct LeafSample {
     pub bleeds: bool,
     /// For text leaves, what the size lint needs.
     pub text: Option<TextMetrics>,
+    /// World outline of a filled shape whose box holds a text's center (a pie slice's box
+    /// covers labels outside it): the contrast lint tests the outline, not the box.
+    pub outline: Option<kurbo::BezPath>,
 }
 
 /// `size` of a text that does not set it.
@@ -192,7 +195,7 @@ pub fn expression_signals(scene: &Scene) -> Vec<SignalId> {
 /// Samples the scene at `t` through `layout`.
 pub fn sample_frame(layout: &Layout, motion: &MotionIndex, reactive: &[SignalId], t: f64) -> FrameSample {
     let scene = layout.scene();
-    let leaves = present_leaves(layout, t)
+    let mut leaves: Vec<LeafSample> = present_leaves(layout, t)
         .into_iter()
         .map(|(id, shown)| {
             let is_text = is_text_leaf(layout, id, t);
@@ -211,9 +214,21 @@ pub fn sample_frame(layout: &Layout, motion: &MotionIndex, reactive: &[SignalId]
                 fill_opacity: layout.prop_f(id, "fill_opacity", t, 1.0),
                 bleeds: ancestry(scene, id).any(|o| layout.prop_bool(o, "bleed", t, false)),
                 text: is_text.then(|| text_metrics(layout, id, text_owner, t)),
+                outline: None,
             }
         })
         .collect();
+    let centers: Vec<kurbo::Point> = leaves.iter().filter(|leaf| leaf.is_text).map(|leaf| leaf.world_bbox.center()).collect();
+    for leaf in leaves.iter_mut().filter(|leaf| !leaf.is_text && leaf.fill.is_some()) {
+        if centers.iter().any(|&c| leaf.world_bbox.contains(c)) {
+            let to_world = layout.world_affine(leaf.id, t);
+            let mut outline = kurbo::BezPath::new();
+            for part in layout.parts(leaf.id, t) {
+                outline.extend((to_world * part.path).elements().iter().copied());
+            }
+            leaf.outline = Some(outline);
+        }
+    }
     let reactive_values = reactive.iter().map(|&s| (s, layout.evaluator().signal(s, t, layout))).collect();
     FrameSample { t, leaves, reactive_values }
 }

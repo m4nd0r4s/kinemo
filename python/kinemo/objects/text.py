@@ -53,6 +53,8 @@ class GlyphRun(Node):
         stroke: PropAccessor[Color]
         stroke_width: PropAccessor[float]
         dash: PropAccessor[list[float]]
+        glow: PropAccessor[float]
+        glow_color: PropAccessor[Color]
         color: PropAccessor[Color]
         indices: PropAccessor[list[float]]
         rest: PropAccessor[bool]
@@ -71,6 +73,8 @@ class TextPart(Group):
         stroke: PropAccessor[Color]
         stroke_width: PropAccessor[float]
         dash: PropAccessor[list[float]]
+        glow: PropAccessor[float]
+        glow_color: PropAccessor[Color]
         color: PropAccessor[Color]
         indices: PropAccessor[list[float]]
         _text: TextLike
@@ -115,6 +119,8 @@ class TextLike(Group):
         stroke: PropAccessor[Color]
         stroke_width: PropAccessor[float]
         dash: PropAccessor[list[float]]
+        glow: PropAccessor[float]
+        glow_color: PropAccessor[Color]
         #: The fill (`.to(color=...)` recolors the glyphs).
         color: PropAccessor[Color]
         size: PropAccessor[float]

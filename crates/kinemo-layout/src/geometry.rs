@@ -96,6 +96,16 @@ impl<'a> Layout<'a> {
                 let arc = kurbo::Arc::new(Point::ZERO, Vec2::new(r, r), start, sweep, 0.0);
                 open(arc.into_path(TOL))
             }
+            "sector" => {
+                let outer = self.prop_f(o, "r", t, 1.0).max(0.0);
+                let inner = self.prop_f(o, "inner", t, 0.0).clamp(0.0, outer);
+                let start = self.prop_f(o, "start_angle", t, 0.0).to_radians();
+                let sweep = self.prop_f(o, "angle", t, 90.0).to_radians();
+                if sweep.abs() < 1e-9 || outer <= 0.0 {
+                    return vec![];
+                }
+                shape(sector_path(outer, inner, start, sweep))
+            }
             "path" => {
                 let d = self.prop_str(o, "d", t).unwrap_or_default();
                 let closed = self.prop_bool(o, "closed", t, false);
@@ -187,4 +197,20 @@ fn polyline(pts: &[Point], closed: bool) -> BezPath {
         p.close_path();
     }
     p
+}
+
+/// A pie slice (`inner` 0) or a ring slice: the outer arc, then the inner one back, closed.
+fn sector_path(outer: f64, inner: f64, start: f64, sweep: f64) -> BezPath {
+    let mut path = BezPath::new();
+    let point = |r: f64, a: f64| Point::new(r * a.cos(), r * a.sin());
+    path.move_to(point(outer, start));
+    path.extend(kurbo::Arc::new(Point::ZERO, Vec2::new(outer, outer), start, sweep, 0.0).append_iter(TOL));
+    if inner > 0.0 {
+        path.line_to(point(inner, start + sweep));
+        path.extend(kurbo::Arc::new(Point::ZERO, Vec2::new(inner, inner), start + sweep, -sweep, 0.0).append_iter(TOL));
+    } else {
+        path.line_to(Point::ZERO);
+    }
+    path.close_path();
+    path
 }

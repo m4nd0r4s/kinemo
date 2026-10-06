@@ -136,7 +136,7 @@ mod tests {
                 clip: None,
                 fill_rule_even_odd: false,
                 image: None,
-                dots: None,
+                dots: None, glow: None,
             }],
         };
         let svg = display_list_to_svg(&dl);

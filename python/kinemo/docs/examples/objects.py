@@ -401,6 +401,23 @@ def arrow(s: k.Scene):
         related=("k.Line",),
     ),
     DocEntry(
+        "k.Sector",
+        "Objects",
+        "A pie slice from the center, or a ring slice with `inner=` (its inner radius): `r=`, "
+        "`angle=` (degrees, counterclockwise; negative goes clockwise) and `start_angle=` from +x. "
+        "Every prop animates, so a slice can open or turn.",
+        '''
+import kinemo as k
+
+@k.scene
+def slice_(s: k.Scene):
+    wedge = k.Sector(r=2, angle=60, start_angle=90, inner=0.8, fill=k.YELLOW, fill_opacity=0.9).place(at="center")
+    s.play(k.draw(wedge))
+    s.play(wedge.to(angle=300), duration=1.5)
+''',
+        related=("k.Arc", "k.PieChart"),
+    ),
+    DocEntry(
         "k.Arc",
         "Objects",
         "Circular arc of radius `r`, starting at `start_angle` and sweeping `angle` degrees "
@@ -578,6 +595,44 @@ def relayout(s: k.Scene):
         related=("k.Graph", "Graph.path"),
     ),
     DocEntry(
+        "k.Matrix",
+        "Objects",
+        "A matrix whose entries are objects in a grid: numbers, TeX strings (typeset with "
+        "`k.Math`) or any object, between `brackets=` (`\"[\"`, `\"(\"`, `\"|\"`, `\"none\"`). "
+        "`m[i, j]` is an entry, `m.row(i)` / `m.column(j)` list them, `m.box(row=i)` frames a row to "
+        "draw, and `a @ b` is the product of numeric matrices (a new matrix).",
+        '''
+import kinemo as k
+
+@k.scene
+def grid(s: k.Scene):
+    m = k.Matrix([[1, 2], [3, 4]]).place(at="center")
+    s.play(k.fade_in(m))
+    s.play(k.draw(m.box(column=1)))
+    s.play(m[1, 0].to(color=k.YELLOW))
+''',
+        related=("k.matrix_product", "k.Math"),
+    ),
+    DocEntry(
+        "k.matrix_product",
+        "Objects",
+        "Shows a product row by column: `k.matrix_product(a, b, a @ b)` draws the product's "
+        "brackets, then for each entry indicates its row of `a` and its column of `b` while the "
+        "entry appears (`step=` seconds each).",
+        '''
+import kinemo as k
+
+@k.scene
+def product(s: k.Scene):
+    a = k.Matrix([[1, 2], [3, 4]]).place(at=(-3.5, 0))
+    b = k.Matrix([[5, 6], [7, 8]]).place(at=(-0.5, 0))
+    c = (a @ b).place(at=(3, 0))
+    s.play(k.fade_in(a, b))
+    s.play(k.matrix_product(a, b, c, step=0.6))
+''',
+        related=("k.Matrix",),
+    ),
+    DocEntry(
         "k.Bits",
         "Objects",
         "A binary register: the bits of a value, most significant first, lit when 1. "
@@ -669,5 +724,23 @@ def fourier(s: k.Scene):
     s.play(epi.run(turns=1, duration=4))
 ''',
         related=("k.Circle", "k.trace"),
+    ),
+    DocEntry(
+        "k.Icon",
+        "Objects",
+        "A built-in icon, drawn with strokes on a square of side `size=`: `\"check\"`, `\"x\"`, "
+        "`\"warning\"`, `\"lightbulb\"`, `\"gear\"`, `\"user\"`, `\"cpu\"`, … (`k.ICON_NAMES` lists "
+        "them). `color=` sets the stroke; `icon.to(stroke=...)` recolors it. An unknown name is "
+        "K0105 with the closest names.",
+        '''
+import kinemo as k
+
+@k.scene
+def idea(s: k.Scene):
+    bulb = k.Icon("lightbulb", size=1.5, color=k.YELLOW).place(at="center")
+    s.play(k.draw(bulb))
+    s.play(bulb.to(stroke=k.ORANGE))
+''',
+        related=("k.SVG",),
     ),
 )

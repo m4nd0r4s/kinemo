@@ -100,7 +100,7 @@ fn blend_items(a: &DrawItem, b: &DrawItem, p: f64) -> Vec<DrawItem> {
             clip: side.clip.clone(),
             fill_rule_even_odd: false,
             image: Some(ImagePaint { bitmap: img.bitmap.clone(), transform: carry * img.transform }),
-            dots: None,
+            dots: None, glow: None,
         });
     }
     out
@@ -136,7 +136,7 @@ fn blend_shapes(a: &DrawItem, b: &DrawItem, p: f64) -> DrawItem {
         clip: None,
         fill_rule_even_odd: false,
         image: None,
-        dots: None,
+        dots: None, glow: None,
     }
 }
 

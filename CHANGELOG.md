@@ -4,6 +4,26 @@ All notable changes to kinemo are listed here. The project follows
 [semantic versioning](https://semver.org/); until 1.0, a minor version may change the API, and
 `kinemo upgrade` rewrites the forms it replaces.
 
+## 0.15.1
+
+Ready for first-time users: a clear path from `pip install` to the first video.
+
+**Added**
+
+- `kinemo doctor`: what kinemo finds on the machine (Python, platform, ffmpeg with its version
+  and path, the native core, GPU preview, the align extra, the project); the bug report
+  template asks for its output.
+- A fresh-install workflow: `pip install kinemo` from PyPI on clean Linux, macOS and Windows,
+  then `kinemo new`, `check` and `render`, timed; after each release and every week.
+
+**Changed**
+
+- A missing ffmpeg is a short message with the install command for the system (brew,
+  winget, apt, dnf, pacman, apk) and `KINEMO_FFMPEG`, instead of a traceback; PNG and SVG frames
+  and `kinemo dev` keep working without it.
+- README: a hero animation made with kinemo, why kinemo, a comparison with Manim, ffmpeg per
+  system, the pre-1.0 status and where to ask; questions go to GitHub Discussions.
+
 ## 0.15.0
 
 Charts and series extras: new components for math, computing and data videos, tools a series

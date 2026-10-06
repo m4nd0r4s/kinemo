@@ -28,6 +28,8 @@ Axes, number lines, polar axes, plots and data charts.
 - [`ax.zoom_to`](#axes-zoom_to): Named transition: animates the visible ranges of the axes (`x=(a, b)`, `y=(c, d)`).
 - [`ax.point`](#axes-point): Data point `(x, y)` in world coordinates, reactive when `x` or `y` are signals.
 - [`ax.add`](#axes-add): Puts objects inside the axes, in its own coordinates, so they follow zooms like plots do; place them with `position=ax.local_point(x, y)` or `ax.origin()`.
+- [`ax.segment`](#axes-segment): A line between two data points `(x, y)`, cut to the visible ranges with `clip=True` (the default) and hidden when it falls entirely outside them; it follows zooms.
+- [`ax.hband`](#axes-hband): `ax.hband(y0, y1)`: a translucent band across the plot between two data values; `ax.vband(x0, x1)` the same up the plot.
 - [`ax.origin`](#axes-origin): Where the two axes cross, in the axes' own coordinates: the data origin clamped to the visible ranges.
 - [`ax.in_view`](#axes-in_view): Whether a data value is inside the visible ranges, as a reactive bool for `visible=`: `ax.in_view(x=3)`, `ax.in_view(y=5)` or both.
 - [`curve.point_at`](#plot-point_at): World position of the curve at `x`; reactive when `x` is a signal.
@@ -232,6 +234,9 @@ def custom_ticks(s: k.Scene):
 - [`in_view`](#axes-in_view): Whether a data value is inside the visible ranges, as a reactive bool for `visible=`: `ax.in_view(x=3)`, `ax.in_view(y=5)` or both.
 - [`plot`](#axes-plot): Draws the curve `y = fn(x)` on the axes, with adaptive sampling.
 - [`area`](#axes-area): Filled region under a curve (down to the x axis) or between two curves (`between=`).
+- [`segment`](#axes-segment): A line between two data points `(x, y)`, cut to the visible ranges with `clip=True` (the default) and hidden when it falls entirely outside them; it follows zooms.
+- [`hband`](#axes-hband): `ax.hband(y0, y1)`: a translucent band across the plot between two data values; `ax.vband(x0, x1)` the same up the plot.
+- [`vband`](#axes-vband): A vertical band between data `x0` and `x1`, up the plot, cut to the visible x range (hidden outside it); it follows zooms.
 - [`vline`](#axes-vline): Vertical line on the axes at `at=` (accepts a signal: the line moves with it); `style="dashed"` makes it dashed.
 - [`hline`](#axes-hline): Horizontal line on the axes at `at=` (accepts a signal); `style="dashed"` makes it dashed.
 - [`scatter`](#axes-scatter): Points `(xs[i], ys[i])` on the axes, as a group of `k.Dot`.
@@ -499,6 +504,109 @@ def area(s: k.Scene):
 
 **See also:** [`ax.plot`](#axes-plot).
 
+<a id="axes-segment"></a>
+#### `k.Axes.segment` *(method)*
+
+```python
+ax.segment(
+    start: tuple[float, float],
+    end: tuple[float, float],
+    *,
+    clip: bool = True,
+    enter_with_axes: bool = True,
+    **props: Unpack[StyleKeywords],
+) -> Line
+```
+
+A line between two data points `(x, y)`, cut to the visible ranges with `clip=True` (the default) and hidden when it falls entirely outside them; it follows zooms.
+
+**Parameters:**
+
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `start` | `tuple[float, float]` | required |   |
+| `end` | `tuple[float, float]` | required |   |
+| `clip` | `bool` | `True` | A line between two data points `(x, y)`, cut to the visible ranges with `clip=True` (the default) and hidden when it falls entirely outside them; it follows zooms. |
+| `enter_with_axes` | `bool` | `True` |   |
+| `**props` | `Unpack[StyleKeywords]` | variadic | Keyword arguments (`StyleKeywords`): `name: str \| None`, `key: str \| None`, `x: FloatVal`, `y: FloatVal`, `position: VecVal`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`, `fill: ColorVal`, `fill_opacity: FloatVal`, `stroke: ColorVal`, `stroke_width: FloatVal`, `dash: FloatsVal`, `color: ColorVal`. |
+
+**Example:**
+
+```python
+@k.scene
+def secant(s: k.Scene):
+    ax = k.Axes(x=(0, 10, 2), y=(0, 10, 2)).place(at="center")
+    ax.plot(lambda x: 0.1 * x * x)
+    line = ax.segment((-2, -1), (12, 11), stroke=k.YELLOW)
+    s.play(k.draw(ax))
+    s.play(k.indicate(line))
+    s.play(ax.zoom_to(x=(4, 10), y=(4, 10)), duration=1.5)
+```
+
+**See also:** [`ax.hband`](#axes-hband), [`ax.zoom_to`](#axes-zoom_to).
+
+<a id="axes-hband"></a>
+#### `k.Axes.hband` *(method)*
+
+```python
+ax.hband(
+    y0: float,
+    y1: float,
+    *,
+    enter_with_axes: bool = True,
+    **props: Unpack[UnplacedStyleKeywords],
+) -> Rect
+```
+
+`ax.hband(y0, y1)`: a translucent band across the plot between two data values; `ax.vband(x0, x1)` the same up the plot. Cut to the visible range, hidden outside it, following zooms. Style with `fill=`, `fill_opacity=`.
+
+**Parameters:**
+
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `y0` | `float` | required | A horizontal band between data `y0` and `y1`, across the plot, cut to the visible y range (hidden outside it); it follows zooms. |
+| `y1` | `float` | required | A horizontal band between data `y0` and `y1`, across the plot, cut to the visible y range (hidden outside it); it follows zooms. |
+| `enter_with_axes` | `bool` | `True` |   |
+| `**props` | `Unpack[UnplacedStyleKeywords]` | variadic | Keyword arguments (`UnplacedStyleKeywords`): `name: str \| None`, `key: str \| None`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`, `fill: ColorVal`, `fill_opacity: FloatVal`, `stroke: ColorVal`, `stroke_width: FloatVal`, `dash: FloatsVal`, `color: ColorVal`. |
+
+**Example:**
+
+```python
+@k.scene
+def comfort(s: k.Scene):
+    ax = k.Axes(x=(0, 24, 6), y=(0, 30, 10), labels=("h", "°C")).place(at="center")
+    ax.hband(18, 24)
+    ax.vband(9, 17, fill=k.GREEN)
+    ax.plot(lambda h: 15 + 8 * k.sin((h - 9) * 3.14159 / 12))
+    s.play(k.draw(ax))
+```
+
+**See also:** [`ax.segment`](#axes-segment), [`ax.vline`](#axes-vline).
+
+<a id="axes-vband"></a>
+#### `k.Axes.vband` *(method)*
+
+```python
+ax.vband(
+    x0: float,
+    x1: float,
+    *,
+    enter_with_axes: bool = True,
+    **props: Unpack[UnplacedStyleKeywords],
+) -> Rect
+```
+
+A vertical band between data `x0` and `x1`, up the plot, cut to the visible x range (hidden outside it); it follows zooms.
+
+**Parameters:**
+
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `x0` | `float` | required | A vertical band between data `x0` and `x1`, up the plot, cut to the visible x range (hidden outside it); it follows zooms. |
+| `x1` | `float` | required | A vertical band between data `x0` and `x1`, up the plot, cut to the visible x range (hidden outside it); it follows zooms. |
+| `enter_with_axes` | `bool` | `True` |   |
+| `**props` | `Unpack[UnplacedStyleKeywords]` | variadic | Keyword arguments (`UnplacedStyleKeywords`): `name: str \| None`, `key: str \| None`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`, `fill: ColorVal`, `fill_opacity: FloatVal`, `stroke: ColorVal`, `stroke_width: FloatVal`, `dash: FloatsVal`, `color: ColorVal`. |
+
 <a id="axes-vline"></a>
 #### `k.Axes.vline` *(method)*
 
@@ -763,7 +871,7 @@ def number_line(s: k.Scene):
 
 **See also:** [`k.Axes`](#k-axes), [`ax.point`](#axes-point).
 
-Inherited from [`k.Axes`](#k-axes): [`map_x`](#axes-map_x), [`map_y`](#axes-map_y), [`local_point`](#axes-local_point), [`point`](#axes-point), [`add`](#axes-add), [`origin`](#axes-origin), [`in_view`](#axes-in_view), [`plot`](#axes-plot), [`area`](#axes-area), [`vline`](#axes-vline), [`hline`](#axes-hline), [`scatter`](#axes-scatter), [`parametric`](#axes-parametric), [`bars`](#axes-bars), [`zoom_to`](#axes-zoom_to).
+Inherited from [`k.Axes`](#k-axes): [`map_x`](#axes-map_x), [`map_y`](#axes-map_y), [`local_point`](#axes-local_point), [`point`](#axes-point), [`add`](#axes-add), [`origin`](#axes-origin), [`in_view`](#axes-in_view), [`plot`](#axes-plot), [`area`](#axes-area), [`segment`](#axes-segment), [`hband`](#axes-hband), [`vband`](#axes-vband), [`vline`](#axes-vline), [`hline`](#axes-hline), [`scatter`](#axes-scatter), [`parametric`](#axes-parametric), [`bars`](#axes-bars), [`zoom_to`](#axes-zoom_to).
 Inherited from [`k.Group`](objects.md#k-group): [`children`](objects.md#group-children), [`to`](objects.md#group-to), [`swap`](objects.md#group-swap), [`insert`](objects.md#group-insert), [`pop`](objects.md#group-pop), [`fit`](objects.md#group-fit).
 Inherited from [`k.Node`](object-state.md#k-node): [`set`](object-state.md#node-set), [`unbind`](object-state.md#node-unbind), [`edge`](object-state.md#node-edge), [`age`](object-state.md#node-age), [`entered`](object-state.md#node-entered), [`exited`](object-state.md#node-exited), [`copy`](object-state.md#node-copy), [`place`](object-state.md#node-place), [`to_place`](object-state.md#node-to_place), [`unpin`](object-state.md#node-unpin).
 
@@ -1327,7 +1435,7 @@ def lines(s: k.Scene):
 
 - [`to`](#linechart-to): `chart.to(data=df2)`: the lines morph to the new values (plus any other props).
 
-Inherited from [`k.Axes`](#k-axes): [`map_x`](#axes-map_x), [`map_y`](#axes-map_y), [`local_point`](#axes-local_point), [`point`](#axes-point), [`add`](#axes-add), [`origin`](#axes-origin), [`in_view`](#axes-in_view), [`plot`](#axes-plot), [`area`](#axes-area), [`vline`](#axes-vline), [`hline`](#axes-hline), [`scatter`](#axes-scatter), [`parametric`](#axes-parametric), [`bars`](#axes-bars), [`zoom_to`](#axes-zoom_to).
+Inherited from [`k.Axes`](#k-axes): [`map_x`](#axes-map_x), [`map_y`](#axes-map_y), [`local_point`](#axes-local_point), [`point`](#axes-point), [`add`](#axes-add), [`origin`](#axes-origin), [`in_view`](#axes-in_view), [`plot`](#axes-plot), [`area`](#axes-area), [`segment`](#axes-segment), [`hband`](#axes-hband), [`vband`](#axes-vband), [`vline`](#axes-vline), [`hline`](#axes-hline), [`scatter`](#axes-scatter), [`parametric`](#axes-parametric), [`bars`](#axes-bars), [`zoom_to`](#axes-zoom_to).
 Inherited from [`k.Group`](objects.md#k-group): [`children`](objects.md#group-children), [`swap`](objects.md#group-swap), [`insert`](objects.md#group-insert), [`pop`](objects.md#group-pop), [`fit`](objects.md#group-fit).
 Inherited from [`k.Node`](object-state.md#k-node): [`set`](object-state.md#node-set), [`unbind`](object-state.md#node-unbind), [`edge`](object-state.md#node-edge), [`age`](object-state.md#node-age), [`entered`](object-state.md#node-entered), [`exited`](object-state.md#node-exited), [`copy`](object-state.md#node-copy), [`place`](object-state.md#node-place), [`to_place`](object-state.md#node-to_place), [`unpin`](object-state.md#node-unpin).
 

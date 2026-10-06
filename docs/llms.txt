@@ -1262,8 +1262,8 @@ def lines(s: k.Scene):
     s.play(k.draw(chart))
     s.play(chart.to(data={"h": [0, 6, 12, 18, 24], "kw": [0, 3, 7, 3, 0]}), duration=2)
 ```
-#### `k.Table(data, columns=None, *, size=0.32, header_color=None, rule=True, **props)`
-Table of `k.Text` with a highlighted header; `columns=` selects and orders the columns. `table.to(data=df2)` updates the cells: changed texts flash with the new value, new rows appear and removed ones leave. `table.cells[r][c]` are the cells. See also: `k.BarChart`, `k.Text`.
+#### `k.Table(data, columns=None, *, size=0.32, header_color=None, rule=True, widths=None, reserve=(), **props)`
+Table of `k.Text` with a highlighted header; `columns=` selects and orders the columns. `table.to(data=df2)` updates the cells: changed texts flash with the new value, new rows appear and removed ones leave. `table.cells[r][c]` are the cells. Columns fit their text; `reserve=[df2]` sizes them for data shown later (they keep their width as rows arrive) and `widths=` sets minimum widths per column. See also: `k.BarChart`, `k.Text`.
 ```python
 @k.scene
 def table(s: k.Scene):

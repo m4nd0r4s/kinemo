@@ -443,7 +443,9 @@ def lines(s: k.Scene):
         "Charts",
         "Table of `k.Text` with a highlighted header; `columns=` selects and orders the columns. "
         "`table.to(data=df2)` updates the cells: changed texts flash with the new value, "
-        "new rows appear and removed ones leave. `table.cells[r][c]` are the cells.",
+        "new rows appear and removed ones leave. `table.cells[r][c]` are the cells. Columns fit "
+        "their text; `reserve=[df2]` sizes them for data shown later (they keep their width as "
+        "rows arrive) and `widths=` sets minimum widths per column.",
         '''
 import kinemo as k
 

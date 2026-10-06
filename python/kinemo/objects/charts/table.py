@@ -13,6 +13,7 @@ from ...anim.animation import Animation
 from ...anim.ease import Ease
 from ...anim.prop import PropTo
 from ...data.arrow import column, columns
+from ...diagnostics import KinemoError
 from ..groups import Group, Reorder
 from ..node import Node
 from ..shapes import Line
@@ -41,7 +42,8 @@ def read_cells(data: DataTable, names: Sequence[str] | None) -> tuple[list[str],
 
 class Table(Group):
     """`k.Table(df, columns=["pais", "gwh"], size=0.32)`. `table.cells[r][c]` are the
-    body cells and `table.header[c]` the header texts."""
+    body cells and `table.header[c]` the header texts. Column widths fit the text; `widths=`
+    sets minimums and `reserve=[df2, ...]` makes room for data shown later."""
 
     if TYPE_CHECKING:
         _table_opts: tuple[list[str], float, ColorLike | None, bool, list[float]]
@@ -54,10 +56,27 @@ class Table(Group):
         #: The line under the header (with `rule=True`).
         rule: Line
 
-    def __init__(self, data: DataTable, columns: Sequence[str] | None = None, *, size: float = 0.32, header_color: ColorLike | None = None, rule: bool = True, **props: Unpack[TransformKeywords]) -> None:
+    def __init__(
+        self,
+        data: DataTable,
+        columns: Sequence[str] | None = None,
+        *,
+        size: float = 0.32,
+        header_color: ColorLike | None = None,
+        rule: bool = True,
+        widths: Sequence[float | None] | None = None,
+        reserve: Sequence[DataTable] = (),
+        **props: Unpack[TransformKeywords],
+    ) -> None:
         names, rows = read_cells(data, columns)
+        # Columns fit every text they will show: the initial rows and the tables in `reserve`
+        # (data a later `table.to(data=...)` brings), so they keep their width as rows change.
+        future = [row for later in reserve for row in read_cells(later, names)[1]]
+        if widths is not None and len(widths) != len(names):
+            raise KinemoError.make("K0105", f"widths= has {len(widths)} values for {len(names)} columns", fixes=[("one width (or None) per column", None)])
+        minimum = list(widths) if widths is not None else [None] * len(names)
         widths = [
-            max(_text_width(t, size) for t in [f"**{n}**", *(r[c] for r in rows)]) + CELL_PADDING
+            max(max(_text_width(t, size) for t in [f"**{n}**", *(r[c] for r in rows + future)]) + CELL_PADDING, float(minimum[c] or 0.0))
             for c, n in enumerate(names)
         ]
         object.__setattr__(self, "_table_opts", (names, size, header_color, rule, widths))

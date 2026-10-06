@@ -513,7 +513,7 @@ Circle of radius `r`, centered on its position. Like every shape, it accepts the
 | Name | Type | Default | Description |
 | --- | --- | --- | --- |
 | `r` | `FloatVal` | `1.0` | Circle of radius `r`, centered on its position. |
-| `**props` | `Unpack[StyleKeywords]` | variadic | Keyword arguments (`StyleKeywords`): `name: str \| None`, `key: str \| None`, `x: FloatVal`, `y: FloatVal`, `position: VecVal`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`, `fill: ColorVal`, `fill_opacity: FloatVal`, `stroke: ColorVal`, `stroke_width: FloatVal`, `dash: FloatsVal`, `color: ColorVal`. |
+| `**props` | `Unpack[StyleKeywords]` | variadic | Keyword arguments (`StyleKeywords`): `name: str \| None`, `key: str \| None`, `x: FloatVal`, `y: FloatVal`, `position: VecVal`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`, `fill: ColorVal`, `fill_opacity: FloatVal`, `stroke: ColorVal`, `stroke_width: FloatVal`, `dash: FloatsVal`, `glow: FloatVal`, `glow_color: ColorVal`, `color: ColorVal`. |
 
 **Props** (animatable with `.to()`, settable with `.set()` or in the constructor):
 
@@ -524,6 +524,8 @@ Circle of radius `r`, centered on its position. Like every shape, it accepts the
 | `stroke` | color | `theme.fg` | linear |
 | `stroke_width` | float | `theme.stroke_width` | linear |
 | `dash` | floats | `()` | step_end |
+| `glow` | float | `0.0` | linear |
+| `glow_color` | color | `theme.no_color` | linear |
 | `r` | float | `1.0` | linear |
 
 Props inherited from [`k.Node`](object-state.md#k-node): `x`, `y`, `rotate`, `scale`, `scale_x`, `scale_y`, `anchor`, `opacity`, `z`, `visible`, `bleed`.
@@ -556,7 +558,7 @@ Filled dot (default radius 0.08), with no stroke. It is the marker used in chart
 | Name | Type | Default | Description |
 | --- | --- | --- | --- |
 | `r` | `FloatVal` | `0.08` |   |
-| `**props` | `Unpack[StyleKeywords]` | variadic | Keyword arguments (`StyleKeywords`): `name: str \| None`, `key: str \| None`, `x: FloatVal`, `y: FloatVal`, `position: VecVal`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`, `fill: ColorVal`, `fill_opacity: FloatVal`, `stroke: ColorVal`, `stroke_width: FloatVal`, `dash: FloatsVal`, `color: ColorVal`. |
+| `**props` | `Unpack[StyleKeywords]` | variadic | Keyword arguments (`StyleKeywords`): `name: str \| None`, `key: str \| None`, `x: FloatVal`, `y: FloatVal`, `position: VecVal`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`, `fill: ColorVal`, `fill_opacity: FloatVal`, `stroke: ColorVal`, `stroke_width: FloatVal`, `dash: FloatsVal`, `glow: FloatVal`, `glow_color: ColorVal`, `color: ColorVal`. |
 
 **Props** (animatable with `.to()`, settable with `.set()` or in the constructor):
 
@@ -567,6 +569,8 @@ Filled dot (default radius 0.08), with no stroke. It is the marker used in chart
 | `stroke` | color | `theme.fg` | linear |
 | `stroke_width` | float | `0.0` | linear |
 | `dash` | floats | `()` | step_end |
+| `glow` | float | `0.0` | linear |
+| `glow_color` | color | `theme.no_color` | linear |
 | `r` | float | `0.08` | linear |
 
 Props inherited from [`k.Node`](object-state.md#k-node): `x`, `y`, `rotate`, `scale`, `scale_x`, `scale_y`, `anchor`, `opacity`, `z`, `visible`, `bleed`.
@@ -601,7 +605,7 @@ Ellipse of width `w` and height `h`, centered on its position.
 | --- | --- | --- | --- |
 | `w` | `FloatVal` | `2.0` | Ellipse of width `w` and height `h`, centered on its position. |
 | `h` | `FloatVal` | `1.0` | Ellipse of width `w` and height `h`, centered on its position. |
-| `**props` | `Unpack[StyleKeywords]` | variadic | Keyword arguments (`StyleKeywords`): `name: str \| None`, `key: str \| None`, `x: FloatVal`, `y: FloatVal`, `position: VecVal`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`, `fill: ColorVal`, `fill_opacity: FloatVal`, `stroke: ColorVal`, `stroke_width: FloatVal`, `dash: FloatsVal`, `color: ColorVal`. |
+| `**props` | `Unpack[StyleKeywords]` | variadic | Keyword arguments (`StyleKeywords`): `name: str \| None`, `key: str \| None`, `x: FloatVal`, `y: FloatVal`, `position: VecVal`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`, `fill: ColorVal`, `fill_opacity: FloatVal`, `stroke: ColorVal`, `stroke_width: FloatVal`, `dash: FloatsVal`, `glow: FloatVal`, `glow_color: ColorVal`, `color: ColorVal`. |
 
 **Props** (animatable with `.to()`, settable with `.set()` or in the constructor):
 
@@ -612,6 +616,8 @@ Ellipse of width `w` and height `h`, centered on its position.
 | `stroke` | color | `theme.fg` | linear |
 | `stroke_width` | float | `theme.stroke_width` | linear |
 | `dash` | floats | `()` | step_end |
+| `glow` | float | `0.0` | linear |
+| `glow_color` | color | `theme.no_color` | linear |
 | `w` | float | `2.0` | linear |
 | `h` | float | `1.0` | linear |
 
@@ -646,7 +652,7 @@ Rectangle of width `w` and height `h`, centered on its position; `radius=` round
 | --- | --- | --- | --- |
 | `w` | `FloatVal` | `2.0` | Rectangle of width `w` and height `h`, centered on its position; `radius=` rounds the corners (for rounded corners prefer `k.RoundedRect`). |
 | `h` | `FloatVal` | `1.0` | Rectangle of width `w` and height `h`, centered on its position; `radius=` rounds the corners (for rounded corners prefer `k.RoundedRect`). |
-| `**props` | `Unpack[RectKeywords]` | variadic | Keyword arguments (`RectKeywords`): `name: str \| None`, `key: str \| None`, `x: FloatVal`, `y: FloatVal`, `position: VecVal`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`, `fill: ColorVal`, `fill_opacity: FloatVal`, `stroke: ColorVal`, `stroke_width: FloatVal`, `dash: FloatsVal`, `color: ColorVal`, `radius: FloatVal`. |
+| `**props` | `Unpack[RectKeywords]` | variadic | Keyword arguments (`RectKeywords`): `name: str \| None`, `key: str \| None`, `x: FloatVal`, `y: FloatVal`, `position: VecVal`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`, `fill: ColorVal`, `fill_opacity: FloatVal`, `stroke: ColorVal`, `stroke_width: FloatVal`, `dash: FloatsVal`, `glow: FloatVal`, `glow_color: ColorVal`, `color: ColorVal`, `radius: FloatVal`. |
 
 **Props** (animatable with `.to()`, settable with `.set()` or in the constructor):
 
@@ -657,6 +663,8 @@ Rectangle of width `w` and height `h`, centered on its position; `radius=` round
 | `stroke` | color | `theme.fg` | linear |
 | `stroke_width` | float | `theme.stroke_width` | linear |
 | `dash` | floats | `()` | step_end |
+| `glow` | float | `0.0` | linear |
+| `glow_color` | color | `theme.no_color` | linear |
 | `w` | float | `2.0` | linear |
 | `h` | float | `1.0` | linear |
 | `radius` | float | `0.0` | linear |
@@ -698,9 +706,9 @@ Rectangle with rounded corners (`radius=0.15` by default). Good for boxes and ca
 | `w` | `FloatVal` | `2.0` |   |
 | `h` | `FloatVal` | `1.0` |   |
 | `radius` | `FloatVal` | `0.15` | Rectangle with rounded corners (`radius=0.15` by default). |
-| `**props` | `Unpack[StyleKeywords]` | variadic | Keyword arguments (`StyleKeywords`): `name: str \| None`, `key: str \| None`, `x: FloatVal`, `y: FloatVal`, `position: VecVal`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`, `fill: ColorVal`, `fill_opacity: FloatVal`, `stroke: ColorVal`, `stroke_width: FloatVal`, `dash: FloatsVal`, `color: ColorVal`. |
+| `**props` | `Unpack[StyleKeywords]` | variadic | Keyword arguments (`StyleKeywords`): `name: str \| None`, `key: str \| None`, `x: FloatVal`, `y: FloatVal`, `position: VecVal`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`, `fill: ColorVal`, `fill_opacity: FloatVal`, `stroke: ColorVal`, `stroke_width: FloatVal`, `dash: FloatsVal`, `glow: FloatVal`, `glow_color: ColorVal`, `color: ColorVal`. |
 
-Props inherited from [`k.Rect`](#k-rect): `fill`, `fill_opacity`, `stroke`, `stroke_width`, `dash`, `w`, `h`, `radius`.
+Props inherited from [`k.Rect`](#k-rect): `fill`, `fill_opacity`, `stroke`, `stroke_width`, `dash`, `glow`, `glow_color`, `w`, `h`, `radius`.
 
 Props inherited from [`k.Node`](object-state.md#k-node): `x`, `y`, `rotate`, `scale`, `scale_x`, `scale_y`, `anchor`, `opacity`, `z`, `visible`, `bleed`.
 
@@ -733,9 +741,9 @@ Square with side `side`, centered on its position. It is a `k.Rect` with `w == h
 | Name | Type | Default | Description |
 | --- | --- | --- | --- |
 | `side` | `FloatVal` | `1.0` | Square with side `side`, centered on its position. |
-| `**props` | `Unpack[RectKeywords]` | variadic | Keyword arguments (`RectKeywords`): `name: str \| None`, `key: str \| None`, `x: FloatVal`, `y: FloatVal`, `position: VecVal`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`, `fill: ColorVal`, `fill_opacity: FloatVal`, `stroke: ColorVal`, `stroke_width: FloatVal`, `dash: FloatsVal`, `color: ColorVal`, `radius: FloatVal`. |
+| `**props` | `Unpack[RectKeywords]` | variadic | Keyword arguments (`RectKeywords`): `name: str \| None`, `key: str \| None`, `x: FloatVal`, `y: FloatVal`, `position: VecVal`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`, `fill: ColorVal`, `fill_opacity: FloatVal`, `stroke: ColorVal`, `stroke_width: FloatVal`, `dash: FloatsVal`, `glow: FloatVal`, `glow_color: ColorVal`, `color: ColorVal`, `radius: FloatVal`. |
 
-Props inherited from [`k.Rect`](#k-rect): `fill`, `fill_opacity`, `stroke`, `stroke_width`, `dash`, `w`, `h`, `radius`.
+Props inherited from [`k.Rect`](#k-rect): `fill`, `fill_opacity`, `stroke`, `stroke_width`, `dash`, `glow`, `glow_color`, `w`, `h`, `radius`.
 
 Props inherited from [`k.Node`](object-state.md#k-node): `x`, `y`, `rotate`, `scale`, `scale_x`, `scale_y`, `anchor`, `opacity`, `z`, `visible`, `bleed`.
 
@@ -776,7 +784,7 @@ The square built on a polygon edge, outside (or inside) the polygon.
 | --- | --- | --- | --- |
 | `side` | `Side` | required |   |
 | `outward` | `bool` | `True` |   |
-| `**props` | `Unpack[UnplacedStyleKeywords]` | variadic | Keyword arguments (`UnplacedStyleKeywords`): `name: str \| None`, `key: str \| None`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`, `fill: ColorVal`, `fill_opacity: FloatVal`, `stroke: ColorVal`, `stroke_width: FloatVal`, `dash: FloatsVal`, `color: ColorVal`. |
+| `**props` | `Unpack[UnplacedStyleKeywords]` | variadic | Keyword arguments (`UnplacedStyleKeywords`): `name: str \| None`, `key: str \| None`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`, `fill: ColorVal`, `fill_opacity: FloatVal`, `stroke: ColorVal`, `stroke_width: FloatVal`, `dash: FloatsVal`, `glow: FloatVal`, `glow_color: ColorVal`, `color: ColorVal`. |
 
 <a id="k-polygon"></a>
 ### `k.Polygon` *(class)*
@@ -792,7 +800,7 @@ Polygon from its vertices (`k.Polygon((0, 0), (2, 0), (1, 1))`), centered on its
 | Name | Type | Default | Description |
 | --- | --- | --- | --- |
 | `*points` | `VecLike \| list[VecLike]` | variadic |   |
-| `**props` | `Unpack[StyleKeywords]` | variadic | Keyword arguments (`StyleKeywords`): `name: str \| None`, `key: str \| None`, `x: FloatVal`, `y: FloatVal`, `position: VecVal`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`, `fill: ColorVal`, `fill_opacity: FloatVal`, `stroke: ColorVal`, `stroke_width: FloatVal`, `dash: FloatsVal`, `color: ColorVal`. |
+| `**props` | `Unpack[StyleKeywords]` | variadic | Keyword arguments (`StyleKeywords`): `name: str \| None`, `key: str \| None`, `x: FloatVal`, `y: FloatVal`, `position: VecVal`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`, `fill: ColorVal`, `fill_opacity: FloatVal`, `stroke: ColorVal`, `stroke_width: FloatVal`, `dash: FloatsVal`, `glow: FloatVal`, `glow_color: ColorVal`, `color: ColorVal`. |
 
 **Props** (animatable with `.to()`, settable with `.set()` or in the constructor):
 
@@ -803,6 +811,8 @@ Polygon from its vertices (`k.Polygon((0, 0), (2, 0), (1, 1))`), centered on its
 | `stroke` | color | `theme.fg` | linear |
 | `stroke_width` | float | `theme.stroke_width` | linear |
 | `dash` | floats | `()` | step_end |
+| `glow` | float | `0.0` | linear |
+| `glow_color` | color | `theme.no_color` | linear |
 | `points` | points | `[]` | pointwise |
 
 Props inherited from [`k.Node`](object-state.md#k-node): `x`, `y`, `rotate`, `scale`, `scale_x`, `scale_y`, `anchor`, `opacity`, `z`, `visible`, `bleed`.
@@ -846,7 +856,7 @@ Regular polygon with `n` sides (a signal works: the shape follows it) and circum
 | --- | --- | --- | --- |
 | `n` | `FloatVal` | required | Regular polygon with `n` sides (a signal works: the shape follows it) and circumradius `r`, a vertex on top. |
 | `r` | `FloatVal` | `1.0` | Regular polygon with `n` sides (a signal works: the shape follows it) and circumradius `r`, a vertex on top. |
-| `**props` | `Unpack[StyleKeywords]` | variadic | Keyword arguments (`StyleKeywords`): `name: str \| None`, `key: str \| None`, `x: FloatVal`, `y: FloatVal`, `position: VecVal`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`, `fill: ColorVal`, `fill_opacity: FloatVal`, `stroke: ColorVal`, `stroke_width: FloatVal`, `dash: FloatsVal`, `color: ColorVal`. |
+| `**props` | `Unpack[StyleKeywords]` | variadic | Keyword arguments (`StyleKeywords`): `name: str \| None`, `key: str \| None`, `x: FloatVal`, `y: FloatVal`, `position: VecVal`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`, `fill: ColorVal`, `fill_opacity: FloatVal`, `stroke: ColorVal`, `stroke_width: FloatVal`, `dash: FloatsVal`, `glow: FloatVal`, `glow_color: ColorVal`, `color: ColorVal`. |
 
 <a id="polygon-sides"></a>
 #### `k.Polygon.sides` *(property)*
@@ -880,9 +890,9 @@ Triangle from its three vertices (no arguments: equilateral with radius 1). `k.T
 | Name | Type | Default | Description |
 | --- | --- | --- | --- |
 | `*points` | `VecLike \| list[VecLike]` | variadic |   |
-| `**props` | `Unpack[StyleKeywords]` | variadic | Keyword arguments (`StyleKeywords`): `name: str \| None`, `key: str \| None`, `x: FloatVal`, `y: FloatVal`, `position: VecVal`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`, `fill: ColorVal`, `fill_opacity: FloatVal`, `stroke: ColorVal`, `stroke_width: FloatVal`, `dash: FloatsVal`, `color: ColorVal`. |
+| `**props` | `Unpack[StyleKeywords]` | variadic | Keyword arguments (`StyleKeywords`): `name: str \| None`, `key: str \| None`, `x: FloatVal`, `y: FloatVal`, `position: VecVal`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`, `fill: ColorVal`, `fill_opacity: FloatVal`, `stroke: ColorVal`, `stroke_width: FloatVal`, `dash: FloatsVal`, `glow: FloatVal`, `glow_color: ColorVal`, `color: ColorVal`. |
 
-Props inherited from [`k.Polygon`](#k-polygon): `fill`, `fill_opacity`, `stroke`, `stroke_width`, `dash`, `points`.
+Props inherited from [`k.Polygon`](#k-polygon): `fill`, `fill_opacity`, `stroke`, `stroke_width`, `dash`, `glow`, `glow_color`, `points`.
 
 Props inherited from [`k.Node`](object-state.md#k-node): `x`, `y`, `rotate`, `scale`, `scale_x`, `scale_y`, `anchor`, `opacity`, `z`, `visible`, `bleed`.
 
@@ -926,7 +936,7 @@ Right triangle with legs `a` (horizontal) and `b` (vertical).
 | `a` | `float` | required | Right triangle with legs `a` (horizontal) and `b` (vertical). |
 | `b` | `float` | required | Right triangle with legs `a` (horizontal) and `b` (vertical). |
 | `scale` | `float` | `1.0` |   |
-| `**props` | `Unpack[UnscaledStyleKeywords]` | variadic | Keyword arguments (`UnscaledStyleKeywords`): `name: str \| None`, `key: str \| None`, `x: FloatVal`, `y: FloatVal`, `position: VecVal`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`, `fill: ColorVal`, `fill_opacity: FloatVal`, `stroke: ColorVal`, `stroke_width: FloatVal`, `dash: FloatsVal`, `color: ColorVal`. |
+| `**props` | `Unpack[UnscaledStyleKeywords]` | variadic | Keyword arguments (`UnscaledStyleKeywords`): `name: str \| None`, `key: str \| None`, `x: FloatVal`, `y: FloatVal`, `position: VecVal`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`, `fill: ColorVal`, `fill_opacity: FloatVal`, `stroke: ColorVal`, `stroke_width: FloatVal`, `dash: FloatsVal`, `glow: FloatVal`, `glow_color: ColorVal`, `color: ColorVal`. |
 
 <a id="k-line"></a>
 ### `k.Line` *(class)*
@@ -950,7 +960,7 @@ Segment from `start` to `end` (local coordinates), or centered with `length=`. T
 | `start` | `VecVal \| None` | `None` | Segment from `start` to `end` (local coordinates), or centered with `length=`. |
 | `end` | `VecVal \| None` | `None` | Segment from `start` to `end` (local coordinates), or centered with `length=`. |
 | `length` | `float \| None` | `None` | Segment from `start` to `end` (local coordinates), or centered with `length=`. |
-| `**props` | `Unpack[StyleKeywords]` | variadic | Keyword arguments (`StyleKeywords`): `name: str \| None`, `key: str \| None`, `x: FloatVal`, `y: FloatVal`, `position: VecVal`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`, `fill: ColorVal`, `fill_opacity: FloatVal`, `stroke: ColorVal`, `stroke_width: FloatVal`, `dash: FloatsVal`, `color: ColorVal`. |
+| `**props` | `Unpack[StyleKeywords]` | variadic | Keyword arguments (`StyleKeywords`): `name: str \| None`, `key: str \| None`, `x: FloatVal`, `y: FloatVal`, `position: VecVal`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`, `fill: ColorVal`, `fill_opacity: FloatVal`, `stroke: ColorVal`, `stroke_width: FloatVal`, `dash: FloatsVal`, `glow: FloatVal`, `glow_color: ColorVal`, `color: ColorVal`. |
 
 **Props** (animatable with `.to()`, settable with `.set()` or in the constructor):
 
@@ -961,6 +971,8 @@ Segment from `start` to `end` (local coordinates), or centered with `length=`. T
 | `stroke` | color | `theme.fg` | linear |
 | `stroke_width` | float | `theme.stroke_width` | linear |
 | `dash` | floats | `()` | step_end |
+| `glow` | float | `0.0` | linear |
+| `glow_color` | color | `theme.no_color` | linear |
 | `start` | vec2 | `(-1.0, 0.0)` | linear |
 | `end` | vec2 | `(1.0, 0.0)` | linear |
 
@@ -1000,7 +1012,7 @@ Arrow from `start` to `end` with a tip of size `tip`. The endpoints accept signa
 | --- | --- | --- | --- |
 | `start` | `VecVal \| None` | `None` | Arrow from `start` to `end` with a tip of size `tip`. |
 | `end` | `VecVal \| None` | `None` | Arrow from `start` to `end` with a tip of size `tip`. |
-| `**props` | `Unpack[ArrowKeywords]` | variadic | Keyword arguments (`ArrowKeywords`): `name: str \| None`, `key: str \| None`, `x: FloatVal`, `y: FloatVal`, `position: VecVal`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`, `fill: ColorVal`, `fill_opacity: FloatVal`, `stroke: ColorVal`, `stroke_width: FloatVal`, `dash: FloatsVal`, `color: ColorVal`, `tip: FloatVal`. |
+| `**props` | `Unpack[ArrowKeywords]` | variadic | Keyword arguments (`ArrowKeywords`): `name: str \| None`, `key: str \| None`, `x: FloatVal`, `y: FloatVal`, `position: VecVal`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`, `fill: ColorVal`, `fill_opacity: FloatVal`, `stroke: ColorVal`, `stroke_width: FloatVal`, `dash: FloatsVal`, `glow: FloatVal`, `glow_color: ColorVal`, `color: ColorVal`, `tip: FloatVal`. |
 
 **Props** (animatable with `.to()`, settable with `.set()` or in the constructor):
 
@@ -1011,6 +1023,8 @@ Arrow from `start` to `end` with a tip of size `tip`. The endpoints accept signa
 | `stroke` | color | `theme.fg` | linear |
 | `stroke_width` | float | `theme.stroke_width` | linear |
 | `dash` | floats | `()` | step_end |
+| `glow` | float | `0.0` | linear |
+| `glow_color` | color | `theme.no_color` | linear |
 | `start` | vec2 | `(-1.0, 0.0)` | linear |
 | `end` | vec2 | `(1.0, 0.0)` | linear |
 | `tip` | float | `0.25` | linear |
@@ -1110,7 +1124,7 @@ Circular arc of radius `r`, starting at `start_angle` and sweeping `angle` degre
 | `r` | `FloatVal` | `1.0` | Circular arc of radius `r`, starting at `start_angle` and sweeping `angle` degrees (counterclockwise). |
 | `start_angle` | `FloatVal` | `0.0` | Circular arc of radius `r`, starting at `start_angle` and sweeping `angle` degrees (counterclockwise). |
 | `angle` | `FloatVal` | `90.0` | Circular arc of radius `r`, starting at `start_angle` and sweeping `angle` degrees (counterclockwise). |
-| `**props` | `Unpack[StyleKeywords]` | variadic | Keyword arguments (`StyleKeywords`): `name: str \| None`, `key: str \| None`, `x: FloatVal`, `y: FloatVal`, `position: VecVal`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`, `fill: ColorVal`, `fill_opacity: FloatVal`, `stroke: ColorVal`, `stroke_width: FloatVal`, `dash: FloatsVal`, `color: ColorVal`. |
+| `**props` | `Unpack[StyleKeywords]` | variadic | Keyword arguments (`StyleKeywords`): `name: str \| None`, `key: str \| None`, `x: FloatVal`, `y: FloatVal`, `position: VecVal`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`, `fill: ColorVal`, `fill_opacity: FloatVal`, `stroke: ColorVal`, `stroke_width: FloatVal`, `dash: FloatsVal`, `glow: FloatVal`, `glow_color: ColorVal`, `color: ColorVal`. |
 
 **Props** (animatable with `.to()`, settable with `.set()` or in the constructor):
 
@@ -1121,6 +1135,8 @@ Circular arc of radius `r`, starting at `start_angle` and sweeping `angle` degre
 | `stroke` | color | `theme.fg` | linear |
 | `stroke_width` | float | `theme.stroke_width` | linear |
 | `dash` | floats | `()` | step_end |
+| `glow` | float | `0.0` | linear |
+| `glow_color` | color | `theme.no_color` | linear |
 | `r` | float | `1.0` | linear |
 | `start_angle` | float | `0.0` | linear |
 | `angle` | float | `90.0` | linear |
@@ -1161,7 +1177,7 @@ Path from SVG commands (`d="M 0 0 L 1 1"`) or a polyline from a list of points; 
 | --- | --- | --- | --- |
 | `d` | `str \| Sequence[VecLike]` | `""` | Path from SVG commands (`d="M 0 0 L 1 1"`) or a polyline from a list of points; `closed=True` closes the outline. |
 | `closed` | `bool` | `False` | Path from SVG commands (`d="M 0 0 L 1 1"`) or a polyline from a list of points; `closed=True` closes the outline. |
-| `**props` | `Unpack[StyleKeywords]` | variadic | Keyword arguments (`StyleKeywords`): `name: str \| None`, `key: str \| None`, `x: FloatVal`, `y: FloatVal`, `position: VecVal`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`, `fill: ColorVal`, `fill_opacity: FloatVal`, `stroke: ColorVal`, `stroke_width: FloatVal`, `dash: FloatsVal`, `color: ColorVal`. |
+| `**props` | `Unpack[StyleKeywords]` | variadic | Keyword arguments (`StyleKeywords`): `name: str \| None`, `key: str \| None`, `x: FloatVal`, `y: FloatVal`, `position: VecVal`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`, `fill: ColorVal`, `fill_opacity: FloatVal`, `stroke: ColorVal`, `stroke_width: FloatVal`, `dash: FloatsVal`, `glow: FloatVal`, `glow_color: ColorVal`, `color: ColorVal`. |
 
 **Props** (animatable with `.to()`, settable with `.set()` or in the constructor):
 
@@ -1172,6 +1188,8 @@ Path from SVG commands (`d="M 0 0 L 1 1"`) or a polyline from a list of points; 
 | `stroke` | color | `theme.fg` | linear |
 | `stroke_width` | float | `theme.stroke_width` | linear |
 | `dash` | floats | `()` | step_end |
+| `glow` | float | `0.0` | linear |
+| `glow_color` | color | `theme.no_color` | linear |
 | `d` | str | `""` | step_end |
 | `closed` | bool | `False` | step_end |
 
@@ -1206,7 +1224,7 @@ Boolean operations between shapes: `k.union(a, b)`, `k.intersect(a, b)` and `k.s
 | --- | --- | --- | --- |
 | `a` | `Node` | required | Boolean operations between shapes: `k.union(a, b)`, `k.intersect(a, b)` and `k.subtract(a, b)` return a new `k.Path` computed from the outlines at the cursor (with the style of `a`, unless another one is passed). |
 | `b` | `Node` | required | Shape covering `a` or `b` (style of `a` unless given). |
-| `**style` | `Unpack[StyleKeywords]` | variadic | Keyword arguments (`StyleKeywords`): `name: str \| None`, `key: str \| None`, `x: FloatVal`, `y: FloatVal`, `position: VecVal`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`, `fill: ColorVal`, `fill_opacity: FloatVal`, `stroke: ColorVal`, `stroke_width: FloatVal`, `dash: FloatsVal`, `color: ColorVal`. |
+| `**style` | `Unpack[StyleKeywords]` | variadic | Keyword arguments (`StyleKeywords`): `name: str \| None`, `key: str \| None`, `x: FloatVal`, `y: FloatVal`, `position: VecVal`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`, `fill: ColorVal`, `fill_opacity: FloatVal`, `stroke: ColorVal`, `stroke_width: FloatVal`, `dash: FloatsVal`, `glow: FloatVal`, `glow_color: ColorVal`, `color: ColorVal`. |
 
 **Example:**
 
@@ -1238,7 +1256,7 @@ Documented together with [`k.union`](#k-union).
 | --- | --- | --- | --- |
 | `a` | `Node` | required | Shape covering both `a` and `b`. |
 | `b` | `Node` | required | Shape covering both `a` and `b`. |
-| `**style` | `Unpack[StyleKeywords]` | variadic | Keyword arguments (`StyleKeywords`): `name: str \| None`, `key: str \| None`, `x: FloatVal`, `y: FloatVal`, `position: VecVal`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`, `fill: ColorVal`, `fill_opacity: FloatVal`, `stroke: ColorVal`, `stroke_width: FloatVal`, `dash: FloatsVal`, `color: ColorVal`. |
+| `**style` | `Unpack[StyleKeywords]` | variadic | Keyword arguments (`StyleKeywords`): `name: str \| None`, `key: str \| None`, `x: FloatVal`, `y: FloatVal`, `position: VecVal`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`, `fill: ColorVal`, `fill_opacity: FloatVal`, `stroke: ColorVal`, `stroke_width: FloatVal`, `dash: FloatsVal`, `glow: FloatVal`, `glow_color: ColorVal`, `color: ColorVal`. |
 
 <a id="k-subtract"></a>
 ### `k.subtract` *(function)*
@@ -1257,7 +1275,7 @@ Documented together with [`k.union`](#k-union).
 | --- | --- | --- | --- |
 | `a` | `Node` | required | `a` with `b` cut out. |
 | `b` | `Node` | required | `a` with `b` cut out. |
-| `**style` | `Unpack[StyleKeywords]` | variadic | Keyword arguments (`StyleKeywords`): `name: str \| None`, `key: str \| None`, `x: FloatVal`, `y: FloatVal`, `position: VecVal`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`, `fill: ColorVal`, `fill_opacity: FloatVal`, `stroke: ColorVal`, `stroke_width: FloatVal`, `dash: FloatsVal`, `color: ColorVal`. |
+| `**style` | `Unpack[StyleKeywords]` | variadic | Keyword arguments (`StyleKeywords`): `name: str \| None`, `key: str \| None`, `x: FloatVal`, `y: FloatVal`, `position: VecVal`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`, `fill: ColorVal`, `fill_opacity: FloatVal`, `stroke: ColorVal`, `stroke_width: FloatVal`, `dash: FloatsVal`, `glow: FloatVal`, `glow_color: ColorVal`, `color: ColorVal`. |
 
 <a id="k-bar"></a>
 ### `k.Bar` *(class)*

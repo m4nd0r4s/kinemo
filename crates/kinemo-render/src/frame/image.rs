@@ -36,7 +36,7 @@ pub(super) fn painted_image(layout: &Layout, leaf: ObjectId, t: f64, size: Frame
         clip: None,
         fill_rule_even_odd: false,
         image: Some(ImagePaint { bitmap, transform: to_px * image_to_local }),
-        dots: None,
+        dots: None, glow: None,
     };
     vec![PaintedPart { item, key: None, index: 0 }]
 }

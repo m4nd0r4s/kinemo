@@ -346,6 +346,43 @@ def comfort(s: k.Scene):
         aliases=("Axes.vband",),
     ),
     DocEntry(
+        "Axes.vector",
+        "Charts",
+        "An arrow of components `v` from the data point `at=`, in data units; both are signals, so "
+        "`vector.to(v=(2, 1))` turns it and it follows zooms. `components=True` adds its dashed x "
+        "and y components (labelled with `label=`). `a + b` is the resultant, shown tip to tail by "
+        "`k.vector_sum(a, b, a + b)`.",
+        '''
+import kinemo as k
+
+@k.scene
+def forces(s: k.Scene):
+    ax = k.Axes(x=(-1, 6, 1), y=(-1, 5, 1), grid=True).place(at="center")
+    a = ax.vector((3, 1), label="F", components=True)
+    b = ax.vector((1, 2.5), label="G")
+    s.play(k.draw(ax))
+    s.play(k.vector_sum(a, b, a + b))
+''',
+        related=("k.vector_sum", "k.Arrow"),
+    ),
+    DocEntry(
+        "k.vector_sum",
+        "Charts",
+        "Adds two axes vectors tip to tail: `b` slides so its tail sits on `a`'s tip, then the "
+        "resultant (`a + b`) is drawn from `a`'s tail.",
+        '''
+import kinemo as k
+
+@k.scene
+def resultant(s: k.Scene):
+    ax = k.Axes(x=(0, 6, 1), y=(0, 4, 1)).place(at="center")
+    a, b = ax.vector((3, 0), label="a"), ax.vector((1, 3), label="b")
+    s.play(k.draw(ax))
+    s.play(k.vector_sum(a, b, a + b, duration=0.8))
+''',
+        related=("Axes.vector",),
+    ),
+    DocEntry(
         "Axes.origin",
         "Charts",
         "Where the two axes cross, in the axes' own coordinates: the data origin clamped "

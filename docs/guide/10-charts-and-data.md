@@ -123,6 +123,9 @@ s.play(k.fade_in(tan))    # now the tangent
   ranges (and hidden when it falls outside them) as the axes zoom.
 - `ax.hband(y0, y1)` and `ax.vband(x0, x1)` shade a band between two values, across or up
   the plot, cut to the visible range.
+- `ax.vector((3, 1), at=(0, 0), label="F", components=True)` draws a vector in data units
+  with its dashed components; `v=` and `at=` are signals (`vector.to(v=...)` turns it), and
+  `k.vector_sum(a, b, a + b)` adds two vectors tip to tail.
 
 ```python
 import kinemo as k

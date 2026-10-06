@@ -27,6 +27,7 @@ if TYPE_CHECKING:
     from ...reactive.native import FloatExpr
     from ..keywords import PlotStyleKeywords, StyleKeywords, UnplacedKeywords, UnplacedStyleKeywords
     from ..props import PropAccessor
+    from .axes_vector import AxesVector
     from .plot import ParametricPlot
 
 #: A plotted function: called with floats to sample the curve and traced with a signal
@@ -399,6 +400,20 @@ class Axes(Group):
         self._append(band, enter_with_axes)
         _name_from_call(band, factory)
         return band
+
+    def vector(self, v: tuple[FloatVal, FloatVal], at: tuple[FloatVal, FloatVal] = (0.0, 0.0), *, label: str | None = None, components: bool = False, color: ColorLike | None = None, size: float = 0.3, enter_with_axes: bool = True) -> "AxesVector":
+        """An arrow of components `v` from the data point `at`, in data units (both accept
+        signals). `components=True` adds its dashed x and y components (labelled `Fₓ`, `Fᵧ` with
+        `label="F"`). `vector.to(v=..., at=...)` animates it; `a + b` is the resultant."""
+        from .axes_vector import AxesVector
+
+        tint = color if color is not None else self._next_color()
+        if isinstance(tint, ThemeToken):
+            tint = tint.resolve()
+        arrow = AxesVector(self, v, at, label=label, components=components, color=tint, size=size)
+        self._append(arrow, enter_with_axes)
+        _name_from_call(arrow, Axes.vector)
+        return arrow
 
     def vline(self, at: FloatVal, *, style: LineStyle = "solid", enter_with_axes: bool = True, **props: Unpack[StyleKeywords]) -> Line:
         h = self.size

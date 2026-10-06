@@ -177,6 +177,7 @@ Axes, number lines, polar axes, plots and data charts.
 - [`k.Axes`](charts.md#k-axes): Cartesian axes with ticks, labels and an optional grid: `x=(min, max, step)`, `y=(min, max)`, `labels=("x", "y")`, `width=`/`height=` in units.
 - [`k.NumberLine`](charts.md#k-numberline): A horizontal number line: a `k.Axes` with only the x axis.
 - [`k.NumberPlane`](charts.md#k-numberplane): A coordinate grid with axes and the basis vectors î (green) and ĵ (red): `x=(min, max, step)`, `y=...`, `unit=` scene units per step.
+- [`k.vector_sum`](charts.md#k-vector_sum): Adds two axes vectors tip to tail: `b` slides so its tail sits on `a`'s tip, then the resultant (`a + b`) is drawn from `a`'s tail.
 - [`Plot`](charts.md#plot): A curve `y = fn(x)` of an axes.
 - [`k.BarChart`](charts.md#k-barchart): Bar chart from a table: `x=` is the category column, `y=` the value column and `key=` identifies each bar.
 - [`k.LineChart`](charts.md#k-linechart): A `k.Axes` with one line per `y=` column (one or several), connecting the table's points in `x=` order.
@@ -197,6 +198,7 @@ Methods:
 - [`ax.add`](charts.md#axes-add): Puts objects inside the axes, in its own coordinates, so they follow zooms like plots do; place them with `position=ax.local_point(x, y)` or `ax.origin()`.
 - [`ax.segment`](charts.md#axes-segment): A line between two data points `(x, y)`, cut to the visible ranges with `clip=True` (the default) and hidden when it falls entirely outside them; it follows zooms.
 - [`ax.hband`](charts.md#axes-hband): `ax.hband(y0, y1)`: a translucent band across the plot between two data values; `ax.vband(x0, x1)` the same up the plot.
+- [`ax.vector`](charts.md#axes-vector): An arrow of components `v` from the data point `at=`, in data units; both are signals, so `vector.to(v=(2, 1))` turns it and it follows zooms.
 - [`ax.origin`](charts.md#axes-origin): Where the two axes cross, in the axes' own coordinates: the data origin clamped to the visible ranges.
 - [`ax.in_view`](charts.md#axes-in_view): Whether a data value is inside the visible ranges, as a reactive bool for `visible=`: `ax.in_view(x=3)`, `ax.in_view(y=5)` or both.
 - [`curve.point_at`](charts.md#plot-point_at): World position of the curve at `x`; reactive when `x` is a signal.

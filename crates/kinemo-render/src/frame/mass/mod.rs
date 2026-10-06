@@ -33,12 +33,14 @@ pub(super) struct MassContext<'l, 'a> {
     /// Reveal progress in `[0, 1]` (`k.draw`).
     pub progress: f64,
     tint: Option<([f64; 4], f64)>,
+    tint_from_group: bool,
 }
 
 impl MassContext<'_, '_> {
     /// A mark's color after the inherited tint.
     pub fn tinted(&self, c: [f64; 4]) -> [f64; 4] {
         match self.tint {
+            Some((tc, a)) if self.tint_from_group => color::tint_keeping_lightness(c, tc, a),
             Some((tc, a)) => color::mix(c, [tc[0], tc[1], tc[2], c[3]], a),
             None => c,
         }
@@ -59,6 +61,7 @@ pub(crate) fn draw_items(layout: &Layout, leaf: ObjectId, t: f64, size: FrameSiz
         stroke_scale: size.stroke_scale(),
         progress,
         tint: inh.tint,
+        tint_from_group: inh.tint_from_group,
     };
     let mut items = match layout.scene().object(leaf).kind.as_str() {
         "points" => points::draw(&cx),

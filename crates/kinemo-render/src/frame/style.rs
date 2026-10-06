@@ -15,11 +15,26 @@ use crate::raster::{Cap, DrawItem, Fill, Join, Stroke};
 pub(crate) struct Inherited {
     pub(crate) opacity: f64,
     pub(crate) tint: Option<([f64; 4], f64)>,
+    /// The tint comes from an ancestor (a group was emphasized), not from the leaf itself.
+    pub(crate) tint_from_group: bool,
+}
+
+impl Inherited {
+    /// `c` under the inherited tint: fully mixed for the emphasized object itself; for the
+    /// parts of an emphasized group, lightness moves only half way so details stay visible.
+    pub(crate) fn tinted(&self, c: [f64; 4]) -> [f64; 4] {
+        match self.tint {
+            Some((tc, a)) if self.tint_from_group => color::tint_keeping_lightness(c, tc, a),
+            Some((tc, a)) => color::mix(c, [tc[0], tc[1], tc[2], c[3]], a),
+            None => c,
+        }
+    }
 }
 
 pub(crate) fn inherited(layout: &Layout, leaf: ObjectId, t: f64) -> Inherited {
     let mut opacity = 1.0;
     let mut tint: Option<([f64; 4], f64)> = None;
+    let mut tint_from_group = false;
     let mut cur = Some(leaf);
     while let Some(o) = cur {
         opacity *= layout.prop_f(o, "opacity", t, 1.0) * layout.prop_f(o, "_fade", t, 1.0);
@@ -27,11 +42,12 @@ pub(crate) fn inherited(layout: &Layout, leaf: ObjectId, t: f64) -> Inherited {
         if amount > tint.map_or(0.0, |(_, a)| a) {
             if let Some(c) = layout.prop_color(o, "_tint", t) {
                 tint = Some((c, amount));
+                tint_from_group = o != leaf;
             }
         }
         cur = layout.scene().object(o).parent;
     }
-    Inherited { opacity: opacity.clamp(0.0, 1.0), tint }
+    Inherited { opacity: opacity.clamp(0.0, 1.0), tint, tint_from_group }
 }
 
 /// Reveal progress (`_draw`, `_write`) is the smallest along the parent chain, so writing
@@ -84,10 +100,7 @@ pub(crate) fn painted_parts(layout: &Layout, leaf: ObjectId, t: f64, size: Frame
     if layout.scene().object(leaf).kind == "image" {
         return super::image::painted_image(layout, leaf, t, size, reveal_mode, inh.opacity);
     }
-    let tinted = |c: [f64; 4]| match inh.tint {
-        Some((tc, a)) => color::mix(c, [tc[0], tc[1], tc[2], c[3]], a),
-        None => c,
-    };
+    let tinted = |c: [f64; 4]| inh.tinted(c);
     let to_px = size.pixel_affine(layout.scene()) * layout.render_affine(leaf, t);
     let sscale = size.stroke_scale();
 

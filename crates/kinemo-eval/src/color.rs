@@ -57,6 +57,19 @@ pub fn mix(a: [f64; 4], b: [f64; 4], t: f64) -> [f64; 4] {
     clamp(oklab_to_srgb(out))
 }
 
+/// Tints `color` toward `tint` at `t` but moves its lightness only half as far: hue and
+/// chroma follow the tint, while lighter and darker parts stay lighter and darker. Used when a
+/// group is emphasized, so its details stay readable (alpha is `color`'s).
+pub fn tint_keeping_lightness(color: [f64; 4], tint: [f64; 4], t: f64) -> [f64; 4] {
+    if t == 0.0 {
+        return clamp(color);
+    }
+    let (from, to) = (srgb_to_oklab(color), srgb_to_oklab(tint));
+    let lightness = from[0] + (to[0] - from[0]) * t / 2.0;
+    let out = [lightness, from[1] + (to[1] - from[1]) * t, from[2] + (to[2] - from[2]) * t, color[3]];
+    clamp(oklab_to_srgb(out))
+}
+
 fn clamp(c: [f64; 4]) -> [f64; 4] {
     c.map(|v| if v.is_nan() { 0.0 } else { v.clamp(0.0, 1.0) })
 }
@@ -80,6 +93,16 @@ fn linear_to_srgb(c: f64) -> f64 {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn group_tint_keeps_parts_apart() {
+        let yellow = [1.0, 0.85, 0.2, 1.0];
+        let (light, dark) = ([0.95, 0.95, 0.95, 1.0], [0.3, 0.6, 0.9, 1.0]);
+        let (a, b) = (tint_keeping_lightness(light, yellow, 1.0), tint_keeping_lightness(dark, yellow, 1.0));
+        // Fully mixed, both would be exactly the tint; here the lighter part stays lighter.
+        assert!(srgb_to_oklab(a)[0] > srgb_to_oklab(b)[0] + 0.05);
+        assert_eq!(tint_keeping_lightness(dark, yellow, 0.0), dark);
+    }
 
     fn close(a: [f64; 4], b: [f64; 4], eps: f64) -> bool {
         a.iter().zip(b).all(|(x, y)| (x - y).abs() < eps)

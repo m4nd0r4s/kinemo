@@ -73,6 +73,15 @@ pub struct DrawItem {
     /// these centers and radii instead of filling the path (thousands of dots fill much
     /// faster this way). Other consumers keep using `path`.
     pub dots: Option<DotCloud>,
+    /// A soft halo painted under the item (see [`Glow`]).
+    pub glow: Option<Glow>,
+}
+
+/// A blurred halo of an item's own shape, in its color: `radius` is the blur radius in pixels.
+#[derive(Clone, Copy, Debug)]
+pub struct Glow {
+    pub color: [f64; 4],
+    pub radius: f64,
 }
 
 /// Disks in pixel coordinates: the marks of a mass object, for fast stamping.

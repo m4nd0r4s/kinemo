@@ -33,7 +33,7 @@ pub fn display_list(width: u32, height: u32, items: Vec<DrawItem>) -> DisplayLis
 }
 
 pub fn filled(path: BezPath, color: [f64; 4]) -> DrawItem {
-    DrawItem { path, fill: Some(Fill { color }), stroke: None, opacity: 1.0, clip: None, fill_rule_even_odd: false, image: None, dots: None }
+    DrawItem { path, fill: Some(Fill { color }), stroke: None, opacity: 1.0, clip: None, fill_rule_even_odd: false, image: None, dots: None, glow: None }
 }
 
 pub fn stroked(path: BezPath, color: [f64; 4], width: f64, dash: Option<Vec<f64>>, cap: Cap, join: Join) -> DrawItem {
@@ -45,7 +45,7 @@ pub fn stroked(path: BezPath, color: [f64; 4], width: f64, dash: Option<Vec<f64>
         clip: None,
         fill_rule_even_odd: false,
         image: None,
-        dots: None,
+        dots: None, glow: None,
     }
 }
 

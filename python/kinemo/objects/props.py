@@ -66,12 +66,23 @@ TRANSFORM: dict[str, PropSpec] = {
     "bleed": PropSpec("bool", False, "step_end"),
 }
 
+def no_color(t: Theme) -> Any:
+    """A transparent color: "not set" for color props that fall back to another one."""
+    from ..values.color import Color
+
+    return Color(0.0, 0.0, 0.0, 0.0)
+
+
 STYLE: dict[str, PropSpec] = {
     "fill": PropSpec("color", fg),
     "fill_opacity": PropSpec("float", 0.0),
     "stroke": PropSpec("color", fg),
     "stroke_width": PropSpec("float", stroke_width),
     "dash": PropSpec("floats", (), "step_end"),
+    #: A soft halo under the shape (0 none, 1 strong); `glow_color` defaults to the stroke
+    #: (or the fill of a shape without one).
+    "glow": PropSpec("float", 0.0),
+    "glow_color": PropSpec("color", no_color),
 }
 
 #: Render-only props driven by verbs; created on first use.

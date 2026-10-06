@@ -27,6 +27,7 @@ if TYPE_CHECKING:
     from ...reactive.native import FloatExpr
     from ..keywords import PlotStyleKeywords, StyleKeywords, UnplacedKeywords, UnplacedStyleKeywords
     from ..props import PropAccessor
+    from .axes_vector import AxesVector
     from .plot import ParametricPlot
 
 #: A plotted function: called with floats to sample the curve and traced with a signal
@@ -56,6 +57,20 @@ def _name_from_call(node: Node, factory: Callable[..., Any]) -> None:
     match = re.match(rf"^\s*([A-Za-z_]\w*)\s*=\s*[\w.\[\]]+\.{factory.__name__}\(", node._span.source_line())
     if match:
         node._rename(match.group(1))
+
+
+def _limit(fn: PlotFunction, x: float) -> float:
+    """`fn(x)`, or its limit from both sides when `fn` is undefined (or not finite) there."""
+    import math
+
+    try:
+        value = float(fn(x))
+        if math.isfinite(value):
+            return value
+    except (ArithmeticError, ValueError):
+        pass
+    eps = 1e-6 * max(1.0, abs(x))
+    return (float(fn(x - eps)) + float(fn(x + eps))) / 2
 
 
 def _range(spec: Sequence[float]) -> tuple[float, float, float | None]:
@@ -280,13 +295,16 @@ class Axes(Group):
         domain: tuple[float, float] | None = None,
         color: ColorLike | None = None,
         label: str | None = None,
+        holes: Sequence[float] = (),
         samples: int = 160,
         enter_with_axes: bool = True,
         **style: Unpack[PlotStyleKeywords],
     ) -> Plot:
         """Curve of `fn` (also usable with floats). `until=`/`from_=` accept signals: the
         curve grows while the signal moves, and its `label=` fades in as the curve reaches the
-        end. `enter_with_axes=False` keeps it (and its label) hidden until a verb brings it in."""
+        end. `holes=[2]` marks points the curve leaves out with open dots (at the limit of `fn`
+        when it is undefined there; `curve.holes`). `enter_with_axes=False` keeps it (and its
+        label) hidden until a verb brings it in."""
         x0, x1 = domain or tuple(self.x_range.now)
         y0, y1 = self.y_range.now
         segments = sample(fn, float(x0), float(x1), float(y1 - y0), samples)
@@ -313,7 +331,30 @@ class Axes(Group):
             self._append(tag, enter_with_axes)
             if not enter_with_axes:
                 object.__setattr__(curve, "_companions", [tag])
+        open_dots: list[Dot] = []
+        for x in holes:
+            hole = self.dot(float(x), _limit(fn, float(x)), open=True, color=stroke, enter_with_axes=enter_with_axes)
+            if isinstance(until, Expr):
+                # It appears when a growing curve reaches it.
+                hole.set(visible=until >= float(x))
+            open_dots.append(hole)
+        object.__setattr__(curve, "holes", open_dots)
+        if open_dots and not enter_with_axes:
+            object.__setattr__(curve, "_companions", [*getattr(curve, "_companions", []), *open_dots])
         return curve
+
+    def dot(self, x: FloatVal, y: FloatVal, *, open: bool = False, radius: float = 0.09, enter_with_axes: bool = True, **props: Unpack[UnplacedStyleKeywords]) -> Dot:
+        """A dot at a data point that follows zooms. `open=True` draws it hollow (filled with the
+        background): an endpoint left out of a piecewise function, or a hole in a curve."""
+        given: dict[str, Any] = dict(props)
+        tint: Any = given.pop("color", None) or self._scene.theme.fg
+        options: dict[str, Any] = {"fill": tint, "fill_opacity": 1.0, "stroke": tint, "stroke_width": 3.0 if open else 0.0, **given}
+        if open:
+            options["fill"] = self._scene.theme.bg
+        point = Dot(r=radius, x=self.map_x(x), y=self.map_y(y), **options)
+        self._append(point, enter_with_axes)
+        _name_from_call(point, Axes.dot)
+        return point
 
     def _label_offset(self, y_data: float) -> float:
         """Vertical offset (units) for a curve label so labels of different curves never sit
@@ -399,6 +440,20 @@ class Axes(Group):
         self._append(band, enter_with_axes)
         _name_from_call(band, factory)
         return band
+
+    def vector(self, v: tuple[FloatVal, FloatVal], at: tuple[FloatVal, FloatVal] = (0.0, 0.0), *, label: str | None = None, components: bool = False, color: ColorLike | None = None, size: float = 0.3, enter_with_axes: bool = True) -> "AxesVector":
+        """An arrow of components `v` from the data point `at`, in data units (both accept
+        signals). `components=True` adds its dashed x and y components (labelled `Fₓ`, `Fᵧ` with
+        `label="F"`). `vector.to(v=..., at=...)` animates it; `a + b` is the resultant."""
+        from .axes_vector import AxesVector
+
+        tint = color if color is not None else self._next_color()
+        if isinstance(tint, ThemeToken):
+            tint = tint.resolve()
+        arrow = AxesVector(self, v, at, label=label, components=components, color=tint, size=size)
+        self._append(arrow, enter_with_axes)
+        _name_from_call(arrow, Axes.vector)
+        return arrow
 
     def vline(self, at: FloatVal, *, style: LineStyle = "solid", enter_with_axes: bool = True, **props: Unpack[StyleKeywords]) -> Line:
         h = self.size

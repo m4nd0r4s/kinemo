@@ -281,8 +281,9 @@ k.Stack(background, icon)                  # overlapping, centered (or align=)
 
 Changing children through the container's transitions animates the reflow. `swap`,
 `insert` and `pop` are sugar for `group.to(children=[...])`. Children that pass each other
-travel on opposite arcs instead of through each other; an inserted child grows in while
-its neighbours make room, and a popped one shrinks away in its slot:
+travel on opposite arcs instead of through each other (`path="straight"` on any of them
+keeps them on straight lines); an inserted child grows in while its neighbours make room,
+and a popped one shrinks away in its slot:
 
 ```python
 import kinemo as k

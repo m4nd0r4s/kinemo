@@ -157,7 +157,9 @@ def fit(s: k.Scene):
         "Group.swap",
         "Layout",
         "Named transition: swaps the places of two children and the container animates the reflow. "
-        "Equivalent to `group.to(children=[...])` with `i` and `j` swapped.",
+        "Equivalent to `group.to(children=[...])` with `i` and `j` swapped. Children that pass each "
+        "other travel on opposite arcs; `path=\"straight\"` moves them in straight lines (calmer "
+        "for bar-like rows at high tempo).",
         '''
 import kinemo as k
 

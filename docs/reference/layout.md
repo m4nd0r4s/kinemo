@@ -52,6 +52,7 @@ Container that lays its children out in a row (flexbox), with `gap=` and `align=
 | --- | --- | --- | --- |
 | `gap` | float | `0.25` | linear |
 | `align` | str | `"center"` | step_end |
+| `swap_path` | str | `"arc"` | step_end |
 
 Props inherited from [`k.Node`](object-state.md#k-node): `x`, `y`, `rotate`, `scale`, `scale_x`, `scale_y`, `anchor`, `opacity`, `z`, `visible`, `bleed`.
 
@@ -100,6 +101,7 @@ Container that stacks its children in a column, with `gap=` and `align=` (`"cent
 | --- | --- | --- | --- |
 | `gap` | float | `0.25` | linear |
 | `align` | str | `"center"` | step_end |
+| `swap_path` | str | `"arc"` | step_end |
 
 Props inherited from [`k.Node`](object-state.md#k-node): `x`, `y`, `rotate`, `scale`, `scale_x`, `scale_y`, `anchor`, `opacity`, `z`, `visible`, `bleed`.
 

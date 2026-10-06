@@ -757,6 +757,15 @@ def speaker(s: k.Scene):
     s.wait(1)
     s.play(k.fade_out(who))
 ```
+#### `k.Icon(icon, *, size=1.0, color=None, stroke_width=3.0, **props)`
+A built-in icon, drawn with strokes on a square of side `size=`: `"check"`, `"x"`, `"warning"`, `"lightbulb"`, `"gear"`, `"user"`, `"cpu"`, … (`k.ICON_NAMES` lists them). `color=` sets the stroke; `icon.to(stroke=...)` recolors it. An unknown name is K0105 with the closest names. See also: `k.SVG`.
+```python
+@k.scene
+def idea(s: k.Scene):
+    bulb = k.Icon("lightbulb", size=1.5, color=k.YELLOW).place(at="center")
+    s.play(k.draw(bulb))
+    s.play(bulb.to(stroke=k.ORANGE))
+```
 #### `k.Image(path, width=None, height=None, **props)`
 Raster image (PNG or JPEG) drawn by the renderer, centered on its position. Without a size it is 3 units tall; with `width=` or `height=` the other side follows the file's aspect ratio (props `w` and `h`, animatable). Relative paths start from the folder of the scene file. Accepts `scale`, `rotate` and `opacity`; morphs and layout treat it as its rectangle, and the exported SVG embeds the file. See also: `k.SVG`, `k.morph`.
 ```python

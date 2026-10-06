@@ -33,6 +33,8 @@ Shapes, groups, images, SVG and mass objects (points, vector fields, stream line
 - [`k.TitleCard`](#k-titlecard): An episode's opening card: the title, a `kicker=` above it, an accent rule under it and a `subtitle=`.
 - [`k.EndCard`](#k-endcard): What comes next: `heading=` ("Next") over the next title, then `brand=`, `series=` and an `invite=`.
 - [`k.LowerThird`](#k-lowerthird): A name and a role beside an accent bar, for a corner (`side="right"` mirrors it); place it as usual.
+- [`k.Icon`](#k-icon): A built-in icon, drawn with strokes on a square of side `size=`: `"check"`, `"x"`, `"warning"`, `"lightbulb"`, `"gear"`, `"user"`, `"cpu"`, … (`k.ICON_NAMES` lists them).
+- [`k.ICON_NAMES`](#k-icon_names): A built-in icon, drawn with strokes on a square of side `size=`: `"check"`, `"x"`, `"warning"`, `"lightbulb"`, `"gear"`, `"user"`, `"cpu"`, … (`k.ICON_NAMES` lists them).
 - [`k.Image`](#k-image): Raster image (PNG or JPEG) drawn by the renderer, centered on its position.
 - [`k.SVG`](#k-svg): Imports an SVG illustration (a file or inline markup): each shape becomes a `k.Path` with the SVG's fill, stroke and stroke width, and each `<g>` becomes a `k.Group`.
 - [`k.Brace`](#k-brace): Curly brace (`}`) along one side of an object's box: `direction=` "down", "up", "left" or "right", `gap` units away from it, with the tip pointing outward.
@@ -1889,6 +1891,65 @@ Inherited from [`k.Node`](object-state.md#k-node): [`set`](object-state.md#node-
 ```python
 lowerthird.enter() -> Animation
 ```
+
+<a id="k-icon"></a>
+### `k.Icon` *(class)*
+
+```python
+k.Icon(
+    icon: str,
+    *,
+    size: float = 1.0,
+    color: ColorLike | None = None,
+    stroke_width: float = 3.0,
+    **props: Unpack[TransformKeywords],
+)
+```
+
+A built-in icon, drawn with strokes on a square of side `size=`: `"check"`, `"x"`, `"warning"`, `"lightbulb"`, `"gear"`, `"user"`, `"cpu"`, … (`k.ICON_NAMES` lists them). `color=` sets the stroke; `icon.to(stroke=...)` recolors it. An unknown name is K0105 with the closest names.
+
+**Parameters:**
+
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `icon` | `str` | required |   |
+| `size` | `float` | `1.0` | A built-in icon, drawn with strokes on a square of side `size=`: `"check"`, `"x"`, `"warning"`, `"lightbulb"`, `"gear"`, `"user"`, `"cpu"`, … (`k.ICON_NAMES` lists them). |
+| `color` | `ColorLike \| None` | `None` | `color=` sets the stroke; `icon.to(stroke=...)` recolors it. |
+| `stroke_width` | `float` | `3.0` | `stroke` and `stroke_width` are the icon's own props: `icon.to(stroke=k.RED)` recolors every stroke. |
+| `**props` | `Unpack[TransformKeywords]` | variadic | Keyword arguments (`TransformKeywords`): `name: str \| None`, `key: str \| None`, `x: FloatVal`, `y: FloatVal`, `position: VecVal`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`. |
+
+**Props** (animatable with `.to()`, settable with `.set()` or in the constructor):
+
+| Prop | Kind | Default | Interpolation |
+| --- | --- | --- | --- |
+| `stroke` | color | `theme.fg` | linear |
+| `stroke_width` | float | `3.0` | linear |
+
+Props inherited from [`k.Node`](object-state.md#k-node): `x`, `y`, `rotate`, `scale`, `scale_x`, `scale_y`, `anchor`, `opacity`, `z`, `visible`, `bleed`.
+
+**Example:**
+
+```python
+@k.scene
+def idea(s: k.Scene):
+    bulb = k.Icon("lightbulb", size=1.5, color=k.YELLOW).place(at="center")
+    s.play(k.draw(bulb))
+    s.play(bulb.to(stroke=k.ORANGE))
+```
+
+**See also:** [`k.SVG`](#k-svg).
+
+Inherited from [`k.Group`](#k-group): [`children`](#group-children), [`to`](#group-to), [`swap`](#group-swap), [`insert`](#group-insert), [`pop`](#group-pop), [`fit`](#group-fit).
+Inherited from [`k.Node`](object-state.md#k-node): [`set`](object-state.md#node-set), [`unbind`](object-state.md#node-unbind), [`edge`](object-state.md#node-edge), [`age`](object-state.md#node-age), [`entered`](object-state.md#node-entered), [`exited`](object-state.md#node-exited), [`copy`](object-state.md#node-copy), [`place`](object-state.md#node-place), [`to_place`](object-state.md#node-to_place), [`unpin`](object-state.md#node-unpin).
+
+<a id="k-icon_names"></a>
+### `k.ICON_NAMES` *(value)*
+
+```python
+k.ICON_NAMES: tuple = ('arrow-down', 'arrow-left', 'arrow-right', 'arrow-up', 'bolt', 'book', 'chart', 'check', 'clock', 'cloud', 'cpu', 'database', 'flag', 'gear', 'globe', 'home', 'info', 'lightbulb', 'lock', 'mail', 'minus', 'pause', 'play', 'plus', 'question', 'search', 'star', 'user', 'warning', 'x')
+```
+
+Documented together with [`k.Icon`](#k-icon). A built-in icon, drawn with strokes on a square of side `size=`: `"check"`, `"x"`, `"warning"`, `"lightbulb"`, `"gear"`, `"user"`, `"cpu"`, … (`k.ICON_NAMES` lists them). `color=` sets the stroke; `icon.to(stroke=...)` recolors it. An unknown name is K0105 with the closest names.
 
 <a id="k-image"></a>
 ### `k.Image` *(class)*

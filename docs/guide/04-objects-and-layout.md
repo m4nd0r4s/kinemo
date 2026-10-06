@@ -496,6 +496,13 @@ def search(s: k.Scene):
 - `g.add_node(name, edges=...)` lays the graph out again with the new node; `at=(x, y)`
   puts it somewhere instead. `g.add_edge(u, v)` and `g.remove(name, (u, v))` change edges.
 
+## Icons
+
+`k.Icon(name, size=1)` draws one of the built-in icons (`k.ICON_NAMES`: arrows, `check`,
+`x`, `warning`, `info`, `lightbulb`, `gear`, `user`, `cpu`, `database`, `globe`, `lock`,
+`mail`, `clock`, `chart`, ...) with strokes, so it can be drawn, recolored and animated like
+a shape: `k.draw(icon)`, `icon.to(stroke=k.RED)`.
+
 ## Series cards
 
 `k.TitleCard`, `k.EndCard` and `k.LowerThird` are the cards a series repeats: an

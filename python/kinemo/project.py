@@ -13,6 +13,8 @@ from typing import Any
 class ProjectConfig:
     root: str
     scene: dict[str, Any] = field(default_factory=dict)
+    #: `[presets.<name>]`: named sets of scene defaults, chosen with `@k.scene(preset="name")`.
+    presets: dict[str, dict[str, Any]] = field(default_factory=dict)
     render: dict[str, Any] = field(default_factory=dict)
     lints_allow: tuple[str, ...] = ()
     tts_provider: str | None = None
@@ -65,6 +67,7 @@ def load(start: str) -> ProjectConfig:
     return ProjectConfig(
         root=root,
         scene=dict(data.get("scene", {})),
+        presets={name: dict(values) for name, values in data.get("presets", {}).items()},
         render=dict(data.get("render", {})),
         lints_allow=tuple(data.get("lints", {}).get("allow", ())),
         tts_provider=tts.get("provider"),

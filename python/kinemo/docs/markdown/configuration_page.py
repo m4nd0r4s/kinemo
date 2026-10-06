@@ -21,10 +21,11 @@ SCENE_OPTIONS = {
     "camera": "`\"2d\"` or `\"3d\"`.",
     "params": "Scene parameters (`k.Int`, `k.Float`, `k.Bool`, `k.Choice`, `k.Str`), passed to the function by name.",
     "name": "Scene name used by `--scene`; defaults to the function name.",
+    "preset": "Name of a `[presets.<name>]` table of `kinemo.toml` whose values this scene starts from.",
 }
 
 #: Options that only the decorator accepts (not `kinemo.toml [scene]`).
-DECORATOR_ONLY = ("params", "name")
+DECORATOR_ONLY = ("params", "name", "preset")
 
 #: Draft quality limits, mirrored from the renderer (`crates/kinemo-render/src/renderer.rs`).
 DRAFT_SHORT_SIDE = 540
@@ -53,6 +54,9 @@ def _toml_rows() -> list[tuple[str, str, str, str]]:
         if name not in DECORATOR_ONLY
     ]
     rows += [
+        (code("[presets.<name>] *"), "table", code("{}"),
+         "Named scene defaults (the keys of `[scene]`), chosen with `@k.scene(preset=\"<name>\")`: "
+         "decorator > preset > `[scene]` > defaults. For defaults in Python, `k.scene_preset(...)`."),
         (code("[render] *"), "table", code("{}"),
          "Read into `ProjectConfig.render`; the CLI does not use it yet. The output directory is set with "
          "`--out` (default `out`)."),

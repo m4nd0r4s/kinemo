@@ -8,6 +8,7 @@ Scenes, the timeline cursor and the blocks that shape time (`s.play`, `s.start`,
 
 - [`k.scene`](#k-scene): Turns a function `def name(s: k.Scene)` into a scene.
 - [`k.SceneDef`](#k-scenedef): A scene function plus its configuration.
+- [`k.scene_preset`](#k-scene_preset): A scene decorator with defaults of its own, for a series or a shared library: `episode = k.scene_preset(tail=1.0, theme="light")`, then `@episode` or `@episode(params=...)`.
 - [`k.Scene`](#k-scene-class): Timeline of one scene.
 - [`k.TimeSpan`](#k-timespan): Where a `play`/`start` landed.
 - [`k.Voice`](#k-voice): A narration line: when it starts and ends in the scene, and when each word is said.
@@ -45,12 +46,13 @@ k.scene(
     camera: str = "2d",
     params: dict[str, Param] | None = None,
     name: str | None = None,
+    preset: str | None = None,
 ) -> Callable[[SceneFn], SceneDef]
 ```
 
-Written as: `@k.scene(size="1080p", fps=60, background=None, seed=0, tail=0.5, theme=None, camera="2d", params=None, name=None)`
+Written as: `@k.scene(size="1080p", fps=60, background=None, seed=0, tail=0.5, theme=None, camera="2d", params=None, name=None, preset=None)`
 
-Turns a function `def name(s: k.Scene)` into a scene. The body runs exactly once, in the build phase, and produces a timeline; the frame at time t is a pure function of t. The decorator arguments (size, fps, background, seed, tail, theme, parameters) take precedence over `kinemo.toml`.
+Turns a function `def name(s: k.Scene)` into a scene. The body runs exactly once, in the build phase, and produces a timeline; the frame at time t is a pure function of t. The decorator arguments (size, fps, background, seed, tail, theme, parameters) take precedence over `kinemo.toml`; `preset="short"` starts from a `[presets.short]` table there.
 
 **Parameters:**
 
@@ -65,6 +67,7 @@ Turns a function `def name(s: k.Scene)` into a scene. The body runs exactly once
 | `camera` | `str` | `"2d"` | `"2d"` or `"3d"`. |
 | `params` | `dict[str, Param] \| None` | `None` | Scene parameters (`k.Int`, `k.Float`, `k.Bool`, `k.Choice`, `k.Str`), passed to the function by name. |
 | `name` | `str \| None` | `None` | Scene name used by `--scene`; defaults to the function name. |
+| `preset` | `str \| None` | `None` | The decorator arguments (size, fps, background, seed, tail, theme, parameters) take precedence over `kinemo.toml`; `preset="short"` starts from a `[presets.short]` table there. |
 
 **Example:**
 
@@ -124,6 +127,34 @@ Run the build phase and return the scene with its finished timeline.
 | --- | --- | --- | --- |
 | `params` | `dict[str, object] \| None` | `None` |   |
 | `**overrides` | `object` | variadic |   |
+
+<a id="k-scene_preset"></a>
+### `k.scene_preset` *(function)*
+
+```python
+k.scene_preset(**defaults: Unpack[SceneOptions]) -> ScenePreset
+```
+
+A scene decorator with defaults of its own, for a series or a shared library: `episode = k.scene_preset(tail=1.0, theme="light")`, then `@episode` or `@episode(params=...)`. It accepts the arguments of `@k.scene`; a decoration's own arguments win over the preset's.
+
+**Parameters:**
+
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `**defaults` | `Unpack[SceneOptions]` | variadic | Keyword arguments (`SceneOptions`): `size: str \| tuple[int, int]`, `fps: float`, `background: ColorLike \| None`, `seed: int`, `tail: float`, `theme: Theme \| str \| None`, `camera: str`, `params: dict[str, Param] \| None`, `name: str \| None`, `preset: str \| None`. |
+
+**Example:**
+
+```python
+short = k.scene_preset(size="vertical", tail=1.0)
+
+@short  # as @k.scene(size="vertical", tail=1.0)
+def teaser(s: k.Scene):
+    title = k.Text("One minute of math").place(at="center")
+    s.play(k.write(title))
+```
+
+**See also:** [`k.scene`](#k-scene).
 
 <a id="k-scene-class"></a>
 ### `k.Scene` *(class)*

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import random
 from dataclasses import replace
-from typing import TYPE_CHECKING, Any, Callable, overload
+from typing import TYPE_CHECKING, Any, Callable, Protocol, TypedDict, Unpack, cast, overload
 
 from .._runtime.context import pop_scene, push_scene
 from ..theme.tokens import Theme
@@ -104,6 +104,7 @@ def scene(
     camera: str = "2d",
     params: dict[str, Param] | None = None,
     name: str | None = None,
+    preset: str | None = None,
 ) -> Callable[[SceneFn], SceneDef]: ...
 
 
@@ -114,10 +115,20 @@ def scene(fn: SceneFn | None = None, **kwargs: Any) -> SceneDef | Callable[[Scen
         from ..project import project_config
         from ..theme.tokens import DEFAULT, themes
 
-        # Precedence: decorator > kinemo.toml [scene] > defaults (the CLI overrides at build).
+        # Precedence: decorator > preset > kinemo.toml [scene] > defaults (the CLI overrides
+        # at build).
         config = project_config()
-        project = config.scene
-        merged = {**project, **kwargs}
+        preset = kwargs.get("preset")
+        chosen: dict[str, Any] = {}
+        if preset is not None:
+            if preset not in config.presets:
+                from .._runtime.spans import user_span
+                from ..diagnostics import KinemoError
+
+                known = ", ".join(sorted(config.presets)) or "none in kinemo.toml"
+                raise KinemoError.make("K0105", f"unknown scene preset {preset!r} (presets: {known})", spans=[user_span()], fixes=[("define it in kinemo.toml", f"[presets.{preset}]\nsize = \"vertical\"")])
+            chosen = config.presets[preset]
+        merged = {**config.scene, **chosen, **{key: value for key, value in kwargs.items() if key != "preset"}}
         theme = merged.get("theme") or DEFAULT
         if isinstance(theme, str):
             theme = getattr(themes, theme, DEFAULT)
@@ -138,3 +149,40 @@ def scene(fn: SceneFn | None = None, **kwargs: Any) -> SceneDef | Callable[[Scen
     if fn is not None:
         return wrap(fn)
     return wrap
+
+
+class SceneOptions(TypedDict, total=False):
+    """The arguments of `@k.scene` (see `k.scene_preset`)."""
+
+    size: str | tuple[int, int]
+    fps: float
+    background: ColorLike | None
+    seed: int
+    tail: float
+    theme: Theme | str | None
+    camera: str
+    params: dict[str, Param] | None
+    name: str | None
+    preset: str | None
+
+
+class ScenePreset(Protocol):
+    """A scene decorator with defaults: `@preset` or `@preset(**options)`."""
+
+    @overload
+    def __call__(self, fn: SceneFn, /) -> SceneDef: ...
+    @overload
+    def __call__(self, /, **options: Unpack[SceneOptions]) -> Callable[[SceneFn], SceneDef]: ...
+
+
+def scene_preset(**defaults: Unpack[SceneOptions]) -> ScenePreset:
+    """A scene decorator with defaults of its own, for a series or a library:
+    `episode = k.scene_preset(tail=1.0, theme="light")`, then `@episode` or
+    `@episode(params=...)`. The arguments of `@k.scene` are accepted; a decoration's own
+    arguments win over the preset's."""
+
+    def decorate(fn: SceneFn | None = None, /, **options: Any) -> Any:
+        merged: dict[str, Any] = {**defaults, **options}
+        return scene(fn, **merged) if fn is not None else scene(**merged)
+
+    return cast("ScenePreset", decorate)

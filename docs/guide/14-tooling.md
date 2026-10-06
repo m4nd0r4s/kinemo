@@ -27,6 +27,10 @@ cd demo && kinemo check scene.py && kinemo render scene.py
 looked up from the **working directory** upwards, so run `kinemo` from inside the project.
 See [Configuration](../reference/configuration.md).
 
+Named presets live there too: a `[presets.short]` table (`size = "vertical"`, `tail = 1.0`)
+is chosen with `@k.scene(preset="short")`. For defaults kept in Python (a series library),
+`episode = k.scene_preset(tail=1.0)` makes a decorator: `@episode`.
+
 ## `kinemo check`
 
 `check` builds and resolves the scene without rendering, then runs the lints. It is fast

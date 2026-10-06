@@ -51,8 +51,8 @@ Each symbol: signature, summary and one canonical example (all start with `impor
 
 ### Scene
 
-#### `@k.scene(size="1080p", fps=60, background=None, seed=0, tail=0.5, theme=None, camera="2d", params=None, name=None)`
-Turns a function `def name(s: k.Scene)` into a scene. The body runs exactly once, in the build phase, and produces a timeline; the frame at time t is a pure function of t. The decorator arguments (size, fps, background, seed, tail, theme, parameters) take precedence over `kinemo.toml`. See also: `s.play`, `k.Text`, `k.Int`.
+#### `@k.scene(size="1080p", fps=60, background=None, seed=0, tail=0.5, theme=None, camera="2d", params=None, name=None, preset=None)`
+Turns a function `def name(s: k.Scene)` into a scene. The body runs exactly once, in the build phase, and produces a timeline; the frame at time t is a pure function of t. The decorator arguments (size, fps, background, seed, tail, theme, parameters) take precedence over `kinemo.toml`; `preset="short"` starts from a `[presets.short]` table there. See also: `s.play`, `k.Text`, `k.Int`.
 ```python
 @k.scene(size="1080p", fps=60, tail=0.5)
 def hello(s: k.Scene):
@@ -60,6 +60,16 @@ def hello(s: k.Scene):
     s.play(k.write(title))
     s.play(title.to(color=k.BLUE, scale=1.5))
     s.wait(1)
+```
+#### `k.scene_preset(**defaults) -> ScenePreset`
+A scene decorator with defaults of its own, for a series or a shared library: `episode = k.scene_preset(tail=1.0, theme="light")`, then `@episode` or `@episode(params=...)`. It accepts the arguments of `@k.scene`; a decoration's own arguments win over the preset's. See also: `k.scene`.
+```python
+short = k.scene_preset(size="vertical", tail=1.0)
+
+@short  # as @k.scene(size="vertical", tail=1.0)
+def teaser(s: k.Scene):
+    title = k.Text("One minute of math").place(at="center")
+    s.play(k.write(title))
 ```
 #### `s.play(*anims, duration=None, ease=None, at=None) -> TimeSpan`
 Schedules animations at the cursor and advances the cursor to their end. Multiple arguments run in parallel (`s.play(a, b)` is by definition `s.play(k.par(a, b))`). `duration=` sets the total duration of the group, rescaling its contents. See also: `s.start`, `k.par`, `s.wait`.
@@ -818,11 +828,12 @@ def text(s: k.Scene):
     s.play(x.to(12), duration=2)
 ```
 #### `k.Math(tex, *, size=0.6, display=True, engine="builtin", **props)`
-Formula in LaTeX syntax, typeset by the built-in engine (no TeX installation needed). `\id{name}{...}` names a subexpression (`eq["name"]`); any subexpression is found through the syntax tree (`eq["c^2"]` ≡ `eq["c^{2}"]`). `k.morph` between equations matches names first, then identical TeX subtrees. Unsupported command: K0801. See also: `k.morph`, `k.Text`, `k.write`.
+Formula in LaTeX syntax, typeset by the built-in engine (no TeX installation needed). `\id{name}{...}` names a subexpression (`eq["name"]`); any subexpression is found through the syntax tree (`eq["c^2"]` ≡ `eq["c^{2}"]`). `k.morph` between equations matches names first, then identical TeX subtrees. `color=` colors the formula and any part (`eq["E"].set(color=k.YELLOW)`, or `.to(color=...)` to animate). Unsupported command: K0801. See also: `k.morph`, `k.Text`, `k.write`.
 ```python
 @k.scene
 def formula(s: k.Scene):
-    eq = k.Math(r"\id{lhs}{a^2 + b^2} = c^2").place(at="center")
+    eq = k.Math(r"\id{lhs}{a^2 + b^2} = c^2", color=k.BLUE).place(at="center")
+    eq["="].set(color=k.WHITE)
     s.play(k.write(eq))
     s.play(eq["lhs"].to(color=k.YELLOW))
     s.play(eq["c^2"].to(color=k.GREEN))

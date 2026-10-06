@@ -37,6 +37,7 @@ allow = []
 | `[scene] tail` | `float` | `0.5` | Seconds added after the last animation ends. |
 | `[scene] theme` | `Theme \| str \| None` | `None` | A `k.Theme` or the name of one in `k.themes` (`"dark"`, `"light"`, `"blueprint"`). |
 | `[scene] camera` | `str` | `"2d"` | `"2d"` or `"3d"`. |
+| `[presets.<name>] *` | table | `{}` | Named scene defaults (the keys of `[scene]`), chosen with `@k.scene(preset="<name>")`: decorator > preset > `[scene]` > defaults. For defaults in Python, `k.scene_preset(...)`. |
 | `[render] *` | table | `{}` | Read into `ProjectConfig.render`; the CLI does not use it yet. The output directory is set with `--out` (default `out`). |
 | `[lints] allow` | `list[str]` | `[]` | Lint codes allowed in the whole project (see [diagnostics](diagnostics.md)). |
 | `[tts] provider` | `str` | `None` | Text-to-speech provider for `s.voice`. Without one, `s.voice` is silent with an estimated duration and lint W1401 is reported. `"command"` runs `[tts] command`. |
@@ -69,6 +70,7 @@ def intro(s: k.Scene): ...
 | `camera` | `str` | `"2d"` | `"2d"` or `"3d"`. | also `[scene]` |
 | `params` | `dict[str, Param] \| None` | `None` | Scene parameters (`k.Int`, `k.Float`, `k.Bool`, `k.Choice`, `k.Str`), passed to the function by name. | decorator only |
 | `name` | `str \| None` | `None` | Scene name used by `--scene`; defaults to the function name. | decorator only |
+| `preset` | `str \| None` | `None` | Name of a `[presets.<name>]` table of `kinemo.toml` whose values this scene starts from. | decorator only |
 
 See [`k.scene`](scene.md#k-scene) and [`k.SceneDef`](scene.md#k-scenedef).
 

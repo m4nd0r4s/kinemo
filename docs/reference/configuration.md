@@ -49,6 +49,7 @@ allow = []
 | `[cache] dir` | `str` | `".kinemo-cache"` | Cache directory (generated audio, ...), relative to the project root. |
 | `[editor] command` | `str` | `"vscode"` | Editor the preview opens on source links: `vscode`, `vscode-insiders`, `cursor`, `windsurf`, `zed`, `idea`, `pycharm` or `sublime` (opened by URL), or a command that `kinemo dev` runs with `{file}` and `{line}` replaced, such as `emacsclient -n +{line} {file}`. Read when `kinemo dev` starts. |
 | `[python] workers_threshold` | `float` | `2.0` | Seconds of `k.python` computation above which a worker pool is used. |
+| `[python] paths` | `list[str]` | `[]` | Folders of the project (relative to its root) that scene files import from, such as a shared `lib/` of components. `kinemo dev` reloads modules anywhere in the project. |
 
 <a id="scene-options"></a>
 ## `@k.scene` options

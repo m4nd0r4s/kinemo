@@ -327,6 +327,21 @@ def cards(s: k.Scene):
     s.play(k.indicate(a.content))
 ```
 
+## Sharing components across files
+
+Put components that several scene files use in a folder of the project and list it in
+`kinemo.toml`:
+
+```toml
+[python]
+paths = ["lib"]
+```
+
+Every scene file can then `from badges import Badge`, wherever it lives in the project, and
+`kinemo dev` reloads `lib/badges.py` when it changes. A component file can hold a scene of its
+own to preview the component alone (`kinemo dev lib/badges.py`): a file's scenes are the ones
+it defines, so importing `Badge` does not bring that preview scene into an episode.
+
 ## Typing with `k.prop`
 
 Components are designed to pass Pyright in strict mode (the configuration `kinemo new`

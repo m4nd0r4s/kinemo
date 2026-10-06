@@ -471,6 +471,24 @@ def copies(s: k.Scene):
 
 A component's `copy()` rebuilds it with the same arguments.
 
+## Bits
+
+`k.Bits(value, width=8)` shows the bits of a number as cells that light up when 1;
+`bits.to(value=n)` flips the cells that change. `signed=True` uses two's complement,
+`place_values=True` writes 128 64 … 1 above the cells, `group=4` leaves a gap every
+nibble, and `fields=` labels ranges of cells, such as the parts of a float:
+
+```python
+import kinemo as k
+
+
+@k.scene
+def half_float(s: k.Scene):
+    f = k.Bits(0, width=16, fields={"sign": (0, 1), "exponent": (1, 6), "mantissa": (6, 16)}, size=0.4).place(at="center")
+    s.play(k.fade_in(f))
+    s.play(f.to(value=15360))  # 1.0 in IEEE 754 half precision
+```
+
 ## Graphs
 
 `k.Graph(nodes, edges, layout=...)` draws nodes (circles with their names) joined by edges,

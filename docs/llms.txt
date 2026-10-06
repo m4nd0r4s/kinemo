@@ -729,6 +729,16 @@ def relayout(s: k.Scene):
     s.play(k.draw(g))
     s.play(g.relayout("circle"), duration=1.5)
 ```
+#### `k.Bits(value=0, width=8, *, signed=False, place_values=False, group=None, fields=None, size=0.5, color=None, **props)`
+A binary register: the bits of a value, most significant first, lit when 1. `bits.to(value=n)` flips the cells that change, from the least significant up. `signed=True` (two's complement), `place_values=True` (128 64 … 1 above), `group=4` (a gap every 4 bits) and `fields={"sign": (0, 1), ...}` (labelled ranges of cells). `bits.bit(0)` is the least significant cell (`.box`, `.digit`). See also: `k.Array`.
+```python
+@k.scene
+def counting(s: k.Scene):
+    reg = k.Bits(13, width=8, place_values=True, group=4).place(at="center")
+    s.play(k.fade_in(reg))
+    s.play(reg.to(value=14))
+    s.play(k.indicate(reg.bit(0)))
+```
 #### `k.Image(path, width=None, height=None, **props)`
 Raster image (PNG or JPEG) drawn by the renderer, centered on its position. Without a size it is 3 units tall; with `width=` or `height=` the other side follows the file's aspect ratio (props `w` and `h`, animatable). Relative paths start from the folder of the scene file. Accepts `scale`, `rotate` and `opacity`; morphs and layout treat it as its rectangle, and the exported SVG embeds the file. See also: `k.SVG`, `k.morph`.
 ```python

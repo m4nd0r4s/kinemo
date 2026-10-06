@@ -40,6 +40,7 @@ EXAMPLE_MODULES = (
 
 #: Public names documented through the entry of what an author actually calls.
 DOCUMENTED_BY: dict[str, str] = {
+    "ICON_NAMES": "k.Icon",
     "Scene": "Scene.play",
     "SceneDef": "k.scene",
     "TimeSpan": "Scene.start",

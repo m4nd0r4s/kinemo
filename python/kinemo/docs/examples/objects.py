@@ -704,4 +704,22 @@ def speaker(s: k.Scene):
 ''',
         related=("k.TitleCard",),
     ),
+    DocEntry(
+        "k.Icon",
+        "Objects",
+        "A built-in icon, drawn with strokes on a square of side `size=`: `\"check\"`, `\"x\"`, "
+        "`\"warning\"`, `\"lightbulb\"`, `\"gear\"`, `\"user\"`, `\"cpu\"`, … (`k.ICON_NAMES` lists "
+        "them). `color=` sets the stroke; `icon.to(stroke=...)` recolors it. An unknown name is "
+        "K0105 with the closest names.",
+        '''
+import kinemo as k
+
+@k.scene
+def idea(s: k.Scene):
+    bulb = k.Icon("lightbulb", size=1.5, color=k.YELLOW).place(at="center")
+    s.play(k.draw(bulb))
+    s.play(bulb.to(stroke=k.ORANGE))
+''',
+        related=("k.SVG",),
+    ),
 )

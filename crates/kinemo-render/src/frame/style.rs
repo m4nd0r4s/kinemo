@@ -9,7 +9,7 @@ use kinemo_layout::{Layout, PartRole};
 use super::reveal::{arrow_part_progress, fill_fraction, glyph_progress, outline_fraction};
 use super::FrameSize;
 use crate::geom::trim;
-use crate::raster::{Cap, DrawItem, Fill, Join, Stroke};
+use crate::raster::{Cap, DrawItem, Fill, Glow, Join, Stroke};
 
 /// Style inherited down the tree (opacity multiplies, tint takes the strongest).
 pub(crate) struct Inherited {
@@ -124,6 +124,7 @@ pub(crate) fn painted_parts(layout: &Layout, leaf: ObjectId, t: f64, size: Frame
         Some("bevel") => Join::Bevel,
         _ => Join::Round,
     };
+    let glow = glow_of(layout, leaf, t, size, stroke.filter(|_| stroke_width > 0.0).or(fill.filter(|_| fill_opacity > 0.0)), &tinted);
     let parts = layout.parts(leaf, t);
     let arrow = layout.scene().object(leaf).kind == "arrow";
     let mut items = Vec::with_capacity(parts.len());
@@ -188,9 +189,37 @@ pub(crate) fn painted_parts(layout: &Layout, leaf: ObjectId, t: f64, size: Frame
             items.push(PaintedPart { item: item(path, fill_paint, stroke_paint, inh.opacity, even_odd), key: part.key.clone(), index: part.index });
         }
     }
+    if let Some(glow) = glow {
+        for part in &mut items {
+            part.item.glow = Some(glow);
+        }
+    }
     items
 }
 
+/// Pixels of blur at `glow = 1` (1080p; scaled with the output).
+const GLOW_RADIUS: f64 = 28.0;
+
+/// The halo of a leaf: from the nearest object up its parent chain with `glow > 0` (a text's
+/// glyph runs glow with the text, a group's parts with the group), in that object's
+/// `glow_color`, else the color the leaf is painted with.
+fn glow_of(layout: &Layout, leaf: ObjectId, t: f64, size: FrameSize, painted: Option<[f64; 4]>, tinted: &dyn Fn([f64; 4]) -> [f64; 4]) -> Option<Glow> {
+    let mut source = Some(leaf);
+    let (owner, amount) = loop {
+        let o = source?;
+        let amount = layout.prop_f(o, "glow", t, 0.0);
+        if amount > 0.0 {
+            break (o, amount);
+        }
+        source = layout.scene().object(o).parent;
+    };
+    let own = layout.prop_color(owner, "glow_color", t).filter(|c| c[3] > 0.0).map(tinted);
+    let color = own.or(painted)?;
+    // Stronger glows are both wider and brighter.
+    let strength = amount.min(1.0);
+    Some(Glow { color: [color[0], color[1], color[2], color[3] * (0.35 + 0.65 * strength)], radius: GLOW_RADIUS * amount.max(0.05) * size.stroke_scale() })
+}
+
 fn item(path: BezPath, fill: Option<Fill>, stroke: Option<Stroke>, opacity: f64, even_odd: bool) -> DrawItem {
-    DrawItem { path, fill, stroke, opacity, clip: None, fill_rule_even_odd: even_odd, image: None, dots: None }
+    DrawItem { path, fill, stroke, opacity, clip: None, fill_rule_even_odd: even_odd, image: None, dots: None, glow: None }
 }

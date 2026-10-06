@@ -53,7 +53,7 @@ fn dense_display_list(frame: usize) -> DisplayList {
                 clip: None,
                 fill_rule_even_odd: false,
                 image: None,
-                dots: None,
+                dots: None, glow: None,
             });
         }
     }
@@ -67,7 +67,7 @@ fn dense_display_list(frame: usize) -> DisplayList {
             clip: None,
             fill_rule_even_odd: false,
             image: None,
-            dots: None,
+            dots: None, glow: None,
         });
     }
     DisplayList { width: 1920, height: 1080, background: [0.078, 0.082, 0.102, 1.0], items }

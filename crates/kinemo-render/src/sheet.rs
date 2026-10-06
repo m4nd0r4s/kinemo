@@ -60,7 +60,7 @@ fn frame_item(shot: Image, x: f64, y: f64) -> DrawItem {
         clip: None,
         fill_rule_even_odd: false,
         image: Some(ImagePaint { bitmap: Arc::new(bitmap), transform: Affine::translate((x, y)) }),
-        dots: None,
+        dots: None, glow: None,
     }
 }
 
@@ -79,7 +79,7 @@ fn label_items(label: &str, cx: f64, cy: f64) -> Vec<DrawItem> {
             clip: None,
             fill_rule_even_odd: false,
             image: None,
-            dots: None,
+            dots: None, glow: None,
         })
         .collect()
 }

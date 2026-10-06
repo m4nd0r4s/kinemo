@@ -71,13 +71,17 @@ They share a common set:
 | Group | Props |
 | --- | --- |
 | Transform | `x`, `y`, `position`, `rotate` (degrees), `scale`, `scale_x`, `scale_y`, `anchor` |
-| Style | `color` (shorthand for `stroke` and `fill`), `fill`, `fill_opacity`, `stroke`, `stroke_width`, `dash`, `opacity` |
+| Style | `color` (shorthand for `stroke` and `fill`), `fill`, `fill_opacity`, `stroke`, `stroke_width`, `dash`, `opacity`, `glow` (a soft halo, 0–1), `glow_color` |
 | Composition | `z` (draw order), `visible`, `bleed` (cropped by the frame edge on purpose) |
 | Read-only (derived from layout) | `width`, `height`, `bbox`, `left`, `right`, `top`, `bottom`, `center` |
 
 Shapes add their own (`r` for `k.Circle`, `w`/`h` for `k.Rect`, `start`/`end` for
 `k.Line`, `text` for `k.Text`, `value` for `k.Bar`...). Every constructor argument accepts a
 value, a signal or a lambda.
+
+`glow=0.6` paints a soft blurred halo under a shape, a line or a text (in its stroke or fill
+color, or `glow_color=`); it animates like any prop (`dot.to(glow=1)`), and on a group it
+glows every part.
 
 Objects are drawn by `z` (higher on top); with equal `z`, the one that entered the scene
 later is on top, so `s.add(background, label)` puts the label above. Inside a group,

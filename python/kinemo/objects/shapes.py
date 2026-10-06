@@ -31,6 +31,8 @@ class Shape(Node):
         stroke: PropAccessor[Color]
         stroke_width: PropAccessor[float]
         dash: PropAccessor[list[float]]
+        glow: PropAccessor[float]
+        glow_color: PropAccessor[Color]
         #: The stroke (`.to(color=...)` sets stroke and fill).
         color: PropAccessor[Color]
 

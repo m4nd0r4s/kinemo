@@ -489,6 +489,13 @@ def half_float(s: k.Scene):
     s.play(f.to(value=15360))  # 1.0 in IEEE 754 half precision
 ```
 
+## Epicycles
+
+`k.Epicycles(points, n=50)` computes the Fourier series of a closed path and shows the chain
+of rotating circles whose tip draws it. `k.draw(epi)` draws the circles; `epi.run(turns=1)`
+turns them while the curve appears behind the tip. Pass `coefficients={1: 1, -1: 0.5j}`
+(frequency → complex amplitude) to choose the circles yourself.
+
 ## Graphs
 
 `k.Graph(nodes, edges, layout=...)` draws nodes (circles with their names) joined by edges,

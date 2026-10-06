@@ -767,6 +767,20 @@ def speaker(s: k.Scene):
     s.wait(1)
     s.play(k.fade_out(who))
 ```
+#### `k.Epicycles(points=None, n=50, *, coefficients=None, color=None, circle_color=None, **props)`
+The Fourier series of a closed path (points as tuples or complex numbers), as a chain of `n` rotating circles, largest first, whose tip traces the path; or `coefficients=` (frequency → complex amplitude) directly. `epi.run(turns=1)` turns the chain and the curve appears behind the tip. Parts: `epi.circles`, `epi.arms`, `epi.curve`, `epi.tip`. See also: `k.Circle`, `k.trace`.
+```python
+import math
+import kinemo as k
+
+SQUARE = [(2 * math.copysign(min(1, abs(math.cos(a)) * 1.5), math.cos(a)), 2 * math.copysign(min(1, abs(math.sin(a)) * 1.5), math.sin(a))) for a in (2 * math.pi * i / 120 for i in range(120))]
+
+@k.scene
+def fourier(s: k.Scene):
+    epi = k.Epicycles(SQUARE, n=20).place(at="center")
+    s.play(k.draw(epi))
+    s.play(epi.run(turns=1, duration=4))
+```
 #### `k.Image(path, width=None, height=None, **props)`
 Raster image (PNG or JPEG) drawn by the renderer, centered on its position. Without a size it is 3 units tall; with `width=` or `height=` the other side follows the file's aspect ratio (props `w` and `h`, animatable). Relative paths start from the folder of the scene file. Accepts `scale`, `rotate` and `opacity`; morphs and layout treat it as its rectangle, and the exported SVG embeds the file. See also: `k.SVG`, `k.morph`.
 ```python

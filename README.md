@@ -10,6 +10,10 @@ Explanatory animations (math, algorithms, engineering, data) written in Python, 
 preview and a native core in Rust. The API was designed to be written by people and by AI
 without errors: one form per concept, full typing, and errors that already carry the fix.
 
+![A tangent sliding along a curve, with the code that makes it](docs/media/hero.gif)
+
+<sub>Made with kinemo: [docs/media/hero.py](docs/media/hero.py).</sub>
+
 ```python
 import kinemo as k
 
@@ -22,10 +26,45 @@ def hello(s: k.Scene):
 ```
 
 ```bash
-kinemo dev hello.py        # browser preview with hot reload and a draggable timeline
-kinemo check hello.py      # errors, lints and timeline summary, without rendering
-kinemo render hello.py     # MP4 (also webm, mov, gif, png, slides)
+pip install kinemo
+kinemo new my-video        # a project with a first scene (then cd my-video)
+kinemo dev scene.py        # browser preview with hot reload and a draggable timeline
+kinemo check scene.py      # errors, lints and timeline summary, without rendering
+kinemo render scene.py     # MP4 (also webm, mov, gif, png, slides)
 ```
+
+## Why kinemo
+
+- **See it while you write it.** `kinemo dev` re-renders on save and lets you scrub to any
+  instant; the frame at `t` is a pure function of `t`, so jumping around is instant.
+- **Mistakes are caught before you render.** Lints find text that leaves the frame, overlaps,
+  is too small or has too little contrast, at the instant it happens, with the fix;
+  `kinemo check --fix` applies the safe ones.
+- **Fast.** The timeline, layout, text, math and rendering are Rust, and frames render in
+  parallel on every core.
+- **Nothing else to install.** Math is typeset without LaTeX, code is highlighted with
+  tree-sitter, fonts are embedded. Video needs ffmpeg, and that is all.
+- **Built for agents.** Typed, one way to do each thing, machine-readable checks and an MCP
+  server: a model can write a scene, check it and fix it without looking at frames.
+
+### Compared with Manim
+
+[Manim](https://www.manim.community/) is the reference for this kind of video, and it
+inspired kinemo. Choose by what you need:
+
+| | Manim | kinemo |
+|---|---|---|
+| Maturity | Years of use, a large community, many tutorials and plugins | Young (pre-1.0), a small community |
+| 3D | Yes | Not yet (2D only) |
+| LaTeX | Needs a TeX installation | Built in (typst), no TeX |
+| Preview | Render, then watch | Live preview with a scrubbable timeline |
+| Time model | Animations run as the script runs | The script builds a timeline first: scrub, parallel render, caching |
+| Errors | Python tracebacks | Coded diagnostics with line, instant and fix; visual lints |
+| Narration | Plugins | Built in: TTS or recorded audio, word timing, subtitles |
+
+Coming from Manim: `Create`, `.animate` and other Manim names are recognized and the error
+names the kinemo form; the [mental model](docs/guide/02-mental-model.md) explains the
+differences.
 
 ## What kinemo does
 
@@ -58,9 +97,33 @@ kinemo render hello.py     # MP4 (also webm, mov, gif, png, slides)
 pip install kinemo
 ```
 
-Wheels for Linux, macOS and Windows, Python ≥ 3.11. Video output needs `ffmpeg` on your path.
-`pip install "kinemo[align]"` adds word timing for recorded narration (speech recognition).
-`kinemo new hello` starts a project.
+Wheels for Linux, macOS and Windows, Python ≥ 3.11. Video output needs
+[ffmpeg](https://ffmpeg.org/):
+
+| System | Command |
+|---|---|
+| macOS | `brew install ffmpeg` |
+| Windows | `winget install Gyan.FFmpeg` (or `choco install ffmpeg`) |
+| Ubuntu, Debian | `sudo apt install ffmpeg` |
+| Fedora | `sudo dnf install ffmpeg` |
+| Arch | `sudo pacman -S ffmpeg` |
+
+`kinemo doctor` shows what kinemo finds (Python, ffmpeg, extras); PNG and SVG frames and
+`kinemo dev` work without ffmpeg. `pip install "kinemo[align]"` adds word timing for recorded
+narration (speech recognition).
+
+### Status
+
+kinemo is before 1.0: the API can still change between minor versions. When it does,
+`kinemo upgrade scene.py` rewrites the old forms, and the [changelog](CHANGELOG.md) says what
+changed. kinemo collects no telemetry and makes no network requests of its own (a TTS
+provider you configure for narration is the only exception).
+
+### Questions and bugs
+
+Questions, ideas and things you made go in
+[Discussions](https://github.com/m4nd0r4s/kinemo/discussions); bugs go in
+[issues](https://github.com/m4nd0r4s/kinemo/issues) (paste the output of `kinemo doctor`).
 
 ### From source
 

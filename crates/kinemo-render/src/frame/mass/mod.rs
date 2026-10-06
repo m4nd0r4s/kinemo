@@ -133,6 +133,7 @@ impl Buckets {
                 fill_rule_even_odd: false,
                 image: None,
                 dots: dots.filter(|dots| !dots.centers.is_empty()),
+                glow: None,
             })
             .collect()
     }
@@ -149,7 +150,7 @@ impl Buckets {
                 clip: None,
                 fill_rule_even_odd: false,
                 image: None,
-                dots: None,
+                dots: None, glow: None,
             })
             .collect()
     }

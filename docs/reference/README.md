@@ -106,6 +106,7 @@ Shapes, groups, images, SVG and mass objects (points, vector fields, stream line
 - [`k.Triangle`](objects.md#k-triangle): Triangle from its three vertices (no arguments: equilateral with radius 1).
 - [`k.Line`](objects.md#k-line): Segment from `start` to `end` (local coordinates), or centered with `length=`.
 - [`k.Arrow`](objects.md#k-arrow): Arrow from `start` to `end` with a tip of size `tip`.
+- [`k.Sector`](objects.md#k-sector): A pie slice from the center, or a ring slice with `inner=` (its inner radius): `r=`, `angle=` (degrees, counterclockwise; negative goes clockwise) and `start_angle=` from +x.
 - [`k.Arc`](objects.md#k-arc): Circular arc of radius `r`, starting at `start_angle` and sweeping `angle` degrees (counterclockwise).
 - [`k.Path`](objects.md#k-path): Path from SVG commands (`d="M 0 0 L 1 1"`) or a polyline from a list of points; `closed=True` closes the outline.
 - [`k.union`](objects.md#k-union): Boolean operations between shapes: `k.union(a, b)`, `k.intersect(a, b)` and `k.subtract(a, b)` return a new `k.Path` computed from the outlines at the cursor (with the style of `a`, unless another one is passed).
@@ -114,6 +115,9 @@ Shapes, groups, images, SVG and mass objects (points, vector fields, stream line
 - [`k.Bar`](objects.md#k-bar): A value shown as a bar that grows from its base, with an optional label (`label=True`).
 - [`k.Group`](objects.md#k-group): Groups objects: transforms compose and opacity multiplies.
 - [`k.Graph`](objects.md#k-graph): Nodes and edges: `k.Graph(nodes, edges, layout=...)` with names as nodes and `(u, v)` or `(u, v, weight)` edges (arrows with `directed=True`).
+- [`k.Matrix`](objects.md#k-matrix): A matrix whose entries are objects in a grid: numbers, TeX strings (typeset with `k.Math`) or any object, between `brackets=` (`"["`, `"("`, `"|"`, `"none"`).
+- [`k.matrix_product`](objects.md#k-matrix_product): Shows a product row by column: `k.matrix_product(a, b, a @ b)` draws the product's brackets, then for each entry indicates its row of `a` and its column of `b` while the entry appears (`step=` seconds each).
+- [`k.Bits`](objects.md#k-bits): A binary register: the bits of a value, most significant first, lit when 1.
 - [`k.TitleCard`](objects.md#k-titlecard): An episode's opening card: the title, a `kicker=` above it, an accent rule under it and a `subtitle=`.
 - [`k.EndCard`](objects.md#k-endcard): What comes next: `heading=` ("Next") over the next title, then `brand=`, `series=` and an `invite=`.
 - [`k.LowerThird`](objects.md#k-lowerthird): A name and a role beside an accent bar, for a corner (`side="right"` mirrors it); place it as usual.
@@ -180,6 +184,7 @@ Axes, number lines, polar axes, plots and data charts.
 - [`k.vector_sum`](charts.md#k-vector_sum): Adds two axes vectors tip to tail: `b` slides so its tail sits on `a`'s tip, then the resultant (`a + b`) is drawn from `a`'s tail.
 - [`Plot`](charts.md#plot): A curve `y = fn(x)` of an axes.
 - [`k.BarChart`](charts.md#k-barchart): Bar chart from a table: `x=` is the category column, `y=` the value column and `key=` identifies each bar.
+- [`k.PieChart`](charts.md#k-piechart): One slice per row of a table: `labels=` names the category column and `values=` the numbers; `donut=0.5` leaves a hole (a fraction of `radius=`).
 - [`k.LineChart`](charts.md#k-linechart): A `k.Axes` with one line per `y=` column (one or several), connecting the table's points in `x=` order.
 - [`k.Table`](charts.md#k-table): Table of `k.Text` with a highlighted header; `columns=` selects and orders the columns.
 
@@ -199,6 +204,7 @@ Methods:
 - [`ax.segment`](charts.md#axes-segment): A line between two data points `(x, y)`, cut to the visible ranges with `clip=True` (the default) and hidden when it falls entirely outside them; it follows zooms.
 - [`ax.hband`](charts.md#axes-hband): `ax.hband(y0, y1)`: a translucent band across the plot between two data values; `ax.vband(x0, x1)` the same up the plot.
 - [`ax.vector`](charts.md#axes-vector): An arrow of components `v` from the data point `at=`, in data units; both are signals, so `vector.to(v=(2, 1))` turns it and it follows zooms.
+- [`ax.dot`](charts.md#axes-dot): A dot at a data point that follows zooms; `open=True` draws it hollow (filled with the background) for an endpoint a piecewise function leaves out.
 - [`ax.origin`](charts.md#axes-origin): Where the two axes cross, in the axes' own coordinates: the data origin clamped to the visible ranges.
 - [`ax.in_view`](charts.md#axes-in_view): Whether a data value is inside the visible ranges, as a reactive bool for `visible=`: `ax.in_view(x=3)`, `ax.in_view(y=5)` or both.
 - [`curve.point_at`](charts.md#plot-point_at): World position of the curve at `x`; reactive when `x` is a signal.

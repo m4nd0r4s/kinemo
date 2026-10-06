@@ -383,6 +383,26 @@ def resultant(s: k.Scene):
         related=("Axes.vector",),
     ),
     DocEntry(
+        "Axes.dot",
+        "Charts",
+        "A dot at a data point that follows zooms; `open=True` draws it hollow (filled with the "
+        "background) for an endpoint a piecewise function leaves out. `ax.plot(f, holes=[2])` "
+        "puts open dots on a curve (at the limit of `f` where it is undefined): `curve.holes`.",
+        '''
+import kinemo as k
+
+@k.scene
+def piecewise(s: k.Scene):
+    ax = k.Axes(x=(0, 4, 1), y=(0, 6, 1)).place(at="center")
+    curve = ax.plot(lambda x: (x * x - 4) / (x - 2), holes=[2])
+    ax.dot(3, 1, open=True, color=k.RED)
+    ax.dot(3, 5, color=k.RED)
+    s.play(k.draw(ax))
+    s.play(k.indicate(curve.holes[0]))
+''',
+        related=("Axes.plot", "Axes.segment"),
+    ),
+    DocEntry(
         "Axes.origin",
         "Charts",
         "Where the two axes cross, in the axes' own coordinates: the data origin clamped "
@@ -496,6 +516,29 @@ def energy(s: k.Scene):
     s.play(chart.to(data={"country": ["ES", "PT", "FR"], "gwh": [300, 80, 540]}), duration=2)
 ''',
         related=("k.LineChart", "k.Table", "k.Bar"),
+    ),
+    DocEntry(
+        "k.PieChart",
+        "Charts",
+        "One slice per row of a table: `labels=` names the category column and `values=` the "
+        "numbers; `donut=0.5` leaves a hole (a fraction of `radius=`). Slices start at the top and "
+        "go clockwise, labelled outside with their percentage (narrow ones get a leader line). "
+        "`pie.to(data=df2)` animates the shares; new keys grow in, missing ones shrink away. "
+        "`pie.slice(\"IT\")` is a slice (`.sector`, `.label`, `.percent`).",
+        '''
+import kinemo as k
+
+MIX = {"source": ["Solar", "Wind", "Hydro", "Gas"], "twh": [10, 25, 30, 35]}
+LATER = {"source": ["Solar", "Wind", "Hydro", "Gas"], "twh": [35, 30, 25, 10]}
+
+@k.scene
+def mix(s: k.Scene):
+    pie = k.PieChart(MIX, labels="source", values="twh", donut=0.45).place(at="center")
+    s.play(k.draw(pie))
+    s.play(pie.to(data=LATER), duration=2)
+    s.play(k.indicate(pie.slice("Solar")))
+''',
+        related=("k.BarChart", "k.Sector"),
     ),
     DocEntry(
         "k.LineChart",

@@ -13,6 +13,7 @@ Axes, number lines, polar axes, plots and data charts.
 - [`k.vector_sum`](#k-vector_sum): Adds two axes vectors tip to tail: `b` slides so its tail sits on `a`'s tip, then the resultant (`a + b`) is drawn from `a`'s tail.
 - [`Plot`](#plot): A curve `y = fn(x)` of an axes.
 - [`k.BarChart`](#k-barchart): Bar chart from a table: `x=` is the category column, `y=` the value column and `key=` identifies each bar.
+- [`k.PieChart`](#k-piechart): One slice per row of a table: `labels=` names the category column and `values=` the numbers; `donut=0.5` leaves a hole (a fraction of `radius=`).
 - [`k.LineChart`](#k-linechart): A `k.Axes` with one line per `y=` column (one or several), connecting the table's points in `x=` order.
 - [`k.Table`](#k-table): Table of `k.Text` with a highlighted header; `columns=` selects and orders the columns.
 
@@ -32,6 +33,7 @@ Axes, number lines, polar axes, plots and data charts.
 - [`ax.segment`](#axes-segment): A line between two data points `(x, y)`, cut to the visible ranges with `clip=True` (the default) and hidden when it falls entirely outside them; it follows zooms.
 - [`ax.hband`](#axes-hband): `ax.hband(y0, y1)`: a translucent band across the plot between two data values; `ax.vband(x0, x1)` the same up the plot.
 - [`ax.vector`](#axes-vector): An arrow of components `v` from the data point `at=`, in data units; both are signals, so `vector.to(v=(2, 1))` turns it and it follows zooms.
+- [`ax.dot`](#axes-dot): A dot at a data point that follows zooms; `open=True` draws it hollow (filled with the background) for an endpoint a piecewise function leaves out.
 - [`ax.origin`](#axes-origin): Where the two axes cross, in the axes' own coordinates: the data origin clamped to the visible ranges.
 - [`ax.in_view`](#axes-in_view): Whether a data value is inside the visible ranges, as a reactive bool for `visible=`: `ax.in_view(x=3)`, `ax.in_view(y=5)` or both.
 - [`curve.point_at`](#plot-point_at): World position of the curve at `x`; reactive when `x` is a signal.
@@ -235,6 +237,7 @@ def custom_ticks(s: k.Scene):
 - [`origin`](#axes-origin): Where the two axes cross, in the axes' own coordinates: the data origin clamped to the visible ranges.
 - [`in_view`](#axes-in_view): Whether a data value is inside the visible ranges, as a reactive bool for `visible=`: `ax.in_view(x=3)`, `ax.in_view(y=5)` or both.
 - [`plot`](#axes-plot): Draws the curve `y = fn(x)` on the axes, with adaptive sampling.
+- [`dot`](#axes-dot): A dot at a data point that follows zooms; `open=True` draws it hollow (filled with the background) for an endpoint a piecewise function leaves out.
 - [`area`](#axes-area): Filled region under a curve (down to the x axis) or between two curves (`between=`).
 - [`segment`](#axes-segment): A line between two data points `(x, y)`, cut to the visible ranges with `clip=True` (the default) and hidden when it falls entirely outside them; it follows zooms.
 - [`hband`](#axes-hband): `ax.hband(y0, y1)`: a translucent band across the plot between two data values; `ax.vband(x0, x1)` the same up the plot.
@@ -421,6 +424,7 @@ ax.plot(
     domain: tuple[float, float] | None = None,
     color: ColorLike | None = None,
     label: str | None = None,
+    holes: Sequence[float] = (),
     samples: int = 160,
     enter_with_axes: bool = True,
     **style: Unpack[PlotStyleKeywords],
@@ -439,6 +443,7 @@ Draws the curve `y = fn(x)` on the axes, with adaptive sampling. `fn` uses `k` f
 | `domain` | `tuple[float, float] \| None` | `None` |   |
 | `color` | `ColorLike \| None` | `None` |   |
 | `label` | `str \| None` | `None` | `label=` puts a label at the end of the curve. |
+| `holes` | `Sequence[float]` | `()` | `holes=[2]` marks points the curve leaves out with open dots (at the limit of `fn` when it is undefined there; `curve.holes`). |
 | `samples` | `int` | `160` |   |
 | `enter_with_axes` | `bool` | `True` | `enter_with_axes=False` keeps it (and its label) hidden until a verb brings it in. |
 | `**style` | `Unpack[PlotStyleKeywords]` | variadic | Keyword arguments (`PlotStyleKeywords`): `name: str \| None`, `key: str \| None`, `x: FloatVal`, `y: FloatVal`, `position: VecVal`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`, `fill: ColorVal`, `fill_opacity: FloatVal`, `stroke_width: FloatVal`, `dash: FloatsVal`. |
@@ -459,6 +464,49 @@ def wave_plot(s: k.Scene):
 ```
 
 **See also:** [`curve.point_at`](#plot-point_at), [`ax.area`](#axes-area), [`k.sin`](native-blocks.md#k-sin).
+
+<a id="axes-dot"></a>
+#### `k.Axes.dot` *(method)*
+
+```python
+ax.dot(
+    x: FloatVal,
+    y: FloatVal,
+    *,
+    open: bool = False,
+    radius: float = 0.09,
+    enter_with_axes: bool = True,
+    **props: Unpack[UnplacedStyleKeywords],
+) -> Dot
+```
+
+A dot at a data point that follows zooms; `open=True` draws it hollow (filled with the background) for an endpoint a piecewise function leaves out. `ax.plot(f, holes=[2])` puts open dots on a curve (at the limit of `f` where it is undefined): `curve.holes`.
+
+**Parameters:**
+
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `x` | `FloatVal` | required |   |
+| `y` | `FloatVal` | required |   |
+| `open` | `bool` | `False` | A dot at a data point that follows zooms; `open=True` draws it hollow (filled with the background) for an endpoint a piecewise function leaves out. |
+| `radius` | `float` | `0.09` |   |
+| `enter_with_axes` | `bool` | `True` |   |
+| `**props` | `Unpack[UnplacedStyleKeywords]` | variadic | Keyword arguments (`UnplacedStyleKeywords`): `name: str \| None`, `key: str \| None`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`, `fill: ColorVal`, `fill_opacity: FloatVal`, `stroke: ColorVal`, `stroke_width: FloatVal`, `dash: FloatsVal`, `glow: FloatVal`, `glow_color: ColorVal`, `color: ColorVal`. |
+
+**Example:**
+
+```python
+@k.scene
+def piecewise(s: k.Scene):
+    ax = k.Axes(x=(0, 4, 1), y=(0, 6, 1)).place(at="center")
+    curve = ax.plot(lambda x: (x * x - 4) / (x - 2), holes=[2])
+    ax.dot(3, 1, open=True, color=k.RED)
+    ax.dot(3, 5, color=k.RED)
+    s.play(k.draw(ax))
+    s.play(k.indicate(curve.holes[0]))
+```
+
+**See also:** [`ax.plot`](#axes-plot), [`ax.segment`](#axes-segment).
 
 <a id="axes-area"></a>
 #### `k.Axes.area` *(method)*
@@ -488,7 +536,7 @@ Filled region under a curve (down to the x axis) or between two curves (`between
 | `until` | `FloatExpr \| None` | `None` |   |
 | `samples` | `int` | `200` |   |
 | `enter_with_axes` | `bool` | `True` |   |
-| `**style` | `Unpack[StyleKeywords]` | variadic | Keyword arguments (`StyleKeywords`): `name: str \| None`, `key: str \| None`, `x: FloatVal`, `y: FloatVal`, `position: VecVal`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`, `fill: ColorVal`, `fill_opacity: FloatVal`, `stroke: ColorVal`, `stroke_width: FloatVal`, `dash: FloatsVal`, `color: ColorVal`. |
+| `**style` | `Unpack[StyleKeywords]` | variadic | Keyword arguments (`StyleKeywords`): `name: str \| None`, `key: str \| None`, `x: FloatVal`, `y: FloatVal`, `position: VecVal`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`, `fill: ColorVal`, `fill_opacity: FloatVal`, `stroke: ColorVal`, `stroke_width: FloatVal`, `dash: FloatsVal`, `glow: FloatVal`, `glow_color: ColorVal`, `color: ColorVal`. |
 
 **Example:**
 
@@ -531,7 +579,7 @@ A line between two data points `(x, y)`, cut to the visible ranges with `clip=Tr
 | `end` | `tuple[float, float]` | required |   |
 | `clip` | `bool` | `True` | A line between two data points `(x, y)`, cut to the visible ranges with `clip=True` (the default) and hidden when it falls entirely outside them; it follows zooms. |
 | `enter_with_axes` | `bool` | `True` |   |
-| `**props` | `Unpack[StyleKeywords]` | variadic | Keyword arguments (`StyleKeywords`): `name: str \| None`, `key: str \| None`, `x: FloatVal`, `y: FloatVal`, `position: VecVal`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`, `fill: ColorVal`, `fill_opacity: FloatVal`, `stroke: ColorVal`, `stroke_width: FloatVal`, `dash: FloatsVal`, `color: ColorVal`. |
+| `**props` | `Unpack[StyleKeywords]` | variadic | Keyword arguments (`StyleKeywords`): `name: str \| None`, `key: str \| None`, `x: FloatVal`, `y: FloatVal`, `position: VecVal`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`, `fill: ColorVal`, `fill_opacity: FloatVal`, `stroke: ColorVal`, `stroke_width: FloatVal`, `dash: FloatsVal`, `glow: FloatVal`, `glow_color: ColorVal`, `color: ColorVal`. |
 
 **Example:**
 
@@ -570,7 +618,7 @@ ax.hband(
 | `y0` | `float` | required | A horizontal band between data `y0` and `y1`, across the plot, cut to the visible y range (hidden outside it); it follows zooms. |
 | `y1` | `float` | required | A horizontal band between data `y0` and `y1`, across the plot, cut to the visible y range (hidden outside it); it follows zooms. |
 | `enter_with_axes` | `bool` | `True` |   |
-| `**props` | `Unpack[UnplacedStyleKeywords]` | variadic | Keyword arguments (`UnplacedStyleKeywords`): `name: str \| None`, `key: str \| None`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`, `fill: ColorVal`, `fill_opacity: FloatVal`, `stroke: ColorVal`, `stroke_width: FloatVal`, `dash: FloatsVal`, `color: ColorVal`. |
+| `**props` | `Unpack[UnplacedStyleKeywords]` | variadic | Keyword arguments (`UnplacedStyleKeywords`): `name: str \| None`, `key: str \| None`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`, `fill: ColorVal`, `fill_opacity: FloatVal`, `stroke: ColorVal`, `stroke_width: FloatVal`, `dash: FloatsVal`, `glow: FloatVal`, `glow_color: ColorVal`, `color: ColorVal`. |
 
 **Example:**
 
@@ -608,7 +656,7 @@ A vertical band between data `x0` and `x1`, up the plot, cut to the visible x ra
 | `x0` | `float` | required | A vertical band between data `x0` and `x1`, up the plot, cut to the visible x range (hidden outside it); it follows zooms. |
 | `x1` | `float` | required | A vertical band between data `x0` and `x1`, up the plot, cut to the visible x range (hidden outside it); it follows zooms. |
 | `enter_with_axes` | `bool` | `True` |   |
-| `**props` | `Unpack[UnplacedStyleKeywords]` | variadic | Keyword arguments (`UnplacedStyleKeywords`): `name: str \| None`, `key: str \| None`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`, `fill: ColorVal`, `fill_opacity: FloatVal`, `stroke: ColorVal`, `stroke_width: FloatVal`, `dash: FloatsVal`, `color: ColorVal`. |
+| `**props` | `Unpack[UnplacedStyleKeywords]` | variadic | Keyword arguments (`UnplacedStyleKeywords`): `name: str \| None`, `key: str \| None`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`, `fill: ColorVal`, `fill_opacity: FloatVal`, `stroke: ColorVal`, `stroke_width: FloatVal`, `dash: FloatsVal`, `glow: FloatVal`, `glow_color: ColorVal`, `color: ColorVal`. |
 
 <a id="axes-vector"></a>
 #### `k.Axes.vector` *(method)*
@@ -676,7 +724,7 @@ Vertical line on the axes at `at=` (accepts a signal: the line moves with it); `
 | `at` | `FloatVal` | required | Vertical line on the axes at `at=` (accepts a signal: the line moves with it); `style="dashed"` makes it dashed. |
 | `style` | `LineStyle` | `"solid"` | Vertical line on the axes at `at=` (accepts a signal: the line moves with it); `style="dashed"` makes it dashed. |
 | `enter_with_axes` | `bool` | `True` |   |
-| `**props` | `Unpack[StyleKeywords]` | variadic | Keyword arguments (`StyleKeywords`): `name: str \| None`, `key: str \| None`, `x: FloatVal`, `y: FloatVal`, `position: VecVal`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`, `fill: ColorVal`, `fill_opacity: FloatVal`, `stroke: ColorVal`, `stroke_width: FloatVal`, `dash: FloatsVal`, `color: ColorVal`. |
+| `**props` | `Unpack[StyleKeywords]` | variadic | Keyword arguments (`StyleKeywords`): `name: str \| None`, `key: str \| None`, `x: FloatVal`, `y: FloatVal`, `position: VecVal`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`, `fill: ColorVal`, `fill_opacity: FloatVal`, `stroke: ColorVal`, `stroke_width: FloatVal`, `dash: FloatsVal`, `glow: FloatVal`, `glow_color: ColorVal`, `color: ColorVal`. |
 
 **Example:**
 
@@ -714,7 +762,7 @@ Horizontal line on the axes at `at=` (accepts a signal); `style="dashed"` makes 
 | `at` | `FloatVal` | required | Horizontal line on the axes at `at=` (accepts a signal); `style="dashed"` makes it dashed. |
 | `style` | `LineStyle` | `"solid"` | Horizontal line on the axes at `at=` (accepts a signal); `style="dashed"` makes it dashed. |
 | `enter_with_axes` | `bool` | `True` |   |
-| `**props` | `Unpack[StyleKeywords]` | variadic | Keyword arguments (`StyleKeywords`): `name: str \| None`, `key: str \| None`, `x: FloatVal`, `y: FloatVal`, `position: VecVal`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`, `fill: ColorVal`, `fill_opacity: FloatVal`, `stroke: ColorVal`, `stroke_width: FloatVal`, `dash: FloatsVal`, `color: ColorVal`. |
+| `**props` | `Unpack[StyleKeywords]` | variadic | Keyword arguments (`StyleKeywords`): `name: str \| None`, `key: str \| None`, `x: FloatVal`, `y: FloatVal`, `position: VecVal`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`, `fill: ColorVal`, `fill_opacity: FloatVal`, `stroke: ColorVal`, `stroke_width: FloatVal`, `dash: FloatsVal`, `glow: FloatVal`, `glow_color: ColorVal`, `color: ColorVal`. |
 
 **Example:**
 
@@ -753,7 +801,7 @@ Points `(xs[i], ys[i])` on the axes, as a group of `k.Dot`. Accepts lists, numpy
 | `ys` | `FloatColumn` | required |   |
 | `radius` | `float` | `0.06` |   |
 | `enter_with_axes` | `bool` | `True` |   |
-| `**props` | `Unpack[UnplacedStyleKeywords]` | variadic | Keyword arguments (`UnplacedStyleKeywords`): `name: str \| None`, `key: str \| None`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`, `fill: ColorVal`, `fill_opacity: FloatVal`, `stroke: ColorVal`, `stroke_width: FloatVal`, `dash: FloatsVal`, `color: ColorVal`. |
+| `**props` | `Unpack[UnplacedStyleKeywords]` | variadic | Keyword arguments (`UnplacedStyleKeywords`): `name: str \| None`, `key: str \| None`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`, `fill: ColorVal`, `fill_opacity: FloatVal`, `stroke: ColorVal`, `stroke_width: FloatVal`, `dash: FloatsVal`, `glow: FloatVal`, `glow_color: ColorVal`, `color: ColorVal`. |
 
 **Example:**
 
@@ -841,7 +889,7 @@ Vertical bars at data `xs` with data `heights` (from the x axis); `width` is in 
 | `heights` | `FloatColumn` | required | Vertical bars at data `xs` with data `heights` (from the x axis); `width` is in data units. |
 | `width` | `float` | `0.6` | Vertical bars at data `xs` with data `heights` (from the x axis); `width` is in data units. |
 | `enter_with_axes` | `bool` | `True` |   |
-| `**props` | `Unpack[UnplacedStyleKeywords]` | variadic | Keyword arguments (`UnplacedStyleKeywords`): `name: str \| None`, `key: str \| None`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`, `fill: ColorVal`, `fill_opacity: FloatVal`, `stroke: ColorVal`, `stroke_width: FloatVal`, `dash: FloatsVal`, `color: ColorVal`. |
+| `**props` | `Unpack[UnplacedStyleKeywords]` | variadic | Keyword arguments (`UnplacedStyleKeywords`): `name: str \| None`, `key: str \| None`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`, `fill: ColorVal`, `fill_opacity: FloatVal`, `stroke: ColorVal`, `stroke_width: FloatVal`, `dash: FloatsVal`, `glow: FloatVal`, `glow_color: ColorVal`, `color: ColorVal`. |
 
 <a id="axes-zoom_to"></a>
 #### `k.Axes.zoom_to` *(method)*
@@ -918,7 +966,7 @@ def number_line(s: k.Scene):
 
 **See also:** [`k.Axes`](#k-axes), [`ax.point`](#axes-point).
 
-Inherited from [`k.Axes`](#k-axes): [`map_x`](#axes-map_x), [`map_y`](#axes-map_y), [`local_point`](#axes-local_point), [`point`](#axes-point), [`add`](#axes-add), [`origin`](#axes-origin), [`in_view`](#axes-in_view), [`plot`](#axes-plot), [`area`](#axes-area), [`segment`](#axes-segment), [`hband`](#axes-hband), [`vband`](#axes-vband), [`vector`](#axes-vector), [`vline`](#axes-vline), [`hline`](#axes-hline), [`scatter`](#axes-scatter), [`parametric`](#axes-parametric), [`bars`](#axes-bars), [`zoom_to`](#axes-zoom_to).
+Inherited from [`k.Axes`](#k-axes): [`map_x`](#axes-map_x), [`map_y`](#axes-map_y), [`local_point`](#axes-local_point), [`point`](#axes-point), [`add`](#axes-add), [`origin`](#axes-origin), [`in_view`](#axes-in_view), [`plot`](#axes-plot), [`dot`](#axes-dot), [`area`](#axes-area), [`segment`](#axes-segment), [`hband`](#axes-hband), [`vband`](#axes-vband), [`vector`](#axes-vector), [`vline`](#axes-vline), [`hline`](#axes-hline), [`scatter`](#axes-scatter), [`parametric`](#axes-parametric), [`bars`](#axes-bars), [`zoom_to`](#axes-zoom_to).
 Inherited from [`k.Group`](objects.md#k-group): [`children`](objects.md#group-children), [`to`](objects.md#group-to), [`swap`](objects.md#group-swap), [`insert`](objects.md#group-insert), [`pop`](objects.md#group-pop), [`fit`](objects.md#group-fit).
 Inherited from [`k.Node`](object-state.md#k-node): [`set`](object-state.md#node-set), [`unbind`](object-state.md#node-unbind), [`edge`](object-state.md#node-edge), [`age`](object-state.md#node-age), [`entered`](object-state.md#node-entered), [`exited`](object-state.md#node-exited), [`copy`](object-state.md#node-copy), [`place`](object-state.md#node-place), [`to_place`](object-state.md#node-to_place), [`unpin`](object-state.md#node-unpin).
 
@@ -1011,7 +1059,7 @@ An arrow from the origin to `(x, y)` that the transformations carry.
 | --- | --- | --- | --- |
 | `x` | `float` | required |   |
 | `y` | `float` | required |   |
-| `**style` | `Unpack[UnplacedStyleKeywords]` | variadic | Keyword arguments (`UnplacedStyleKeywords`): `name: str \| None`, `key: str \| None`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`, `fill: ColorVal`, `fill_opacity: FloatVal`, `stroke: ColorVal`, `stroke_width: FloatVal`, `dash: FloatsVal`, `color: ColorVal`. |
+| `**style` | `Unpack[UnplacedStyleKeywords]` | variadic | Keyword arguments (`UnplacedStyleKeywords`): `name: str \| None`, `key: str \| None`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`, `fill: ColorVal`, `fill_opacity: FloatVal`, `stroke: ColorVal`, `stroke_width: FloatVal`, `dash: FloatsVal`, `glow: FloatVal`, `glow_color: ColorVal`, `color: ColorVal`. |
 
 <a id="numberplane-dot"></a>
 #### `k.NumberPlane.dot` *(method)*
@@ -1035,7 +1083,7 @@ A dot at `(x, y)` that the transformations carry.
 | `x` | `float` | required |   |
 | `y` | `float` | required |   |
 | `radius` | `float` | `0.1` |   |
-| `**style` | `Unpack[UnplacedStyleKeywords]` | variadic | Keyword arguments (`UnplacedStyleKeywords`): `name: str \| None`, `key: str \| None`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`, `fill: ColorVal`, `fill_opacity: FloatVal`, `stroke: ColorVal`, `stroke_width: FloatVal`, `dash: FloatsVal`, `color: ColorVal`. |
+| `**style` | `Unpack[UnplacedStyleKeywords]` | variadic | Keyword arguments (`UnplacedStyleKeywords`): `name: str \| None`, `key: str \| None`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`, `fill: ColorVal`, `fill_opacity: FloatVal`, `stroke: ColorVal`, `stroke_width: FloatVal`, `dash: FloatsVal`, `glow: FloatVal`, `glow_color: ColorVal`, `color: ColorVal`. |
 
 <a id="numberplane-polygon"></a>
 #### `k.NumberPlane.polygon` *(method)*
@@ -1054,7 +1102,7 @@ A filled shape with vertices in data coordinates that deforms with the plane. Th
 | Name | Type | Default | Description |
 | --- | --- | --- | --- |
 | `points` | `Sequence[tuple[float, float]]` | required |   |
-| `**style` | `Unpack[UnplacedStyleKeywords]` | variadic | Keyword arguments (`UnplacedStyleKeywords`): `name: str \| None`, `key: str \| None`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`, `fill: ColorVal`, `fill_opacity: FloatVal`, `stroke: ColorVal`, `stroke_width: FloatVal`, `dash: FloatsVal`, `color: ColorVal`. |
+| `**style` | `Unpack[UnplacedStyleKeywords]` | variadic | Keyword arguments (`UnplacedStyleKeywords`): `name: str \| None`, `key: str \| None`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`, `fill: ColorVal`, `fill_opacity: FloatVal`, `stroke: ColorVal`, `stroke_width: FloatVal`, `dash: FloatsVal`, `glow: FloatVal`, `glow_color: ColorVal`, `color: ColorVal`. |
 
 **Example:**
 
@@ -1196,7 +1244,7 @@ A curve `y = fn(x)` of an axes. Grows with `until=`; follows the axes when it zo
 | `fn` | `PlotFunction` | required |   |
 | `segments` | `list[list[tuple[float, float]]]` | required |   |
 | `clip` | `Vec \| Expr[Vec]` | required |   |
-| `**props` | `Unpack[StyleKeywords]` | variadic | Keyword arguments (`StyleKeywords`): `name: str \| None`, `key: str \| None`, `x: FloatVal`, `y: FloatVal`, `position: VecVal`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`, `fill: ColorVal`, `fill_opacity: FloatVal`, `stroke: ColorVal`, `stroke_width: FloatVal`, `dash: FloatsVal`, `color: ColorVal`. |
+| `**props` | `Unpack[StyleKeywords]` | variadic | Keyword arguments (`StyleKeywords`): `name: str \| None`, `key: str \| None`, `x: FloatVal`, `y: FloatVal`, `position: VecVal`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`, `fill: ColorVal`, `fill_opacity: FloatVal`, `stroke: ColorVal`, `stroke_width: FloatVal`, `dash: FloatsVal`, `glow: FloatVal`, `glow_color: ColorVal`, `color: ColorVal`. |
 
 **Props** (animatable with `.to()`, settable with `.set()` or in the constructor):
 
@@ -1207,6 +1255,8 @@ A curve `y = fn(x)` of an axes. Grows with `until=`; follows the axes when it zo
 | `stroke` | color | `theme.fg` | linear |
 | `stroke_width` | float | `theme.stroke_width` | linear |
 | `dash` | floats | `()` | step_end |
+| `glow` | float | `0.0` | linear |
+| `glow_color` | color | `theme.no_color` | linear |
 | `points` | segments | `[]` | step_end |
 | `x_range` | vec2 | `(0.0, 1.0)` | linear |
 | `y_range` | vec2 | `(0.0, 1.0)` | linear |
@@ -1325,7 +1375,7 @@ Tangent segment `length` units long, centered on the curve at `x`, reactive when
 | `x` | `FloatExpr` | required | Tangent segment `length` units long, centered on the curve at `x`, reactive when `x` is a signal. |
 | `length` | `float` | `2.0` | Tangent segment `length` units long, centered on the curve at `x`, reactive when `x` is a signal. |
 | `enter_with_axes` | `bool` | `True` | It belongs to the axes and enters with it; `enter_with_axes=False` keeps it hidden until a verb brings it in. |
-| `**style` | `Unpack[UnplacedStyleKeywords]` | variadic | Keyword arguments (`UnplacedStyleKeywords`): `name: str \| None`, `key: str \| None`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`, `fill: ColorVal`, `fill_opacity: FloatVal`, `stroke: ColorVal`, `stroke_width: FloatVal`, `dash: FloatsVal`, `color: ColorVal`. |
+| `**style` | `Unpack[UnplacedStyleKeywords]` | variadic | Keyword arguments (`UnplacedStyleKeywords`): `name: str \| None`, `key: str \| None`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`, `fill: ColorVal`, `fill_opacity: FloatVal`, `stroke: ColorVal`, `stroke_width: FloatVal`, `dash: FloatsVal`, `glow: FloatVal`, `glow_color: ColorVal`, `color: ColorVal`. |
 
 **Example:**
 
@@ -1461,6 +1511,119 @@ barchart.to(*, data: DataTable | None = None, **kw: Unpack[ChangeKeywords]) -> A
 | `data` | `DataTable \| None` | `None` | `chart.to(data=df2)`: animated change of data (plus any other props). |
 | `**kw` | `Unpack[ChangeKeywords]` | variadic |   |
 
+<a id="k-piechart"></a>
+### `k.PieChart` *(class)*
+
+```python
+k.PieChart(
+    data: DataTable,
+    labels: str,
+    values: str,
+    *,
+    key: str | None = None,
+    radius: float = 2.0,
+    donut: float = 0.0,
+    color: ColorLike | Mapping[str, ColorLike] | None = None,
+    percent: bool = True,
+    label_size: float = 0.26,
+    **props: Unpack[ChartKeywords],
+)
+```
+
+One slice per row of a table: `labels=` names the category column and `values=` the numbers; `donut=0.5` leaves a hole (a fraction of `radius=`). Slices start at the top and go clockwise, labelled outside with their percentage (narrow ones get a leader line). `pie.to(data=df2)` animates the shares; new keys grow in, missing ones shrink away. `pie.slice("IT")` is a slice (`.sector`, `.label`, `.percent`).
+
+**Parameters:**
+
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `data` | `DataTable` | required | `pie.to(data=df2)` animates the shares; new keys grow in, missing ones shrink away. |
+| `labels` | `str` | required | One slice per row of a table: `labels=` names the category column and `values=` the numbers; `donut=0.5` leaves a hole (a fraction of `radius=`). |
+| `values` | `str` | required | One slice per row of a table: `labels=` names the category column and `values=` the numbers; `donut=0.5` leaves a hole (a fraction of `radius=`). |
+| `key` | `str \| None` | `None` |   |
+| `radius` | `float` | `2.0` | One slice per row of a table: `labels=` names the category column and `values=` the numbers; `donut=0.5` leaves a hole (a fraction of `radius=`). |
+| `donut` | `float` | `0.0` | One slice per row of a table: `labels=` names the category column and `values=` the numbers; `donut=0.5` leaves a hole (a fraction of `radius=`). |
+| `color` | `ColorLike \| Mapping[str, ColorLike] \| None` | `None` |   |
+| `percent` | `bool` | `True` |   |
+| `label_size` | `float` | `0.26` |   |
+| `**props` | `Unpack[ChartKeywords]` | variadic | Keyword arguments (`ChartKeywords`): `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`, `name: str \| None`. |
+
+Props inherited from [`k.Node`](object-state.md#k-node): `x`, `y`, `rotate`, `scale`, `scale_x`, `scale_y`, `anchor`, `opacity`, `z`, `visible`, `bleed`.
+
+**Example:**
+
+```python
+MIX = {"source": ["Solar", "Wind", "Hydro", "Gas"], "twh": [10, 25, 30, 35]}
+LATER = {"source": ["Solar", "Wind", "Hydro", "Gas"], "twh": [35, 30, 25, 10]}
+
+@k.scene
+def mix(s: k.Scene):
+    pie = k.PieChart(MIX, labels="source", values="twh", donut=0.45).place(at="center")
+    s.play(k.draw(pie))
+    s.play(pie.to(data=LATER), duration=2)
+    s.play(k.indicate(pie.slice("Solar")))
+```
+
+**See also:** [`k.BarChart`](#k-barchart), [`k.Sector`](objects.md#k-sector).
+
+**Members:**
+
+- [`keys`](#piechart-keys): Keys of the slices, in order (as of the last scheduled transition).
+- [`slice`](#piechart-slice): The slice of `key`.
+- [`enter`](#piechart-enter): `k.draw(pie)`: the slices are drawn one after the other, then their labels appear.
+- [`to`](#piechart-to): `pie.to(data=df2)`: animated change of data (plus any other props).
+
+Inherited from [`k.Group`](objects.md#k-group): [`children`](objects.md#group-children), [`swap`](objects.md#group-swap), [`insert`](objects.md#group-insert), [`pop`](objects.md#group-pop), [`fit`](objects.md#group-fit).
+Inherited from [`k.Node`](object-state.md#k-node): [`set`](object-state.md#node-set), [`unbind`](object-state.md#node-unbind), [`edge`](object-state.md#node-edge), [`age`](object-state.md#node-age), [`entered`](object-state.md#node-entered), [`exited`](object-state.md#node-exited), [`copy`](object-state.md#node-copy), [`place`](object-state.md#node-place), [`to_place`](object-state.md#node-to_place), [`unpin`](object-state.md#node-unpin).
+
+<a id="piechart-keys"></a>
+#### `k.PieChart.keys` *(property)*
+
+```python
+piechart.keys: list[str]  # read-only
+```
+
+Keys of the slices, in order (as of the last scheduled transition).
+
+<a id="piechart-slice"></a>
+#### `k.PieChart.slice` *(method)*
+
+```python
+piechart.slice(key: object) -> PieSlice
+```
+
+The slice of `key`.
+
+**Parameters:**
+
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `key` | `object` | required | The slice of `key`. |
+
+<a id="piechart-enter"></a>
+#### `k.PieChart.enter` *(method)*
+
+```python
+piechart.enter() -> Animation
+```
+
+`k.draw(pie)`: the slices are drawn one after the other, then their labels appear.
+
+<a id="piechart-to"></a>
+#### `k.PieChart.to` *(method)*
+
+```python
+piechart.to(*, data: DataTable | None = None, **kw: Unpack[ChangeKeywords]) -> Animation
+```
+
+`pie.to(data=df2)`: animated change of data (plus any other props).
+
+**Parameters:**
+
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `data` | `DataTable \| None` | `None` | `pie.to(data=df2)`: animated change of data (plus any other props). |
+| `**kw` | `Unpack[ChangeKeywords]` | variadic |   |
+
 <a id="k-linechart"></a>
 ### `k.LineChart` *(class)*
 
@@ -1519,7 +1682,7 @@ def lines(s: k.Scene):
 
 - [`to`](#linechart-to): `chart.to(data=df2)`: the lines morph to the new values (plus any other props).
 
-Inherited from [`k.Axes`](#k-axes): [`map_x`](#axes-map_x), [`map_y`](#axes-map_y), [`local_point`](#axes-local_point), [`point`](#axes-point), [`add`](#axes-add), [`origin`](#axes-origin), [`in_view`](#axes-in_view), [`plot`](#axes-plot), [`area`](#axes-area), [`segment`](#axes-segment), [`hband`](#axes-hband), [`vband`](#axes-vband), [`vector`](#axes-vector), [`vline`](#axes-vline), [`hline`](#axes-hline), [`scatter`](#axes-scatter), [`parametric`](#axes-parametric), [`bars`](#axes-bars), [`zoom_to`](#axes-zoom_to).
+Inherited from [`k.Axes`](#k-axes): [`map_x`](#axes-map_x), [`map_y`](#axes-map_y), [`local_point`](#axes-local_point), [`point`](#axes-point), [`add`](#axes-add), [`origin`](#axes-origin), [`in_view`](#axes-in_view), [`plot`](#axes-plot), [`dot`](#axes-dot), [`area`](#axes-area), [`segment`](#axes-segment), [`hband`](#axes-hband), [`vband`](#axes-vband), [`vector`](#axes-vector), [`vline`](#axes-vline), [`hline`](#axes-hline), [`scatter`](#axes-scatter), [`parametric`](#axes-parametric), [`bars`](#axes-bars), [`zoom_to`](#axes-zoom_to).
 Inherited from [`k.Group`](objects.md#k-group): [`children`](objects.md#group-children), [`swap`](objects.md#group-swap), [`insert`](objects.md#group-insert), [`pop`](objects.md#group-pop), [`fit`](objects.md#group-fit).
 Inherited from [`k.Node`](object-state.md#k-node): [`set`](object-state.md#node-set), [`unbind`](object-state.md#node-unbind), [`edge`](object-state.md#node-edge), [`age`](object-state.md#node-age), [`entered`](object-state.md#node-entered), [`exited`](object-state.md#node-exited), [`copy`](object-state.md#node-copy), [`place`](object-state.md#node-place), [`to_place`](object-state.md#node-to_place), [`unpin`](object-state.md#node-unpin).
 

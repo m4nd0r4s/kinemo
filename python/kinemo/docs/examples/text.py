@@ -11,13 +11,16 @@ ENTRIES = (
         "Formula in LaTeX syntax, typeset by the built-in engine (no TeX installation needed). "
         "`\\id{name}{...}` names a subexpression (`eq[\"name\"]`); any subexpression is "
         "found through the syntax tree (`eq[\"c^2\"]` ≡ `eq[\"c^{2}\"]`). `k.morph` between "
-        "equations matches names first, then identical TeX subtrees. Unsupported command: K0801.",
+        "equations matches names first, then identical TeX subtrees. `color=` colors the formula and "
+        "any part (`eq[\"E\"].set(color=k.YELLOW)`, or `.to(color=...)` to animate). "
+        "Unsupported command: K0801.",
         '''
 import kinemo as k
 
 @k.scene
 def formula(s: k.Scene):
-    eq = k.Math(r"\\id{lhs}{a^2 + b^2} = c^2").place(at="center")
+    eq = k.Math(r"\\id{lhs}{a^2 + b^2} = c^2", color=k.BLUE).place(at="center")
+    eq["="].set(color=k.WHITE)
     s.play(k.write(eq))
     s.play(eq["lhs"].to(color=k.YELLOW))
     s.play(eq["c^2"].to(color=k.GREEN))

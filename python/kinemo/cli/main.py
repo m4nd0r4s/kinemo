@@ -6,7 +6,8 @@ import argparse
 import sys
 from typing import Any, Callable
 
-from . import check, dev, docs_cmd, inspect, mcp_cmd, new, render, snap, upgrade_cmd, voice
+from . import check, dev, docs_cmd, doctor_cmd, inspect, mcp_cmd, new, render, snap, upgrade_cmd, voice
+from .environment import MissingFfmpeg
 from .instants import InstantError
 
 
@@ -107,6 +108,9 @@ def parser() -> argparse.ArgumentParser:
     upgrade_cmd.add_arguments(p)
     p.set_defaults(run=upgrade_cmd.run)
 
+    p = sub.add_parser("doctor", help="what kinemo finds on this machine (paste it into bug reports)")
+    p.set_defaults(run=doctor_cmd.run)
+
     p = sub.add_parser("explain", help="long explanation of an error or lint")
     p.add_argument("code")
     p.set_defaults(run=_explain)
@@ -132,6 +136,9 @@ def main(argv: list[str] | None = None) -> int:
     try:
         return run(args)
     except InstantError as error:
+        print(f"kinemo: {error}")
+        return 2
+    except MissingFfmpeg as error:
         print(f"kinemo: {error}")
         return 2
 

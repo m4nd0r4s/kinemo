@@ -18,6 +18,7 @@ Explanatory animations in Python. Every subcommand takes `-h` / `--help`. Exit c
 | [`kinemo mcp`](#mcp) | MCP server (stdio) with check, inspect, snap, docs and explain |
 | [`kinemo docs`](#docs) | short offline docs with a canonical example |
 | [`kinemo upgrade`](#upgrade) | codemods between versions |
+| [`kinemo doctor`](#doctor) | what kinemo finds on this machine (paste it into bug reports) |
 | [`kinemo explain`](#explain) | long explanation of an error or lint |
 
 Scene commands (`dev`, `check`, `inspect`, `snap`, `render`) take the file, `--scene NAME` to pick one scene (default: all) and `--param NAME=VALUE` (repeatable) to set [scene parameters](parameters.md). Settings precedence: CLI > `@k.scene` > `kinemo.toml` > defaults ([configuration](configuration.md)).
@@ -265,6 +266,24 @@ Examples:
 ```sh
 kinemo upgrade scene.py --check
 kinemo upgrade scenes/*.py
+```
+
+<a id="doctor"></a>
+## `kinemo doctor`
+
+What kinemo finds on this machine (paste it into bug reports).
+
+```text
+kinemo doctor [-h]
+```
+
+Takes no arguments.
+
+Examples:
+
+```sh
+kinemo doctor
+kinemo doctor > setup.txt
 ```
 
 <a id="explain"></a>

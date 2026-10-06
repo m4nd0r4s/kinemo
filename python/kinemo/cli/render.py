@@ -8,6 +8,7 @@ import os
 
 from ..diagnostics import KinemoError
 from ..project import load as load_project
+from .environment import require_ffmpeg
 from .loader import LoadError, build, find_scenes, load_module, select
 from .instants import parse_time
 from .output_path import ensure_folder_of, single_file
@@ -48,6 +49,9 @@ def run(args: argparse.Namespace) -> int:
         print(f"kinemo: --out {args.out} is a .{single[1]} file but --format is {args.format}")
         return 2
     args.format = args.format or (single[1] if single else "mp4")
+    if args.format in (*VIDEO, "slides"):
+        # Before anything is built: a missing ffmpeg is reported with how to install it.
+        require_ffmpeg()
     if single is not None and args.frames:
         print("kinemo: --frames writes a folder of PNGs; pass a folder to --out")
         return 2

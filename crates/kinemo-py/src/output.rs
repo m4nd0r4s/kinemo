@@ -128,6 +128,13 @@ pub fn ffmpeg_available() -> bool {
     kinemo_encode::ffmpeg_available()
 }
 
+/// Where kinemo finds ffmpeg (`KINEMO_FFMPEG`, then `PATH`, then common locations); the
+/// reason when it does not.
+#[pyfunction]
+pub fn ffmpeg_location() -> PyResult<String> {
+    kinemo_encode::find_ffmpeg().map(|path| path.display().to_string()).map_err(runtime)
+}
+
 /// Logical box (x0, y0, x1, y1) of a text layout, for tests and tooling.
 #[pyfunction]
 #[pyo3(signature = (text, size = 0.5))]

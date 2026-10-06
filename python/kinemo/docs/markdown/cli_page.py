@@ -9,6 +9,7 @@ from .writer import code, code_block, heading, link, page, table
 #: Usage examples per subcommand (the arguments themselves come from the parser).
 EXAMPLES: dict[str, tuple[str, ...]] = {
     "new": ("kinemo new my-video", "cd my-video && kinemo check scene.py && kinemo render scene.py"),
+    "doctor": ("kinemo doctor", "kinemo doctor > setup.txt"),
     "dev": ("kinemo dev scene.py", "kinemo dev scene.py --scene intro --debug layout,safe --port 8000"),
     "check": (
         "kinemo check scene.py",

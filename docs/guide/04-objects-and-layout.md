@@ -471,6 +471,26 @@ def copies(s: k.Scene):
 
 A component's `copy()` rebuilds it with the same arguments.
 
+## Matrices
+
+`k.Matrix(rows)` lays its entries out as objects in a grid, so each one can be colored,
+moved or indicated: `m[i, j]`, `m.row(i)`, `m.column(j)`. Entries are numbers, TeX strings
+or any object; `brackets=` picks `[`, `(`, `|` or none. `a @ b` computes the product of two
+numeric matrices, and `k.matrix_product(a, b, a @ b)` shows it row by column:
+
+```python
+import kinemo as k
+
+
+@k.scene
+def product(s: k.Scene):
+    a = k.Matrix([[1, 2], [3, 4]]).place(at=(-3.5, 0))
+    b = k.Matrix([[5, 6], [7, 8]]).place(at=(-0.5, 0))
+    c = (a @ b).place(at=(3, 0))
+    s.play(k.fade_in(a, b))
+    s.play(k.matrix_product(a, b, c))
+```
+
 ## Graphs
 
 `k.Graph(nodes, edges, layout=...)` draws nodes (circles with their names) joined by edges,

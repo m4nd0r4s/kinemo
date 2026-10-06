@@ -114,6 +114,8 @@ Shapes, groups, images, SVG and mass objects (points, vector fields, stream line
 - [`k.Bar`](objects.md#k-bar): A value shown as a bar that grows from its base, with an optional label (`label=True`).
 - [`k.Group`](objects.md#k-group): Groups objects: transforms compose and opacity multiplies.
 - [`k.Graph`](objects.md#k-graph): Nodes and edges: `k.Graph(nodes, edges, layout=...)` with names as nodes and `(u, v)` or `(u, v, weight)` edges (arrows with `directed=True`).
+- [`k.Matrix`](objects.md#k-matrix): A matrix whose entries are objects in a grid: numbers, TeX strings (typeset with `k.Math`) or any object, between `brackets=` (`"["`, `"("`, `"|"`, `"none"`).
+- [`k.matrix_product`](objects.md#k-matrix_product): Shows a product row by column: `k.matrix_product(a, b, a @ b)` draws the product's brackets, then for each entry indicates its row of `a` and its column of `b` while the entry appears (`step=` seconds each).
 - [`k.Image`](objects.md#k-image): Raster image (PNG or JPEG) drawn by the renderer, centered on its position.
 - [`k.SVG`](objects.md#k-svg): Imports an SVG illustration (a file or inline markup): each shape becomes a `k.Path` with the SVG's fill, stroke and stroke width, and each `<g>` becomes a `k.Group`.
 - [`k.Brace`](objects.md#k-brace): Curly brace (`}`) along one side of an object's box: `direction=` "down", "up", "left" or "right", `gap` units away from it, with the tip pointing outward.

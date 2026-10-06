@@ -615,4 +615,76 @@ def product(s: k.Scene):
 ''',
         related=("k.Matrix",),
     ),
+    DocEntry(
+        "k.Bits",
+        "Objects",
+        "A binary register: the bits of a value, most significant first, lit when 1. "
+        "`bits.to(value=n)` flips the cells that change, from the least significant up. "
+        "`signed=True` (two's complement), `place_values=True` (128 64 … 1 above), `group=4` "
+        "(a gap every 4 bits) and `fields={\"sign\": (0, 1), ...}` (labelled ranges of cells). "
+        "`bits.bit(0)` is the least significant cell (`.box`, `.digit`).",
+        '''
+import kinemo as k
+
+@k.scene
+def counting(s: k.Scene):
+    reg = k.Bits(13, width=8, place_values=True, group=4).place(at="center")
+    s.play(k.fade_in(reg))
+    s.play(reg.to(value=14))
+    s.play(k.indicate(reg.bit(0)))
+''',
+        related=("k.Array",),
+    ),
+    DocEntry(
+        "k.TitleCard",
+        "Objects",
+        "An episode's opening card: the title, a `kicker=` above it, an accent rule under it and a "
+        "`subtitle=`. `k.draw(card)` fades the kicker in and writes the title, draws the rule, then "
+        "shows the subtitle. Parts: `card.kicker`, `card.title`, `card.rule`, `card.subtitle`.",
+        '''
+import kinemo as k
+
+@k.scene
+def opening(s: k.Scene):
+    card = k.TitleCard("How a Computer Adds", kicker="EPISODE 2", subtitle="How computers do math").place(at="center")
+    s.play(k.draw(card))
+    s.wait(1)
+''',
+        related=("k.EndCard", "k.LowerThird"),
+    ),
+    DocEntry(
+        "k.EndCard",
+        "Objects",
+        "What comes next: `heading=` (\"Next\") over the next title, then `brand=`, `series=` and an "
+        "`invite=`. `k.draw(card)` writes the heading and the title, then fades the rest in. Parts: "
+        "`card.heading`, `card.next`, `card.brand`, `card.series`, `card.invite`.",
+        '''
+import kinemo as k
+
+@k.scene
+def closing(s: k.Scene):
+    card = k.EndCard("Floating Point, Unmasked", brand="Until It Clicks", series="How computers do math").place(at="center")
+    s.play(k.draw(card))
+    s.play(k.indicate(card.heading, scale=1.05))
+''',
+        related=("k.TitleCard",),
+    ),
+    DocEntry(
+        "k.LowerThird",
+        "Objects",
+        "A name and a role beside an accent bar, for a corner (`side=\"right\"` mirrors it); place "
+        "it as usual. `k.draw(card)` grows the bar, then slides the texts in. Parts: `card.bar`, "
+        "`card.title`, `card.role`.",
+        '''
+import kinemo as k
+
+@k.scene
+def speaker(s: k.Scene):
+    who = k.LowerThird("Ada Lovelace", role="Mathematician").place(at="bottom-left", gap=0.6)
+    s.play(k.draw(who))
+    s.wait(1)
+    s.play(k.fade_out(who))
+''',
+        related=("k.TitleCard",),
+    ),
 )

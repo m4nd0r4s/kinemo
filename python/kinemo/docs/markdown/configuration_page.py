@@ -89,6 +89,9 @@ def _toml_rows() -> list[tuple[str, str, str, str]]:
          "`{file}` and `{line}` replaced, such as `emacsclient -n +{line} {file}`. Read when `kinemo dev` starts."),
         (code("[python] workers_threshold"), code("float"), code(default_text(defaults["python_workers_threshold"])),
          "Seconds of `k.python` computation above which a worker pool is used."),
+        (code("[python] paths"), code("list[str]"), code("[]"),
+         "Folders of the project (relative to its root) that scene files import from, such as a "
+         "shared `lib/` of components. `kinemo dev` reloads modules anywhere in the project."),
     ]
     return rows
 

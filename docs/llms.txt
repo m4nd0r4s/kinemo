@@ -750,6 +750,44 @@ def product(s: k.Scene):
     s.play(k.fade_in(a, b))
     s.play(k.matrix_product(a, b, c, step=0.6))
 ```
+#### `k.Bits(value=0, width=8, *, signed=False, place_values=False, group=None, fields=None, size=0.5, color=None, **props)`
+A binary register: the bits of a value, most significant first, lit when 1. `bits.to(value=n)` flips the cells that change, from the least significant up. `signed=True` (two's complement), `place_values=True` (128 64 … 1 above), `group=4` (a gap every 4 bits) and `fields={"sign": (0, 1), ...}` (labelled ranges of cells). `bits.bit(0)` is the least significant cell (`.box`, `.digit`). See also: `k.Array`.
+```python
+@k.scene
+def counting(s: k.Scene):
+    reg = k.Bits(13, width=8, place_values=True, group=4).place(at="center")
+    s.play(k.fade_in(reg))
+    s.play(reg.to(value=14))
+    s.play(k.indicate(reg.bit(0)))
+```
+#### `k.TitleCard(title, *, kicker=None, subtitle=None, accent=None, size=0.9, **props)`
+An episode's opening card: the title, a `kicker=` above it, an accent rule under it and a `subtitle=`. `k.draw(card)` fades the kicker in and writes the title, draws the rule, then shows the subtitle. Parts: `card.kicker`, `card.title`, `card.rule`, `card.subtitle`. See also: `k.EndCard`, `k.LowerThird`.
+```python
+@k.scene
+def opening(s: k.Scene):
+    card = k.TitleCard("How a Computer Adds", kicker="EPISODE 2", subtitle="How computers do math").place(at="center")
+    s.play(k.draw(card))
+    s.wait(1)
+```
+#### `k.EndCard(next_title=None, *, heading="Next", brand=None, series=None, invite=None, accent=None, size=0.7, **props)`
+What comes next: `heading=` ("Next") over the next title, then `brand=`, `series=` and an `invite=`. `k.draw(card)` writes the heading and the title, then fades the rest in. Parts: `card.heading`, `card.next`, `card.brand`, `card.series`, `card.invite`. See also: `k.TitleCard`.
+```python
+@k.scene
+def closing(s: k.Scene):
+    card = k.EndCard("Floating Point, Unmasked", brand="Until It Clicks", series="How computers do math").place(at="center")
+    s.play(k.draw(card))
+    s.play(k.indicate(card.heading, scale=1.05))
+```
+#### `k.LowerThird(title, role=None, *, side="left", accent=None, size=0.42, **props)`
+A name and a role beside an accent bar, for a corner (`side="right"` mirrors it); place it as usual. `k.draw(card)` grows the bar, then slides the texts in. Parts: `card.bar`, `card.title`, `card.role`. See also: `k.TitleCard`.
+```python
+@k.scene
+def speaker(s: k.Scene):
+    who = k.LowerThird("Ada Lovelace", role="Mathematician").place(at="bottom-left", gap=0.6)
+    s.play(k.draw(who))
+    s.wait(1)
+    s.play(k.fade_out(who))
+```
 #### `k.Image(path, width=None, height=None, **props)`
 Raster image (PNG or JPEG) drawn by the renderer, centered on its position. Without a size it is 3 units tall; with `width=` or `height=` the other side follows the file's aspect ratio (props `w` and `h`, animatable). Relative paths start from the folder of the scene file. Accepts `scale`, `rotate` and `opacity`; morphs and layout treat it as its rectangle, and the exported SVG embeds the file. See also: `k.SVG`, `k.morph`.
 ```python

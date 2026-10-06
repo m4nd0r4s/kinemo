@@ -471,6 +471,12 @@ def copies(s: k.Scene):
 
 A component's `copy()` rebuilds it with the same arguments.
 
+## Bits
+
+`k.Bits(value, width=8)` shows the bits of a number as cells that light up when 1;
+`bits.to(value=n)` flips the cells that change. `signed=True` uses two's complement,
+`place_values=True` writes 128 64 … 1 above the cells, `group=4` leaves a gap every
+nibble, and `fields=` labels ranges of cells, such as the parts of a float:
 ## Matrices
 
 `k.Matrix(rows)` lays its entries out as objects in a grid, so each one can be colored,
@@ -483,6 +489,10 @@ import kinemo as k
 
 
 @k.scene
+def half_float(s: k.Scene):
+    f = k.Bits(0, width=16, fields={"sign": (0, 1), "exponent": (1, 6), "mantissa": (6, 16)}, size=0.4).place(at="center")
+    s.play(k.fade_in(f))
+    s.play(f.to(value=15360))  # 1.0 in IEEE 754 half precision
 def product(s: k.Scene):
     a = k.Matrix([[1, 2], [3, 4]]).place(at=(-3.5, 0))
     b = k.Matrix([[5, 6], [7, 8]]).place(at=(-0.5, 0))
@@ -515,6 +525,26 @@ def search(s: k.Scene):
   carries them along.
 - `g.add_node(name, edges=...)` lays the graph out again with the new node; `at=(x, y)`
   puts it somewhere instead. `g.add_edge(u, v)` and `g.remove(name, (u, v))` change edges.
+
+## Series cards
+
+`k.TitleCard`, `k.EndCard` and `k.LowerThird` are the cards a series repeats: an
+episode's opening, what comes next, and a name over a corner. They follow the theme, have
+named parts (`card.title`, `card.next`, ...) and enter with a choreography of their own
+through `k.draw(card)`:
+
+```python
+import kinemo as k
+
+
+@k.scene
+def episode(s: k.Scene):
+    card = k.TitleCard("How a Computer Adds", kicker="EPISODE 2", subtitle="How computers do math").place(at="center")
+    s.play(k.draw(card))
+    s.play(k.fade_out(card))
+    end = k.EndCard("Floating Point, Unmasked", brand="Until It Clicks").place(at="center")
+    s.play(k.draw(end))
+```
 
 ## Identity and keys
 

@@ -81,7 +81,9 @@ class Session:
 
     @property
     def root(self) -> str:
-        return os.path.dirname(os.path.abspath(self.path))
+        """Where local modules live (watched and reloaded): the project (the folder with
+        `kinemo.toml`, so shared components anywhere in it reload), else the scene's folder."""
+        return load_project(os.path.dirname(os.path.abspath(self.path))).root
 
     # ---- building ------------------------------------------------------------------------
     def rebuild(self) -> bool:

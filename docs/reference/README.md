@@ -106,6 +106,7 @@ Shapes, groups, images, SVG and mass objects (points, vector fields, stream line
 - [`k.Triangle`](objects.md#k-triangle): Triangle from its three vertices (no arguments: equilateral with radius 1).
 - [`k.Line`](objects.md#k-line): Segment from `start` to `end` (local coordinates), or centered with `length=`.
 - [`k.Arrow`](objects.md#k-arrow): Arrow from `start` to `end` with a tip of size `tip`.
+- [`k.Sector`](objects.md#k-sector): A pie slice from the center, or a ring slice with `inner=` (its inner radius): `r=`, `angle=` (degrees, counterclockwise; negative goes clockwise) and `start_angle=` from +x.
 - [`k.Arc`](objects.md#k-arc): Circular arc of radius `r`, starting at `start_angle` and sweeping `angle` degrees (counterclockwise).
 - [`k.Path`](objects.md#k-path): Path from SVG commands (`d="M 0 0 L 1 1"`) or a polyline from a list of points; `closed=True` closes the outline.
 - [`k.union`](objects.md#k-union): Boolean operations between shapes: `k.union(a, b)`, `k.intersect(a, b)` and `k.subtract(a, b)` return a new `k.Path` computed from the outlines at the cursor (with the style of `a`, unless another one is passed).
@@ -176,6 +177,7 @@ Axes, number lines, polar axes, plots and data charts.
 - [`k.NumberPlane`](charts.md#k-numberplane): A coordinate grid with axes and the basis vectors î (green) and ĵ (red): `x=(min, max, step)`, `y=...`, `unit=` scene units per step.
 - [`Plot`](charts.md#plot): A curve `y = fn(x)` of an axes.
 - [`k.BarChart`](charts.md#k-barchart): Bar chart from a table: `x=` is the category column, `y=` the value column and `key=` identifies each bar.
+- [`k.PieChart`](charts.md#k-piechart): One slice per row of a table: `labels=` names the category column and `values=` the numbers; `donut=0.5` leaves a hole (a fraction of `radius=`).
 - [`k.LineChart`](charts.md#k-linechart): A `k.Axes` with one line per `y=` column (one or several), connecting the table's points in `x=` order.
 - [`k.Table`](charts.md#k-table): Table of `k.Text` with a highlighted header; `columns=` selects and orders the columns.
 

@@ -22,6 +22,7 @@ Shapes, groups, images, SVG and mass objects (points, vector fields, stream line
 - [`k.Triangle`](#k-triangle): Triangle from its three vertices (no arguments: equilateral with radius 1).
 - [`k.Line`](#k-line): Segment from `start` to `end` (local coordinates), or centered with `length=`.
 - [`k.Arrow`](#k-arrow): Arrow from `start` to `end` with a tip of size `tip`.
+- [`k.Sector`](#k-sector): A pie slice from the center, or a ring slice with `inner=` (its inner radius): `r=`, `angle=` (degrees, counterclockwise; negative goes clockwise) and `start_angle=` from +x.
 - [`k.Arc`](#k-arc): Circular arc of radius `r`, starting at `start_angle` and sweeping `angle` degrees (counterclockwise).
 - [`k.Path`](#k-path): Path from SVG commands (`d="M 0 0 L 1 1"`) or a polyline from a list of points; `closed=True` closes the outline.
 - [`k.union`](#k-union): Boolean operations between shapes: `k.union(a, b)`, `k.intersect(a, b)` and `k.subtract(a, b)` return a new `k.Path` computed from the outlines at the cursor (with the style of `a`, unless another one is passed).
@@ -1023,6 +1024,62 @@ def arrow(s: k.Scene):
 ```
 
 **See also:** [`k.Line`](#k-line).
+
+Inherited from [`k.Node`](object-state.md#k-node): [`set`](object-state.md#node-set), [`to`](object-state.md#node-to), [`unbind`](object-state.md#node-unbind), [`edge`](object-state.md#node-edge), [`age`](object-state.md#node-age), [`entered`](object-state.md#node-entered), [`exited`](object-state.md#node-exited), [`copy`](object-state.md#node-copy), [`place`](object-state.md#node-place), [`to_place`](object-state.md#node-to_place), [`unpin`](object-state.md#node-unpin).
+
+<a id="k-sector"></a>
+### `k.Sector` *(class)*
+
+```python
+k.Sector(
+    r: FloatVal = 1.0,
+    angle: FloatVal = 90.0,
+    start_angle: FloatVal = 0.0,
+    *,
+    inner: FloatVal = 0.0,
+    **props: Unpack[StyleKeywords],
+)
+```
+
+A pie slice from the center, or a ring slice with `inner=` (its inner radius): `r=`, `angle=` (degrees, counterclockwise; negative goes clockwise) and `start_angle=` from +x. Every prop animates, so a slice can open or turn.
+
+**Parameters:**
+
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `r` | `FloatVal` | `1.0` | A pie slice from the center, or a ring slice with `inner=` (its inner radius): `r=`, `angle=` (degrees, counterclockwise; negative goes clockwise) and `start_angle=` from +x. |
+| `angle` | `FloatVal` | `90.0` | A pie slice from the center, or a ring slice with `inner=` (its inner radius): `r=`, `angle=` (degrees, counterclockwise; negative goes clockwise) and `start_angle=` from +x. |
+| `start_angle` | `FloatVal` | `0.0` | A pie slice from the center, or a ring slice with `inner=` (its inner radius): `r=`, `angle=` (degrees, counterclockwise; negative goes clockwise) and `start_angle=` from +x. |
+| `inner` | `FloatVal` | `0.0` | A pie slice from the center, or a ring slice with `inner=` (its inner radius): `r=`, `angle=` (degrees, counterclockwise; negative goes clockwise) and `start_angle=` from +x. |
+| `**props` | `Unpack[StyleKeywords]` | variadic | Keyword arguments (`StyleKeywords`): `name: str \| None`, `key: str \| None`, `x: FloatVal`, `y: FloatVal`, `position: VecVal`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`, `fill: ColorVal`, `fill_opacity: FloatVal`, `stroke: ColorVal`, `stroke_width: FloatVal`, `dash: FloatsVal`, `color: ColorVal`. |
+
+**Props** (animatable with `.to()`, settable with `.set()` or in the constructor):
+
+| Prop | Kind | Default | Interpolation |
+| --- | --- | --- | --- |
+| `fill` | color | `theme.fg` | linear |
+| `fill_opacity` | float | `0.0` | linear |
+| `stroke` | color | `theme.fg` | linear |
+| `stroke_width` | float | `theme.stroke_width` | linear |
+| `dash` | floats | `()` | step_end |
+| `r` | float | `1.0` | linear |
+| `inner` | float | `0.0` | linear |
+| `start_angle` | float | `0.0` | linear |
+| `angle` | float | `90.0` | linear |
+
+Props inherited from [`k.Node`](object-state.md#k-node): `x`, `y`, `rotate`, `scale`, `scale_x`, `scale_y`, `anchor`, `opacity`, `z`, `visible`, `bleed`.
+
+**Example:**
+
+```python
+@k.scene
+def slice_(s: k.Scene):
+    wedge = k.Sector(r=2, angle=60, start_angle=90, inner=0.8, fill=k.YELLOW, fill_opacity=0.9).place(at="center")
+    s.play(k.draw(wedge))
+    s.play(wedge.to(angle=300), duration=1.5)
+```
+
+**See also:** [`k.Arc`](#k-arc), [`k.PieChart`](charts.md#k-piechart).
 
 Inherited from [`k.Node`](object-state.md#k-node): [`set`](object-state.md#node-set), [`to`](object-state.md#node-to), [`unbind`](object-state.md#node-unbind), [`edge`](object-state.md#node-edge), [`age`](object-state.md#node-age), [`entered`](object-state.md#node-entered), [`exited`](object-state.md#node-exited), [`copy`](object-state.md#node-copy), [`place`](object-state.md#node-place), [`to_place`](object-state.md#node-to_place), [`unpin`](object-state.md#node-unpin).
 

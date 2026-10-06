@@ -401,6 +401,23 @@ def arrow(s: k.Scene):
         related=("k.Line",),
     ),
     DocEntry(
+        "k.Sector",
+        "Objects",
+        "A pie slice from the center, or a ring slice with `inner=` (its inner radius): `r=`, "
+        "`angle=` (degrees, counterclockwise; negative goes clockwise) and `start_angle=` from +x. "
+        "Every prop animates, so a slice can open or turn.",
+        '''
+import kinemo as k
+
+@k.scene
+def slice_(s: k.Scene):
+    wedge = k.Sector(r=2, angle=60, start_angle=90, inner=0.8, fill=k.YELLOW, fill_opacity=0.9).place(at="center")
+    s.play(k.draw(wedge))
+    s.play(wedge.to(angle=300), duration=1.5)
+''',
+        related=("k.Arc", "k.PieChart"),
+    ),
+    DocEntry(
         "k.Arc",
         "Objects",
         "Circular arc of radius `r`, starting at `start_angle` and sweeping `angle` degrees "

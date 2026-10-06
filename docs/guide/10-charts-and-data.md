@@ -290,6 +290,33 @@ def generation(s: k.Scene):
     s.wait(0.5)
 ```
 
+### `k.PieChart`
+
+```python signature
+k.PieChart(data, labels, values, *, key=None, radius=2.0, donut=0.0, color=None, percent=True, label_size=0.26)
+```
+
+One slice per row: `labels=` names the category column and `values=` the numbers.
+`donut=0.5` leaves a hole. Slices start at the top and go clockwise; labels sit outside
+with their percentage, and narrow slices get a leader line. `pie.to(data=df2)` animates the
+shares by `key` (new keys grow in, missing ones shrink away), and `pie.slice("Solar")` is a
+slice to indicate or recolor.
+
+```python
+import kinemo as k
+
+MIX = {"source": ["Solar", "Wind", "Hydro", "Gas"], "twh": [10, 25, 30, 35]}
+LATER = {"source": ["Solar", "Wind", "Hydro", "Nuclear"], "twh": [35, 30, 25, 10]}
+
+
+@k.scene
+def mix(s: k.Scene):
+    pie = k.PieChart(MIX, labels="source", values="twh", donut=0.45).place(at="center")
+    s.play(k.draw(pie))
+    s.play(pie.to(data=LATER), duration=2)
+    s.play(k.indicate(pie.slice("Solar")))
+```
+
 ### `k.LineChart`
 
 ```python signature

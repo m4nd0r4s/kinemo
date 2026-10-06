@@ -34,6 +34,7 @@ from .objects.charts.polar import PolarAxes
 from .objects.charts.axes_vector import vector_sum
 from .objects.charts.bar_chart import BarChart
 from .objects.charts.pie_chart import PieChart
+from .objects.charts.timeline import Timeline
 from .objects.charts.line_chart import LineChart
 from .objects.charts.table import Table
 from .objects.groups import Column, Grid, Group, Row, Stack
@@ -139,7 +140,7 @@ __all__ = [
     "Points", "StreamLines", "VectorField",
     "Brace", "Image", "SVG",
     "Axes", "NumberLine", "PolarAxes", "BarChart", "LineChart", "Table", "Component", "Context", "Event", "EventInfo", "EventSource", "State", "intersect", "spline", "subtract", "union", "reparent", "Code", "Math", "morph", "Movie", "crossfade", "cut", "morph_cut", "movie", "ListSignal", "list", "flash", "follow", "squash", "Trail", "trace", "integrate", "simulate", "when", "Out", "Prop", "clip", "context", "field", "from_context",
-    "prop", "provide", "Terminal", "box", "cross", "encircle", "strike", "underline", "Angle", "RightAngle", "Card", "Gauge", "Callout", "Array", "NumberPlane", "Graph", "scene_preset", "EndCard", "LowerThird", "TitleCard", "Bits", "Matrix", "matrix_product", "PieChart", "Sector", "vector_sum", "ICON_NAMES", "Icon", "ComplexPlane", "Epicycles", "BrowserWindow", "Laptop", "Phone",
+    "prop", "provide", "Terminal", "box", "cross", "encircle", "strike", "underline", "Angle", "RightAngle", "Card", "Gauge", "Callout", "Array", "NumberPlane", "Graph", "scene_preset", "EndCard", "LowerThird", "TitleCard", "Bits", "Matrix", "matrix_product", "PieChart", "Sector", "vector_sum", "ICON_NAMES", "Icon", "ComplexPlane", "Epicycles", "BrowserWindow", "Laptop", "Phone", "Timeline",
     "ArrowKeywords", "ColorKeywords", "PaintKeywords", "RectKeywords", "StyleKeywords", "TextKeywords", "TransformKeywords",
     "Animation", "Arc", "Arrow", "BLACK", "BLUE", "Bar", "Bool", "Choice", "Circle", "Color", "Column",
     "Diagnostic", "Dot", "Ellipse", "Expr", "Float", "GRAY", "GREEN", "Grid", "Group", "IR_VERSION", "Int",

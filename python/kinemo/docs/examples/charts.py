@@ -76,6 +76,29 @@ def custom_ticks(s: k.Scene):
         related=("Axes.plot", "Axes.zoom_to", "k.NumberLine"),
     ),
     DocEntry(
+        "k.Timeline",
+        "Charts",
+        "Events along a time axis: `k.Timeline([(1687, \"Principia\"), ...], range=(1600, 2000))` "
+        "draws labelled ticks and a marker per event, its label on the first row above or below the "
+        "axis where it clears the others. `reveal=True` keeps events hidden until "
+        "`tl.reveal(name)`; `tl.zoom_to(range=(a, b))` pans and zooms (ticks are regenerated, events "
+        "out of view hide). `tl.event(name)` is an event (`.marker`, `.stem`, `.label`).",
+        '''
+import kinemo as k
+
+EVENTS = [(1687, "Principia"), (1859, "Darwin"), (1865, "Maxwell"), (1905, "Relativity")]
+
+@k.scene
+def history(s: k.Scene):
+    tl = k.Timeline(EVENTS, range=(1650, 1950), reveal=True).place(at="center")
+    s.play(k.draw(tl))
+    for _, name in EVENTS:
+        s.play(tl.reveal(name), duration=0.4)
+    s.play(tl.zoom_to(range=(1680, 1920)), duration=1.5)
+''',
+        related=("k.NumberLine", "Axes.zoom_to"),
+    ),
+    DocEntry(
         "k.NumberLine",
         "Charts",
         "A horizontal number line: a `k.Axes` with only the x axis. Use `nl.point(x, 0)` to "

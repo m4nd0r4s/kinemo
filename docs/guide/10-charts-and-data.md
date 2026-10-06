@@ -252,6 +252,12 @@ def shear(s: k.Scene):
 points are complex numbers: `cp.dot(2 + 1j)`, `cp.vector(1 - 2j)`. `cp.apply(1j)` multiplies
 the whole plane by `i` (a quarter turn) and `cp.apply(lambda z: z ** 2)` maps it with any
 function of `z`.
+### Timelines
+
+`k.Timeline(events, range=(start, end))` lays events `(time, label)` along a time axis; each
+label takes the first row above or below the axis where it clears the others. With
+`reveal=True` the events wait for `tl.reveal(name)`, and `tl.zoom_to(range=(a, b))` pans and
+zooms like an axes.
 
 ## Data charts
 

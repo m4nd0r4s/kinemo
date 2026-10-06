@@ -1,1 +1,11 @@
-blank_issues_enabled: true
+blank_issues_enabled: false
+contact_links:
+  - name: Question or idea
+    url: https://github.com/m4nd0r4s/kinemo/discussions
+    about: How do I…, what if kinemo…, or show what you made. Issues are for bugs and planned features.
+  - name: Documentation
+    url: https://m4nd0r4s.github.io/kinemo/
+    about: Guides, the API reference and examples.
+  - name: Security vulnerability
+    url: https://github.com/m4nd0r4s/kinemo/security/policy
+    about: Please report it privately, as SECURITY.md describes.

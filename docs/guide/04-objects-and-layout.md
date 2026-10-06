@@ -526,6 +526,12 @@ def search(s: k.Scene):
 - `g.add_node(name, edges=...)` lays the graph out again with the new node; `at=(x, y)`
   puts it somewhere instead. `g.add_edge(u, v)` and `g.remove(name, (u, v))` change edges.
 
+## Device frames
+
+`k.BrowserWindow(content, url=...)`, `k.Phone(content)` and `k.Laptop(content)` show a screen
+in context: the content sits in the screen, scaled down to fit when it is larger, and the
+frame follows the theme (dark or light).
+
 ## Series cards
 
 `k.TitleCard`, `k.EndCard` and `k.LowerThird` are the cards a series repeats: an

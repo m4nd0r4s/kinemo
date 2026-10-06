@@ -687,4 +687,23 @@ def speaker(s: k.Scene):
 ''',
         related=("k.TitleCard",),
     ),
+    DocEntry(
+        "k.BrowserWindow",
+        "Objects",
+        "Device frames that hold content, styled to the theme: `k.BrowserWindow(content, url=, w=, "
+        "h=)` (dots and an address bar), `k.Phone(content, w=, h=)` and `k.Laptop(content, w=)`. "
+        "The content sits in the screen, scaled down to fit when it is larger. Parts such as "
+        "`window.page`, `phone.screen`, `laptop.base` and `.content`.",
+        '''
+import kinemo as k
+
+@k.scene
+def screens(s: k.Scene):
+    page = k.BrowserWindow(k.Text("Docs", size=0.6), url="kinemo.dev/docs", w=6, h=3.6).place(at=(-2.5, 0))
+    phone = k.Phone(k.Circle(r=0.5, fill=k.GREEN, fill_opacity=1), w=1.8, h=3.6).place(at=(3, 0))
+    s.play(k.fade_in(page, phone))
+''',
+        related=("k.Terminal", "k.Card"),
+        aliases=("k.Phone", "k.Laptop"),
+    ),
 )

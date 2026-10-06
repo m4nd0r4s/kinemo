@@ -346,6 +346,26 @@ def comfort(s: k.Scene):
         aliases=("Axes.vband",),
     ),
     DocEntry(
+        "Axes.dot",
+        "Charts",
+        "A dot at a data point that follows zooms; `open=True` draws it hollow (filled with the "
+        "background) for an endpoint a piecewise function leaves out. `ax.plot(f, holes=[2])` "
+        "puts open dots on a curve (at the limit of `f` where it is undefined): `curve.holes`.",
+        '''
+import kinemo as k
+
+@k.scene
+def piecewise(s: k.Scene):
+    ax = k.Axes(x=(0, 4, 1), y=(0, 6, 1)).place(at="center")
+    curve = ax.plot(lambda x: (x * x - 4) / (x - 2), holes=[2])
+    ax.dot(3, 1, open=True, color=k.RED)
+    ax.dot(3, 5, color=k.RED)
+    s.play(k.draw(ax))
+    s.play(k.indicate(curve.holes[0]))
+''',
+        related=("Axes.plot", "Axes.segment"),
+    ),
+    DocEntry(
         "Axes.origin",
         "Charts",
         "Where the two axes cross, in the axes' own coordinates: the data origin clamped "

@@ -123,6 +123,9 @@ s.play(k.fade_in(tan))    # now the tangent
   ranges (and hidden when it falls outside them) as the axes zoom.
 - `ax.hband(y0, y1)` and `ax.vband(x0, x1)` shade a band between two values, across or up
   the plot, cut to the visible range.
+- `ax.dot(x, y)` marks a data point; `open=True` draws it hollow, for the endpoint a
+  piecewise function leaves out. `ax.plot(f, holes=[2])` puts open dots on the curve where
+  it is not defined (at the limit of `f`), and they appear as a growing curve reaches them.
 
 ```python
 import kinemo as k

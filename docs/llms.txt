@@ -1171,7 +1171,7 @@ def determinant(s: k.Scene):
     s.play(plane.apply([[2, 1], [0, 1.5]]), duration=2)
     s.play(k.indicate(square))  # area 3 = det
 ```
-#### `ax.plot(fn, *, until=None, from_=None, domain=None, color=None, label=None, samples=160, enter_with_axes=True, **style) -> Plot`
+#### `ax.plot(fn, *, until=None, from_=None, domain=None, color=None, label=None, holes=(), samples=160, enter_with_axes=True, **style) -> Plot`
 Draws the curve `y = fn(x)` on the axes, with adaptive sampling. `fn` uses `k` functions (`k.sin`, `k.max`...), so the same function works for floats and signals. `until=`/`from_=` accept signals: the curve grows as the signal moves. `label=` puts a label at the end of the curve. See also: `curve.point_at`, `ax.area`, `k.sin`.
 ```python
 def wave(x: float) -> float:
@@ -1285,6 +1285,18 @@ def comfort(s: k.Scene):
     ax.vband(9, 17, fill=k.GREEN)
     ax.plot(lambda h: 15 + 8 * k.sin((h - 9) * 3.14159 / 12))
     s.play(k.draw(ax))
+```
+#### `ax.dot(x, y, *, open=False, radius=0.09, enter_with_axes=True, **props) -> Dot`
+A dot at a data point that follows zooms; `open=True` draws it hollow (filled with the background) for an endpoint a piecewise function leaves out. `ax.plot(f, holes=[2])` puts open dots on a curve (at the limit of `f` where it is undefined): `curve.holes`. See also: `ax.plot`, `ax.segment`.
+```python
+@k.scene
+def piecewise(s: k.Scene):
+    ax = k.Axes(x=(0, 4, 1), y=(0, 6, 1)).place(at="center")
+    curve = ax.plot(lambda x: (x * x - 4) / (x - 2), holes=[2])
+    ax.dot(3, 1, open=True, color=k.RED)
+    ax.dot(3, 5, color=k.RED)
+    s.play(k.draw(ax))
+    s.play(k.indicate(curve.holes[0]))
 ```
 #### `ax.origin() -> Expr[Vec]`
 Where the two axes cross, in the axes' own coordinates: the data origin clamped to the visible ranges. Reactive, so it moves with zooms. See also: `ax.add`, `k.Axes`.

@@ -10,6 +10,7 @@ Axes, number lines, polar axes, plots and data charts.
 - [`k.Axes`](#k-axes): Cartesian axes with ticks, labels and an optional grid: `x=(min, max, step)`, `y=(min, max)`, `labels=("x", "y")`, `width=`/`height=` in units.
 - [`k.NumberLine`](#k-numberline): A horizontal number line: a `k.Axes` with only the x axis.
 - [`k.NumberPlane`](#k-numberplane): A coordinate grid with axes and the basis vectors î (green) and ĵ (red): `x=(min, max, step)`, `y=...`, `unit=` scene units per step.
+- [`k.ComplexPlane`](#k-complexplane): A `k.NumberPlane` labelled as the complex plane (real ticks, `i` ticks, `Re`/`Im`) whose points are complex numbers: `cp.dot(2 + 1j)`, `cp.vector(1 - 2j)`, `cp.coords(z)`.
 - [`Plot`](#plot): A curve `y = fn(x)` of an axes.
 - [`k.BarChart`](#k-barchart): Bar chart from a table: `x=` is the category column, `y=` the value column and `key=` identifies each bar.
 - [`k.LineChart`](#k-linechart): A `k.Axes` with one line per `y=` column (one or several), connecting the table's points in `x=` order.
@@ -1087,6 +1088,132 @@ Animated return to the untransformed plane.
 
 | Name | Type | Default | Description |
 | --- | --- | --- | --- |
+| `**kw` | `Unpack[AnimationTiming]` | variadic | Keyword arguments (`AnimationTiming`): `duration: float \| None`, `ease: EaseLike \| None`, `delay: float`. |
+
+<a id="k-complexplane"></a>
+### `k.ComplexPlane` *(class)*
+
+```python
+k.ComplexPlane(
+    re: Sequence[float] = (-6, 6, 1),
+    im: Sequence[float] = (-3, 3, 1),
+    *,
+    unit: float = 1.0,
+    labels: bool = True,
+    samples: int = 24,
+    **props: Unpack[UnplacedKeywords],
+)
+```
+
+A `k.NumberPlane` labelled as the complex plane (real ticks, `i` ticks, `Re`/`Im`) whose points are complex numbers: `cp.dot(2 + 1j)`, `cp.vector(1 - 2j)`, `cp.coords(z)`. `cp.apply(1j)` multiplies everything by a complex number (a quarter turn), `cp.apply(lambda z: z ** 2)` maps the plane with a function of `z`.
+
+**Parameters:**
+
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `re` | `Sequence[float]` | `(-6, 6, 1)` | `k.ComplexPlane(re=(-4, 4, 1), im=(-3, 3, 1))`: the plane with real ticks along the real axis, `i` ticks along the imaginary one and `Re`/`Im` labels. |
+| `im` | `Sequence[float]` | `(-3, 3, 1)` | `k.ComplexPlane(re=(-4, 4, 1), im=(-3, 3, 1))`: the plane with real ticks along the real axis, `i` ticks along the imaginary one and `Re`/`Im` labels. |
+| `unit` | `float` | `1.0` |   |
+| `labels` | `bool` | `True` |   |
+| `samples` | `int` | `24` |   |
+| `**props` | `Unpack[UnplacedKeywords]` | variadic | Keyword arguments (`UnplacedKeywords`): `name: str \| None`, `key: str \| None`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`. |
+
+Props inherited from [`k.Node`](object-state.md#k-node): `x`, `y`, `rotate`, `scale`, `scale_x`, `scale_y`, `anchor`, `opacity`, `z`, `visible`, `bleed`.
+
+**Example:**
+
+```python
+@k.scene
+def rotation(s: k.Scene):
+    cp = k.ComplexPlane(re=(-4, 4, 1), im=(-3, 3, 1))
+    cp.vector(2 + 1j, color=k.YELLOW)
+    s.play(k.draw(cp))
+    s.play(cp.apply(1j), duration=2)
+```
+
+**See also:** [`k.NumberPlane`](#k-numberplane), [`numberplane.apply`](#numberplane-apply).
+
+**Members:**
+
+- [`coords`](#complexplane-coords): Where the complex number `value` is now, in the plane's own coordinates.
+- [`dot`](#complexplane-dot): A dot at the complex number `value` that the transformations carry.
+- [`vector`](#complexplane-vector): An arrow from 0 to the complex number `value` that the transformations carry.
+- [`apply`](#complexplane-apply): Multiply the plane by a complex number (`cp.apply(1j)`: a quarter turn), or map it with a function of `z` (`cp.apply(lambda z: z ** 2)`); a 2×2 matrix also works.
+
+Inherited from [`k.NumberPlane`](#k-numberplane): [`polygon`](#numberplane-polygon), [`add`](#numberplane-add), [`reset`](#numberplane-reset).
+Inherited from [`k.Group`](objects.md#k-group): [`children`](objects.md#group-children), [`to`](objects.md#group-to), [`swap`](objects.md#group-swap), [`insert`](objects.md#group-insert), [`pop`](objects.md#group-pop), [`fit`](objects.md#group-fit).
+Inherited from [`k.Node`](object-state.md#k-node): [`set`](object-state.md#node-set), [`unbind`](object-state.md#node-unbind), [`edge`](object-state.md#node-edge), [`age`](object-state.md#node-age), [`entered`](object-state.md#node-entered), [`exited`](object-state.md#node-exited), [`copy`](object-state.md#node-copy), [`place`](object-state.md#node-place), [`to_place`](object-state.md#node-to_place), [`unpin`](object-state.md#node-unpin).
+
+<a id="complexplane-coords"></a>
+#### `k.ComplexPlane.coords` *(method)*
+
+```python
+complexplane.coords(value: complex) -> tuple[float, float]
+```
+
+Where the complex number `value` is now, in the plane's own coordinates.
+
+**Parameters:**
+
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `value` | `complex` | required | Where the complex number `value` is now, in the plane's own coordinates. |
+
+<a id="complexplane-dot"></a>
+#### `k.ComplexPlane.dot` *(method)*
+
+```python
+complexplane.dot(
+    value: complex,
+    *,
+    radius: float = 0.1,
+    **style: Unpack[UnplacedStyleKeywords],
+) -> Dot
+```
+
+A dot at the complex number `value` that the transformations carry.
+
+**Parameters:**
+
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `value` | `complex` | required | A dot at the complex number `value` that the transformations carry. |
+| `radius` | `float` | `0.1` |   |
+| `**style` | `Unpack[UnplacedStyleKeywords]` | variadic | Keyword arguments (`UnplacedStyleKeywords`): `name: str \| None`, `key: str \| None`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`, `fill: ColorVal`, `fill_opacity: FloatVal`, `stroke: ColorVal`, `stroke_width: FloatVal`, `dash: FloatsVal`, `color: ColorVal`. |
+
+<a id="complexplane-vector"></a>
+#### `k.ComplexPlane.vector` *(method)*
+
+```python
+complexplane.vector(value: complex, **style: Unpack[UnplacedStyleKeywords]) -> Arrow
+```
+
+An arrow from 0 to the complex number `value` that the transformations carry.
+
+**Parameters:**
+
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `value` | `complex` | required | An arrow from 0 to the complex number `value` that the transformations carry. |
+| `**style` | `Unpack[UnplacedStyleKeywords]` | variadic | Keyword arguments (`UnplacedStyleKeywords`): `name: str \| None`, `key: str \| None`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`, `fill: ColorVal`, `fill_opacity: FloatVal`, `stroke: ColorVal`, `stroke_width: FloatVal`, `dash: FloatsVal`, `color: ColorVal`. |
+
+<a id="complexplane-apply"></a>
+#### `k.ComplexPlane.apply` *(method)*
+
+```python
+complexplane.apply(
+    transform: ComplexTransform | PlaneTransform,
+    **kw: Unpack[AnimationTiming],
+) -> Animation
+```
+
+Multiply the plane by a complex number (`cp.apply(1j)`: a quarter turn), or map it with a function of `z` (`cp.apply(lambda z: z ** 2)`); a 2×2 matrix also works.
+
+**Parameters:**
+
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `transform` | `ComplexTransform \| PlaneTransform` | required |   |
 | `**kw` | `Unpack[AnimationTiming]` | variadic | Keyword arguments (`AnimationTiming`): `duration: float \| None`, `ease: EaseLike \| None`, `delay: float`. |
 
 <a id="plot"></a>

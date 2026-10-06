@@ -240,6 +240,13 @@ def shear(s: k.Scene):
     s.play(k.indicate(square))
 ```
 
+### The complex plane
+
+`k.ComplexPlane(re=..., im=...)` is a number plane labelled with real and `i` ticks, whose
+points are complex numbers: `cp.dot(2 + 1j)`, `cp.vector(1 - 2j)`. `cp.apply(1j)` multiplies
+the whole plane by `i` (a quarter turn) and `cp.apply(lambda z: z ** 2)` maps it with any
+function of `z`.
+
 ## Data charts
 
 ### Where data comes from

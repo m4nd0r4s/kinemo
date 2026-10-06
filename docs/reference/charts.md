@@ -30,6 +30,7 @@ Axes, number lines, polar axes, plots and data charts.
 - [`ax.add`](#axes-add): Puts objects inside the axes, in its own coordinates, so they follow zooms like plots do; place them with `position=ax.local_point(x, y)` or `ax.origin()`.
 - [`ax.segment`](#axes-segment): A line between two data points `(x, y)`, cut to the visible ranges with `clip=True` (the default) and hidden when it falls entirely outside them; it follows zooms.
 - [`ax.hband`](#axes-hband): `ax.hband(y0, y1)`: a translucent band across the plot between two data values; `ax.vband(x0, x1)` the same up the plot.
+- [`ax.dot`](#axes-dot): A dot at a data point that follows zooms; `open=True` draws it hollow (filled with the background) for an endpoint a piecewise function leaves out.
 - [`ax.origin`](#axes-origin): Where the two axes cross, in the axes' own coordinates: the data origin clamped to the visible ranges.
 - [`ax.in_view`](#axes-in_view): Whether a data value is inside the visible ranges, as a reactive bool for `visible=`: `ax.in_view(x=3)`, `ax.in_view(y=5)` or both.
 - [`curve.point_at`](#plot-point_at): World position of the curve at `x`; reactive when `x` is a signal.
@@ -233,6 +234,7 @@ def custom_ticks(s: k.Scene):
 - [`origin`](#axes-origin): Where the two axes cross, in the axes' own coordinates: the data origin clamped to the visible ranges.
 - [`in_view`](#axes-in_view): Whether a data value is inside the visible ranges, as a reactive bool for `visible=`: `ax.in_view(x=3)`, `ax.in_view(y=5)` or both.
 - [`plot`](#axes-plot): Draws the curve `y = fn(x)` on the axes, with adaptive sampling.
+- [`dot`](#axes-dot): A dot at a data point that follows zooms; `open=True` draws it hollow (filled with the background) for an endpoint a piecewise function leaves out.
 - [`area`](#axes-area): Filled region under a curve (down to the x axis) or between two curves (`between=`).
 - [`segment`](#axes-segment): A line between two data points `(x, y)`, cut to the visible ranges with `clip=True` (the default) and hidden when it falls entirely outside them; it follows zooms.
 - [`hband`](#axes-hband): `ax.hband(y0, y1)`: a translucent band across the plot between two data values; `ax.vband(x0, x1)` the same up the plot.
@@ -418,6 +420,7 @@ ax.plot(
     domain: tuple[float, float] | None = None,
     color: ColorLike | None = None,
     label: str | None = None,
+    holes: Sequence[float] = (),
     samples: int = 160,
     enter_with_axes: bool = True,
     **style: Unpack[PlotStyleKeywords],
@@ -436,6 +439,7 @@ Draws the curve `y = fn(x)` on the axes, with adaptive sampling. `fn` uses `k` f
 | `domain` | `tuple[float, float] \| None` | `None` |   |
 | `color` | `ColorLike \| None` | `None` |   |
 | `label` | `str \| None` | `None` | `label=` puts a label at the end of the curve. |
+| `holes` | `Sequence[float]` | `()` | `holes=[2]` marks points the curve leaves out with open dots (at the limit of `fn` when it is undefined there; `curve.holes`). |
 | `samples` | `int` | `160` |   |
 | `enter_with_axes` | `bool` | `True` | `enter_with_axes=False` keeps it (and its label) hidden until a verb brings it in. |
 | `**style` | `Unpack[PlotStyleKeywords]` | variadic | Keyword arguments (`PlotStyleKeywords`): `name: str \| None`, `key: str \| None`, `x: FloatVal`, `y: FloatVal`, `position: VecVal`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`, `fill: ColorVal`, `fill_opacity: FloatVal`, `stroke_width: FloatVal`, `dash: FloatsVal`. |
@@ -456,6 +460,49 @@ def wave_plot(s: k.Scene):
 ```
 
 **See also:** [`curve.point_at`](#plot-point_at), [`ax.area`](#axes-area), [`k.sin`](native-blocks.md#k-sin).
+
+<a id="axes-dot"></a>
+#### `k.Axes.dot` *(method)*
+
+```python
+ax.dot(
+    x: FloatVal,
+    y: FloatVal,
+    *,
+    open: bool = False,
+    radius: float = 0.09,
+    enter_with_axes: bool = True,
+    **props: Unpack[UnplacedStyleKeywords],
+) -> Dot
+```
+
+A dot at a data point that follows zooms; `open=True` draws it hollow (filled with the background) for an endpoint a piecewise function leaves out. `ax.plot(f, holes=[2])` puts open dots on a curve (at the limit of `f` where it is undefined): `curve.holes`.
+
+**Parameters:**
+
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `x` | `FloatVal` | required |   |
+| `y` | `FloatVal` | required |   |
+| `open` | `bool` | `False` | A dot at a data point that follows zooms; `open=True` draws it hollow (filled with the background) for an endpoint a piecewise function leaves out. |
+| `radius` | `float` | `0.09` |   |
+| `enter_with_axes` | `bool` | `True` |   |
+| `**props` | `Unpack[UnplacedStyleKeywords]` | variadic | Keyword arguments (`UnplacedStyleKeywords`): `name: str \| None`, `key: str \| None`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`, `fill: ColorVal`, `fill_opacity: FloatVal`, `stroke: ColorVal`, `stroke_width: FloatVal`, `dash: FloatsVal`, `color: ColorVal`. |
+
+**Example:**
+
+```python
+@k.scene
+def piecewise(s: k.Scene):
+    ax = k.Axes(x=(0, 4, 1), y=(0, 6, 1)).place(at="center")
+    curve = ax.plot(lambda x: (x * x - 4) / (x - 2), holes=[2])
+    ax.dot(3, 1, open=True, color=k.RED)
+    ax.dot(3, 5, color=k.RED)
+    s.play(k.draw(ax))
+    s.play(k.indicate(curve.holes[0]))
+```
+
+**See also:** [`ax.plot`](#axes-plot), [`ax.segment`](#axes-segment).
 
 <a id="axes-area"></a>
 #### `k.Axes.area` *(method)*
@@ -871,7 +918,7 @@ def number_line(s: k.Scene):
 
 **See also:** [`k.Axes`](#k-axes), [`ax.point`](#axes-point).
 
-Inherited from [`k.Axes`](#k-axes): [`map_x`](#axes-map_x), [`map_y`](#axes-map_y), [`local_point`](#axes-local_point), [`point`](#axes-point), [`add`](#axes-add), [`origin`](#axes-origin), [`in_view`](#axes-in_view), [`plot`](#axes-plot), [`area`](#axes-area), [`segment`](#axes-segment), [`hband`](#axes-hband), [`vband`](#axes-vband), [`vline`](#axes-vline), [`hline`](#axes-hline), [`scatter`](#axes-scatter), [`parametric`](#axes-parametric), [`bars`](#axes-bars), [`zoom_to`](#axes-zoom_to).
+Inherited from [`k.Axes`](#k-axes): [`map_x`](#axes-map_x), [`map_y`](#axes-map_y), [`local_point`](#axes-local_point), [`point`](#axes-point), [`add`](#axes-add), [`origin`](#axes-origin), [`in_view`](#axes-in_view), [`plot`](#axes-plot), [`dot`](#axes-dot), [`area`](#axes-area), [`segment`](#axes-segment), [`hband`](#axes-hband), [`vband`](#axes-vband), [`vline`](#axes-vline), [`hline`](#axes-hline), [`scatter`](#axes-scatter), [`parametric`](#axes-parametric), [`bars`](#axes-bars), [`zoom_to`](#axes-zoom_to).
 Inherited from [`k.Group`](objects.md#k-group): [`children`](objects.md#group-children), [`to`](objects.md#group-to), [`swap`](objects.md#group-swap), [`insert`](objects.md#group-insert), [`pop`](objects.md#group-pop), [`fit`](objects.md#group-fit).
 Inherited from [`k.Node`](object-state.md#k-node): [`set`](object-state.md#node-set), [`unbind`](object-state.md#node-unbind), [`edge`](object-state.md#node-edge), [`age`](object-state.md#node-age), [`entered`](object-state.md#node-entered), [`exited`](object-state.md#node-exited), [`copy`](object-state.md#node-copy), [`place`](object-state.md#node-place), [`to_place`](object-state.md#node-to_place), [`unpin`](object-state.md#node-unpin).
 
@@ -1435,7 +1482,7 @@ def lines(s: k.Scene):
 
 - [`to`](#linechart-to): `chart.to(data=df2)`: the lines morph to the new values (plus any other props).
 
-Inherited from [`k.Axes`](#k-axes): [`map_x`](#axes-map_x), [`map_y`](#axes-map_y), [`local_point`](#axes-local_point), [`point`](#axes-point), [`add`](#axes-add), [`origin`](#axes-origin), [`in_view`](#axes-in_view), [`plot`](#axes-plot), [`area`](#axes-area), [`segment`](#axes-segment), [`hband`](#axes-hband), [`vband`](#axes-vband), [`vline`](#axes-vline), [`hline`](#axes-hline), [`scatter`](#axes-scatter), [`parametric`](#axes-parametric), [`bars`](#axes-bars), [`zoom_to`](#axes-zoom_to).
+Inherited from [`k.Axes`](#k-axes): [`map_x`](#axes-map_x), [`map_y`](#axes-map_y), [`local_point`](#axes-local_point), [`point`](#axes-point), [`add`](#axes-add), [`origin`](#axes-origin), [`in_view`](#axes-in_view), [`plot`](#axes-plot), [`dot`](#axes-dot), [`area`](#axes-area), [`segment`](#axes-segment), [`hband`](#axes-hband), [`vband`](#axes-vband), [`vline`](#axes-vline), [`hline`](#axes-hline), [`scatter`](#axes-scatter), [`parametric`](#axes-parametric), [`bars`](#axes-bars), [`zoom_to`](#axes-zoom_to).
 Inherited from [`k.Group`](objects.md#k-group): [`children`](objects.md#group-children), [`swap`](objects.md#group-swap), [`insert`](objects.md#group-insert), [`pop`](objects.md#group-pop), [`fit`](objects.md#group-fit).
 Inherited from [`k.Node`](object-state.md#k-node): [`set`](object-state.md#node-set), [`unbind`](object-state.md#node-unbind), [`edge`](object-state.md#node-edge), [`age`](object-state.md#node-age), [`entered`](object-state.md#node-entered), [`exited`](object-state.md#node-exited), [`copy`](object-state.md#node-copy), [`place`](object-state.md#node-place), [`to_place`](object-state.md#node-to_place), [`unpin`](object-state.md#node-unpin).
 

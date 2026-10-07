@@ -1,6 +1,7 @@
 // Source edits: find the call argument behind a value (via `meta.sources`, keyed by span)
-// and offer an editor for it. Typing commits; dragging a number sends live edits (the
-// scene rebuilds from the edited text) and commits on release; Esc cancels a drag.
+// and offer an editor for it: the whole literal, or each number inside a computed one.
+// Typing commits; dragging a number sends live edits (the scene rebuilds from the edited
+// text) and commits on release; Esc cancels a drag.
 "use strict";
 
 import { colorField } from "./colorpicker.js";
@@ -167,9 +168,7 @@ export function pointEditor(initial, changes) {
  */
 export function valueEditor(editor, current, { point = null, fallback = null } = {}) {
   const { argument, site } = editor;
-  if (argument && !argument.kind) {
-    return el("code", { class: "computed", title: "computed in the code: edit it there" }, argument.text);
-  }
+  if (argument && !argument.kind) return expressionEditor(editor);
   const type = typeOf(editor, current);
   if (!type) return null;
   const literal = argument ? argument.value : fallback ?? currentLiteral(current);
@@ -204,6 +203,28 @@ export function valueEditor(editor, current, { point = null, fallback = null } =
     default:
       return null;
   }
+}
+
+/**
+ * A computed argument: its code, read-only, with each number written inside it editable in
+ * place (`title.x + 1.2`, `lambda x: 3 * x - 0.75 * x**2`). An integer stays an integer.
+ */
+export function expressionEditor(editor) {
+  const { argument } = editor;
+  const numbers = (editor.target && argument.numbers) || [];
+  if (!numbers.length) return el("code", { class: "computed", title: "computed in the code: edit it there" }, argument.text);
+  const parts = [];
+  let at = 0;
+  numbers.forEach((number, index) => {
+    parts.push(argument.text.slice(at, number.offset));
+    const integer = /^[+-]?\d+$/.test(number.text);
+    const text = (v) => (integer ? String(Math.round(v)) : formatNumber(v));
+    const write = (v, live) => sendEdit([{ site: editor.key, target: editor.target, number: index, value: text(v) }], live);
+    parts.push(numberField(number.value, write, { integer, drag: dragHooks((v) => write(v, true)) }));
+    at = number.offset + number.text.length;
+  });
+  parts.push(argument.text.slice(at));
+  return el("code", { class: "computed expression", title: "computed in the code: drag or click a number to change it" }, ...parts);
 }
 
 /** "×N" marker for a call that runs several times (a loop): editing changes every run. */

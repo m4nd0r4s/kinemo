@@ -11,7 +11,7 @@ export const DRAG_THRESHOLD_PX = 3;
  * A number: drag sideways to change it (Shift ×10, Alt ×0.1), click to type. `range`
  * clamps it; `drag` hooks a drag session (`begin(cancel) → end`, `live(value)`).
  */
-export function numberField(initial, onValue, { range = null, drag } = {}) {
+export function numberField(initial, onValue, { range = null, drag, integer = false } = {}) {
   const field = el("span", { class: "edit number", title: "drag to change · click to type" }, formatNumber(initial));
   const clamp = (v) => (range ? Math.min(range[1], Math.max(range[0], v)) : v);
   let start = null;
@@ -35,7 +35,8 @@ export function numberField(initial, onValue, { range = null, drag } = {}) {
     }
     const base = range ? range[1] - range[0] : Math.max(1, Math.abs(start.value));
     const scale = (e.shiftKey ? 10 : e.altKey ? 0.1 : 1) * 0.005 * base;
-    const value = clamp(Math.round((start.value + dx * scale) * 1000) / 1000);
+    const moved = start.value + dx * scale;
+    const value = clamp(integer ? Math.round(moved) : Math.round(moved * 1000) / 1000);
     field.textContent = formatNumber(value);
     start.current = value;
     drag.live(value);

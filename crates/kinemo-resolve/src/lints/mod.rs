@@ -146,7 +146,9 @@ pub enum InvisibilityReason {
 #[derive(Serialize, Clone, Debug, PartialEq)]
 #[serde(tag = "kind", rename_all = "snake_case")]
 pub enum LintDetails {
-    SafeArea { edge: FrameEdge, overshoot: f64 },
+    /// `moving`: cut by the frame edge mid-animation, inside the safe area before and after;
+    /// `reorder`: the motion is a container reordering its children (a swap arc).
+    SafeArea { edge: FrameEdge, overshoot: f64, moving: bool, reorder: bool },
     TextOverlap { overlap_fraction: f64 },
     Contrast { ratio: f64, text_color: [f64; 3], background: [f64; 3] },
     TextSize { pixels: f64 },

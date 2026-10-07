@@ -242,7 +242,8 @@ class Session:
             target = str(change.get("target"))
             if bound_argument(entry.site, target, entry.params) is None and (entry.accepts is None or target not in entry.accepts):
                 raise EditError(f"{entry.site.callee}(...) does not set {target}")
-            by_file.setdefault(entry.source.path, []).append(Change(entry.site, target, str(change.get("value")), entry.params))
+            number = change.get("number")
+            by_file.setdefault(entry.source.path, []).append(Change(entry.site, target, str(change.get("value")), entry.params, int(number) if number is not None else None))
             sources[entry.source.path] = entry.source
         out: dict[str, str] = {}
         for path, file_changes in by_file.items():

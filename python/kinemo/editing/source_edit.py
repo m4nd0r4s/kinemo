@@ -1,13 +1,14 @@
-"""Apply argument changes to a file's text: replace an argument's value, or add a
-`keyword=value` argument to a call. Only those characters change; formatting and comments
-stay as the author wrote them."""
+"""Apply argument changes to a file's text: replace an argument's value, replace one number
+inside a computed argument, or add a `keyword=value` argument to a call. Only those
+characters change; formatting and comments stay as the author wrote them."""
 
 from __future__ import annotations
 
+import ast
 from dataclasses import dataclass
 
 from .call_sites import Argument, CallSite, Position, SourceFile
-from .literals import is_valid_expression
+from .literals import is_number, is_valid_expression
 
 
 class EditError(Exception):
@@ -23,6 +24,9 @@ class Change:
     value: str
     #: Positional index → parameter name for the call's callable (constructors).
     params: tuple[tuple[int, str], ...] = ()
+    #: Which number inside a computed argument to set (`value` is then a number), or `None`
+    #: for the whole argument.
+    number: int | None = None
 
 
 def bound_argument(site: CallSite, target: str, params: tuple[tuple[int, str], ...] = ()) -> Argument | None:
@@ -45,7 +49,9 @@ def apply_changes(source: SourceFile, changes: list[Change]) -> str:
         if not is_valid_expression(value) or "\n" in value:
             raise EditError(f"not a valid value: {change.value!r}")
         argument = bound_argument(change.site, change.target, change.params)
-        if argument is not None:
+        if change.number is not None:
+            replacements.append(_number_replacement(source, change, argument, value, order))
+        elif argument is not None:
             if argument.kind is None:
                 raise EditError(f"{change.target}= is computed ({argument.text}); edit it in the code")
             start, end = _offset(source, argument.start), _offset(source, argument.end)
@@ -61,6 +67,16 @@ def apply_changes(source: SourceFile, changes: list[Change]) -> str:
     for start, end, _, replacement in sorted(replacements, key=lambda r: (r[0], r[2]), reverse=True):
         text = text[:start] + replacement + text[end:]
     return text
+
+
+def _number_replacement(source: SourceFile, change: Change, argument: Argument | None, value: str, order: int) -> tuple[int, int, int, str]:
+    numbers = argument.numbers if argument is not None else ()
+    if change.number is None or not 0 <= change.number < len(numbers):
+        raise EditError(f"{change.target}= no longer has that number; the preview reloads")
+    if not is_number(ast.parse(value, mode="eval").body):
+        raise EditError(f"not a number: {value!r}")
+    found = numbers[change.number]
+    return (_offset(source, found.start), _offset(source, found.end), order, value)
 
 
 def _offset(source: SourceFile, position: Position) -> int:

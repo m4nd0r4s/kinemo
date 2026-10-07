@@ -1,10 +1,11 @@
-"""Classify argument expressions: only plain literals are offered for editing, so a tool
-never overwrites an expression the author computed."""
+"""Classify argument expressions: plain literals are offered for editing whole; inside a
+computed expression only its numbers are, so a tool never overwrites what the author
+computed."""
 
 from __future__ import annotations
 
 import ast
-from typing import Literal
+from typing import Literal, TypeGuard
 
 LiteralKind = Literal["number", "string", "bool", "none", "vector", "color", "ease"]
 
@@ -56,6 +57,31 @@ def literal_value(node: ast.expr) -> object:
     if isinstance(value, tuple):
         return list(value)  # pyright: ignore[reportUnknownArgumentType]
     return value
+
+
+def numbers_inside(node: ast.expr) -> list[ast.expr]:
+    """The numbers written inside a computed expression, in source order: `1.2` in
+    `title.x + 1.2`, `3` and `0.75` in `lambda x: 3 * x - 0.75 * x**2`. A sign written
+    against a number belongs to it (`-2` in `(a, -2)`); booleans and complex numbers are left
+    out."""
+    found: list[ast.expr] = []
+    signed: set[int] = set()
+    for child in ast.walk(node):
+        if isinstance(child, ast.UnaryOp) and isinstance(child.op, (ast.USub, ast.UAdd)) and _is_plain_number(child.operand):
+            found.append(child)
+            signed.add(id(child.operand))
+        elif _is_plain_number(child) and id(child) not in signed:
+            found.append(child)
+    return sorted(found, key=lambda n: (n.lineno, n.col_offset))
+
+
+def _is_plain_number(node: ast.AST) -> TypeGuard[ast.Constant]:
+    return isinstance(node, ast.Constant) and isinstance(node.value, (int, float)) and not isinstance(node.value, bool)
+
+
+def is_number(node: ast.expr) -> bool:
+    """Whether `node` is a number literal, signed or not (what a number edit may write)."""
+    return _is_number(node)
 
 
 def _is_number(node: ast.expr) -> bool:

@@ -1,8 +1,8 @@
 //! Timeline sampling: which instants to look at, and what the viewer sees at each one.
 //!
 //! Sample times are a uniform grid (default step 0.1 s) plus every timeline boundary
-//! (set, animation start/end, presence toggle, placement change), so short events are
-//! never skipped. At each instant, [`sample_frame`] lists the present leaves with their
+//! (set, animation start/end, presence toggle, placement change) and the middle of every
+//! animation, so short events are never skipped. At each instant, [`sample_frame`] lists the present leaves with their
 //! world box, effective opacity and whether they are "at rest" (see [`MotionIndex`]).
 
 use std::collections::HashMap;
@@ -27,6 +27,7 @@ pub fn sample_times(scene: &Scene, step: f64) -> Vec<f64> {
     let mut times: Vec<f64> = (0..=grid_count).map(|i| (i as f64 * step * 1e9).round() / 1e9).collect();
     times.push(duration);
     times.extend(timeline_boundaries(scene));
+    times.extend(animation_midpoints(scene));
     times.retain(|t| t.is_finite() && *t >= 0.0 && *t <= duration + SAME_INSTANT);
     times.sort_by(f64::total_cmp);
     times.dedup_by(|a, b| (*a - *b).abs() < SAME_INSTANT);
@@ -50,6 +51,17 @@ pub fn timeline_boundaries(scene: &Scene) -> Vec<f64> {
         }
     }
     out
+}
+
+/// The middle of every animation: an animation shorter than the grid step (a sped-up swap)
+/// is still seen at the peak of its path.
+fn animation_midpoints(scene: &Scene) -> impl Iterator<Item = f64> + '_ {
+    scene.signals.iter().flat_map(|signal| {
+        signal.timeline.iter().filter_map(|entry| match entry {
+            Entry::Anim { t0, t1, .. } if t1 > t0 => Some((t0 + t1) / 2.0),
+            _ => None,
+        })
+    })
 }
 
 /// Time intervals during which each object's own props (or placement) are animating.

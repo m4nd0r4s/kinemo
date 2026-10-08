@@ -28,10 +28,15 @@ export function positionEditor(object) {
   if (source.kind === "place") {
     const found = siteFor(source.span);
     const at = found && argumentFor(found.site, "at");
-    if (!at || at.kind !== "vector") return { reason: "positioned by a constraint (place)" };
-    return {
-      changes: (dx, dy) => [{ site: found.key, target: "at", value: `(${formatNumber(at.value[0] + dx)}, ${formatNumber(at.value[1] + dy)})` }],
-    };
+    if (at && at.kind === "vector") {
+      return {
+        changes: (dx, dy) => [{ site: found.key, target: "at", value: `(${formatNumber(at.value[0] + dx)}, ${formatNumber(at.value[1] + dy)})` }],
+      };
+    }
+    // `at=(a, 2.0)`, `at=(left + 0.5, top - 1)`: the number each coordinate adds moves.
+    const axes = at && !at.kind && at.offsets ? at.offsets.map((offset) => offset && { key: found.key, target: "at", argument: at, offset }) : null;
+    if (!axes || !axes.some(Boolean)) return { reason: "positioned by a constraint (place)" };
+    return { changes: (dx, dy) => offsetChanges(axes, [dx, dy]) };
   }
   const moving = ["x", "y"].find((name) => {
     const source = object.prop_sources[name];
@@ -40,15 +45,26 @@ export function positionEditor(object) {
   if (moving) return { reason: `${moving} is animating here; move the playhead past the animation to drag its target` };
   const axes = ["x", "y"].map((name) => {
     const editor = propEditor(object, name);
-    if (!editor || (editor.argument && editor.argument.kind !== "number")) return null;
-    const base = editor.argument ? editor.argument.value : value(object.props[name]);
-    return { editor, base };
+    if (!editor) return null;
+    const { argument } = editor;
+    // `x=title.x + 1.2`: the added number moves.
+    if (argument && !argument.kind) return argument.offset ? { key: editor.key, target: editor.target, argument, offset: argument.offset } : null;
+    if (argument && argument.kind !== "number") return null;
+    return { key: editor.key, target: editor.target, base: argument ? argument.value : value(object.props[name]) };
   });
   if (axes.some((a) => !a)) return { reason: "its position is computed in the code" };
-  return {
-    changes: (dx, dy) =>
-      axes.map(({ editor, base }, i) => ({ site: editor.key, target: editor.target, value: formatNumber(base + (i ? dy : dx)) })),
-  };
+  return { changes: (dx, dy) => offsetChanges(axes, [dx, dy]) };
+}
+
+/** The edits that move each axis by its distance: a literal gets the new value, a computed
+ * coordinate the new value of the number it adds. Axes without a way to move stay put. */
+function offsetChanges(axes, distances) {
+  return axes.flatMap((axis, i) => {
+    if (!axis) return [];
+    if (!axis.offset) return [{ site: axis.key, target: axis.target, value: formatNumber(axis.base + distances[i]) }];
+    const number = axis.argument.numbers[axis.offset.number];
+    return [{ site: axis.key, target: axis.target, number: axis.offset.number, value: formatNumber(number.value + axis.offset.sign * distances[i]) }];
+  });
 }
 
 /** Dragged distances snap to this many world units (a clean number in the code). */

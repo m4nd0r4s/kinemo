@@ -113,3 +113,33 @@ def test_the_preview_gets_the_numbers_and_an_edit_writes_one(tmp_path: Path) -> 
     session.process_edits([{"id": 1, "live": False, "changes": [{"site": key, "target": "x", "number": 0, "value": "2.5"}]}])
     assert "dot = k.Dot(r=0.2, x=title.x + 2.5)" in path.read_text(encoding="utf-8")
     assert server.notes[-1]["ok"] is True
+
+
+PLOT = '''import kinemo as k
+
+
+@k.scene
+def demo(s: k.Scene):
+    ax = k.Axes(x=(0, 4, 1), y=(0, 3, 1))
+    curve = ax.plot(lambda x: 3 * x - 0.75 * x**2, domain=(0, 4))
+    s.add(ax)
+    s.wait(0.5)
+'''
+
+
+def test_a_lambda_number_rebuilds_live_and_commits(tmp_path: Path) -> None:
+    path = tmp_path / "scene.py"
+    path.write_text(PLOT, encoding="utf-8")
+    server = FakeServer()
+    session = Session(str(path), None, {}, server)  # type: ignore[arg-type]
+    assert session.rebuild()
+    key = site_of(server.scenes[-1], "ax.plot")
+    fn = next(a for a in server.scenes[-1]["sources"][key]["arguments"] if a["param"] == "fn")
+    assert [n["text"] for n in fn["numbers"]] == ["3", "0.75", "2"]
+    built = len(server.scenes)
+    live = {"id": 1, "live": True, "changes": [{"site": key, "target": "fn", "number": 1, "value": "1.5"}]}
+    session.process_edits([live])
+    assert len(server.scenes) == built + 1, "a live edit rebuilds the scene"
+    assert "0.75" in path.read_text(encoding="utf-8"), "a live edit does not write the file"
+    session.process_edits([{**live, "id": 2, "live": False}])
+    assert "lambda x: 3 * x - 1.5 * x**2" in path.read_text(encoding="utf-8")

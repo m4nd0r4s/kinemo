@@ -27,6 +27,8 @@ class Change:
     #: Which number inside a computed argument to set (`value` is then a number), or `None`
     #: for the whole argument.
     number: int | None = None
+    #: Set the literal of the variable the argument names (`gap = 0.4` for `gap=gap`).
+    variable: bool = False
 
 
 def bound_argument(site: CallSite, target: str, params: tuple[tuple[int, str], ...] = ()) -> Argument | None:
@@ -51,6 +53,11 @@ def apply_changes(source: SourceFile, changes: list[Change]) -> str:
         argument = bound_argument(change.site, change.target, change.params)
         if change.number is not None:
             replacements.append(_number_replacement(source, change, argument, value, order))
+        elif change.variable:
+            variable = argument.variable if argument is not None else None
+            if variable is None:
+                raise EditError(f"{change.target}= no longer names a variable holding a value; the preview reloads")
+            replacements.append((_offset(source, variable.start), _offset(source, variable.end), order, value))
         elif argument is not None:
             if argument.kind is None:
                 raise EditError(f"{change.target}= is computed ({argument.text}); edit it in the code")

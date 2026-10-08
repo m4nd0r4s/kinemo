@@ -36,6 +36,21 @@ class NumberInside:
 
 
 @dataclass(frozen=True)
+class Variable:
+    """The literal a name argument holds: `gap = 0.4` for `place(gap=gap)`. `start`/`end`
+    locate the literal in the assignment; `uses` counts where the name is read."""
+
+    name: str
+    text: str
+    kind: LiteralKind
+    value: object
+    line: int
+    uses: int
+    start: Position
+    end: Position
+
+
+@dataclass(frozen=True)
 class Argument:
     """One argument of a call. Positional arguments have an `index`, keywords a `keyword`."""
 
@@ -48,6 +63,8 @@ class Argument:
     end: Position
     #: The numbers inside a computed argument, editable one by one (none for a literal).
     numbers: tuple[NumberInside, ...] = ()
+    #: For a bare name bound once to a literal in its scope: that assignment.
+    variable: Variable | None = None
 
 
 @dataclass(frozen=True)
@@ -152,7 +169,35 @@ class SourceFile:
             start=start,
             end=end,
             numbers=self._numbers(value, start) if kind is None else (),
+            variable=self._variable(value) if isinstance(value, ast.Name) else None,
         )
+
+    def _variable(self, name: ast.Name) -> Variable | None:
+        """The assignment that gives `name` its value, when there is exactly one in the
+        innermost function around the call (or, when that function never binds the name, at
+        module level) and it assigns a literal."""
+        if self.tree is None:
+            return None
+        function = _enclosing_function(self.tree, name)
+        scope: ast.AST = self.tree
+        if function is not None and (_parameters(function) & {name.id} or _bindings(function, name.id) or _declared_outside(function, name.id)):
+            scope = function
+        if name.id in (_parameters(scope) if not isinstance(scope, ast.Module) else set()):
+            return None
+        bindings = _bindings(scope, name.id)
+        if len(bindings) != 1 or _declared_outside(scope, name.id):
+            return None
+        binding = bindings[0]
+        if not isinstance(binding, (ast.Assign, ast.AnnAssign)) or binding.value is None:
+            return None
+        value = binding.value
+        kind = literal_kind(value, self.module_aliases)
+        if kind is None:
+            return None
+        start = self.position(value.lineno, value.col_offset)
+        end = self.position(value.end_lineno or value.lineno, value.end_col_offset or 0)
+        uses = sum(1 for node in ast.walk(scope) if isinstance(node, ast.Name) and node.id == name.id and isinstance(node.ctx, ast.Load))
+        return Variable(name.id, self.segment(start, end), kind, literal_value(value), binding.lineno, uses, start, end)
 
     def _numbers(self, value: ast.expr, argument_start: Position) -> tuple[NumberInside, ...]:
         out: list[NumberInside] = []
@@ -171,3 +216,74 @@ class SourceFile:
                 continue
             out.append(NumberInside(text, number, len(self.segment(argument_start, start)), start, end))
         return tuple(out)
+
+
+_Function = ast.FunctionDef | ast.AsyncFunctionDef
+_Scopes = (ast.FunctionDef, ast.AsyncFunctionDef, ast.Lambda, ast.ClassDef, ast.ListComp, ast.SetComp, ast.DictComp, ast.GeneratorExp)
+
+
+def _enclosing_function(tree: ast.Module, node: ast.AST) -> _Function | None:
+    """The innermost function whose body contains `node`."""
+    found: _Function | None = None
+    for candidate in ast.walk(tree):
+        if isinstance(candidate, (ast.FunctionDef, ast.AsyncFunctionDef)) and any(n is node for n in ast.walk(candidate)):
+            if found is None or any(n is candidate for n in ast.walk(found)):
+                found = candidate
+    return found
+
+
+def _own_nodes(scope: ast.AST) -> list[ast.AST]:
+    """The nodes of `scope` outside the functions, classes and comprehensions nested in it."""
+    out: list[ast.AST] = []
+    pending = list(ast.iter_child_nodes(scope))
+    while pending:
+        node = pending.pop()
+        out.append(node)
+        if not isinstance(node, _Scopes):
+            pending.extend(ast.iter_child_nodes(node))
+    return out
+
+
+def _parameters(scope: ast.AST) -> set[str]:
+    if not isinstance(scope, (ast.FunctionDef, ast.AsyncFunctionDef)):
+        return set()
+    a = scope.args
+    names = [*a.posonlyargs, *a.args, *a.kwonlyargs, *([a.vararg] if a.vararg else []), *([a.kwarg] if a.kwarg else [])]
+    return {arg.arg for arg in names}
+
+
+def _bindings(scope: ast.AST, name: str) -> list[ast.stmt | ast.expr | ast.AST]:
+    """Everything in `scope` that binds `name`: assignments, loop and `with` targets, imports,
+    walrus targets, nested definitions."""
+    out: list[ast.stmt | ast.expr | ast.AST] = []
+    for node in _own_nodes(scope):
+        if isinstance(node, ast.Assign) and any(_binds(t, name) for t in node.targets):
+            out.append(node)
+        elif isinstance(node, (ast.AnnAssign, ast.AugAssign)) and _binds(node.target, name):
+            out.append(node)
+        elif isinstance(node, (ast.For, ast.AsyncFor)) and _binds(node.target, name):
+            out.append(node)
+        elif isinstance(node, ast.withitem) and node.optional_vars is not None and _binds(node.optional_vars, name):
+            out.append(node)
+        elif isinstance(node, ast.NamedExpr) and node.target.id == name:
+            out.append(node)
+        elif isinstance(node, (ast.Import, ast.ImportFrom)) and any((a.asname or a.name.split(".")[0]) == name for a in node.names):
+            out.append(node)
+        elif isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)) and node.name == name:
+            out.append(node)
+    return out
+
+
+def _binds(target: ast.expr, name: str) -> bool:
+    if isinstance(target, ast.Name):
+        return target.id == name
+    if isinstance(target, (ast.Tuple, ast.List)):
+        return any(_binds(e, name) for e in target.elts)
+    if isinstance(target, ast.Starred):
+        return _binds(target.value, name)
+    return False
+
+
+def _declared_outside(scope: ast.AST, name: str) -> bool:
+    """`global name` or `nonlocal name` in `scope`: it is bound somewhere else."""
+    return any(isinstance(n, (ast.Global, ast.Nonlocal)) and name in n.names for n in _own_nodes(scope))

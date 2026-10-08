@@ -168,11 +168,12 @@ export function pointEditor(initial, changes) {
  */
 export function valueEditor(editor, current, { point = null, fallback = null } = {}) {
   const { argument, site } = editor;
+  if (argument && !argument.kind && argument.variable && editor.target) return variableEditor(editor, current, { point, fallback });
   if (argument && !argument.kind) return expressionEditor(editor);
   const type = typeOf(editor, current);
   if (!type) return null;
   const literal = argument ? argument.value : fallback ?? currentLiteral(current);
-  const write = (text, live) => sendEdit([{ site: editor.key, target: editor.target, value: text }], live);
+  const write = (text, live) => sendEdit([{ site: editor.key, target: editor.target, value: text, ...(editor.variable ? { variable: true } : {}) }], live);
   const range = type.range || null;
   const dragFor = (toValue) => dragHooks((v) => write(pythonVector(toValue(v)), true));
   switch (type.type) {
@@ -203,6 +204,20 @@ export function valueEditor(editor, current, { point = null, fallback = null } =
     default:
       return null;
   }
+}
+
+/**
+ * A name bound once to a literal (`gap = 0.4` … `gap=gap`): the literal's editor, editing the
+ * assignment, with where it is and how many reads share it.
+ */
+function variableEditor(editor, current, options) {
+  const variable = editor.argument.variable;
+  const field = valueEditor({ ...editor, argument: { ...variable, param: editor.target }, variable: true }, current, options);
+  if (!field) return expressionEditor(editor);
+  const uses = variable.uses > 1 ? `, used ${variable.uses}×` : "";
+  const note = `via ${variable.name}, line ${variable.line}${uses}`;
+  const title = variable.uses > 1 ? `edits the assignment on line ${variable.line}: every use of ${variable.name} changes` : `edits the assignment on line ${variable.line}`;
+  return el("span", { class: "via-variable" }, field, el("span", { class: "variable-note", title }, note));
 }
 
 /**

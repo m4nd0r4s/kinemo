@@ -143,3 +143,76 @@ def test_a_lambda_number_rebuilds_live_and_commits(tmp_path: Path) -> None:
     assert "0.75" in path.read_text(encoding="utf-8"), "a live edit does not write the file"
     session.process_edits([{**live, "id": 2, "live": False}])
     assert "lambda x: 3 * x - 1.5 * x**2" in path.read_text(encoding="utf-8")
+
+
+# ---- values held by a variable ----------------------------------------------------------
+
+
+def variable_of(text: str, callee: str, keyword: str) -> object:
+    _, site = call(text, callee)
+    argument = site.keyword(keyword)
+    assert argument is not None
+    return argument.variable
+
+
+def test_a_name_bound_once_to_a_literal_in_the_function_is_editable() -> None:
+    text = "def demo(s):\n    gap = 0.4\n    title.place(above=box, gap=gap)\n    label.place(below=box, gap=gap)\n"
+    variable = variable_of(text, "title.place", "gap")
+    assert variable is not None
+    assert (variable.name, variable.text, variable.kind, variable.line, variable.uses) == ("gap", "0.4", "number", 2, 2)
+
+
+def test_a_module_constant_is_editable_from_a_scene_function() -> None:
+    text = "import kinemo as k\n\nACCENT = k.YELLOW\n\ndef demo(s):\n    dot = k.Dot(color=ACCENT)\n"
+    variable = variable_of(text, "k.Dot", "color")
+    assert variable is not None and variable.kind == "color" and variable.value == "YELLOW"
+
+
+@pytest.mark.parametrize(
+    "text",
+    [
+        "def demo(s):\n    gap = 0.4\n    gap = 0.5\n    t.place(gap=gap)\n",          # assigned twice
+        "def demo(s, gap=0.4):\n    t.place(gap=gap)\n",                            # a parameter
+        "def demo(s):\n    for gap in (0.1, 0.2):\n        t.place(gap=gap)\n",     # a loop variable
+        "def demo(s):\n    gap = base * 2\n    t.place(gap=gap)\n",                  # computed
+        "gap = 0.4\n\ndef demo(s):\n    global gap\n    gap = 0.2\n    t.place(gap=gap)\n",  # rebound elsewhere
+        "def demo(s):\n    gap += 0.1\n    t.place(gap=gap)\n",                      # augmented
+    ],
+)
+def test_names_that_do_not_hold_one_literal_stay_read_only(text: str) -> None:
+    assert variable_of(text, "t.place", "gap") is None
+
+
+def test_editing_through_a_variable_rewrites_the_assignment() -> None:
+    text = "def demo(s):\n    gap = 0.4\n    title.place(above=box, gap=gap)\n"
+    source, site = call(text, "title.place")
+    edited = apply_changes(source, [Change(site, "gap", "0.25", variable=True)])
+    assert edited == "def demo(s):\n    gap = 0.25\n    title.place(above=box, gap=gap)\n"
+    _, literal_site = call("title.place(gap=0.4)\n", "title.place")
+    with pytest.raises(EditError, match="no longer names a variable"):
+        apply_changes(SourceFile("scene.py", "title.place(gap=0.4)\n"), [Change(literal_site, "gap", "0.2", variable=True)])
+
+
+VARIABLE_SCENE = '''import kinemo as k
+
+
+@k.scene
+def demo(s: k.Scene):
+    size = 0.4
+    title = k.Text("hi", size=size)
+    s.add(title)
+    s.wait(0.5)
+'''
+
+
+def test_the_preview_edits_a_value_through_its_variable(tmp_path: Path) -> None:
+    path = tmp_path / "scene.py"
+    path.write_text(VARIABLE_SCENE, encoding="utf-8")
+    server = FakeServer()
+    session = Session(str(path), None, {}, server)  # type: ignore[arg-type]
+    assert session.rebuild()
+    key = site_of(server.scenes[-1], "k.Text")
+    size = next(a for a in server.scenes[-1]["sources"][key]["arguments"] if a["param"] == "size")
+    assert size["variable"] == {"name": "size", "text": "0.4", "kind": "number", "value": 0.4, "line": 6, "uses": 1}
+    session.process_edits([{"id": 1, "live": False, "changes": [{"site": key, "target": "size", "variable": True, "value": "0.6"}]}])
+    assert "    size = 0.6\n" in path.read_text(encoding="utf-8")

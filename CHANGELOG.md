@@ -4,6 +4,20 @@ All notable changes to kinemo are listed here. The project follows
 [semantic versioning](https://semver.org/); until 1.0, a minor version may change the API, and
 `kinemo upgrade` rewrites the forms it replaces.
 
+## 0.15.2
+
+Fixes found while launching 0.15.1.
+
+**Changed**
+
+- W1001 now reports an object the frame edge cuts while it moves between two places inside the
+  frame: a `row.swap` arc near an edge, an ease that overshoots past it. Entrances and exits
+  through the edge are not reported. The fix suggests `path="straight"` for a reorder and an
+  ease without overshoot otherwise. Motions shorter than the sampling step are now seen at
+  their peak.
+- The README works on PyPI: images and links point to GitHub.
+- The easing example in the animations guide leaves room for overshooting curves.
+
 ## 0.15.1
 
 Ready for first-time users: a clear path from `pip install` to the first video.

@@ -15,7 +15,7 @@ from functools import lru_cache
 from typing import TYPE_CHECKING, Any, Callable, Mapping
 
 from .._runtime.spans import Span
-from .call_sites import CallSite, SourceFile
+from .call_sites import CallSite, SourceFile, Variable
 from .value_types import ValueType, from_prop_spec, parameter_types
 
 if TYPE_CHECKING:
@@ -281,6 +281,18 @@ def easing_names() -> list[str]:
     return [name for name, value in vars(type(ease)).items() if isinstance(value, Ease)]
 
 
+def _variable_json(variable: "Variable", colors: Mapping[str, str]) -> dict[str, Any]:
+    return {
+        "name": variable.name,
+        "text": variable.text,
+        "kind": variable.kind,
+        "value": variable.value,
+        "line": variable.line,
+        "uses": variable.uses,
+        **({"hex": colors.get(str(variable.value))} if variable.kind == "color" else {}),
+    }
+
+
 def _site_json(entry: IndexedSite, colors: Mapping[str, str]) -> dict[str, Any]:
     params = dict(entry.params)
     aliases = sorted(entry.source.module_aliases)
@@ -307,6 +319,7 @@ def _site_json(entry: IndexedSite, colors: Mapping[str, str]) -> dict[str, Any]:
                 "value": a.value,
                 **({"hex": colors.get(str(a.value))} if a.kind == "color" else {}),
                 **({"numbers": [{"text": n.text, "value": n.value, "offset": n.offset} for n in a.numbers]} if a.numbers else {}),
+                **({"variable": _variable_json(a.variable, colors)} if a.variable is not None else {}),
             }
             for a in entry.site.arguments
         ],

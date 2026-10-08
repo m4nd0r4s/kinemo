@@ -346,6 +346,8 @@ a:hover { text-decoration: underline; }
 .computed { color: var(--text-dim); font-size: 11px; }
 .computed.expression { white-space: pre-wrap; }
 .computed.expression .edit.number { color: var(--text); }
+.via-variable { display: inline-flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+.variable-note { color: var(--text-faint); font-size: 11px; }
 .now { color: var(--text-faint); }
 .runs {
   display: inline-block; margin-left: 6px; padding: 0 4px; border-radius: 3px;

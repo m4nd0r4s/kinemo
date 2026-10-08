@@ -114,10 +114,11 @@ def decelerate(t: float) -> float:
 def easing(s: k.Scene):
     eases = [k.ease.linear, k.ease.smooth, k.ease.out_back, k.ease.spring(stiffness=120, damping=8),
              k.ease.steps(5), k.ease.custom(decelerate)]
-    dots = [k.Dot(r=0.15, x=-5, y=2.5 - i) for i in range(len(eases))]
+    dots = [k.Dot(r=0.15, x=-4, y=2.5 - i) for i in range(len(eases))]
     s.add(*dots)
     s.wait(0.5)
-    s.play(*[d.to(x=5, ease=e) for d, e in zip(dots, eases)], duration=2)
+    # Overshooting curves (out_back, spring) travel past the target: leave them room.
+    s.play(*[d.to(x=4, ease=e) for d, e in zip(dots, eases)], duration=2)
     s.wait(0.5)
 ```
 

@@ -4,6 +4,29 @@ All notable changes to kinemo are listed here. The project follows
 [semantic versioning](https://semver.org/); until 1.0, a minor version may change the API, and
 `kinemo upgrade` rewrites the forms it replaces.
 
+## 0.16.0
+
+Editing expressions: the preview edits values the code computes without flattening them into
+literals.
+
+**Added**
+
+- **Numbers inside expressions and lambdas** are editable in the inspector, in place: drag or
+  type the `1.2` of `x=title.x + 1.2`, or a coefficient of
+  `ax.plot(lambda x: 3 * x - 0.75 * x**2)` and watch the curve follow. An integer stays an
+  integer; numbers in an f-string's format spec are not offered.
+- **Values held by a variable**: for `size=label_size` with `label_size = 0.4` assigned once (in
+  the scene function or at module level), the preview edits the assignment and says where it
+  is (*via label_size, line 9*, *used N×*).
+- **Dragging objects with a computed position** moves the number the position adds
+  (`x=title.x + 1.2`, `place(at=(left + 0.5, top - 1))`), keeping the expression.
+- Guide chapter 14: editing computed values, and a walkthrough from a lint to the fix
+  (warning → frame → edit), with screenshots.
+
+**Changed**
+
+- CI installs ffmpeg on Windows from a static build when Chocolatey is unavailable.
+
 ## 0.15.2
 
 Fixes found while launching 0.15.1.

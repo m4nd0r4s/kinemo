@@ -253,11 +253,59 @@ only those characters, and the scene rebuilds:
   This rewrites `place(at=(x, y))`, or the `x`/`y` literals that position it; dragging
   snaps to 0.01 units.
 
-Only what the code already wrote is edited; the preview never invents statements. A value the
-code computes (a variable, an expression, a lambda) is shown, not editable. A line that runs
-several times, as in a loop, carries a `×N` mark, and editing it changes every run. If the
-file was changed elsewhere since the last build (unsaved edits in your editor, for example),
-the preview refuses the edit and reloads.
+#### Values the code computes
+
+A value the code computes stays an expression: the preview edits the numbers written inside
+it, never the expression itself.
+
+![The inspector: size edited through its variable, x through the number it adds](../examples/images/edit-expressions.png)
+
+- **Numbers inside an expression or a lambda** are underlined in its code and edited like any
+  number: `x=title.x + 1.2`, `ax.plot(lambda x: 3 * x - 0.75 * x**2)` (drag a coefficient and
+  the curve follows). An integer stays an integer (`x**2` drags to `x**3`). Numbers in an
+  f-string's format spec (`:.1f`) are not offered.
+- **A value held by a variable** (`gap = 0.4` … `place(gap=gap)`) is edited where it is
+  assigned, with *via gap, line 6* beside it, and *used N×* when other lines read it too. This
+  works for a name assigned once to a literal in the scene function, or at module level
+  (`ACCENT = k.YELLOW`); names assigned more than once, parameters and loop variables stay
+  read-only.
+- **Dragging an object whose position is computed** moves the number its position adds:
+  `x=title.x + 1.2` becomes `x=title.x + 0.8`, `place(at=(left + 0.5, top - 1))` changes
+  `0.5` and `1`. A position with no such number (`place(above=...)`, a container,
+  `title.x * 2`) is not dragged, and the inspector says why.
+
+Only what the code already wrote is edited; the preview never invents statements. A line that
+runs several times, as in a loop, carries a `×N` mark, and editing it changes every run. If
+the file was changed elsewhere since the last build (unsaved edits in your editor, for
+example), the preview refuses the edit and reloads.
+
+#### From a warning to the fix
+
+Lints and edits work together. Here a label placed by hand overlaps the title:
+
+```python
+speed = k.Text("v₀ = 3 m/s", size=0.4, x=1.2, y=3.3)
+```
+
+1. The build reports `W1002 text over text` at 2.00 s in the inspector's
+   diagnostics (and in the header: *1 warning*).
+
+   ![kinemo dev listing W1002 at 2.00 s](../examples/images/edit-loop-1.png)
+
+2. Clicking *2.00 s* moves the playhead to the frame where it happens. Selecting the label
+   shows `y=3.3` as an editable literal.
+
+   ![The frame at 2.00 s with the label selected](../examples/images/edit-loop-2.png)
+
+3. Typing `2.4` writes `y=2.4` to the file; the scene rebuilds and the warning is gone.
+
+   ![The label below the title and no warnings](../examples/images/edit-loop-3.png)
+
+4. The fix the warning suggests, `.place(below=title, gap=0.3)`, keeps the label under the
+   title for good. Its position is then computed: it is shown with where it comes from, and
+   `gap=0.3` stays editable.
+
+   ![The label placed below the title, its position read-only and gap editable](../examples/images/edit-loop-4.png)
 
 `dev` previews at draft quality. A wheel built with `maturin develop --features gpu`
 rasterizes the preview on the GPU when an adapter is available. The final render always uses

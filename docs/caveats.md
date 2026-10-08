@@ -113,15 +113,22 @@ code is given where one exists.
 
 ## Editing from the preview
 
-- **Only literals are editable.** A value that comes from a variable, an expression or a
-  function argument is shown read-only; edit it in the code. The preview edits arguments
-  that already exist (or adds a keyword for a default prop); it never adds statements.
+- **Computed values are edited through their numbers.** Literals are edited whole; in an
+  expression or a lambda only the numbers written inside it are editable, and a name is
+  edited where it is assigned only when it is assigned once to a literal (in the scene
+  function or at module level). Parameters, loop variables, names assigned more than once
+  and anything without a number in it stay read-only; edit them in the code. The preview
+  edits arguments that already exist (or adds a keyword for a default prop); it never adds
+  statements.
+- **A number that a drag crosses to negative keeps its operator**: dragging the `1.2` of
+  `title.x + 1.2` below zero writes `title.x + -0.3`.
 - **Editing a line inside a loop changes every run of it** (the `×N` mark). A clip's body is
   one line for all its uses.
-- **Dragging an object adds the pointer distance to its literal position.** Inside a scaled
-  or rotated group the object moves by a different amount on screen than the pointer.
-  Objects positioned by a relation (`place(above=...)`), a container or an expression can't
-  be dragged, and neither can an object whose `x`/`y` is animating at the playhead.
+- **Dragging an object adds the pointer distance to its literal position**, or to the number
+  its computed position adds (`title.x + 1.2`). Inside a scaled or rotated group the object
+  moves by a different amount on screen than the pointer. Objects positioned by a relation
+  (`place(above=...)`), a container or an expression without such a number can't be
+  dragged, and neither can an object whose `x`/`y` is animating at the playhead.
 - **An edit is refused when the file changed since the preview last built it** (for example
   unsaved changes in the editor that were then saved); the preview reloads and the edit can
   be repeated.

@@ -216,3 +216,27 @@ def test_the_preview_edits_a_value_through_its_variable(tmp_path: Path) -> None:
     assert size["variable"] == {"name": "size", "text": "0.4", "kind": "number", "value": 0.4, "line": 6, "uses": 1}
     session.process_edits([{"id": 1, "live": False, "changes": [{"site": key, "target": "size", "variable": True, "value": "0.6"}]}])
     assert "    size = 0.6\n" in path.read_text(encoding="utf-8")
+
+
+# ---- dragging computed positions ----------------------------------------------------------
+
+
+@pytest.mark.parametrize(
+    ("x", "expected"),
+    [("title.x + 1.2", (0, 1)), ("title.x - 1.2", (0, -1)), ("1.2 + title.x", (0, 1)), ("title.x * 2", None), ("2 * a + 0.5", (1, 1))],
+)
+def test_a_computed_coordinate_moves_through_the_number_it_adds(x: str, expected: tuple[int, int] | None) -> None:
+    _, site = call(f"k.Dot(x={x})\n", "k.Dot")
+    argument = site.keyword("x")
+    assert argument is not None
+    found = (argument.offset.number, argument.offset.sign) if argument.offset is not None else None
+    assert found == expected
+
+
+def test_a_computed_pair_moves_each_coordinate_through_its_own_number() -> None:
+    _, site = call("dot.place(at=(left + 0.5, top - 1))\n", "dot.place")
+    at = site.keyword("at")
+    assert at is not None and [(o.number, o.sign) if o else None for o in at.offsets] == [(0, 1), (1, -1)]
+    _, site = call("dot.place(at=(a, 2.0))\n", "dot.place")
+    at = site.keyword("at")
+    assert at is not None and [(o.number, o.sign) if o else None for o in at.offsets] == [None, (0, 1)]

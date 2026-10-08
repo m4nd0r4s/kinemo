@@ -15,7 +15,7 @@ from functools import lru_cache
 from typing import TYPE_CHECKING, Any, Callable, Mapping
 
 from .._runtime.spans import Span
-from .call_sites import CallSite, SourceFile, Variable
+from .call_sites import CallSite, Offset, SourceFile, Variable
 from .value_types import ValueType, from_prop_spec, parameter_types
 
 if TYPE_CHECKING:
@@ -281,6 +281,10 @@ def easing_names() -> list[str]:
     return [name for name, value in vars(type(ease)).items() if isinstance(value, Ease)]
 
 
+def _offset_json(offset: "Offset | None") -> dict[str, int] | None:
+    return {"number": offset.number, "sign": offset.sign} if offset is not None else None
+
+
 def _variable_json(variable: "Variable", colors: Mapping[str, str]) -> dict[str, Any]:
     return {
         "name": variable.name,
@@ -320,6 +324,8 @@ def _site_json(entry: IndexedSite, colors: Mapping[str, str]) -> dict[str, Any]:
                 **({"hex": colors.get(str(a.value))} if a.kind == "color" else {}),
                 **({"numbers": [{"text": n.text, "value": n.value, "offset": n.offset} for n in a.numbers]} if a.numbers else {}),
                 **({"variable": _variable_json(a.variable, colors)} if a.variable is not None else {}),
+                **({"offset": _offset_json(a.offset)} if a.offset is not None else {}),
+                **({"offsets": [_offset_json(o) for o in a.offsets]} if a.offsets else {}),
             }
             for a in entry.site.arguments
         ],

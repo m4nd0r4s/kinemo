@@ -10,9 +10,10 @@ from __future__ import annotations
 import ast
 from dataclasses import dataclass
 from functools import cached_property
+from typing import Any
 
 from .._runtime.spans import Span
-from .literals import LiteralKind, literal_kind, literal_value, numbers_inside
+from .literals import LiteralKind, is_number, literal_kind, literal_value, numbers_inside
 
 
 @dataclass(frozen=True, order=True)
@@ -33,6 +34,15 @@ class NumberInside:
     offset: int
     start: Position
     end: Position
+
+
+@dataclass(frozen=True)
+class Offset:
+    """The number a computed coordinate adds to the rest (`1.2` in `title.x + 1.2`): moving
+    the object by `d` changes that number by `sign * d`."""
+
+    number: int
+    sign: int
 
 
 @dataclass(frozen=True)
@@ -65,6 +75,10 @@ class Argument:
     numbers: tuple[NumberInside, ...] = ()
     #: For a bare name bound once to a literal in its scope: that assignment.
     variable: Variable | None = None
+    #: A computed coordinate's added number (`x=title.x + 1.2`), and for a computed pair
+    #: (`at=(a, 2.0)`) each element's: what a drag of the object changes.
+    offset: Offset | None = None
+    offsets: tuple[Offset | None, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -170,7 +184,26 @@ class SourceFile:
             end=end,
             numbers=self._numbers(value, start) if kind is None else (),
             variable=self._variable(value) if isinstance(value, ast.Name) else None,
+            **self._offsets(value) if kind is None else {},
         )
+
+    def _offsets(self, value: ast.expr) -> dict[str, Any]:
+        """Where a drag goes in a computed coordinate (see `Argument.offset`)."""
+        order = {(n.lineno, n.col_offset): i for i, n in enumerate(numbers_inside(value))}
+
+        def offset(node: ast.expr) -> Offset | None:
+            found = _added_number(node)
+            if found is None:
+                return None
+            number, sign = found
+            index = order.get((number.lineno, number.col_offset))
+            return Offset(index, sign) if index is not None else None
+
+        if isinstance(value, (ast.Tuple, ast.List)) and len(value.elts) == 2:
+            pair = tuple(offset(e) for e in value.elts)
+            return {"offsets": pair} if any(pair) else {}
+        found = offset(value)
+        return {"offset": found} if found is not None else {}
 
     def _variable(self, name: ast.Name) -> Variable | None:
         """The assignment that gives `name` its value, when there is exactly one in the
@@ -220,6 +253,19 @@ class SourceFile:
 
 _Function = ast.FunctionDef | ast.AsyncFunctionDef
 _Scopes = (ast.FunctionDef, ast.AsyncFunctionDef, ast.Lambda, ast.ClassDef, ast.ListComp, ast.SetComp, ast.DictComp, ast.GeneratorExp)
+
+
+def _added_number(node: ast.expr) -> tuple[ast.expr, int] | None:
+    """The number `node` adds to the rest of it, with its sign: `1.2` (+1) in `a + 1.2` or
+    `1.2 + a`, `1.2` (-1) in `a - 1.2`, the number itself when `node` is one."""
+    if is_number(node):
+        return node, 1
+    if isinstance(node, ast.BinOp) and isinstance(node.op, (ast.Add, ast.Sub)):
+        if is_number(node.right):
+            return node.right, 1 if isinstance(node.op, ast.Add) else -1
+        if isinstance(node.op, ast.Add) and is_number(node.left):
+            return node.left, 1
+    return None
 
 
 def _enclosing_function(tree: ast.Module, node: ast.AST) -> _Function | None:

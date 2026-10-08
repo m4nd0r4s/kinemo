@@ -1,0 +1,115 @@
+"""Editing numbers inside computed arguments: the expression stays, only the number's
+characters change (`title.x + 1.2` → `title.x + 0.8`)."""
+
+from __future__ import annotations
+
+import ast
+from pathlib import Path
+
+import pytest
+
+from kinemo._runtime.spans import Span
+from kinemo.editing.call_sites import CallSite, SourceFile
+from kinemo.editing.source_edit import Change, EditError, apply_changes
+
+from test_dev_editing import FakeServer, site_of
+from kinemo.cli.dev import Session
+
+
+def call(text: str, callee: str) -> tuple[SourceFile, CallSite]:
+    """The first call to `callee` in `text`, found the way the preview finds it: by span."""
+    source = SourceFile("scene.py", text)
+    for node in ast.walk(ast.parse(text)):
+        if isinstance(node, ast.Call) and ast.unparse(node.func) == callee:
+            start = source.position(node.lineno, node.col_offset)
+            end = source.position(node.end_lineno or node.lineno, node.end_col_offset or 0)
+            site = source.call_at(Span("scene.py", start.line, start.col, end.line, end.col))
+            assert site is not None
+            return source, site
+    raise AssertionError(f"no call to {callee}")
+
+
+def numbers(site: CallSite, keyword: str) -> list[str]:
+    argument = site.keyword(keyword)
+    assert argument is not None
+    return [n.text for n in argument.numbers]
+
+
+def test_numbers_inside_arithmetic_and_lambdas_in_source_order() -> None:
+    _, site = call("k.Dot(x=title.x + 1.2, y=lambda: 3 * t() - 0.75 * t() ** 2)\n", "k.Dot")
+    assert numbers(site, "x") == ["1.2"]
+    assert numbers(site, "y") == ["3", "0.75", "2"]
+
+
+def test_a_sign_written_against_a_number_belongs_to_it() -> None:
+    _, site = call("box.place(at=(a, -2))\n", "box.place")
+    assert numbers(site, "at") == ["-2"]
+
+
+def test_literals_have_no_inner_numbers_and_booleans_are_not_numbers() -> None:
+    _, site = call("k.Dot(r=0.2, visible=flag or True)\n", "k.Dot")
+    r = site.keyword("r")
+    assert r is not None and r.kind == "number" and r.numbers == ()
+    assert numbers(site, "visible") == []
+
+
+def test_format_specs_are_not_numbers_but_numbers_in_fstring_fields_are() -> None:
+    _, site = call('k.Text(lambda: f"{x() * 100:.0f}% of {total}")\n', "k.Text")
+    argument = site.positional(0)
+    assert argument is not None
+    assert [n.text for n in argument.numbers] == ["100"]
+
+
+def test_offsets_count_characters_across_unicode_and_lines() -> None:
+    text = 'k.Text("v₀ = " + str(3), x=(\n    left\n    + 0.5\n))\n'
+    _, site = call(text, "k.Text")
+    label = site.positional(0)
+    assert label is not None and label.numbers[0].text == "3"
+    assert label.text[label.numbers[0].offset] == "3"
+    x = site.keyword("x")
+    assert x is not None and x.text[x.numbers[0].offset :].startswith("0.5")
+
+
+def test_editing_a_number_keeps_the_expression() -> None:
+    text = "dot = k.Dot(x=title.x + 1.2, y=lambda: 3 * t() - 0.75 * t() ** 2)\n"
+    source, site = call(text, "k.Dot")
+    edited = apply_changes(source, [Change(site, "y", "0.5", number=1), Change(site, "x", "-0.8", number=0)])
+    assert edited == "dot = k.Dot(x=title.x + -0.8, y=lambda: 3 * t() - 0.5 * t() ** 2)\n"
+
+
+def test_number_edits_refuse_other_values_and_missing_numbers() -> None:
+    source, site = call("k.Dot(x=title.x + 1.2)\n", "k.Dot")
+    with pytest.raises(EditError, match="not a number"):
+        apply_changes(source, [Change(site, "x", "offset", number=0)])
+    with pytest.raises(EditError, match="no longer has that number"):
+        apply_changes(source, [Change(site, "x", "2", number=3)])
+    with pytest.raises(EditError, match="computed"):
+        apply_changes(source, [Change(site, "x", "2")])
+
+
+SCENE = '''import kinemo as k
+
+
+@k.scene
+def demo(s: k.Scene):
+    title = k.Text("hi")
+    dot = k.Dot(r=0.2, x=title.x + 1.2)
+    s.add(title, dot)
+    s.wait(0.5)
+'''
+
+
+def test_the_preview_gets_the_numbers_and_an_edit_writes_one(tmp_path: Path) -> None:
+    path = tmp_path / "scene.py"
+    path.write_text(SCENE, encoding="utf-8")
+    server = FakeServer()
+    session = Session(str(path), None, {}, server)  # type: ignore[arg-type]
+    assert session.rebuild()
+    meta = server.scenes[-1]
+    key = site_of(meta, "k.Dot")
+    x = next(a for a in meta["sources"][key]["arguments"] if a["param"] == "x")
+    assert x["kind"] is None
+    assert x["numbers"] == [{"text": "1.2", "value": 1.2, "offset": 10}]
+    session.process_edits([{"id": 1, "live": False, "changes": [{"site": key, "target": "x", "number": 0, "value": "2.5"}]}])
+    assert "dot = k.Dot(r=0.2, x=title.x + 2.5)" in path.read_text(encoding="utf-8")
+    assert server.notes[-1]["ok"] is True

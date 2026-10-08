@@ -12,7 +12,7 @@ from dataclasses import dataclass
 from functools import cached_property
 
 from .._runtime.spans import Span
-from .literals import LiteralKind, literal_kind, literal_value
+from .literals import LiteralKind, literal_kind, literal_value, numbers_inside
 
 
 @dataclass(frozen=True, order=True)
@@ -21,6 +21,18 @@ class Position:
 
     line: int
     col: int
+
+
+@dataclass(frozen=True)
+class NumberInside:
+    """A number written inside a computed argument (`1.2` in `title.x + 1.2`). `offset` is
+    where it starts in the argument's text."""
+
+    text: str
+    value: int | float
+    offset: int
+    start: Position
+    end: Position
 
 
 @dataclass(frozen=True)
@@ -34,6 +46,8 @@ class Argument:
     value: object
     start: Position
     end: Position
+    #: The numbers inside a computed argument, editable one by one (none for a literal).
+    numbers: tuple[NumberInside, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -137,4 +151,23 @@ class SourceFile:
             value=literal_value(value) if kind is not None else None,
             start=start,
             end=end,
+            numbers=self._numbers(value, start) if kind is None else (),
         )
+
+    def _numbers(self, value: ast.expr, argument_start: Position) -> tuple[NumberInside, ...]:
+        out: list[NumberInside] = []
+        for node in numbers_inside(value):
+            start = self.position(node.lineno, node.col_offset)
+            end = self.position(node.end_lineno or node.lineno, node.end_col_offset or 0)
+            text = self.segment(start, end)
+            # Positions inside f-strings are unreliable before Python 3.12: keep a number
+            # only where the text really is that number.
+            try:
+                written = ast.literal_eval(text)
+            except (ValueError, SyntaxError):
+                continue
+            number = ast.literal_eval(node)
+            if written != number or isinstance(written, bool):
+                continue
+            out.append(NumberInside(text, number, len(self.segment(argument_start, start)), start, end))
+        return tuple(out)

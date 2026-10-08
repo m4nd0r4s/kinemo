@@ -306,6 +306,7 @@ def _site_json(entry: IndexedSite, colors: Mapping[str, str]) -> dict[str, Any]:
                 "kind": a.kind,
                 "value": a.value,
                 **({"hex": colors.get(str(a.value))} if a.kind == "color" else {}),
+                **({"numbers": [{"text": n.text, "value": n.value, "offset": n.offset} for n in a.numbers]} if a.numbers else {}),
             }
             for a in entry.site.arguments
         ],

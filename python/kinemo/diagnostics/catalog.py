@@ -139,7 +139,7 @@ CATALOG: dict[str, Entry] = {
     "W0701": Entry("handler object never removed", "Objects created in handlers should leave the scene."),
     "W0801": Entry("morph without matches", "The shapes have nothing in common; the morph does a warp + crossfade."),
     "W0901": Entry("too many individual objects", "Use vectorized types (`k.Points`, `k.VectorField`)."),
-    "W1001": Entry("outside the safe area", "The object extends beyond the frame's safe area. Objects entirely offstage are not reported; for one cropped on purpose, `bleed=True`."),
+    "W1001": Entry("outside the safe area", "The object extends beyond the frame's safe area. Objects entirely offstage are not reported; for one cropped on purpose, `bleed=True`. A moving object is reported when the frame edge cuts it on its way between two places inside the frame (a swap arc, an overshooting ease); entrances and exits through the edge are not."),
     "W1002": Entry("text over text", "Two texts overlap by more than 10% of their area."),
     "W1003": Entry("low contrast", "Contrast between text and what is behind it (the background, or a filled shape under it such as a card or a speech bubble) is below 4.5:1."),
     "W1004": Entry("small text", "Text smaller than 18 px at the final resolution."),

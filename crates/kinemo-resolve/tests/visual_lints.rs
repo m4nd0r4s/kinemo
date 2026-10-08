@@ -27,7 +27,7 @@ fn object_past_the_safe_area_is_reported_with_edge_and_overshoot() {
     assert_eq!(w[0].objects, vec![r]);
     assert_eq!(w[0].t, 0.0);
     match &w[0].details {
-        LintDetails::SafeArea { edge, overshoot } => {
+        LintDetails::SafeArea { edge, overshoot, .. } => {
             assert_eq!(*edge, FrameEdge::Right);
             assert!((overshoot - 0.8).abs() < 1e-6);
         }

@@ -68,7 +68,15 @@ class _Finding:
 
 def _outside_safe_area(f: _Finding) -> tuple[str, list[Fix], list[Span]]:
     d = f.details
-    message = f"{f.label} leaves the safe area ({EDGE_NAMES.get(d['edge'], d['edge'])}, {_number(d['overshoot'])} u)"
+    edge = EDGE_NAMES.get(d["edge"], d["edge"])
+    if d.get("moving"):
+        message = f"{f.label} is cut by the frame edge while it moves ({edge}, {_number(d['overshoot'])} u)"
+        if d.get("reorder"):
+            fix = Fix("keep the whole path inside the frame: move the row away from the edge, or swap in a straight line", 'row.swap(i, j, path="straight")')
+        else:
+            fix = Fix("keep the whole path inside the frame: move it away from the edge, or ease without overshoot", f"{f.label}.to(..., ease=k.ease.smooth)")
+        return message, [fix], []
+    message = f"{f.label} leaves the safe area ({edge}, {_number(d['overshoot'])} u)"
     fix_info: dict[str, Any] = f.raw.get("fix") or {}
     target_id = fix_info.get("target")
     target = f.nodes_by_id.get(target_id) if isinstance(target_id, int) else None

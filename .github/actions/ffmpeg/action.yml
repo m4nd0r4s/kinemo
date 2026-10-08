@@ -9,8 +9,19 @@ runs:
     - if: runner.os == 'macOS'
       shell: bash
       run: brew install ffmpeg
+    # Chocolatey's feed is sometimes down (503): fall back to a static build from GitHub.
     - if: runner.os == 'Windows'
       shell: pwsh
-      run: choco install ffmpeg -y --no-progress
+      run: |
+        choco install ffmpeg -y --no-progress
+        if (-not (Get-Command ffmpeg -ErrorAction SilentlyContinue)) {
+          Write-Host "choco could not install ffmpeg; using a static build"
+          $zip = Join-Path $env:RUNNER_TEMP "ffmpeg.zip"
+          $folder = Join-Path $env:RUNNER_TEMP "ffmpeg"
+          Invoke-WebRequest "https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/ffmpeg-master-latest-win64-gpl.zip" -OutFile $zip
+          Expand-Archive $zip -DestinationPath $folder
+          $bin = (Get-ChildItem $folder -Recurse -Filter ffmpeg.exe | Select-Object -First 1).DirectoryName
+          Add-Content $env:GITHUB_PATH $bin
+        }
     - shell: bash
       run: ffmpeg -version | head -1

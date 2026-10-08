@@ -43,7 +43,7 @@ def test_core_reports_findings_as_json() -> None:
     assert [f["code"] for f in findings] == ["W1001"]
     f = findings[0]
     assert f["t"] == 0.0
-    assert f["details"] == {"kind": "safe_area", "edge": "right", "overshoot": f["details"]["overshoot"]}
+    assert f["details"] == {"kind": "safe_area", "edge": "right", "overshoot": f["details"]["overshoot"], "moving": False, "reorder": False}
     assert abs(f["details"]["overshoot"] - 0.8) < 1e-6
     assert f["fix"]["kind"] == "place_with_clamp"
 
@@ -96,6 +96,65 @@ def test_w1001_not_reported_for_an_object_waiting_offstage() -> None:
         s.add(arrow)
         s.wait(0.5)
         s.play(arrow.to(x=4.0))
+
+    assert lints_of(build(scene), "W1001") == []
+
+
+def test_w1001_reports_a_path_that_leaves_the_frame_mid_motion() -> None:
+    # A swap moves one bar above the row and one below it: near the bottom edge, the lower
+    # arc leaves the frame although the row rests inside before and after.
+    def scene(s: k.Scene) -> None:
+        row = k.Row(*[k.Bar(v, label=True) for v in [5, 9, 3]], gap=0.2, align="bottom").place(at="bottom", margin=0.6)
+        s.play(k.fade_in(row))
+        s.play(row.swap(1, 2), duration=0.4)
+        s.wait(0.2)
+
+    d = lints_of(build(scene), "W1001")[0]
+    assert "is cut by the frame edge while it moves (bottom" in d.message, d.render()
+    assert 1.0 < d.time < 1.4
+    assert any('path="straight"' in (fix.code or "") for fix in d.fixes), d.render()
+
+
+def test_w1001_reports_an_overshoot_past_the_frame_with_an_easing_fix() -> None:
+    def scene(s: k.Scene) -> None:
+        dot = k.Dot(r=0.15, x=-5)
+        s.add(dot)
+        s.wait(0.5)
+        s.play(dot.to(x=5, ease=k.ease.spring(stiffness=120, damping=8)), duration=2)
+        s.wait(0.5)
+
+    d = only_one(lints_of(build(scene), "W1001"))
+    assert "while it moves (right" in d.message
+    assert any("ease=" in (fix.code or "") for fix in d.fixes), d.render()
+
+
+def test_w1001_not_reported_for_a_short_swap_kept_inside() -> None:
+    def scene(s: k.Scene) -> None:
+        row = k.Row(*[k.Bar(v, label=True) for v in [5, 9, 3]], gap=0.2, align="bottom").place(at="bottom", margin=0.6)
+        s.play(k.fade_in(row))
+        s.play(row.swap(1, 2, path="straight"), duration=0.05)
+        s.wait(0.2)
+
+    assert lints_of(build(scene), "W1001") == []
+
+
+def test_w1001_reports_a_sped_up_swap_shorter_than_the_sample_step() -> None:
+    def scene(s: k.Scene) -> None:
+        row = k.Row(*[k.Bar(v, label=True) for v in [5, 9, 3]], gap=0.2, align="bottom").place(at="bottom", margin=0.6)
+        s.play(k.fade_in(row))
+        s.play(row.swap(1, 2), duration=0.05)
+        s.wait(0.2)
+
+    assert lints_of(build(scene), "W1001")
+
+
+def test_w1001_not_reported_for_an_exit_through_the_edge() -> None:
+    def scene(s: k.Scene) -> None:
+        box = k.Rect(w=1, h=1)
+        s.add(box)
+        s.wait(0.5)
+        s.play(box.to(x=9.0))
+        s.wait(0.5)
 
     assert lints_of(build(scene), "W1001") == []
 

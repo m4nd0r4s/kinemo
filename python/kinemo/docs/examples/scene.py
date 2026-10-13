@@ -267,6 +267,27 @@ def triangle(s: k.Scene):
         assets=("script.md",),
     ),
     DocEntry(
+        "k.Captions",
+        "Scene",
+        "The narration as captions burned into the video, for viewers who watch muted. Create "
+        "it once, anywhere in the scene: when the build ends, every `s.voice` line becomes short "
+        "captions (`chars=` per row, `rows=` per caption), each shown while its words are "
+        "spoken, at the bottom of the safe area (above the buttons of `platform=`; `at=` moves "
+        "it), on a plate (`plate=False` for none). `highlight=` colors the word being spoken. "
+        "`kinemo render --subtitles` still writes SRT/WebVTT files.",
+        '''
+import kinemo as k
+
+@k.scene(size="vertical", platform="reels")
+def short(s: k.Scene):
+    k.Captions(highlight=k.YELLOW)
+    number = k.Text("1089", size=1.4).place(at="center")
+    with s.voice("Pick a three digit number."):  # kinemo: allow W1401
+        s.play(k.write(number))
+''',
+        related=("Scene.voice", "k.Script"),
+    ),
+    DocEntry(
         "k.time",
         "Scene",
         "Global scene time in seconds, as a read-only signal. It is the right way to express "

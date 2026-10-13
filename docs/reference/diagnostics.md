@@ -22,7 +22,7 @@ Every problem kinemo reports has a stable code: `K` codes are errors, `W` codes 
 | [K11xx](#range-11) | Names from other libraries (Manim) | 6 |
 | [K12xx](#range-12) | Data and interoperability (Arrow, arrays) | 4 |
 | [W13xx](#range-13) | Parameters and export | 2 |
-| [W14xx](#range-14) | Audio and voice | 6 |
+| [W14xx](#range-14) | Audio and voice | 7 |
 
 <a id="range-00"></a>
 ## K00xx: General
@@ -475,6 +475,7 @@ s.play(c.to(x=2))
 | [`W1403`](#w1403) | warning (lint) | content runs past the narration |
 | [`W1404`](#w1404) | warning (lint) | stale narration |
 | [`W1405`](#w1405) | hint (does not fail `--strict`) | narration without audio yet |
+| [`W1407`](#w1407) | warning (lint) | captions without narration |
 
 <a id="k1401"></a>
 ### K1401: TTS command failed
@@ -535,3 +536,8 @@ Fix:
 ```python
 `kinemo voice <scene file>` makes every missing line in one run; `kinemo render` makes them before rendering.
 ```
+
+<a id="w1407"></a>
+### W1407: captions without narration
+
+*Warning (lint).* `k.Captions()` shows the scene's `s.voice` lines; this scene has none, so there is nothing to caption.

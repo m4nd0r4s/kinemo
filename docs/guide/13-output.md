@@ -378,6 +378,25 @@ from the narration: cues of at most two lines of 42 characters, timed by the wor
 follow the audio when its word times were aligned), and a sentence end closes a cue. A scene
 without narration writes none.
 
+### Captions in the video
+
+Most short videos are watched muted. `k.Captions()` burns the narration into the video:
+
+```python
+@k.scene(size="vertical", platform="reels")
+def short(s: k.Scene):
+    k.Captions(highlight=k.YELLOW)
+    ...
+```
+
+Create it once, anywhere in the scene. When the build ends, every `s.voice` line becomes
+captions of at most `rows=2` rows of `chars=28` characters, each shown while its words are
+spoken, at the bottom of the safe area (so above the buttons of `platform=`), on a plate.
+`highlight=` colors the word being spoken when the words have times (recorded audio aligned
+with `kinemo[align]`, or a provider that gives them; estimated times work too). `at="top"`
+or `"center"` moves them, `plate=False` removes the plate. A scene without narration gets
+`W1407`.
+
 ### Without a TTS provider
 
 When no provider is configured, the voice becomes **silence with an estimated duration**

@@ -13,6 +13,7 @@ Scenes, the timeline cursor and the blocks that shape time (`s.play`, `s.start`,
 - [`k.TimeSpan`](#k-timespan): Where a `play`/`start` landed.
 - [`k.Voice`](#k-voice): A narration line: when it starts and ends in the scene, and when each word is said.
 - [`k.Script`](#k-script): Narration kept outside the code, by beat: a Markdown file with a heading per beat (`### B03 · Title`, the first word is the id) and its narration on `> ` lines, or JSON (`{"B03": "..."}`).
+- [`k.Captions`](#k-captions): The narration as captions burned into the video, for viewers who watch muted.
 - [`k.time`](#k-time): Global scene time in seconds, as a read-only signal.
 
 **Methods in this area:**
@@ -741,6 +742,53 @@ script.ids: list[str]  # read-only
 ```
 
 Beat ids in script order.
+
+<a id="k-captions"></a>
+### `k.Captions` *(class)*
+
+```python
+k.Captions(
+    *,
+    size: float = 0.5,
+    highlight: ColorLike | None = None,
+    chars: int = 28,
+    rows: int = 2,
+    at: Literal['bottom', 'top', 'center'] = "bottom",
+    plate: bool = True,
+)
+```
+
+The narration as captions burned into the video, for viewers who watch muted. Create it once, anywhere in the scene: when the build ends, every `s.voice` line becomes short captions (`chars=` per row, `rows=` per caption), each shown while its words are spoken, at the bottom of the safe area (above the buttons of `platform=`; `at=` moves it), on a plate (`plate=False` for none). `highlight=` colors the word being spoken. `kinemo render --subtitles` still writes SRT/WebVTT files.
+
+**Parameters:**
+
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `size` | `float` | `0.5` | `k.Captions(size=0.5, highlight=k.YELLOW)`: the scene's narration as captions in the video, a phrase at a time (`chars=` per row, `rows=` per caption), at the bottom of the safe area (`at="top"` or `"center"` for elsewhere), on a plate (`plate=False` for none). |
+| `highlight` | `ColorLike \| None` | `None` | `highlight=` colors the word being spoken. |
+| `chars` | `int` | `28` | Create it once, anywhere in the scene: when the build ends, every `s.voice` line becomes short captions (`chars=` per row, `rows=` per caption), each shown while its words are spoken, at the bottom of the safe area (above the buttons of `platform=`; `at=` moves it), on a plate (`plate=False` for none). |
+| `rows` | `int` | `2` | Create it once, anywhere in the scene: when the build ends, every `s.voice` line becomes short captions (`chars=` per row, `rows=` per caption), each shown while its words are spoken, at the bottom of the safe area (above the buttons of `platform=`; `at=` moves it), on a plate (`plate=False` for none). |
+| `at` | `Literal['bottom', 'top', 'center']` | `"bottom"` | Create it once, anywhere in the scene: when the build ends, every `s.voice` line becomes short captions (`chars=` per row, `rows=` per caption), each shown while its words are spoken, at the bottom of the safe area (above the buttons of `platform=`; `at=` moves it), on a plate (`plate=False` for none). |
+| `plate` | `bool` | `True` | Create it once, anywhere in the scene: when the build ends, every `s.voice` line becomes short captions (`chars=` per row, `rows=` per caption), each shown while its words are spoken, at the bottom of the safe area (above the buttons of `platform=`; `at=` moves it), on a plate (`plate=False` for none). |
+
+**Attributes:**
+
+| Attribute | Type | Description |
+| --- | --- | --- |
+| `captions.span` |   |   |
+
+**Example:**
+
+```python
+@k.scene(size="vertical", platform="reels")
+def short(s: k.Scene):
+    k.Captions(highlight=k.YELLOW)
+    number = k.Text("1089", size=1.4).place(at="center")
+    with s.voice("Pick a three digit number."):  # kinemo: allow W1401
+        s.play(k.write(number))
+```
+
+**See also:** [`s.voice`](#scene-voice), [`k.Script`](#k-script).
 
 <a id="k-time"></a>
 ### `k.time` *(constant)*

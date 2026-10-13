@@ -77,7 +77,9 @@ class Captions:
             words = [word for row in rows for word in row]
             text = "\n".join(" ".join(_escaped(w) for w, _, _ in row) for row in rows)
             s.cursor = start
-            caption = Text(text, size=self.size, align="center", fill=theme.fg)
+            pad = self.size * 0.35 if self.plate else 0.0
+            # Never wider than the safe area: platforms cover the sides unevenly.
+            caption = Text(text, size=self.size, width=safe.width - 2 * pad, align="center", fill=theme.fg)
             if highlight is not None and all(t1 > t0 for _, t0, t1 in words):
                 # The word being spoken takes the highlight while it is said (its parts are made
                 # before the caption enters, so they come and go with it).
@@ -87,13 +89,12 @@ class Captions:
                     _set(s, word, "fill", min(t1, end), theme.fg, self.span)
             parts: list[Node] = [caption]
             if self.plate:
-                pad = self.size * 0.35
                 plate = RoundedRect(w=float(caption.width.now) + 2 * pad, h=float(caption.height.now) + 2 * pad, radius=pad, fill=theme.bg, fill_opacity=0.72, stroke_width=0.0)
                 parts.insert(0, plate)
-            half = (float(caption.height.now) / 2) + (self.size * 0.35 if self.plate else 0.0)
-            y = {"bottom": safe.bottom + half, "top": safe.top - half, "center": 0.0}[self.at]
+            half = float(caption.height.now) / 2 + pad
+            y = {"bottom": safe.bottom + half, "top": safe.top - half, "center": (safe.bottom + safe.top) / 2}[self.at]
             for part in parts:
-                part.set(x=0.0, y=y)
+                part.set(x=(safe.left + safe.right) / 2, y=y)
                 s._enter(part, start)
                 _ramp(s, part, "_fade", start, FADE, ease.smooth, 0.0, 1.0, self.span)
                 _ramp(s, part, "_fade", max(start, end - FADE), FADE, ease.smooth, 1.0, 0.0, self.span)

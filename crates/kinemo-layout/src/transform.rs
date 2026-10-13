@@ -11,6 +11,22 @@ pub fn frame_rect(cfg: &SceneConfig) -> Rect {
     Rect::new(-cfg.frame_w / 2.0, -cfg.frame_h / 2.0, cfg.frame_w / 2.0, cfg.frame_h / 2.0)
 }
 
+/// Inset of the safe area from each edge of the frame, in scene units.
+pub const SAFE_MARGIN: f64 = 0.5;
+
+/// The safe area: the frame inset by `margin`, or by more where the platform covers it
+/// (`covered`: top, right, bottom, left).
+pub fn safe_rect_with(cfg: &SceneConfig, margin: f64) -> Rect {
+    let f = frame_rect(cfg);
+    let [top, right, bottom, left] = cfg.covered.map(|c| c.max(margin));
+    Rect::new(f.x0 + left, f.y0 + bottom, f.x1 - right, f.y1 - top)
+}
+
+/// The safe area with the default margin (see [`safe_rect_with`]).
+pub fn safe_rect(cfg: &SceneConfig) -> Rect {
+    safe_rect_with(cfg, SAFE_MARGIN)
+}
+
 /// Point of `r` named by an anchor ("center", "top", "bottom-left", ...). Unknown names → center.
 pub fn anchor_point(r: Rect, name: &str) -> Point {
     let [ux, uy] = anchor_unit(name);

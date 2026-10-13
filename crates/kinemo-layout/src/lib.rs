@@ -25,4 +25,4 @@ pub use diag::{LayoutIssue, LayoutIssueKind};
 pub use engine::Layout;
 pub use geometry::{PartRole, ShapePart};
 pub use glyphs::SourceGlyph;
-pub use transform::{anchor_point, frame_rect};
+pub use transform::{anchor_point, frame_rect, safe_rect, safe_rect_with, SAFE_MARGIN};

@@ -20,6 +20,14 @@ SIZES: dict[str, tuple[int, int]] = {
 #: Scene units on the short side of the frame.
 SHORT_SIDE_UNITS = 9.0
 
+#: What each app covers with its buttons and captions on a vertical video, in pixels of a
+#: 1080 × 1920 frame: (top, right, bottom, left). Approximations of the 2026 layouts.
+PLATFORMS: dict[str, tuple[int, int, int, int]] = {
+    "reels": (220, 140, 420, 60),
+    "tiktok": (180, 160, 480, 60),
+    "shorts": (160, 180, 380, 60),
+}
+
 
 @dataclass
 class SceneConfig:
@@ -34,6 +42,19 @@ class SceneConfig:
     params: dict[str, Any] = field(default_factory=dict)
     #: Integrated loudness of the audio track in LUFS (`[audio] loudness`); None keeps the mix.
     loudness: float | None = None
+    #: The app a vertical video is made for (`platform="reels"`): its covered zones narrow the
+    #: safe area. Ignored for frames that are not vertical.
+    platform: str | None = None
+
+    @property
+    def covered_units(self) -> tuple[float, float, float, float]:
+        """(top, right, bottom, left) of the frame the platform covers, in scene units."""
+        w, h = self.size
+        if self.platform is None or h <= w:
+            return (0.0, 0.0, 0.0, 0.0)
+        per_pixel = self.frame_units[1] / h * (h / 1920)
+        top, right, bottom, left = PLATFORMS[self.platform]
+        return (top * per_pixel, right * per_pixel, bottom * per_pixel, left * per_pixel)
 
     @property
     def frame_units(self) -> tuple[float, float]:
@@ -61,6 +82,7 @@ class SceneConfig:
             "frame_w": fw,
             "frame_h": fh,
             "loudness": self.loudness,
+            "covered": list(self.covered_units),
         }
 
 

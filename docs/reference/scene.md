@@ -47,6 +47,7 @@ k.scene(
     params: dict[str, Param] | None = None,
     name: str | None = None,
     preset: str | None = None,
+    platform: Literal['reels', 'tiktok', 'shorts'] | None = None,
 ) -> Callable[[SceneFn], SceneDef]
 ```
 
@@ -68,6 +69,7 @@ Turns a function `def name(s: k.Scene)` into a scene. The body runs exactly once
 | `params` | `dict[str, Param] \| None` | `None` | Scene parameters (`k.Int`, `k.Float`, `k.Bool`, `k.Choice`, `k.Str`), passed to the function by name. |
 | `name` | `str \| None` | `None` | Scene name used by `--scene`; defaults to the function name. |
 | `preset` | `str \| None` | `None` | The decorator arguments (size, fps, background, seed, tail, theme, parameters) take precedence over `kinemo.toml`; `preset="short"` starts from a `[presets.short]` table there. |
+| `platform` | `Literal['reels', 'tiktok', 'shorts'] \| None` | `None` | The app a vertical video is made for (`"reels"`, `"tiktok"`, `"shorts"`): the zones its buttons and captions cover narrow the safe area. Ignored for frames that are not vertical. |
 
 **Example:**
 
@@ -141,7 +143,7 @@ A scene decorator with defaults of its own, for a series or a shared library: `e
 
 | Name | Type | Default | Description |
 | --- | --- | --- | --- |
-| `**defaults` | `Unpack[SceneOptions]` | variadic | Keyword arguments (`SceneOptions`): `size: str \| tuple[int, int]`, `fps: float`, `background: ColorLike \| None`, `seed: int`, `tail: float`, `theme: Theme \| str \| None`, `camera: str`, `params: dict[str, Param] \| None`, `name: str \| None`, `preset: str \| None`. |
+| `**defaults` | `Unpack[SceneOptions]` | variadic | Keyword arguments (`SceneOptions`): `size: str \| tuple[int, int]`, `fps: float`, `background: ColorLike \| None`, `seed: int`, `tail: float`, `theme: Theme \| str \| None`, `camera: str`, `params: dict[str, Param] \| None`, `name: str \| None`, `preset: str \| None`, `platform: Literal['reels', 'tiktok', 'shorts'] \| None`. |
 
 **Example:**
 

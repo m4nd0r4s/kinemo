@@ -37,6 +37,10 @@ pub struct SceneConfig {
     /// Integrated loudness of the audio track in LUFS (`[audio] loudness`), or as mixed.
     #[serde(default)]
     pub loudness: Option<f64>,
+    /// (top, right, bottom, left) of the frame covered by the app a vertical video is made for
+    /// (`platform="reels"`), in scene units: the safe area stays clear of it.
+    #[serde(default)]
+    pub covered: [f64; 4],
 }
 
 impl Default for SceneConfig {
@@ -52,6 +56,7 @@ impl Default for SceneConfig {
             frame_w: 16.0,
             frame_h: 9.0,
             loudness: None,
+            covered: [0.0; 4],
         }
     }
 }

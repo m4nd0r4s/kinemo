@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import random
 from dataclasses import replace
-from typing import TYPE_CHECKING, Any, Callable, Protocol, TypedDict, Unpack, cast, overload
+from typing import TYPE_CHECKING, Any, Callable, Literal, Protocol, TypedDict, Unpack, cast, overload
 
 from .._runtime.context import pop_scene, push_scene
 from ..theme.tokens import Theme
@@ -105,6 +105,7 @@ def scene(
     params: dict[str, Param] | None = None,
     name: str | None = None,
     preset: str | None = None,
+    platform: Literal["reels", "tiktok", "shorts"] | None = None,
 ) -> Callable[[SceneFn], SceneDef]: ...
 
 
@@ -143,12 +144,23 @@ def scene(fn: SceneFn | None = None, **kwargs: Any) -> SceneDef | Callable[[Scen
             camera=merged.get("camera", "2d"),
             params=dict(kwargs.get("params") or {}),
             loudness=config.audio_loudness,
+            platform=_platform(merged.get("platform")),
         )
         return SceneDef(f, cfg)
 
     if fn is not None:
         return wrap(fn)
     return wrap
+
+
+def _platform(value: object) -> str | None:
+    from .._runtime.spans import user_span
+    from ..diagnostics import KinemoError
+    from .config import PLATFORMS
+
+    if value is None or value in PLATFORMS:
+        return value  # type: ignore[return-value]
+    raise KinemoError.make("K0105", f"unknown platform {value!r}", spans=[user_span()], fixes=[(f"use one of {', '.join(PLATFORMS)}", None)])
 
 
 class SceneOptions(TypedDict, total=False):
@@ -164,6 +176,8 @@ class SceneOptions(TypedDict, total=False):
     params: dict[str, Param] | None
     name: str | None
     preset: str | None
+    #: The app a vertical video is made for: its buttons and captions narrow the safe area.
+    platform: Literal["reels", "tiktok", "shorts"] | None
 
 
 class ScenePreset(Protocol):

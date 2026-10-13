@@ -22,6 +22,7 @@ SCENE_OPTIONS = {
     "params": "Scene parameters (`k.Int`, `k.Float`, `k.Bool`, `k.Choice`, `k.Str`), passed to the function by name.",
     "name": "Scene name used by `--scene`; defaults to the function name.",
     "preset": "Name of a `[presets.<name>]` table of `kinemo.toml` whose values this scene starts from.",
+    "platform": "The app a vertical video is made for (`\"reels\"`, `\"tiktok\"`, `\"shorts\"`): the zones its buttons and captions cover narrow the safe area. Ignored for frames that are not vertical.",
 }
 
 #: Options that only the decorator accepts (not `kinemo.toml [scene]`).

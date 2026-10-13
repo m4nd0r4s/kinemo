@@ -370,3 +370,26 @@ def test_dev_warns_when_two_builds_differ(tmp_path: Any, capsys: Any, monkeypatc
     assert session.rebuild()
     wait_for_checks()
     assert "gave different results" in capsys.readouterr().out
+
+
+def test_a_morph_between_texts_without_shared_glyphs_is_not_w0801() -> None:
+    # 0 → 1, a date line, a number folding into a formula: the crossfade is what's meant.
+    @build
+    def scene(s: k.Scene) -> None:
+        zero, one = k.Text("0"), k.Text("1")
+        number, formula = k.Text("1089"), k.Math(r"x^2")
+        s.add(zero, number)
+        s.play(k.morph(zero, one), k.morph(number, formula))
+
+    assert "W0801" not in lints_of(scene)
+
+
+def test_w0801_offers_a_fade_for_shapes_with_nothing_in_common() -> None:
+    @build
+    def scene(s: k.Scene) -> None:
+        word, circle = k.Text("abc"), k.Circle()
+        s.add(word)
+        s.play(k.morph(word, circle))
+
+    d = next(d for d in scene.lints.items if d.code == "W0801")
+    assert any("k.fade_out" in (f.code or "") and "k.fade_in" in (f.code or "") for f in d.fixes)

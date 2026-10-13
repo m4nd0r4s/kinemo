@@ -72,6 +72,7 @@ fn text_options(options: &CodeOptions) -> TextOptions {
         tabular_nums: true,
         markup: false,
         mono: true,
+        inline: Vec::new(),
     }
 }
 

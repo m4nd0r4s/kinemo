@@ -142,7 +142,6 @@ These are described in the specification but are not implemented yet:
 - `kinemo dev --debug` draws `layout` and `safe`; the `morph` and `trace` overlays, and the
   events track on the timeline, are not there yet.
 - `s.start(..., loop=True)` (looping animations that keep running on a paused slide).
-- `$...$` inline math inside `k.Text`; use a separate `k.Math`.
 - `kinemo check` does not yet print the measured cost of each `k.python` function.
 - `k.PolarAxes.plot` is sampled at build time: it does not follow later changes of
   `r_max`/`radius`.

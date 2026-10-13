@@ -8,8 +8,11 @@
 //! styling parts never duplicates or loses glyphs.
 
 use std::collections::HashSet;
+use std::sync::Arc;
 
-use kurbo::{Rect, Shape};
+use kurbo::{Affine, Rect, Shape};
+use kinemo_math::{layout_math, MathLayout, MathOptions};
+use kinemo_text::{FontStyle, InlineBox, TextLayout};
 
 use kinemo_ir::{ObjectId, Value};
 
@@ -27,6 +30,15 @@ pub struct SourceGlyph {
     pub color: Option<[f64; 4]>,
 }
 
+/// A text laid out with its `$math$` spans (see [`Layout::text_with_math`]).
+struct InlineText {
+    layout: Arc<TextLayout>,
+    /// The typeset spans, in order; empty when they stay literal.
+    math: Vec<Arc<MathLayout>>,
+    /// TeX of each span.
+    spans: Vec<String>,
+}
+
 impl<'a> Layout<'a> {
     /// Glyphs of a text-like source object (`text`, `code`) at `t`.
     pub fn source_glyphs(&self, source: ObjectId, t: f64) -> Vec<SourceGlyph> {
@@ -35,20 +47,54 @@ impl<'a> Layout<'a> {
             "math" => return self.math_glyphs(source, t),
             _ => {}
         }
-        let text = self.prop_str(source, "text", t).unwrap_or_default();
-        let lay = kinemo_text::layout(&text, &self.text_options(source, t));
-        let chars: Vec<char> = lay.plain.chars().collect();
-        lay.glyphs
-            .iter()
-            .map(|g| SourceGlyph {
+        let text = self.text_with_math(source, t);
+        let chars: Vec<char> = text.layout.plain.chars().collect();
+        let mut out = Vec::with_capacity(text.layout.glyphs.len());
+        let mut span = 0;
+        for g in &text.layout.glyphs {
+            if g.style == FontStyle::Inline {
+                // A `$math$` span: the formula's glyphs and rules, on the text's baseline, all
+                // keyed by the span's TeX so `txt["f'(x)"]` finds them.
+                if let Some(math) = text.math.get(span) {
+                    let r = g.advance_rect;
+                    let baseline = r.y0 + (math.baseline - math.bbox.y0);
+                    let shift = Affine::translate((r.x0 - math.bbox.x0, baseline - math.baseline));
+                    let paths = math.glyphs.iter().map(|m| &m.path).chain(math.rules.iter().map(|(path, _)| path));
+                    out.extend(paths.map(|path| SourceGlyph {
+                        path: shift * path.clone(),
+                        key: text.spans[span].clone(),
+                        char_index: g.char_index,
+                        line: g.line,
+                        word: g.word,
+                        color: None,
+                    }));
+                }
+                span += 1;
+                continue;
+            }
+            out.push(SourceGlyph {
                 path: g.path.clone(),
                 key: chars.get(g.char_index).map(|c| c.to_string()).unwrap_or_default(),
                 char_index: g.char_index,
                 line: g.line,
                 word: g.word,
                 color: None,
-            })
-            .collect()
+            });
+        }
+        out
+    }
+
+    /// A text's layout with its `$math$` spans typeset inline: each span takes a box the size
+    /// of its formula on the line. When a span does not typeset, all stay literal text (the
+    /// Python side reports the TeX error when the text is made).
+    fn text_with_math(&self, source: ObjectId, t: f64) -> InlineText {
+        let text = self.prop_str(source, "text", t).unwrap_or_default();
+        let mut opts = self.text_options(source, t);
+        let spans = kinemo_text::math_spans(&text, &opts);
+        let laid: Vec<Option<Arc<MathLayout>>> = spans.iter().map(|tex| layout_math(tex, &MathOptions { size: opts.size, display: false }).ok()).collect();
+        let math: Vec<Arc<MathLayout>> = if laid.iter().all(Option::is_some) { laid.into_iter().flatten().collect() } else { Vec::new() };
+        opts.inline = math.iter().map(|m| InlineBox { width: m.bbox.width(), ascent: m.bbox.y1 - m.baseline, descent: m.baseline - m.bbox.y0 }).collect();
+        InlineText { layout: kinemo_text::layout(&text, &opts), math, spans }
     }
 
     /// Number of glyphs of a source (what [`Layout::source_glyphs`] returns), without
@@ -58,8 +104,9 @@ impl<'a> Layout<'a> {
             "code" => self.code_layout(source, t).map_or(0, |lay| lay.glyphs.len() + lay.line_numbers.iter().map(Vec::len).sum::<usize>()),
             "math" => self.math_layout(source, t).map_or(0, |lay| lay.glyphs.len() + lay.rules.len()),
             _ => {
-                let text = self.prop_str(source, "text", t).unwrap_or_default();
-                kinemo_text::layout(&text, &self.text_options(source, t)).glyphs.len()
+                let text = self.text_with_math(source, t);
+                let inline = text.layout.glyphs.iter().filter(|g| g.style == FontStyle::Inline).count();
+                text.layout.glyphs.len() - inline + text.math.iter().map(|m| m.glyphs.len() + m.rules.len()).sum::<usize>()
             }
         }
     }
@@ -71,8 +118,7 @@ impl<'a> Layout<'a> {
             "math" => return self.math_box(source, t),
             _ => {}
         }
-        let text = self.prop_str(source, "text", t).unwrap_or_default();
-        kinemo_text::measure(&text, &self.text_options(source, t))
+        self.text_with_math(source, t).layout.bbox
     }
 
     /// Drawable glyphs of a source, optionally restricted to `selected` indices.

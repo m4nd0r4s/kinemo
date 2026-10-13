@@ -18,9 +18,8 @@ so the output is identical on every machine.
 k.Text(text="", *, size=None, width=None, align="left", **props)
 ```
 
-- **Markup is minimal**: `**bold**`, `*italic*` and `` `code` `` (monospace). There is
-  nothing beyond that. In particular, `$...$` is kept literally: put formulas in `k.Math`
-  (see [Mixing text and formulas](#mixing-text-and-formulas)).
+- **Markup is minimal**: `**bold**`, `*italic*`, `` `code` `` (monospace) and `$math$`
+  (see [Mixing text and formulas](#mixing-text-and-formulas)). There is nothing beyond that.
 - **`size=`** is the font size in units (the default comes from the theme).
 - **`width=`** wraps lines at that width. Without it the text is a single line. `align=`
   (`"left"`, `"center"`, `"right"`) aligns the wrapped lines.
@@ -112,7 +111,7 @@ During the morph, the text is temporarily replaced by the morph itself. Do not r
 
 ### Mixing text and formulas
 
-`k.Text` does not typeset math. Put a `k.Math` next to it with a container:
+`$...$` inside a text is typeset as math, inline, on the text's baseline:
 
 ```python
 import kinemo as k
@@ -120,14 +119,22 @@ import kinemo as k
 
 @k.scene
 def mixed(s: k.Scene):
-    line = k.Row(
-        k.Text("The area is", size=0.5),
-        k.Math(r"A = \pi r^2", size=0.6),
-        gap=0.25,
-    ).place(at="center")
+    line = k.Text(r"The area is $A = \pi r^2$, so doubling $r$ gives **four** times the area.", size=0.5, width=8).place(at="center")
     s.play(k.write(line))
+    s.play(line["A = \\pi r^2"].to(color=k.YELLOW))
     s.wait(0.5)
 ```
+
+- The formula is part of the text: it wraps as one word, `k.write` writes it with the rest,
+  and `txt["A = \\pi r^2"]` (its TeX) addresses it.
+- Dollar signs follow Pandoc's rule, so prices stay text: the opening `$` has a non-space
+  right after it and the closing `$` a non-space right before it and no digit after it.
+  `costs $5 and $10` is plain text; `\\$` is always a literal `$`.
+- LaTeX the built-in engine can't typeset is `K0801` when the text is made. Text from a
+  lambda is not checked ahead: a span that fails there stays literal.
+- A tall formula (a fraction, a sum with limits) keeps the line height: it reaches into the
+  lines above and below. For a displayed equation, use `k.Math` on its own, next to the text
+  with a container (`k.Row(k.Text("The area is"), k.Math(r"A = \pi r^2"), gap=0.25)`).
 
 ## `k.Math`
 

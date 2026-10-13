@@ -1,13 +1,29 @@
-//! Minimal inline markup: `**bold**`, `*italic*`, `` `code` `` (mono).
+//! Minimal inline markup: `**bold**`, `*italic*`, `` `code` `` (mono), `$math$`.
 //!
-//! `$...$` math is kept as literal text for now. Backslash escapes `\*`, `` \` ``,
-//! `\$` and `\\` produce the literal character. A marker without a matching
-//! closer is kept literally (so `2 * 3` stays as is).
+//! A `$...$` span becomes one [`INLINE_CHAR`] with the `Inline` style when the caller gives
+//! the boxes of the spans (`TextOptions::inline`); otherwise it stays literal text. Backslash
+//! escapes `\*`, `` \` ``, `\$` and `\\` produce the literal character. A marker without a
+//! matching closer is kept literally (so `2 * 3` and `$5` stay as they are).
 
 use crate::types::{FontStyle, TextOptions};
 
+/// The char that stands for a `$math$` span in `TextLayout::plain`.
+pub const INLINE_CHAR: char = '\u{FFFC}';
+
 /// Parse `text` into plain chars, each with its font style.
 pub(crate) fn parse(text: &str, opts: &TextOptions) -> Vec<(char, FontStyle)> {
+    scan(text, opts, !opts.inline.is_empty(), &mut Vec::new())
+}
+
+/// The TeX of each `$...$` span of `text`, in order: what the caller lays out and gives back
+/// as `TextOptions::inline`. Empty when markup is off.
+pub fn math_spans(text: &str, opts: &TextOptions) -> Vec<String> {
+    let mut spans = Vec::new();
+    scan(text, opts, true, &mut spans);
+    spans
+}
+
+fn scan(text: &str, opts: &TextOptions, inline: bool, spans: &mut Vec<String>) -> Vec<(char, FontStyle)> {
     let chars: Vec<char> = text.chars().collect();
     let style_of = |bold: bool, italic: bool, code: bool| {
         if opts.mono || code {
@@ -38,6 +54,13 @@ pub(crate) fn parse(text: &str, opts: &TextOptions) -> Vec<(char, FontStyle)> {
                     continue;
                 }
             }
+        } else if c == '$' && inline && !code {
+            if let Some(end) = math_closer(&chars, i) {
+                spans.push(chars[i + 1..end].iter().collect());
+                out.push((INLINE_CHAR, FontStyle::Inline));
+                i = end + 1;
+                continue;
+            }
         } else if c == '`' {
             if code || has_closer(&chars, i + 1, &['`']) {
                 code = !code;
@@ -66,6 +89,32 @@ pub(crate) fn parse(text: &str, opts: &TextOptions) -> Vec<(char, FontStyle)> {
 /// Is there an unescaped `marker` at or after `from`? A single `*` marker does
 /// not match the start of a `**`.
 fn has_closer(chars: &[char], from: usize, marker: &[char]) -> bool {
+    find_closer(chars, from, marker).is_some()
+}
+
+/// The closing `$` of a math span opened at `open`, as Pandoc reads them: the opening `$`
+/// has a non-space right after it, the closing one a non-space right before it and no digit
+/// right after it. So `$x^2$` is math, `costs $5 and $10` is not.
+fn math_closer(chars: &[char], open: usize) -> Option<usize> {
+    if chars.get(open + 1).is_none_or(|c| c.is_whitespace() || *c == '$') {
+        return None;
+    }
+    let mut j = open + 1;
+    while j < chars.len() {
+        if chars[j] == '\\' && j + 1 < chars.len() {
+            j += 2;
+            continue;
+        }
+        if chars[j] == '$' && !chars[j - 1].is_whitespace() && !chars.get(j + 1).is_some_and(|c| c.is_ascii_digit()) {
+            return Some(j);
+        }
+        j += 1;
+    }
+    None
+}
+
+/// Index of the first unescaped `marker` at or after `from` (see [`has_closer`]).
+fn find_closer(chars: &[char], from: usize, marker: &[char]) -> Option<usize> {
     let mut j = from;
     while j < chars.len() {
         if chars[j] == '\\' && j + 1 < chars.len() {
@@ -77,11 +126,11 @@ fn has_closer(chars: &[char], from: usize, marker: &[char]) -> bool {
                 j += 2;
                 continue;
             }
-            return true;
+            return Some(j);
         }
         j += 1;
     }
-    false
+    None
 }
 
 #[cfg(test)]
@@ -98,7 +147,21 @@ mod tests {
         assert_eq!(plain(r"\*x\* \` \$ \\"), r"*x* ` $ \");
         assert_eq!(plain("2 * 3"), "2 * 3");
         assert_eq!(plain("$x^2$"), "$x^2$");
+        assert_eq!(plain("costs $5"), "costs $5");
         assert_eq!(plain("`a*b*c`"), "a*b*c");
+    }
+
+    #[test]
+    fn math_spans_become_one_inline_char_when_boxes_are_given() {
+        let opts = TextOptions { inline: vec![crate::types::InlineBox { width: 1.0, ascent: 0.4, descent: 0.1 }; 2], ..TextOptions::default() };
+        assert_eq!(math_spans(r"slope $f'(x)$ and `$no$` then $x^2$ and \$5", &opts), vec!["f'(x)".to_string(), "x^2".to_string()]);
+        let parsed = parse(r"a $x$ b \$5", &opts);
+        let plain: String = parsed.iter().map(|(c, _)| *c).collect();
+        assert_eq!(plain, "a \u{FFFC} b $5");
+        assert_eq!(parsed[2].1, FontStyle::Inline);
+        assert_eq!(math_spans("$$ and $5", &opts), Vec::<String>::new());
+        assert_eq!(math_spans("costs $5 and $10 today", &opts), Vec::<String>::new());
+        assert_eq!(math_spans("between $a$ and $b$", &opts), vec!["a".to_string(), "b".to_string()]);
     }
 
     #[test]

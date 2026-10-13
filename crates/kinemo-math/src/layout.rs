@@ -16,6 +16,7 @@ pub(crate) struct FrameInk {
     pub(crate) is_prime: Vec<bool>,
     pub(crate) rules: Vec<(BezPath, usize)>,
     pub(crate) bbox: Rect,
+    pub(crate) baseline: f64,
 }
 
 /// Collect the ink of `frame` scaled so that 1 em = `size` scene units, y-up,
@@ -32,6 +33,7 @@ pub(crate) fn collect(frame: &Frame, size: f64, node_count: usize) -> FrameInk {
         is_prime: walker.is_prime,
         rules: walker.rules,
         bbox: Rect::new(-w / 2.0 * k, -h / 2.0 * k, w / 2.0 * k, h / 2.0 * k),
+        baseline: (h / 2.0 - pt(frame.baseline())) * k,
     }
 }
 

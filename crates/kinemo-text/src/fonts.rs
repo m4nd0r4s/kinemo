@@ -25,6 +25,7 @@ impl Fonts {
             FontStyle::Bold => &self.bold,
             FontStyle::Italic => &self.italic,
             FontStyle::Mono => &self.mono,
+            FontStyle::Inline => &self.regular,
         }
     }
 }

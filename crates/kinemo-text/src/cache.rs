@@ -15,6 +15,7 @@ struct CacheKey {
     line_height: u64,
     align: Align,
     flags: u8,
+    inline: Vec<[u64; 3]>,
 }
 
 impl CacheKey {
@@ -26,6 +27,7 @@ impl CacheKey {
             line_height: o.line_height.to_bits(),
             align: o.align,
             flags: (o.tabular_nums as u8) | ((o.markup as u8) << 1) | ((o.mono as u8) << 2),
+            inline: o.inline.iter().map(|b| [b.width.to_bits(), b.ascent.to_bits(), b.descent.to_bits()]).collect(),
         }
     }
 }

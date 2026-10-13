@@ -8,6 +8,8 @@ pub enum FontStyle {
     Bold,
     Italic,
     Mono,
+    /// An inline box (a `$math$` span) the caller fills: no outline of its own.
+    Inline,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
@@ -29,10 +31,23 @@ pub struct TextOptions {
     pub line_height: f64,
     /// Digits use tabular widths (OpenType `tnum`).
     pub tabular_nums: bool,
-    /// Parse `**bold**`, `*italic*`, `` `code` ``. `$...$` is kept literal.
+    /// Parse `**bold**`, `*italic*`, `` `code` ``, and `$...$` when `inline` gives its boxes.
     pub markup: bool,
     /// Whole text in the mono font.
     pub mono: bool,
+    /// Boxes of the `$...$` spans (see [`crate::math_spans`]), in order. With them, each span
+    /// is one U+FFFC char of `plain` that takes its box on the line; without them, `$...$`
+    /// stays literal text.
+    pub inline: Vec<InlineBox>,
+}
+
+/// Size of an inline box on a line: `width` along it, `ascent` above the baseline and
+/// `descent` below it (both positive).
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct InlineBox {
+    pub width: f64,
+    pub ascent: f64,
+    pub descent: f64,
 }
 
 impl Default for TextOptions {
@@ -45,6 +60,7 @@ impl Default for TextOptions {
             tabular_nums: true,
             markup: true,
             mono: false,
+            inline: Vec::new(),
         }
     }
 }

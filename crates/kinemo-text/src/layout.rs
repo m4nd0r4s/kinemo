@@ -3,7 +3,7 @@
 use kurbo::{Point, Rect};
 
 use crate::fonts::line_metrics;
-use crate::types::{Align, Glyph, TextLayout, TextOptions};
+use crate::types::{Align, FontStyle, Glyph, TextLayout, TextOptions};
 use crate::{markup, outline, shape, wrap};
 
 /// Uncached layout. The logical bbox is centered at (0,0).
@@ -56,6 +56,7 @@ pub(crate) fn compute(text: &str, opts: &TextOptions) -> TextLayout {
 
     let mut pens = x0s;
     let mut glyphs = Vec::with_capacity(shaped.len());
+    let mut boxes = opts.inline.iter();
     for g in &shaped {
         let li = line_of[g.char_index];
         if li == usize::MAX {
@@ -68,6 +69,19 @@ pub(crate) fn compute(text: &str, opts: &TextOptions) -> TextLayout {
         }
         let baseline = -(li as f64) * lh - ascender + dy;
         let x = pen + dx;
+        if g.style == FontStyle::Inline {
+            // The caller draws the span in this box, sitting on the baseline.
+            let b = boxes.next().copied().unwrap_or(crate::types::InlineBox { width: g.advance, ascent: ascender, descent: -descender });
+            glyphs.push(Glyph {
+                path: kurbo::BezPath::new(),
+                char_index: g.char_index,
+                line: li,
+                word: word_of[g.char_index],
+                advance_rect: Rect::new(x, baseline - b.descent, x + g.advance, baseline + b.ascent),
+                style: FontStyle::Inline,
+            });
+            continue;
+        }
         let origin = Point::new(x + g.x_off, baseline + g.y_off);
         glyphs.push(Glyph {
             path: outline::glyph_path(g.style, g.gid, opts.size, origin),

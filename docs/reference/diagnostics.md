@@ -505,7 +505,7 @@ Install `kinemo-tts-<name>`, or use one of the installed providers the message l
 Fix:
 
 ```python
-Shorten or speed up the animations, sync them to the line with `v.at(...)`, or lengthen the narration.
+Shorten or speed up the animations, sync them to the line with `v.at(...)`, or lengthen the narration. An animation meant to keep going after the line (a dial that rolls on) is started with `s.start(...)` instead of `s.play(...)`: it does not hold the next line back, and `kinemo check --fix` makes that change when the last `play` of the block is the one that runs past.
 ```
 
 <a id="w1404"></a>

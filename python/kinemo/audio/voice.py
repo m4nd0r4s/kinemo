@@ -197,6 +197,25 @@ def trimmed(speech: Speech) -> Speech:
 OVERRUN_TOLERANCE = 0.25
 
 
+def _run_on_fix(statements: "list[Any]", cursor: float, narration_end: float) -> "Any | None":
+    """When the block ends with a `play` that starts during the line and is what runs past it
+    (a dial that rolls on after "Today's number."), the fix is to `start` it: it keeps going
+    while the next line begins."""
+    from ..linting.source_edits import line_fix, read_line
+
+    plays = [st for st in statements if st.kind == "play"]
+    if not plays:
+        return None
+    last = max(plays, key=lambda st: st.end)
+    if abs(last.end - cursor) > 1e-9 or last.start >= narration_end:
+        return None
+    source = read_line(last.span.file, last.span.line)
+    if source is None or len(re.findall(r"\b\w+\.play\(", source)) != 1:
+        return None
+    new_line = re.sub(r"\b(\w+)\.play\(", r"\1.start(", source, count=1)
+    return line_fix("let it run on past the line: start it instead of waiting for it", last.span.file, last.span.line, new_line)
+
+
 class VoiceMixin:
     cursor: float
 
@@ -270,15 +289,15 @@ class VoiceMixin:
             for name, when in ((beat.id, line.start), (f"{beat.id}.end", line.end)):
                 s._b.add_mark(when, name, False)
                 s._marks.append((name, when, False, s._b.log_position()))
+        first_statement = len(s._statements)
         yield line
         overrun = s.cursor - line.end
         if overrun > OVERRUN_TOLERANCE:
-            s.lints.warn(
-                "W1403",
-                f"the content of this voice block runs {overrun:.1f} s past its narration",
-                spans=[span],
-                fixes=[("shorten or speed up the animations, or lengthen the narration", None)],
-            )
+            fixes: list[Any] = [("shorten or speed up the animations, or lengthen the narration", None)]
+            run_on = _run_on_fix(s._statements[first_statement:], s.cursor, line.end)
+            if run_on is not None:
+                fixes.insert(0, run_on)
+            s.lints.warn("W1403", f"the content of this voice block runs {overrun:.1f} s past its narration", spans=[span], fixes=fixes)
         s.cursor = max(s.cursor, line.end)
         spoken = " ".join(words)
         s._record("voice", line.start, s.cursor, f"{beat.id} · {spoken}" if beat else spoken, span)

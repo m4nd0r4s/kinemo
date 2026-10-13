@@ -98,3 +98,36 @@ def test_an_audio_file_with_its_text_gets_words_and_marks(tmp_path: Path) -> Non
     assert len(seen["voice"].words) == 6
     assert seen["relation"] == pytest.approx(starts[5])
     assert scene.marks["tri"] == pytest.approx(starts[2])
+
+
+def test_w1403_offers_to_start_the_animation_that_rolls_on() -> None:
+    @build
+    def rolls_on(s: k.Scene) -> None:
+        dial = k.Circle()
+        s.add(dial)
+        with s.voice("Today's number."):  # kinemo: allow W1401
+            s.play(dial.to(rotate=720), duration=3)
+
+    d = next(d for d in rolls_on.lints.items if d.code == "W1403")
+    assert d.fixes[0].code is not None and "s.start(dial.to(rotate=720), duration=3)" in d.fixes[0].code
+    assert d.fixes[0].edits, "a safe line fix"
+
+    @build
+    def started(s: k.Scene) -> None:
+        dial = k.Circle()
+        s.add(dial)
+        with s.voice("Today's number."):  # kinemo: allow W1401
+            s.start(dial.to(rotate=720), duration=3)
+
+    assert "W1403" not in lint_codes(started)
+
+
+def test_w1403_does_not_offer_start_when_the_overrun_begins_after_the_line() -> None:
+    @build
+    def after(s: k.Scene) -> None:
+        with s.voice("Hi."):  # kinemo: allow W1401
+            s.wait(1)
+            s.play(k.draw(k.Circle()), duration=1)
+
+    d = next(d for d in after.lints.items if d.code == "W1403")
+    assert all("start" not in (f.code or "") for f in d.fixes)

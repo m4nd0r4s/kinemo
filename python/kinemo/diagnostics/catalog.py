@@ -160,7 +160,7 @@ CATALOG: dict[str, Entry] = {
         "content runs past the narration",
         "The animations inside a `with s.voice(...)` block last more than 0.25 s longer than its narration, "
         "so the next line starts late and the silence shows.",
-        fix="Shorten or speed up the animations, sync them to the line with `v.at(...)`, or lengthen the narration.",
+        fix="Shorten or speed up the animations, sync them to the line with `v.at(...)`, or lengthen the narration. An animation meant to keep going after the line (a dial that rolls on) is started with `s.start(...)` instead of `s.play(...)`: it does not hold the next line back, and `kinemo check --fix` makes that change when the last `play` of the block is the one that runs past.",
     ),
     "W1405": Entry(
         "narration without audio yet",

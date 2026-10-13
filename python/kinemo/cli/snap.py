@@ -36,7 +36,7 @@ def run(args: argparse.Namespace) -> int:
     else:
         os.makedirs(args.out, exist_ok=True)
     for defn in scenes:
-        result = build(defn, args.params)
+        result = build(defn, args.params, args.size)
         if result.scene is None:
             print("\n".join(d.render() for d in result.diagnostics))
             status = 1

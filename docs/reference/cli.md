@@ -49,7 +49,7 @@ cd my-video && kinemo check scene.py && kinemo render scene.py
 Browser preview with hot reload and a scrubbable timeline.
 
 ```text
-kinemo dev [-h] [--scene SCENE] [--param NAME=VALUE] [--port PORT] [--no-open] [--debug DEBUG] file
+kinemo dev [-h] [--scene SCENE] [--param NAME=VALUE] [--size SIZE] [--port PORT] [--no-open] [--debug DEBUG] file
 ```
 
 | Argument | Type | Default | Description |
@@ -57,6 +57,7 @@ kinemo dev [-h] [--scene SCENE] [--param NAME=VALUE] [--port PORT] [--no-open] [
 | `file` | str |   | (required) |
 | `--scene SCENE` | str |   | scene name (default: all) |
 | `--param NAME=VALUE` | str |   | (repeatable) |
+| `--size SIZE` | str |   | output size instead of the scene's: 1080p, 720p, 4k, square, vertical |
 | `--port PORT` | int | `7878` |   |
 | `--no-open` | flag |   | do not open the browser |
 | `--debug DEBUG` | str |   | overlays: layout,safe (comma-separated) |
@@ -74,7 +75,7 @@ kinemo dev scene.py --scene intro --debug layout,safe --port 8000
 Build + resolve without rendering: errors, lints, timeline.
 
 ```text
-kinemo check [-h] [--scene SCENE] [--param NAME=VALUE] [--json] [--strict] [--fix] file
+kinemo check [-h] [--scene SCENE] [--param NAME=VALUE] [--size SIZE] [--json] [--strict] [--fix] file
 ```
 
 | Argument | Type | Default | Description |
@@ -82,6 +83,7 @@ kinemo check [-h] [--scene SCENE] [--param NAME=VALUE] [--json] [--strict] [--fi
 | `file` | str |   | (required) |
 | `--scene SCENE` | str |   | scene name (default: all) |
 | `--param NAME=VALUE` | str |   | (repeatable) |
+| `--size SIZE` | str |   | output size instead of the scene's: 1080p, 720p, 4k, square, vertical |
 | `--json` | flag |   |   |
 | `--strict` | flag |   | treat warnings as errors |
 | `--fix` | flag |   | apply safe fixes |
@@ -101,7 +103,7 @@ kinemo check scene.py --scene intro --param n=5
 Scene graph at time t.
 
 ```text
-kinemo inspect [-h] [--scene SCENE] [--param NAME=VALUE] [--at AT] [--json] [--all] file
+kinemo inspect [-h] [--scene SCENE] [--param NAME=VALUE] [--size SIZE] [--at AT] [--json] [--all] file
 ```
 
 | Argument | Type | Default | Description |
@@ -109,6 +111,7 @@ kinemo inspect [-h] [--scene SCENE] [--param NAME=VALUE] [--at AT] [--json] [--a
 | `file` | str |   | (required) |
 | `--scene SCENE` | str |   | scene name (default: all) |
 | `--param NAME=VALUE` | str |   | (repeatable) |
+| `--size SIZE` | str |   | output size instead of the scene's: 1080p, 720p, 4k, square, vertical |
 | `--at AT` | str | `0` | comma-separated: seconds, 'end', a mark, 'mark+1.5', 'mark+50%', or 'marks' (every mark); the scene is built once |
 | `--json` | flag |   |   |
 | `--all` | flag |   | include objects not in the scene |
@@ -126,7 +129,7 @@ kinemo inspect scene.py --at end --json --all
 PNGs of the requested times.
 
 ```text
-kinemo snap [-h] [--scene SCENE] [--param NAME=VALUE] [--at AT] [--out OUT] [--sheet] [--columns COLUMNS] [--quality {draft,final}] file
+kinemo snap [-h] [--scene SCENE] [--param NAME=VALUE] [--size SIZE] [--at AT] [--out OUT] [--sheet] [--columns COLUMNS] [--quality {draft,final}] file
 ```
 
 | Argument | Type | Default | Description |
@@ -134,6 +137,7 @@ kinemo snap [-h] [--scene SCENE] [--param NAME=VALUE] [--at AT] [--out OUT] [--s
 | `file` | str |   | (required) |
 | `--scene SCENE` | str |   | scene name (default: all) |
 | `--param NAME=VALUE` | str |   | (repeatable) |
+| `--size SIZE` | str |   | output size instead of the scene's: 1080p, 720p, 4k, square, vertical |
 | `--at AT` | str | `0,end` | comma-separated: seconds, 'end', a mark, 'mark+1.5', 'mark+50%' (between mark and mark.end), or 'marks' (every mark) |
 | `--out OUT` | str | `out` | a folder, or one file (shot.png) for one scene and one instant |
 | `--sheet` | flag |   | one labelled contact sheet per scene instead of one PNG per instant |
@@ -153,7 +157,7 @@ kinemo snap scene.py --at intro_done --quality final --out shots
 Make the narration lines that have no audio yet or changed.
 
 ```text
-kinemo voice [-h] [--scene SCENE] [--param NAME=VALUE] [--check] [--force FORCE] [--progress {bar,json,none}] file
+kinemo voice [-h] [--scene SCENE] [--param NAME=VALUE] [--size SIZE] [--check] [--force FORCE] [--progress {bar,json,none}] file
 ```
 
 | Argument | Type | Default | Description |
@@ -161,6 +165,7 @@ kinemo voice [-h] [--scene SCENE] [--param NAME=VALUE] [--check] [--force FORCE]
 | `file` | str |   | (required) |
 | `--scene SCENE` | str |   | scene name (default: all) |
 | `--param NAME=VALUE` | str |   | (repeatable) |
+| `--size SIZE` | str |   | output size instead of the scene's: 1080p, 720p, 4k, square, vertical |
 | `--check` | flag |   | list missing and stale lines without making them (exit 1 if any) |
 | `--force FORCE` | str |   | script beats to make again, comma-separated (or 'all') |
 | `--progress PROGRESS` | `bar` \\| `json` \\| `none` | `bar` | on stderr: a bar, one JSON object per line, or nothing |
@@ -179,7 +184,7 @@ kinemo voice scene.py --force B03,B04
 Final output.
 
 ```text
-kinemo render [-h] [--scene SCENE] [--param NAME=VALUE] [--format {mp4,webm,mov,gif,png,svg,slides}] [--quality {draft,final}] [--out OUT] [--at AT] [--frames] [--transparent] [--progress {bar,json,none}] [--subtitles] file
+kinemo render [-h] [--scene SCENE] [--param NAME=VALUE] [--size SIZE] [--format {mp4,webm,mov,gif,png,svg,slides}] [--quality {draft,final}] [--out OUT] [--at AT] [--frames] [--transparent] [--progress {bar,json,none}] [--subtitles] file
 ```
 
 | Argument | Type | Default | Description |
@@ -187,6 +192,7 @@ kinemo render [-h] [--scene SCENE] [--param NAME=VALUE] [--format {mp4,webm,mov,
 | `file` | str |   | (required) |
 | `--scene SCENE` | str |   | scene name (default: all) |
 | `--param NAME=VALUE` | str |   | (repeatable) |
+| `--size SIZE` | str |   | output size instead of the scene's: 1080p, 720p, 4k, square, vertical |
 | `--format FORMAT` | `mp4` \\| `webm` \\| `mov` \\| `gif` \\| `png` \\| `svg` \\| `slides` |   | default: from the --out extension, else mp4 |
 | `--quality QUALITY` | `draft` \\| `final` | `final` |   |
 | `--out OUT` | str | `out` | a folder (files named after the scene), or one file: clip.mp4, frame.png |

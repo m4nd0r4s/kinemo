@@ -92,7 +92,7 @@ def run(args: argparse.Namespace) -> int:
         print(e.diagnostic.render())
         return 1
     for defn in select(find_scenes(module), args.scene):
-        result = build(defn, args.params)
+        result = build(defn, args.params, args.size)
         if result.scene is None:
             print("\n".join(d.render() for d in result.diagnostics))
             return 1

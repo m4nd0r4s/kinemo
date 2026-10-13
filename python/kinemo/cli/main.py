@@ -37,6 +37,7 @@ def _scene_args(p: argparse.ArgumentParser) -> None:
     p.add_argument("file")
     p.add_argument("--scene", help="scene name (default: all)")
     p.add_argument("--param", action="append", dest="param_items", metavar="NAME=VALUE")
+    p.add_argument("--size", help="output size instead of the scene's: 1080p, 720p, 4k, square, vertical")
 
 
 def parser() -> argparse.ArgumentParser:

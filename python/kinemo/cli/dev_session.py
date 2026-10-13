@@ -72,6 +72,8 @@ class Session:
     watched: set[str] = field(default_factory=lambda: set[str]())
     #: Debug overlays requested with `--debug` (layout, safe).
     debug: tuple[str, ...] = ()
+    #: `--size`: the output size instead of the scene's.
+    size: str | None = None
     #: Text of every watched file at the last build from disk: edits apply to it, and are
     #: refused when the file no longer matches (edited elsewhere in the meantime).
     texts: dict[str, str] = field(default_factory=lambda: dict[str, str]())
@@ -111,7 +113,7 @@ class Session:
         if not chosen:
             return self._fail([Diagnostic("K0001", "error", f"scene '{self.scene_name}' not found (available: {', '.join(names)})")])
         with source_overrides(overrides or {}):
-            result = build(chosen[0], self.params)
+            result = build(chosen[0], self.params, self.size)
         if result.scene is None:
             return self._fail(result.diagnostics)
         ir_json = result.scene.builder.to_json()
@@ -167,7 +169,7 @@ class Session:
         different second build means the cache and the parallel render can't be trusted.
         With `generation`, the result is dropped when a newer build started meanwhile."""
         try:
-            second = definition.build(self.params).builder.to_json()
+            second = definition.build(self.params, **({"size": self.size} if self.size else {})).builder.to_json()
         except Exception:  # noqa: BLE001 - the published build already succeeded
             return
         if generation is not None and self.generation != generation:

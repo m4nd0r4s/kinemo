@@ -86,7 +86,7 @@ def run(args: argparse.Namespace) -> int:
             return 1
         if made:
             print(f"kinemo: made {len(made)} narration line(s)")
-        result = build(defn, args.params)
+        result = build(defn, args.params, args.size)
         if result.scene is None:
             print("\n".join(d.render() for d in result.diagnostics))
             status = 1

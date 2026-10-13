@@ -105,7 +105,7 @@ def run(args: argparse.Namespace) -> int:
     # A check never calls the voice model: lines without audio are estimated (W1405).
     reset_used_inline_allows()
     with collecting_lines():
-        results = [build(d, args.params) for d in select(find_scenes(module), args.scene)]
+        results = [build(d, args.params, args.size) for d in select(find_scenes(module), args.scene)]
     if not results:
         print(f"kinemo: no scenes (@k.scene) in {args.file}")
         return 1

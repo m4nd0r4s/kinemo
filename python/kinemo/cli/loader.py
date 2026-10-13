@@ -81,9 +81,11 @@ class BuildResult:
         return self.scene is not None and not any(d.level == "error" for d in self.diagnostics)
 
 
-def build(defn: SceneDef, params: dict[str, object] | None = None) -> BuildResult:
+def build(defn: SceneDef, params: dict[str, object] | None = None, size: str | None = None) -> BuildResult:
+    """Build and lint a scene. `size` (`--size vertical`) replaces the size it declares, so one
+    scene renders in several formats."""
     try:
-        s = defn.build(params)
+        s = defn.build(params, **({"size": size} if size else {}))
     except KinemoError as e:
         return BuildResult(defn, None, [e.diagnostic])
     except Exception as e:  # noqa: BLE001

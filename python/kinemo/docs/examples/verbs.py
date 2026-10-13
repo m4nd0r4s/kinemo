@@ -184,8 +184,28 @@ def click(s: k.Scene):
     s.play(k.draw(button))
     s.play(k.sound("click.wav", gain=0.8), k.indicate(button))
 ''',
-        related=("Scene.voice",),
+        related=("Scene.voice", "k.sfx"),
         assets=("click.wav",),
+    ),
+    DocEntry(
+        "k.sfx",
+        "Verbs",
+        "Built-in sound effects for `k.sound`: `k.sfx.click()`, `tick()`, `pop()`, `swish()`, "
+        "`whoosh()` and `ding()` return the file of each effect. They are made by kinemo (no "
+        "third-party license) the first time they are used, in the project's cache, and sound "
+        "the same in every render. Overlapping sounds never clip: the mix ends in a limiter.",
+        '''
+import kinemo as k
+
+@k.scene
+def cells(s: k.Scene):
+    row = k.Row(*[k.Square(0.6) for _ in range(4)], gap=0.2).place(at="center")
+    s.play(k.draw(row))
+    for cell in row:
+        s.play(cell.to(fill=k.YELLOW, fill_opacity=1), k.sound(k.sfx.click(), gain=0.5), duration=0.3)
+    s.play(k.sound(k.sfx.ding(), gain=0.6), k.indicate(row))
+''',
+        related=("k.sound", "k.music"),
     ),
     DocEntry(
         "k.music",

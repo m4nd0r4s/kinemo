@@ -51,6 +51,9 @@ def stroke_width(t: Theme) -> Any:
     return t.stroke_width
 
 
+#: Values of `emphasis=`.
+EMPHASES: tuple[str, ...] = ("normal", "low", "decorative")
+
 TRANSFORM: dict[str, PropSpec] = {
     "x": PropSpec("float", 0.0),
     "y": PropSpec("float", 0.0),
@@ -64,6 +67,9 @@ TRANSFORM: dict[str, PropSpec] = {
     "visible": PropSpec("bool", True, "step_end"),
     #: Cropped by the frame edge on purpose (a horizon, a planet): exempt from W1001.
     "bleed": PropSpec("bool", False, "step_end"),
+    #: How much its text matters to the reader, for the lints (inherited by children):
+    #: `"low"` dimmed on purpose (W1003 asks 3:1), `"decorative"` not meant to be read.
+    "emphasis": PropSpec("str", "normal", "step_end", EMPHASES),
 }
 
 def no_color(t: Theme) -> Any:

@@ -352,12 +352,12 @@ s.play(c.to(x=2))
 <a id="w1003"></a>
 ### W1003: low contrast
 
-*Warning (lint).* Contrast between text and what is behind it (the background, or a filled shape under it such as a card or a speech bubble) is below 4.5:1.
+*Warning (lint).* Contrast between text and what is behind it (the background, or a filled shape under it such as a card or a speech bubble) is below 4.5:1. Text dimmed on purpose (an off bit, a de-emphasized card) takes `emphasis="low"` and is judged against 3:1; text not meant to be read takes `emphasis="decorative"` and is not judged (nor by W1004). Children inherit it.
 
 <a id="w1004"></a>
 ### W1004: small text
 
-*Warning (lint).* Text smaller than 18 px at the final resolution.
+*Warning (lint).* Text smaller than 18 px at the final resolution. Text with `emphasis="decorative"` (not meant to be read) is not judged.
 
 <a id="w1005"></a>
 ### W1005: invisible object

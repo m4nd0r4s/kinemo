@@ -122,6 +122,28 @@ pub fn object_label(scene: &Scene, object: ObjectId) -> String {
     o.name.clone().unwrap_or_else(|| format!("{}#{}", o.kind, o.id))
 }
 
+/// How much a text matters to the reader (`emphasis=`), for the lints.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Default)]
+pub enum Emphasis {
+    #[default]
+    Normal,
+    /// Dimmed on purpose: judged against a lower contrast.
+    Low,
+    /// Not meant to be read: not judged for contrast or size.
+    Decorative,
+}
+
+/// The `emphasis=` of `id`, or of its nearest ancestor that sets one other than `"normal"`.
+fn emphasis(layout: &Layout, scene: &Scene, id: ObjectId, t: f64) -> Emphasis {
+    ancestry(scene, id)
+        .find_map(|o| match layout.prop_str(o, "emphasis", t).as_deref() {
+            Some("low") => Some(Emphasis::Low),
+            Some("decorative") => Some(Emphasis::Decorative),
+            _ => None,
+        })
+        .unwrap_or_default()
+}
+
 /// What the viewer gets from one present leaf at one instant.
 #[derive(Clone, Debug)]
 pub struct LeafSample {
@@ -148,6 +170,8 @@ pub struct LeafSample {
     pub fill_opacity: f64,
     /// `bleed=True` on the leaf or an ancestor: cropped by the frame edge on purpose.
     pub bleeds: bool,
+    /// `emphasis=` of the leaf or its nearest ancestor that sets one.
+    pub emphasis: Emphasis,
     /// For text leaves, what the size lint needs.
     pub text: Option<TextMetrics>,
     /// World outline of a filled shape whose box holds a text's center (a pie slice's box
@@ -225,6 +249,7 @@ pub fn sample_frame(layout: &Layout, motion: &MotionIndex, reactive: &[SignalId]
                 fill: layout.prop_color(id, "fill", t),
                 fill_opacity: layout.prop_f(id, "fill_opacity", t, 1.0),
                 bleeds: ancestry(scene, id).any(|o| layout.prop_bool(o, "bleed", t, false)),
+                emphasis: emphasis(layout, scene, id, t),
                 text: is_text.then(|| text_metrics(layout, id, text_owner, t)),
                 outline: None,
             }

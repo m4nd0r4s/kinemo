@@ -119,10 +119,15 @@ def _text_over_text(f: _Finding) -> tuple[str, list[Fix], list[Span]]:
 
 
 def _low_contrast(f: _Finding) -> tuple[str, list[Fix], list[Span]]:
-    ratio = f.details["ratio"]
-    message = f"low contrast: {f.label} has {_number(ratio)}:1 against the background (minimum 4.5:1)"
-    fix = Fix("use a text color lighter/darker than the background, without transparency", f"{f.label}.set(color=k.WHITE)")
-    return message, [fix], []
+    d = f.details
+    minimum = d.get("minimum", 4.5)
+    low = " for low emphasis" if d.get("low_emphasis") else ""
+    message = f"low contrast: {f.label} has {_number(d['ratio'])}:1 against the background (minimum {_number(minimum)}:1{low})"
+    fixes = [Fix("use a text color lighter/darker than the background, without transparency", f"{f.label}.set(color=k.WHITE)")]
+    if not d.get("low_emphasis"):
+        fixes.append(Fix("if it is dimmed on purpose, say so (judged against 3:1)", f'{f.label}.set(emphasis="low")'))
+    fixes.append(Fix("if it is not meant to be read (a texture, a backdrop), mark it decorative", f'{f.label}.set(emphasis="decorative")'))
+    return message, fixes, []
 
 
 def _small_text(f: _Finding) -> tuple[str, list[Fix], list[Span]]:

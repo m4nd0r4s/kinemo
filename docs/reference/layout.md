@@ -44,7 +44,7 @@ Container that lays its children out in a row (flexbox), with `gap=` and `align=
 | `*children` | `ChildT \| Sequence[ChildT]` | variadic |   |
 | `gap` | `FloatVal` | `0.25` | Container that lays its children out in a row (flexbox), with `gap=` and `align=` (`"center"`, `"top"`, `"bottom"`). |
 | `align` | `Align` | `"center"` | Container that lays its children out in a row (flexbox), with `gap=` and `align=` (`"center"`, `"top"`, `"bottom"`). |
-| `**props` | `Unpack[TransformKeywords]` | variadic | Keyword arguments (`TransformKeywords`): `name: str \| None`, `key: str \| None`, `x: FloatVal`, `y: FloatVal`, `position: VecVal`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`. |
+| `**props` | `Unpack[TransformKeywords]` | variadic | Keyword arguments (`TransformKeywords`): `name: str \| None`, `key: str \| None`, `x: FloatVal`, `y: FloatVal`, `position: VecVal`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`, `emphasis: Emphasis`. |
 
 **Props** (animatable with `.to()`, settable with `.set()` or in the constructor):
 
@@ -54,7 +54,7 @@ Container that lays its children out in a row (flexbox), with `gap=` and `align=
 | `align` | str | `"center"` | step_end |
 | `swap_path` | str | `"arc"` | step_end |
 
-Props inherited from [`k.Node`](object-state.md#k-node): `x`, `y`, `rotate`, `scale`, `scale_x`, `scale_y`, `anchor`, `opacity`, `z`, `visible`, `bleed`.
+Props inherited from [`k.Node`](object-state.md#k-node): `x`, `y`, `rotate`, `scale`, `scale_x`, `scale_y`, `anchor`, `opacity`, `z`, `visible`, `bleed`, `emphasis`.
 
 **Example:**
 
@@ -93,7 +93,7 @@ Container that stacks its children in a column, with `gap=` and `align=` (`"cent
 | `*children` | `ChildT \| Sequence[ChildT]` | variadic |   |
 | `gap` | `FloatVal` | `0.25` | Container that stacks its children in a column, with `gap=` and `align=` (`"center"`, `"left"`, `"right"`). |
 | `align` | `Align` | `"center"` | Container that stacks its children in a column, with `gap=` and `align=` (`"center"`, `"left"`, `"right"`). |
-| `**props` | `Unpack[TransformKeywords]` | variadic | Keyword arguments (`TransformKeywords`): `name: str \| None`, `key: str \| None`, `x: FloatVal`, `y: FloatVal`, `position: VecVal`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`. |
+| `**props` | `Unpack[TransformKeywords]` | variadic | Keyword arguments (`TransformKeywords`): `name: str \| None`, `key: str \| None`, `x: FloatVal`, `y: FloatVal`, `position: VecVal`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`, `emphasis: Emphasis`. |
 
 **Props** (animatable with `.to()`, settable with `.set()` or in the constructor):
 
@@ -103,7 +103,7 @@ Container that stacks its children in a column, with `gap=` and `align=` (`"cent
 | `align` | str | `"center"` | step_end |
 | `swap_path` | str | `"arc"` | step_end |
 
-Props inherited from [`k.Node`](object-state.md#k-node): `x`, `y`, `rotate`, `scale`, `scale_x`, `scale_y`, `anchor`, `opacity`, `z`, `visible`, `bleed`.
+Props inherited from [`k.Node`](object-state.md#k-node): `x`, `y`, `rotate`, `scale`, `scale_x`, `scale_y`, `anchor`, `opacity`, `z`, `visible`, `bleed`, `emphasis`.
 
 **Example:**
 
@@ -143,7 +143,7 @@ Grid container with `cols=` columns and `gap=`. Combine with `.fit(s.frame.safe)
 | `*children` | `ChildT \| Sequence[ChildT]` | variadic |   |
 | `cols` | `int` | `3` | Grid container with `cols=` columns and `gap=`. |
 | `gap` | `FloatVal` | `0.25` | Grid container with `cols=` columns and `gap=`. |
-| `**props` | `Unpack[TransformKeywords]` | variadic | Keyword arguments (`TransformKeywords`): `name: str \| None`, `key: str \| None`, `x: FloatVal`, `y: FloatVal`, `position: VecVal`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`. |
+| `**props` | `Unpack[TransformKeywords]` | variadic | Keyword arguments (`TransformKeywords`): `name: str \| None`, `key: str \| None`, `x: FloatVal`, `y: FloatVal`, `position: VecVal`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`, `emphasis: Emphasis`. |
 
 **Props** (animatable with `.to()`, settable with `.set()` or in the constructor):
 
@@ -152,7 +152,7 @@ Grid container with `cols=` columns and `gap=`. Combine with `.fit(s.frame.safe)
 | `gap` | float | `0.25` | linear |
 | `cols` | float | `3.0` | step_end |
 
-Props inherited from [`k.Node`](object-state.md#k-node): `x`, `y`, `rotate`, `scale`, `scale_x`, `scale_y`, `anchor`, `opacity`, `z`, `visible`, `bleed`.
+Props inherited from [`k.Node`](object-state.md#k-node): `x`, `y`, `rotate`, `scale`, `scale_x`, `scale_y`, `anchor`, `opacity`, `z`, `visible`, `bleed`, `emphasis`.
 
 **Example:**
 
@@ -189,7 +189,7 @@ Container that overlays its children, centered (or aligned by `align=`). Good fo
 | --- | --- | --- | --- |
 | `*children` | `ChildT \| Sequence[ChildT]` | variadic |   |
 | `align` | `Align` | `"center"` | Container that overlays its children, centered (or aligned by `align=`). |
-| `**props` | `Unpack[TransformKeywords]` | variadic | Keyword arguments (`TransformKeywords`): `name: str \| None`, `key: str \| None`, `x: FloatVal`, `y: FloatVal`, `position: VecVal`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`. |
+| `**props` | `Unpack[TransformKeywords]` | variadic | Keyword arguments (`TransformKeywords`): `name: str \| None`, `key: str \| None`, `x: FloatVal`, `y: FloatVal`, `position: VecVal`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`, `emphasis: Emphasis`. |
 
 **Props** (animatable with `.to()`, settable with `.set()` or in the constructor):
 
@@ -197,7 +197,7 @@ Container that overlays its children, centered (or aligned by `align=`). Good fo
 | --- | --- | --- | --- |
 | `align` | str | `"center"` | step_end |
 
-Props inherited from [`k.Node`](object-state.md#k-node): `x`, `y`, `rotate`, `scale`, `scale_x`, `scale_y`, `anchor`, `opacity`, `z`, `visible`, `bleed`.
+Props inherited from [`k.Node`](object-state.md#k-node): `x`, `y`, `rotate`, `scale`, `scale_x`, `scale_y`, `anchor`, `opacity`, `z`, `visible`, `bleed`, `emphasis`.
 
 **Example:**
 

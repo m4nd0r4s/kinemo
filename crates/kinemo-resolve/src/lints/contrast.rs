@@ -6,11 +6,12 @@
 //! (`fill` alpha × `fill_opacity` × accumulated opacity), the way the rasterizer
 //! composites it (straight alpha, sRGB space). Contrast is the WCAG 2 ratio of relative
 //! luminances. Only texts at rest are judged, so fades in and out never count; texts
-//! with a nearly-zero alpha are W1005's business.
+//! with a nearly-zero alpha are W1005's business. `emphasis="low"` (dimmed on purpose) asks
+//! a lower ratio; `emphasis="decorative"` (not meant to be read) is not judged.
 
 
 use super::{FirstOccurrences, LintCode, LintContext, LintDetails, LintFinding, VisualLint};
-use crate::sampling::{object_label, FrameSample};
+use crate::sampling::{object_label, Emphasis, FrameSample};
 
 #[derive(Default)]
 pub(crate) struct ContrastLint {
@@ -74,6 +75,11 @@ impl VisualLint for ContrastLint {
             if !leaf.is_text || !leaf.at_rest || leaf.fading || !leaf.is_visible(options.visible_opacity) {
                 continue;
             }
+            if leaf.emphasis == Emphasis::Decorative {
+                continue;
+            }
+            let low_emphasis = leaf.emphasis == Emphasis::Low;
+            let minimum = if low_emphasis { options.minimum_contrast_low } else { options.minimum_contrast };
             if self.found.contains(&[leaf.id]) {
                 continue;
             }
@@ -85,21 +91,21 @@ impl VisualLint for ContrastLint {
             let background = backdrop(sample, index, scene_background, options.visible_opacity);
             let shown = blend_over([fill[0], fill[1], fill[2]], alpha, background);
             let ratio = contrast_ratio(shown, background);
-            if ratio >= options.minimum_contrast {
+            if ratio >= minimum {
                 continue;
             }
             let message = format!(
                 "contrast {:.1}:1 between {} and the background (minimum {:.1}:1)",
                 ratio,
                 object_label(context.scene, leaf.id),
-                options.minimum_contrast
+                minimum
             );
             self.found.record(LintFinding::new(
                 LintCode::LowContrast,
                 vec![leaf.id],
                 sample.t,
                 message,
-                LintDetails::Contrast { ratio, text_color: shown, background },
+                LintDetails::Contrast { ratio, text_color: shown, background, minimum, low_emphasis },
             ));
         }
     }

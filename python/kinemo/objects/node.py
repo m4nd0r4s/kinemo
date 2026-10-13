@@ -75,6 +75,7 @@ class Node(PlacementMixin):
         z: PropAccessor[float]
         visible: PropAccessor[bool]
         bleed: PropAccessor[bool]
+        emphasis: PropAccessor[str]
         width: DerivedAccessor[float]
         height: DerivedAccessor[float]
         left: DerivedAccessor[float]

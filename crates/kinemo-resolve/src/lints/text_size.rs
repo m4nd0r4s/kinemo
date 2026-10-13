@@ -7,7 +7,7 @@
 
 
 use super::{FirstOccurrences, LintCode, LintContext, LintDetails, LintFinding, VisualLint};
-use crate::sampling::{object_label, FrameSample};
+use crate::sampling::{object_label, Emphasis, FrameSample};
 
 /// Default `size` of a text when the IR does not declare one.
 
@@ -22,7 +22,7 @@ impl VisualLint for TextSizeLint {
         let options = context.options;
         let pixels_per_unit = scene.config.width as f64 / scene.config.frame_w;
         for leaf in &sample.leaves {
-            if !leaf.is_text || !leaf.at_rest || leaf.fading || !leaf.is_visible(options.visible_opacity) {
+            if !leaf.is_text || !leaf.at_rest || leaf.fading || !leaf.is_visible(options.visible_opacity) || leaf.emphasis == Emphasis::Decorative {
                 continue;
             }
             if self.found.contains(&[leaf.id]) {

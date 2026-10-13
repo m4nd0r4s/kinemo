@@ -20,6 +20,9 @@ VecLike = Union[Vec, tuple[float, float]]
 FloatVal = Val[float]
 BoolVal = Val[bool]
 StrVal = Val[str]
+#: How much a text matters to the reader (`emphasis=`): `"low"` for something dimmed on purpose
+#: (judged against 3:1 instead of 4.5:1), `"decorative"` for text not meant to be read.
+Emphasis = Literal["normal", "low", "decorative"]
 ColorVal = Val[ColorLike]
 FloatsVal = Val[Sequence[float]]
 #: A point input: a point, a vector expression, a lambda, or a pair whose coordinates

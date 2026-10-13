@@ -16,7 +16,7 @@ if TYPE_CHECKING:
 
     from ..anim.ease import EaseLike
     from ..reactive.signal import Blend
-    from ..values.aliases import Align, Anchor, BoolVal, ColorVal, FloatsVal, FloatVal, VecVal
+    from ..values.aliases import Align, Anchor, BoolVal, ColorVal, Emphasis, FloatsVal, FloatVal, VecVal
     from .node import Node
 
 
@@ -50,6 +50,7 @@ class VisibilityKeywords(TypedDict, total=False):
     opacity: FloatVal
     visible: BoolVal
     bleed: BoolVal
+    emphasis: Emphasis
 
 
 class PaintKeywords(TypedDict, total=False):
@@ -163,6 +164,7 @@ if TYPE_CHECKING:
         opacity: FloatVal
         visible: BoolVal
         bleed: BoolVal
+        emphasis: Emphasis
 
     class PropChanges(ExtensibleTypedDict, total=False, extra_items=object):
         """`obj.to(...)` / `obj.set(...)`: transform and style props are typed; the props of
@@ -180,6 +182,7 @@ if TYPE_CHECKING:
         opacity: FloatVal
         visible: BoolVal
         bleed: BoolVal
+        emphasis: Emphasis
         fill: ColorVal
         fill_opacity: FloatVal
         stroke: ColorVal
@@ -209,6 +212,7 @@ if TYPE_CHECKING:
         opacity: FloatVal
         visible: BoolVal
         bleed: BoolVal
+        emphasis: Emphasis
         fill: ColorVal
         fill_opacity: FloatVal
         stroke: ColorVal

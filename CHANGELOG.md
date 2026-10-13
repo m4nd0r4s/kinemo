@@ -4,6 +4,32 @@ All notable changes to kinemo are listed here. The project follows
 [semantic versioning](https://semver.org/); until 1.0, a minor version may change the API, and
 `kinemo upgrade` rewrites the forms it replaces.
 
+## 0.17.0
+
+Lints you don't silence: each thing done on purpose that a lint used to flag now has a form,
+and the lints are measured on a corpus of real-world scenes.
+
+**Added**
+
+- `emphasis=` on every object (children inherit it): `"low"` for text dimmed on purpose,
+  judged by W1003 against 3:1 instead of 4.5:1; `"decorative"` for text not meant to be read
+  (a backdrop of digits), not judged by W1002, W1003 or W1004. W1003's fixes offer both.
+- **W0120** reports a `# kinemo: allow CODE` that no longer silences anything on its line, so
+  it can't hide a real problem later; `kinemo check --fix` removes the unused codes and keeps
+  the others and the reason.
+- `--size` (`1080p`, `720p`, `4k`, `square`, `vertical`) replaces the size a scene declares in
+  `render`, `check`, `snap`, `inspect` and `dev`: one file makes a 16:9 video and a 9:16 short,
+  and `check --size vertical` lints the vertical layout.
+- A lint corpus (`tests/lint_corpus/`): scenes written the way real videos are, each with the
+  diagnostics `kinemo check` must report, checked in CI.
+
+**Changed**
+
+- W1403 (content past the narration) offers to `s.start` the animation that runs past the line
+  when it started during it (a dial that rolls on); `--fix` applies it.
+- W0801 no longer warns for a morph between two texts (text, math, code) with nothing in
+  common: the crossfade is what's meant. For other objects it also offers a fade swap.
+
 ## 0.16.0
 
 Editing expressions: the preview edits values the code computes without flattening them into

@@ -7,12 +7,11 @@ use kurbo::{Point, Rect};
 
 use kinemo_ir::{ObjectId, Placement, Side, Value};
 
-use crate::transform::{anchor_unit, frame_rect, transform_rect, unit_point};
+use crate::transform::{anchor_unit, frame_rect, safe_rect, transform_rect, unit_point};
 use crate::Layout;
 
 const DEFAULT_GAP: f64 = 0.25;
 const DEFAULT_MARGIN: f64 = 0.5;
-const SAFE_MARGIN: f64 = 0.5;
 
 impl<'a> Layout<'a> {
     /// Translation from the placement timeline, blending across placement changes.
@@ -81,7 +80,7 @@ impl<'a> Layout<'a> {
             [target.x - own.x, target.y - own.y]
         };
         if p.clamp {
-            out = clamp_into(b, out, self.frame_in(parent, t).inset(-SAFE_MARGIN));
+            out = clamp_into(b, out, transform_rect(self.world_to_parent(parent, t), safe_rect(&self.scene().config)));
         }
         out
     }

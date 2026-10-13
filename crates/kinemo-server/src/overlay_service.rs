@@ -10,7 +10,6 @@ use kinemo_render::FrameSize;
 
 use crate::preview_state::ScenePublication;
 
-const SAFE_MARGIN: f64 = 0.5;
 
 pub fn overlay_json(publication: &ScenePublication, t: f64) -> Json {
     let scene = &publication.scene;
@@ -45,8 +44,7 @@ pub fn overlay_json(publication: &ScenePublication, t: f64) -> Json {
             }
         }
     }
-    let (fw, fh) = (scene.config.frame_w, scene.config.frame_h);
-    let safe = Rect::new(-fw / 2.0 + SAFE_MARGIN, -fh / 2.0 + SAFE_MARGIN, fw / 2.0 - SAFE_MARGIN, fh / 2.0 - SAFE_MARGIN);
+    let safe = kinemo_layout::safe_rect(&scene.config);
     json!({"type": "overlay", "t": t, "boxes": boxes, "relations": relations, "safe": px_rect(safe)})
 }
 

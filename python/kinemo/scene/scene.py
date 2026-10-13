@@ -88,7 +88,7 @@ class Scene(TimelineMixin, LifecycleMixin, WritesMixin, ProbeMixin, EventsMixin,
         #: Signal id → name of every scene parameter.
         self._param_signals: dict[int, str] = {}
         fw, fh = config.frame_units
-        self.frame: Frame = frame_of(fw, fh)
+        self.frame: Frame = frame_of(fw, fh, config.covered_units)
 
     @property
     def builder(self) -> Builder:

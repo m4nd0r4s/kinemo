@@ -34,10 +34,15 @@ class Rect:
 
 @dataclass(frozen=True)
 class Frame(Rect):
+    #: (top, right, bottom, left) covered by the app the video is made for (`platform=`).
+    covered: tuple[float, float, float, float] = (0.0, 0.0, 0.0, 0.0)
+
     @property
     def safe(self) -> Rect:
-        return self.inset(SAFE_MARGIN)
+        """The frame inset by 0.5 u, or by more where the platform covers it."""
+        top, right, bottom, left = (max(SAFE_MARGIN, c) for c in self.covered)
+        return Rect(self.left + left, self.bottom + bottom, self.right - right, self.top - top)
 
 
-def frame_of(width_units: float, height_units: float) -> Frame:
-    return Frame(-width_units / 2, -height_units / 2, width_units / 2, height_units / 2)
+def frame_of(width_units: float, height_units: float, covered: tuple[float, float, float, float] = (0.0, 0.0, 0.0, 0.0)) -> Frame:
+    return Frame(-width_units / 2, -height_units / 2, width_units / 2, height_units / 2, covered)

@@ -81,6 +81,29 @@ The frame always measures 9 units on its shorter side, so a scene written for 10
 its layout at 4k. Square and vertical frames are narrower, so check them with
 `kinemo check` (lint `W1001` flags objects outside the safe area).
 
+### Vertical video for an app
+
+Reels, TikTok and Shorts cover part of a vertical video with their buttons, the caption and
+the channel name. `platform=` tells kinemo which app a scene is for, and the safe area moves
+clear of those zones: W1001 reports what falls under them, `place(..., clamp=True)` keeps
+objects out of them, `s.frame.safe` returns the smaller area, and `kinemo dev --debug safe`
+draws it.
+
+```python
+@k.scene(size="vertical", platform="reels")
+def short(s: k.Scene): ...
+```
+
+| `platform=` | Covered, in pixels of 1080 × 1920 (top, right, bottom, left) |
+| --- | --- |
+| `"reels"` | 220, 140, 420, 60 |
+| `"tiktok"` | 180, 160, 480, 60 |
+| `"shorts"` | 160, 180, 380, 60 |
+
+The zones approximate each app's layout and scale with the frame. They only apply to
+vertical frames, so the same scene rendered as 16:9 keeps the usual safe area. Set it for a
+whole project in `kinemo.toml` (`[scene] platform = "reels"`) or in a preset.
+
 ## Slides
 
 `s.mark(name=None, slide=True)` defines a slide break at the cursor. `--format slides`

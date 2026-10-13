@@ -43,10 +43,9 @@ fn reordering(scene: &Scene, leaf: ObjectId, t: f64) -> bool {
     })
 }
 
-/// The frame shrunk by `margin` on every side.
+/// The frame shrunk by `margin` on every side, or by more where the platform covers it.
 pub(crate) fn safe_area(scene: &Scene, margin: f64) -> Rect {
-    let f = frame_rect(&scene.config);
-    Rect::new(f.x0 + margin, f.y0 + margin, f.x1 - margin, f.y1 - margin)
+    kinemo_layout::safe_rect_with(&scene.config, margin)
 }
 
 /// Edge with the largest overshoot of `b` past `area`, and that overshoot.

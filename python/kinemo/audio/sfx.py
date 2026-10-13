@@ -9,10 +9,9 @@ from __future__ import annotations
 
 import math
 import os
-import random
-import struct
-import wave
 from typing import Callable
+
+# `random`, `struct` and `wave` are imported where an effect is made: `import kinemo` stays fast.
 
 RATE = 44100
 #: Bumped when a recipe changes, so cached files are made again.
@@ -28,6 +27,8 @@ def _decay(n: int, seconds: float) -> Samples:
 
 
 def _noise(n: int, seed: int) -> Samples:
+    import random
+
     rng = random.Random(seed)
     return [rng.uniform(-1.0, 1.0) for _ in range(n)]
 
@@ -107,6 +108,9 @@ RECIPES: dict[str, Callable[[], Samples]] = {
 
 
 def _write(path: str, samples: Samples) -> None:
+    import struct
+    import wave
+
     tmp = f"{path}.tmp{os.getpid()}"
     with wave.open(tmp, "wb") as out:
         out.setnchannels(1)

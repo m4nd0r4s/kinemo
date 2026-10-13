@@ -32,6 +32,11 @@ impl Builder {
         }
     }
 
+    /// The TeX of each `$...$` span of a text, in order (the same rules the layout uses).
+    fn text_math_spans(&self, text: &str) -> Vec<String> {
+        kinemo_text::math_spans(text, &kinemo_text::TextOptions::default())
+    }
+
     /// Part tree and glyph→node mapping: `{"parts": [...], "glyph_nodes": [...]}`.
     #[pyo3(signature = (tex, size = 0.6, display = true))]
     fn math_info(&self, tex: &str, size: f64, display: bool) -> String {

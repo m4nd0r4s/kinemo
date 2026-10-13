@@ -65,19 +65,27 @@ pub(crate) fn shape_run(text: &str, first_char: usize, style: FontStyle, opts: &
     }
 }
 
-/// Shape all style runs of `styled` (runs never cross '\n').
+/// Shape all style runs of `styled` (runs never cross '\n'). An `Inline` char takes the
+/// width of its box (the k-th of `opts.inline`).
 pub(crate) fn shape_all(styled: &[(char, FontStyle)], opts: &TextOptions) -> Vec<Shaped> {
     let mut out = Vec::new();
     let n = styled.len();
     let mut i = 0;
+    let mut boxes = opts.inline.iter();
     while i < n {
         if styled[i].0 == '\n' {
             i += 1;
             continue;
         }
+        if styled[i].1 == FontStyle::Inline {
+            let width = boxes.next().map_or(0.0, |b| b.width);
+            out.push(Shaped { gid: 0, style: FontStyle::Inline, char_index: i, advance: width, x_off: 0.0, y_off: 0.0 });
+            i += 1;
+            continue;
+        }
         let st = styled[i].1;
         let s = i;
-        while i < n && styled[i].0 != '\n' && styled[i].1 == st {
+        while i < n && styled[i].0 != '\n' && styled[i].1 == st && st != FontStyle::Inline {
             i += 1;
         }
         let run: String = styled[s..i].iter().map(|(c, _)| *c).collect();

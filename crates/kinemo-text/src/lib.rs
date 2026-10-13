@@ -20,5 +20,6 @@ mod types;
 mod wrap;
 
 pub use cache::{layout, measure};
+pub use markup::{math_spans, INLINE_CHAR};
 pub use query::ranges_of;
-pub use types::{Align, FontStyle, Glyph, TextLayout, TextOptions};
+pub use types::{Align, FontStyle, Glyph, InlineBox, TextLayout, TextOptions};

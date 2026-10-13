@@ -28,5 +28,5 @@ pub(crate) fn compute_with_markers(tex: &str, opts: &MathOptions, markers: bool)
             glyph.node = script;
         }
     }
-    Ok(MathLayout { glyphs: ink.glyphs, rules: ink.rules, parts: tree.parts, bbox: ink.bbox })
+    Ok(MathLayout { glyphs: ink.glyphs, rules: ink.rules, parts: tree.parts, bbox: ink.bbox, baseline: ink.baseline })
 }

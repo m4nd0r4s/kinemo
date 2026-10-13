@@ -49,4 +49,6 @@ pub struct MathLayout {
     pub parts: Vec<PartNode>,
     /// Logical box (typst's frame), centered at (0,0), y-up.
     pub bbox: Rect,
+    /// y of the baseline in the same coordinates: where the formula sits on a line of text.
+    pub baseline: f64,
 }

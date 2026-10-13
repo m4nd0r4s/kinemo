@@ -204,14 +204,15 @@ class TextLike(Group):
         self._runs.clear()
 
     def find_all(self, needle: str) -> list[TextPart]:
-        """Every occurrence of `needle` (in the text without markup), as parts."""
+        """Every occurrence of `needle` (in the text without markup), as parts. A `$math$`
+        span reads as its TeX: `txt["f'(x)"]`."""
         _, glyphs = self._glyphs()
-        chars = self._char_text()
+        chars, owners = self._char_text_with_owners()
         out: list[TextPart] = []
         start = chars.find(needle)
         occurrence = 0
         while start >= 0 and needle:
-            span = range(start, start + len(needle))
+            span = set(owners[start : start + len(needle)])
             indices = [i for i, g in enumerate(glyphs) if g["char_index"] in span]
             out.append(self._run_for(("find", needle, occurrence), indices))
             occurrence += 1
@@ -227,6 +228,11 @@ class TextLike(Group):
         for g in glyphs:
             chars[g["char_index"]] = g["key"]
         return "".join(chars)
+
+    def _char_text_with_owners(self) -> tuple[str, list[int]]:
+        """The plain text, and for each of its characters the char index it belongs to."""
+        text = self._char_text()
+        return text, list(range(len(text)))
 
     @overload
     def __getitem__(self, key: str) -> TextPart: ...
@@ -342,6 +348,21 @@ class PartView:
         return self.owner._run_for(key, indices)
 
 
+def check_inline_math(text: str) -> None:
+    """K0801 for a `$...$` span of `text` the built-in engine can't typeset (as `k.Math`)."""
+    from .._runtime.context import current_scene
+    from .._runtime.spans import user_span
+
+    if "$" not in text:
+        return
+    builder = current_scene()._b
+    for tex in builder.text_math_spans(text):
+        error = builder.math_error(tex, 0.6, False)
+        if error is not None:
+            code, message, _ = error
+            raise KinemoError.make(code, f"LaTeX in ${tex}$ not supported by the built-in engine: {message}", spans=[user_span()], fixes=[("fix the LaTeX, or escape the dollar signs (\\$) to keep them as text", None)])
+
+
 class Text(TextLike):
     """`k.Text("Hello **world**", size=0.6, width=6, align="left")`. Reactive with a lambda."""
 
@@ -365,7 +386,24 @@ class Text(TextLike):
         options: dict[str, Any] = dict(props)
         if size is not None:
             options["size"] = size
+        if isinstance(text, str):
+            check_inline_math(text)
         super().__init__(text=text, wrap=width or 0.0, align=align, **options)
+
+    def _char_text(self) -> str:
+        return self._char_text_with_owners()[0]
+
+    def _char_text_with_owners(self) -> tuple[str, list[int]]:
+        """The plain text, and for each of its characters the char index it belongs to: one
+        per char, except a `$math$` span, whose TeX stands for its one char."""
+        _, glyphs = self._glyphs()
+        glyphs = [g for g in glyphs if g["char_index"] < NOT_IN_TEXT]
+        size = max((g["char_index"] for g in glyphs), default=-1) + 1
+        keys = [" "] * size
+        for g in glyphs:
+            keys[g["char_index"]] = g["key"]
+        owners = [index for index, key in enumerate(keys) for _ in key]
+        return "".join(keys), owners
 
     def to(  # pyright: ignore[reportIncompatibleMethodOverride] - adds `text=`
         self,
@@ -386,6 +424,7 @@ class Text(TextLike):
         from ..anim.text_change import TextChange
 
         span = user_span()
+        check_inline_math(text)
         change = TextChange(self, text, duration, ease, delay, span)
         if not props and place is None:
             return change

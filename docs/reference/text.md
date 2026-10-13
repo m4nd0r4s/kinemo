@@ -131,7 +131,7 @@ Like `Node.to`; a new `text=` string morphs the glyphs (equal characters travel)
 text.find_all(needle: str) -> list[TextPart]
 ```
 
-Every occurrence of `needle` (in the text without markup), as parts.
+Every occurrence of `needle` (in the text without markup), as parts. A `$math$` span reads as its TeX: `txt["f'(x)"]`.
 
 **Parameters:**
 
@@ -240,7 +240,7 @@ Inherited from [`k.Node`](object-state.md#k-node): [`set`](object-state.md#node-
 math.find_all(needle: str) -> list[TextPart]
 ```
 
-Every occurrence of `needle` (in the text without markup), as parts.
+Every occurrence of `needle` (in the text without markup), as parts. A `$math$` span reads as its TeX: `txt["f'(x)"]`.
 
 **Parameters:**
 
@@ -400,7 +400,7 @@ def code_highlight(s: k.Scene):
 code.find_all(needle: str) -> list[TextPart]
 ```
 
-Every occurrence of `needle` (in the text without markup), as parts.
+Every occurrence of `needle` (in the text without markup), as parts. A `$math$` span reads as its TeX: `txt["f'(x)"]`.
 
 **Parameters:**
 

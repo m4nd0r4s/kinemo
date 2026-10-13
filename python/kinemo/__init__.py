@@ -20,6 +20,7 @@ from .anim.morph import morph
 from .anim.motion import flash, follow, squash
 from .anim.verbs import draw, fade_in, fade_out, grow, indicate, music, shrink, sound, write
 from .audio.sfx import sfx
+from .objects.captions import Captions
 from .component.component import Component
 from .component.context import Context, context, from_context, provide
 from .component.declarations import Out, Prop, field, prop
@@ -138,6 +139,7 @@ if not TYPE_CHECKING:
 
 
 __all__ = [
+    "Captions",
     "Points", "StreamLines", "VectorField",
     "Brace", "Image", "SVG",
     "Axes", "NumberLine", "PolarAxes", "BarChart", "LineChart", "Table", "Component", "Context", "Event", "EventInfo", "EventSource", "State", "intersect", "spline", "subtract", "union", "reparent", "Code", "Math", "morph", "Movie", "crossfade", "cut", "morph_cut", "movie", "ListSignal", "list", "flash", "follow", "squash", "Trail", "trace", "integrate", "simulate", "when", "Out", "Prop", "clip", "context", "field", "from_context",

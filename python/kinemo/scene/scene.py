@@ -140,7 +140,9 @@ class Scene(TimelineMixin, LifecycleMixin, WritesMixin, ProbeMixin, EventsMixin,
     # ---- end of build -----------------------------------------------------------------
     def _finish(self) -> None:
         from ..events.resolve import compute_tables, resolve
+        from ..objects.captions import build_captions
 
+        build_captions(self)
         resolve(self)
         end = max(self.cursor, self._max_end)
         self._b.set_duration(end + self.config.tail)

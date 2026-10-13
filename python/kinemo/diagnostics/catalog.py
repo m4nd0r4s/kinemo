@@ -175,6 +175,7 @@ CATALOG: dict[str, Entry] = {
         "the voice becomes silence with an estimated duration.",
         fix="Install `kinemo-tts-<name>`, or use one of the installed providers the message lists.",
     ),
+    "W1407": Entry("captions without narration", "`k.Captions()` shows the scene's `s.voice` lines; this scene has none, so there is nothing to caption."),
 }
 
 

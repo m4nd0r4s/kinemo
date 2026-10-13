@@ -48,7 +48,7 @@ Text with minimal inline markup (`**bold**`, `*italic*`, `` `code` ``). `size=` 
 | `size` | `FloatVal \| None` | `None` | `size=` sets the size, `width=` wraps lines, `align=` aligns. |
 | `width` | `float \| None` | `None` | `size=` sets the size, `width=` wraps lines, `align=` aligns. |
 | `align` | `Align` | `"left"` | `size=` sets the size, `width=` wraps lines, `align=` aligns. |
-| `**props` | `Unpack[TextKeywords]` | variadic | Keyword arguments (`TextKeywords`): `name: str \| None`, `key: str \| None`, `x: FloatVal`, `y: FloatVal`, `position: VecVal`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`, `fill: ColorVal`, `fill_opacity: FloatVal`, `stroke: ColorVal`, `stroke_width: FloatVal`, `dash: FloatsVal`, `glow: FloatVal`, `glow_color: ColorVal`, `color: ColorVal`, `mono: BoolVal`. |
+| `**props` | `Unpack[TextKeywords]` | variadic | Keyword arguments (`TextKeywords`): `name: str \| None`, `key: str \| None`, `x: FloatVal`, `y: FloatVal`, `position: VecVal`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`, `emphasis: Emphasis`, `fill: ColorVal`, `fill_opacity: FloatVal`, `stroke: ColorVal`, `stroke_width: FloatVal`, `dash: FloatsVal`, `glow: FloatVal`, `glow_color: ColorVal`, `color: ColorVal`, `mono: BoolVal`. |
 
 **Props** (animatable with `.to()`, settable with `.set()` or in the constructor):
 
@@ -67,7 +67,7 @@ Text with minimal inline markup (`**bold**`, `*italic*`, `` `code` ``). `size=` 
 | `align` | str | `"left"` | step_end |
 | `mono` | bool | `False` | step_end |
 
-Props inherited from [`k.Node`](object-state.md#k-node): `x`, `y`, `rotate`, `scale`, `scale_x`, `scale_y`, `anchor`, `opacity`, `z`, `visible`, `bleed`.
+Props inherited from [`k.Node`](object-state.md#k-node): `x`, `y`, `rotate`, `scale`, `scale_x`, `scale_y`, `anchor`, `opacity`, `z`, `visible`, `bleed`, `emphasis`.
 
 **Example:**
 
@@ -190,7 +190,7 @@ Formula in LaTeX syntax, typeset by the built-in engine (no TeX installation nee
 | `size` | `float` | `0.6` |   |
 | `display` | `bool` | `True` |   |
 | `engine` | `str` | `"builtin"` |   |
-| `**props` | `Unpack[StyleKeywords]` | variadic | Keyword arguments (`StyleKeywords`): `name: str \| None`, `key: str \| None`, `x: FloatVal`, `y: FloatVal`, `position: VecVal`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`, `fill: ColorVal`, `fill_opacity: FloatVal`, `stroke: ColorVal`, `stroke_width: FloatVal`, `dash: FloatsVal`, `glow: FloatVal`, `glow_color: ColorVal`, `color: ColorVal`. |
+| `**props` | `Unpack[StyleKeywords]` | variadic | Keyword arguments (`StyleKeywords`): `name: str \| None`, `key: str \| None`, `x: FloatVal`, `y: FloatVal`, `position: VecVal`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`, `emphasis: Emphasis`, `fill: ColorVal`, `fill_opacity: FloatVal`, `stroke: ColorVal`, `stroke_width: FloatVal`, `dash: FloatsVal`, `glow: FloatVal`, `glow_color: ColorVal`, `color: ColorVal`. |
 
 **Props** (animatable with `.to()`, settable with `.set()` or in the constructor):
 
@@ -207,7 +207,7 @@ Formula in LaTeX syntax, typeset by the built-in engine (no TeX installation nee
 | `size` | float | `0.6` | linear |
 | `display` | bool | `True` | step_end |
 
-Props inherited from [`k.Node`](object-state.md#k-node): `x`, `y`, `rotate`, `scale`, `scale_x`, `scale_y`, `anchor`, `opacity`, `z`, `visible`, `bleed`.
+Props inherited from [`k.Node`](object-state.md#k-node): `x`, `y`, `rotate`, `scale`, `scale_x`, `scale_y`, `anchor`, `opacity`, `z`, `visible`, `bleed`, `emphasis`.
 
 **Example:**
 
@@ -301,7 +301,7 @@ Code with syntax highlighting (tree-sitter) and stable tokens: `lang=`, `line_nu
 | `theme` | `str` | `"auto"` | Code with syntax highlighting (tree-sitter) and stable tokens: `lang=`, `line_numbers=True`, `size=`, `theme="auto"` (follows the scene background). |
 | `line_numbers` | `bool` | `False` | Code with syntax highlighting (tree-sitter) and stable tokens: `lang=`, `line_numbers=True`, `size=`, `theme="auto"` (follows the scene background). |
 | `size` | `float` | `0.32` | Code with syntax highlighting (tree-sitter) and stable tokens: `lang=`, `line_numbers=True`, `size=`, `theme="auto"` (follows the scene background). |
-| `**props` | `Unpack[StyleKeywords]` | variadic | Keyword arguments (`StyleKeywords`): `name: str \| None`, `key: str \| None`, `x: FloatVal`, `y: FloatVal`, `position: VecVal`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`, `fill: ColorVal`, `fill_opacity: FloatVal`, `stroke: ColorVal`, `stroke_width: FloatVal`, `dash: FloatsVal`, `glow: FloatVal`, `glow_color: ColorVal`, `color: ColorVal`. |
+| `**props` | `Unpack[StyleKeywords]` | variadic | Keyword arguments (`StyleKeywords`): `name: str \| None`, `key: str \| None`, `x: FloatVal`, `y: FloatVal`, `position: VecVal`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`, `emphasis: Emphasis`, `fill: ColorVal`, `fill_opacity: FloatVal`, `stroke: ColorVal`, `stroke_width: FloatVal`, `dash: FloatsVal`, `glow: FloatVal`, `glow_color: ColorVal`, `color: ColorVal`. |
 
 **Props** (animatable with `.to()`, settable with `.set()` or in the constructor):
 
@@ -322,7 +322,7 @@ Code with syntax highlighting (tree-sitter) and stable tokens: `lang=`, `line_nu
 | `highlight` | floats | `()` | step_start |
 | `highlight_amount` | float | `0.0` | linear |
 
-Props inherited from [`k.Node`](object-state.md#k-node): `x`, `y`, `rotate`, `scale`, `scale_x`, `scale_y`, `anchor`, `opacity`, `z`, `visible`, `bleed`.
+Props inherited from [`k.Node`](object-state.md#k-node): `x`, `y`, `rotate`, `scale`, `scale_x`, `scale_y`, `anchor`, `opacity`, `z`, `visible`, `bleed`, `emphasis`.
 
 **Example:**
 
@@ -459,7 +459,7 @@ Annotation marks on any object or part of a text or formula (`eq["dx"]`): `k.und
 | `pad` | `float` | `0.08` | `pad=` (or `overhang=` for `strike`), `color=` and `stroke_width=`. |
 | `color` | `ColorLike` | `k.YELLOW` | `pad=` (or `overhang=` for `strike`), `color=` and `stroke_width=`. |
 | `stroke_width` | `FloatVal` | `4.0` | `pad=` (or `overhang=` for `strike`), `color=` and `stroke_width=`. |
-| `**props` | `Unpack[VisibilityKeywords]` | variadic | Keyword arguments (`VisibilityKeywords`): `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`. |
+| `**props` | `Unpack[VisibilityKeywords]` | variadic | Keyword arguments (`VisibilityKeywords`): `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`, `emphasis: Emphasis`. |
 
 **Example:**
 
@@ -506,7 +506,7 @@ Documented together with [`k.underline`](#k-underline).
 | `radius` | `float` | `0.08` |   |
 | `color` | `ColorLike` | `k.YELLOW` |   |
 | `stroke_width` | `FloatVal` | `4.0` |   |
-| `**props` | `Unpack[VisibilityKeywords]` | variadic | Keyword arguments (`VisibilityKeywords`): `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`. |
+| `**props` | `Unpack[VisibilityKeywords]` | variadic | Keyword arguments (`VisibilityKeywords`): `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`, `emphasis: Emphasis`. |
 
 <a id="k-cross"></a>
 ### `k.cross` *(function)*
@@ -534,7 +534,7 @@ Documented together with [`k.underline`](#k-underline).
 | `pad` | `float` | `0.06` | An X over `target`: two lines corner to corner, `pad` past its box. |
 | `color` | `ColorLike` | `k.RED` |   |
 | `stroke_width` | `FloatVal` | `4.0` |   |
-| `**props` | `Unpack[VisibilityKeywords]` | variadic | Keyword arguments (`VisibilityKeywords`): `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`. |
+| `**props` | `Unpack[VisibilityKeywords]` | variadic | Keyword arguments (`VisibilityKeywords`): `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`, `emphasis: Emphasis`. |
 
 <a id="k-encircle"></a>
 ### `k.encircle` *(function)*
@@ -562,7 +562,7 @@ Documented together with [`k.underline`](#k-underline).
 | `pad` | `float` | `0.18` | An ellipse around `target` (its box, `pad` larger on each side, times √2 so the corners fit inside). |
 | `color` | `ColorLike` | `k.YELLOW` |   |
 | `stroke_width` | `FloatVal` | `4.0` |   |
-| `**props` | `Unpack[VisibilityKeywords]` | variadic | Keyword arguments (`VisibilityKeywords`): `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`. |
+| `**props` | `Unpack[VisibilityKeywords]` | variadic | Keyword arguments (`VisibilityKeywords`): `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`, `emphasis: Emphasis`. |
 
 <a id="k-strike"></a>
 ### `k.strike` *(function)*
@@ -590,7 +590,7 @@ Documented together with [`k.underline`](#k-underline).
 | `overhang` | `float` | `0.06` | A line through the middle of `target` (struck out), `overhang` past each side. |
 | `color` | `ColorLike` | `k.RED` |   |
 | `stroke_width` | `FloatVal` | `4.0` |   |
-| `**props` | `Unpack[VisibilityKeywords]` | variadic | Keyword arguments (`VisibilityKeywords`): `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`. |
+| `**props` | `Unpack[VisibilityKeywords]` | variadic | Keyword arguments (`VisibilityKeywords`): `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`, `emphasis: Emphasis`. |
 
 <a id="k-terminal"></a>
 ### `k.Terminal` *(class)*
@@ -626,9 +626,9 @@ A terminal or REPL window: `title=`, `prompt=` (`"$ "`, `">>>"`), `lang=` of the
 | `theme` | `str` | `"auto"` | A terminal or REPL window: `title=`, `prompt=` (`"$ "`, `">>>"`), `lang=` of the commands (`"bash"`, `"python"`...), `width=` and `rows=` on screen, `size=`, `theme="auto"`. |
 | `chrome` | `bool` | `True` |   |
 | `caret` | `bool` | `True` |   |
-| `**props` | `Unpack[TransformKeywords]` | variadic | Keyword arguments (`TransformKeywords`): `name: str \| None`, `key: str \| None`, `x: FloatVal`, `y: FloatVal`, `position: VecVal`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`. |
+| `**props` | `Unpack[TransformKeywords]` | variadic | Keyword arguments (`TransformKeywords`): `name: str \| None`, `key: str \| None`, `x: FloatVal`, `y: FloatVal`, `position: VecVal`, `rotate: FloatVal`, `anchor: VecVal`, `z: FloatVal`, `scale: FloatVal`, `scale_x: FloatVal`, `scale_y: FloatVal`, `opacity: FloatVal`, `visible: BoolVal`, `bleed: BoolVal`, `emphasis: Emphasis`. |
 
-Props inherited from [`k.Node`](object-state.md#k-node): `x`, `y`, `rotate`, `scale`, `scale_x`, `scale_y`, `anchor`, `opacity`, `z`, `visible`, `bleed`.
+Props inherited from [`k.Node`](object-state.md#k-node): `x`, `y`, `rotate`, `scale`, `scale_x`, `scale_y`, `anchor`, `opacity`, `z`, `visible`, `bleed`, `emphasis`.
 
 **Example:**
 

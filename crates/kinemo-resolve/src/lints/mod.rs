@@ -47,6 +47,8 @@ pub struct LintOptions {
     pub text_overlap_fraction: f64,
     /// Minimum WCAG contrast ratio (W1003).
     pub minimum_contrast: f64,
+    /// Minimum contrast for text with `emphasis="low"` (W1003).
+    pub minimum_contrast_low: f64,
     /// Minimum text em size in output pixels (W1004).
     pub minimum_text_pixels: f64,
     /// Longest tolerated invisible stretch of a present object, in seconds (W1005).
@@ -71,6 +73,7 @@ impl Default for LintOptions {
             safe_area_tolerance: 1e-3,
             text_overlap_fraction: 0.10,
             minimum_contrast: 4.5,
+            minimum_contrast_low: 3.0,
             minimum_text_pixels: 18.0,
             invisible_seconds: 3.0,
             invisible_opacity: 0.01,
@@ -150,7 +153,7 @@ pub enum LintDetails {
     /// `reorder`: the motion is a container reordering its children (a swap arc).
     SafeArea { edge: FrameEdge, overshoot: f64, moving: bool, reorder: bool },
     TextOverlap { overlap_fraction: f64 },
-    Contrast { ratio: f64, text_color: [f64; 3], background: [f64; 3] },
+    Contrast { ratio: f64, text_color: [f64; 3], background: [f64; 3], minimum: f64, low_emphasis: bool },
     TextSize { pixels: f64 },
     Invisible { duration: f64, reason: InvisibilityReason },
     Noise { simultaneous: usize },

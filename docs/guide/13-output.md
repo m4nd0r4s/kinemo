@@ -104,6 +104,23 @@ The zones approximate each app's layout and scale with the frame. They only appl
 vertical frames, so the same scene rendered as 16:9 keeps the usual safe area. Set it for a
 whole project in `kinemo.toml` (`[scene] platform = "reels"`) or in a preset.
 
+### One scene, several formats
+
+`--size` replaces the size a scene declares, for `render`, `check`, `snap`, `inspect` and
+`dev`, so the same file makes a 16:9 video and a 9:16 short:
+
+```bash
+kinemo render scene.py                    # as declared (1080p)
+kinemo render scene.py --size vertical    # 1080 × 1920
+kinemo check scene.py --size vertical     # lints the vertical layout
+```
+
+A scene adapts when its layout is relative rather than written in coordinates: place
+objects against the frame (`place(at="top", margin=0.6)`) and each other
+(`place(below=title, gap=0.3)`), group them in `k.Row`/`k.Column`/`k.Grid`, and read the
+frame's size from `s.frame` (`s.frame.width`, `s.frame.safe`) when something must fit it.
+`kinemo check --size vertical` shows what still needs a vertical arrangement.
+
 ## Slides
 
 `s.mark(name=None, slide=True)` defines a slide break at the cursor. `--format slides`

@@ -58,7 +58,7 @@ def run(args: argparse.Namespace) -> int:
     except RuntimeError as e:
         print(f"kinemo dev: {e}")
         return 1
-    session = Session(args.file, args.scene, args.params, server, debug=tuple(f for f in (args.debug or "").split(",") if f))
+    session = Session(args.file, args.scene, args.params, server, debug=tuple(f for f in (args.debug or "").split(",") if f), size=args.size)
     session.rebuild()
     print(f"kinemo dev: preview at {url}  (Ctrl+C to quit)", flush=True)
     if not args.no_open:

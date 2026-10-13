@@ -513,3 +513,40 @@ def test_w1003_not_reported_for_dark_text_on_bright_fills() -> None:
         s.wait(1)
 
     assert lints_of(build(scene), "W1003") == []
+
+
+# ---- emphasis ------------------------------------------------------------------------------
+
+
+def _gray_text(gray: float, **props: object) -> k.Text:
+    return k.Text("dimmed", size=0.5, color=k.rgb(gray, gray, gray), **props)  # type: ignore[arg-type]
+
+
+def test_low_emphasis_text_is_judged_against_three_to_one() -> None:
+    def scene(s: k.Scene) -> None:
+        s.add(_gray_text(0.40, y=1, emphasis="low"), _gray_text(0.30, y=-1, emphasis="low"))  # 3.3:1 and 2.2:1
+        s.wait(1)
+
+    d = only_one(lints_of(build(scene, background=k.rgb(0.06, 0.06, 0.06)), "W1003"))
+    assert "(minimum 3.0:1 for low emphasis)" in d.message
+    assert not any('emphasis="low"' in (fix.code or "") for fix in d.fixes)
+
+
+def test_normal_text_suggests_saying_it_is_dimmed_on_purpose() -> None:
+    def scene(s: k.Scene) -> None:
+        s.add(_gray_text(0.40))
+        s.wait(1)
+
+    d = only_one(lints_of(build(scene, background=k.rgb(0.06, 0.06, 0.06)), "W1003"))
+    assert "(minimum 4.5:1)" in d.message
+    assert any('.set(emphasis="low")' in (fix.code or "") for fix in d.fixes)
+
+
+def test_decorative_text_is_not_judged_for_contrast_or_size_and_children_inherit() -> None:
+    def scene(s: k.Scene) -> None:
+        stream = k.Group(k.Text("0110", size=0.12, color=k.rgb(0.15, 0.15, 0.15)), emphasis="decorative")
+        s.add(stream)
+        s.wait(1)
+
+    built = build(scene, background=k.rgb(0.06, 0.06, 0.06))
+    assert lints_of(built, "W1003") == [] and lints_of(built, "W1004") == []

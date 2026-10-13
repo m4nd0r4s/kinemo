@@ -1,11 +1,11 @@
 //! W1002: text over text — two visible texts at rest whose boxes overlap by more than
-//! 10 % of the smaller box's area.
+//! 10 % of the smaller box's area. Text marked `emphasis="decorative"` (a backdrop) is left out.
 
 use kurbo::Rect;
 
 
 use super::{FirstOccurrences, LintCode, LintContext, LintDetails, LintFinding, VisualLint};
-use crate::sampling::{object_label, FrameSample};
+use crate::sampling::{object_label, Emphasis, FrameSample};
 
 #[derive(Default)]
 pub(crate) struct TextOverlapLint {
@@ -28,7 +28,7 @@ impl VisualLint for TextOverlapLint {
         let texts: Vec<_> = sample
             .leaves
             .iter()
-            .filter(|l| l.is_text && l.at_rest && l.is_visible(options.visible_opacity))
+            .filter(|l| l.is_text && l.at_rest && l.is_visible(options.visible_opacity) && l.emphasis != Emphasis::Decorative)
             .collect();
         for (i, a) in texts.iter().enumerate() {
             for b in &texts[i + 1..] {

@@ -72,7 +72,7 @@ They share a common set:
 | --- | --- |
 | Transform | `x`, `y`, `position`, `rotate` (degrees), `scale`, `scale_x`, `scale_y`, `anchor` |
 | Style | `color` (shorthand for `stroke` and `fill`), `fill`, `fill_opacity`, `stroke`, `stroke_width`, `dash`, `opacity`, `glow` (a soft halo, 0–1), `glow_color` |
-| Composition | `z` (draw order), `visible`, `bleed` (cropped by the frame edge on purpose) |
+| Composition | `z` (draw order), `visible`, `bleed` (cropped by the frame edge on purpose), `emphasis` (`"low"`: dimmed on purpose; `"decorative"`: not meant to be read; children inherit it, see W1003) |
 | Read-only (derived from layout) | `width`, `height`, `bbox`, `left`, `right`, `top`, `bottom`, `center` |
 
 Shapes add their own (`r` for `k.Circle`, `w`/`h` for `k.Rect`, `start`/`end` for

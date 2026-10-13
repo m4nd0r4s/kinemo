@@ -117,9 +117,16 @@ def pair_parts(a: list[Part], b: list[Part], match: MorphMatch | None = None, st
     return sorted(pairs)
 
 
+def _both_texts(a: "Node", b: "Node") -> bool:
+    from ..objects.text import TextLike
+
+    return isinstance(a, TextLike) and isinstance(b, TextLike)
+
+
 class Morph(Animation):
     #: `W0801` when nothing matches. A text change turns it off: a crossfade between two
-    #: strings with no characters in common is the expected result, not a mistake.
+    #: strings with no characters in common is the expected result, not a mistake. So does a
+    #: morph between two texts (text, math, code): `0` → `1`, a number folding into a formula.
     warns_without_matches = True
 
     def __init__(self, a: "Node", b: "Node", match: MorphMatch | None, duration: float | None, ease: EaseLike | None, delay: float, span: Span) -> None:
@@ -139,12 +146,13 @@ class Morph(Animation):
         pa, pb = _parts(s, self.a, start), _parts(s, self.b, start)
         structural = _math_pairs(s, self.a, self.b, start, self.match)
         pairs = pair_parts(pa, pb, None if structural else self.match, structural)
-        if not pairs and self.warns_without_matches:
+        if not pairs and self.warns_without_matches and not _both_texts(self.a, self.b):
+            a, b = self.a._label(), self.b._label()
             s.lints.warn(
                 "W0801",
-                f"morph found no matches between {self.a._label()} and {self.b._label()}: falling back to a crossfade",
+                f"morph found no matches between {a} and {b}: falling back to a crossfade",
                 spans=[self.span],
-                fixes=[("specify the matches", "k.morph(a, b, match={...})")],
+                fixes=[("specify the matches", "k.morph(a, b, match={...})"), ("or swap them with a fade", f"s.play(k.fade_out({a}), k.fade_in({b}))")],
             )
         cursor = s.cursor
         s.cursor = start

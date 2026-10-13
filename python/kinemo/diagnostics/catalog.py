@@ -138,7 +138,7 @@ CATALOG: dict[str, Entry] = {
     "W0311": Entry("captured Python list", "Plain lists are not tracked; use `k.list([...])`."),
     "W0312": Entry("eased clock", "A signal used as a clock must advance linearly; use `k.time.map(...)`."),
     "W0701": Entry("handler object never removed", "Objects created in handlers should leave the scene."),
-    "W0801": Entry("morph without matches", "The shapes have nothing in common; the morph does a warp + crossfade."),
+    "W0801": Entry("morph without matches", "The shapes have nothing in common; the morph does a warp + crossfade. Specify the matches (`match={...}`), or swap them with a fade (`s.play(k.fade_out(a), k.fade_in(b))`). Between two texts (text, math, code) the crossfade is the expected result and is not reported."),
     "W0901": Entry("too many individual objects", "Use vectorized types (`k.Points`, `k.VectorField`)."),
     "W1001": Entry("outside the safe area", "The object extends beyond the frame's safe area. Objects entirely offstage are not reported; for one cropped on purpose, `bleed=True`. A moving object is reported when the frame edge cuts it on its way between two places inside the frame (a swap arc, an overshooting ease); entrances and exits through the edge are not."),
     "W1002": Entry("text over text", "Two texts overlap by more than 10% of their area."),

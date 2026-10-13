@@ -307,7 +307,7 @@ s.play(c.to(x=2))
 <a id="w0801"></a>
 ### W0801: morph without matches
 
-*Warning (lint).* The shapes have nothing in common; the morph does a warp + crossfade.
+*Warning (lint).* The shapes have nothing in common; the morph does a warp + crossfade. Specify the matches (`match={...}`), or swap them with a fade (`s.play(k.fade_out(a), k.fade_in(b))`). Between two texts (text, math, code) the crossfade is the expected result and is not reported.
 
 <a id="k0802"></a>
 ### K0802: unknown code language

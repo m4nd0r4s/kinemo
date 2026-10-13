@@ -4,6 +4,28 @@ All notable changes to kinemo are listed here. The project follows
 [semantic versioning](https://semver.org/); until 1.0, a minor version may change the API, and
 `kinemo upgrade` rewrites the forms it replaces.
 
+## 0.18.0
+
+Vertical and social video: the zones apps cover, captions burned into the video, math inline
+in text, and sound effects.
+
+**Added**
+
+- `platform=` (`"reels"`, `"tiktok"`, `"shorts"`) for vertical scenes: the zones each app covers
+  with its buttons and captions narrow the safe area, so W1001 reports what falls under them,
+  `place(..., clamp=True)` keeps objects out, `s.frame.safe` returns the smaller area and
+  `kinemo dev --debug safe` draws it. Frames that are not vertical keep the usual safe area.
+  `kinemo.toml` `[scene] platform` works too.
+- `k.Captions()`: the narration burned into the video for muted viewers. Every `s.voice` line
+  becomes short captions (`chars=`, `rows=`), each shown while its words are spoken, at the
+  bottom of the safe area on a plate, with the spoken word in `highlight=`. W1407 when there is
+  no narration.
+- `$math$` inline in `k.Text`: formulas typeset on the text's baseline, wrapping as one word,
+  addressable by their TeX (`txt["f'(x)"]`). Dollar signs follow Pandoc's rule, so
+  `costs $5 and $10` stays text; LaTeX the engine can't typeset is K0801.
+- `k.sfx`: built-in sound effects for `k.sound` (`click`, `tick`, `pop`, `swish`, `whoosh`,
+  `ding`), made by kinemo in the project's cache, identical in every render.
+
 ## 0.17.0
 
 Lints you don't silence: each thing done on purpose that a lint used to flag now has a form,

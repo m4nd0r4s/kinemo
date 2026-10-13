@@ -103,7 +103,13 @@ or for the whole project, in `kinemo.toml`:
 allow = ["W1007"]
 ```
 
-The comment goes on the line the lint points to (the `:line` in the report).
+The comment goes on the line the lint points to (the `:line` in the report). A reason after
+the codes is kept as written: `# kinemo: allow W1003 (dimmed on purpose)`.
+
+An allow that no longer silences anything (the lint got more precise, or the code moved) is
+reported as `W0120`, so it can't hide a real problem on that line later; `kinemo check --fix`
+removes it, keeping the other codes of the comment. Allows are judged in the checked file when
+all of its scenes are built (not with `--scene`).
 
 ## `kinemo inspect`
 

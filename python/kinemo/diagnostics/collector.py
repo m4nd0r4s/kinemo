@@ -8,6 +8,19 @@ from .._runtime.spans import Span, user_span
 from .diagnostic import Diagnostic, Fix, FixSpec
 
 
+#: Every `# kinemo: allow CODE` that silenced something in this process, as (file, line, code):
+#: what `kinemo check` compares the comments in a file against (W0120).
+_used_inline: set[tuple[str, int, str]] = set()
+
+
+def used_inline_allows() -> set[tuple[str, int, str]]:
+    return set(_used_inline)
+
+
+def reset_used_inline_allows() -> None:
+    _used_inline.clear()
+
+
 class Collector:
     def __init__(self) -> None:
         self.items: list[Diagnostic] = []
@@ -53,4 +66,7 @@ def _allowed_inline(s: Span, code: str) -> bool:
     if marker not in line:
         return False
     allowed = line.split(marker, 1)[1].replace(",", " ").split()
-    return code in allowed
+    if code not in allowed:
+        return False
+    _used_inline.add((s.file, s.line, code))
+    return True

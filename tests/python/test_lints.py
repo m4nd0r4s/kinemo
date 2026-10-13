@@ -495,3 +495,21 @@ def test_w0312_linear_clock_is_fine() -> None:
         assert energy
 
     assert [d for d in code_diagnostics(scene_fn=scene) if d.code == "W0312"] == []
+
+
+def test_w1003_not_reported_for_dark_text_on_bright_fills() -> None:
+    # Lit bit cells, a bright chip, a white disc and a glowing card: high contrast in every case.
+    def scene(s: k.Scene) -> None:
+        dark = k.rgb(0.085, 0.095, 0.125)
+        parts: list[k.Node] = []
+        for i, on in enumerate([True, False, True]):
+            parts.append(k.RoundedRect(w=0.6, h=0.6, radius=0.08, fill=k.WHITE if on else dark, fill_opacity=1, x=-1 + i))
+            parts.append(k.Text("1" if on else "0", size=0.32, color=dark if on else k.GRAY, x=-1 + i))
+        parts.append(k.RoundedRect(w=1.2, h=0.7, radius=0.35, fill=k.YELLOW, fill_opacity=1, x=2, y=2))
+        parts.append(k.Text("A", size=0.4, color=dark, x=2, y=2))
+        parts.append(k.RoundedRect(w=1.2, h=0.7, radius=0.1, fill=k.WHITE, fill_opacity=1, glow=0.6, x=2, y=-1.5))
+        parts.append(k.Text("on", size=0.4, color=dark, x=2, y=-1.5))
+        s.play(k.fade_in(*parts))
+        s.wait(1)
+
+    assert lints_of(build(scene), "W1003") == []

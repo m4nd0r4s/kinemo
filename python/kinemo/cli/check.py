@@ -8,6 +8,8 @@ from typing import Any
 
 from ..audio.voice import collecting_lines
 from ..diagnostics import Diagnostic
+from ..diagnostics.collector import reset_used_inline_allows, used_inline_allows
+from ..linting.allows import unused_allows
 from .fix import apply_fixes
 from .loader import BuildResult, LoadError, build, find_scenes, load_module, select
 from ..scene.written_labels import written_labels
@@ -101,11 +103,18 @@ def run(args: argparse.Namespace) -> int:
     except LoadError as e:
         return _report_load_error(args, e.diagnostic)
     # A check never calls the voice model: lines without audio are estimated (W1405).
+    reset_used_inline_allows()
     with collecting_lines():
         results = [build(d, args.params) for d in select(find_scenes(module), args.scene)]
     if not results:
         print(f"kinemo: no scenes (@k.scene) in {args.file}")
         return 1
+    # Allows are judged only when every scene of the file was built: another scene may need one.
+    if args.scene is None and all(r.ok for r in results):
+        path = os.path.abspath(args.file)
+        used = {(os.path.abspath(file), line, code) for file, line, code in used_inline_allows()}
+        with open(path, encoding="utf-8") as fh:
+            results[0].diagnostics.extend(unused_allows(path, fh.read(), used))
     diags = [d for r in results for d in r.diagnostics]
     if args.fix:
         applied = apply_fixes(diags)

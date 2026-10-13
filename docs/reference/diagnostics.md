@@ -9,7 +9,7 @@ Every problem kinemo reports has a stable code: `K` codes are errors, `W` codes 
 | Range | Area | Codes |
 | --- | --- | --- |
 | [K00xx](#range-00) | General | 1 |
-| [K01xx](#range-01) | Object lifecycle | 7 |
+| [K01xx](#range-01) | Object lifecycle | 8 |
 | [K02xx / W02xx](#range-02) | Animations, conflicts, interpolation | 5 |
 | [K03xx / W03xx](#range-03) | Reactive system | 10 |
 | [K04xx](#range-04) | Layout and constraints | 4 |
@@ -48,6 +48,7 @@ Every problem kinemo reports has a stable code: `K` codes are errors, `W` codes 
 | [`K0105`](#k0105) | error | invalid argument |
 | [`K0106`](#k0106) | error | unknown prop |
 | [`W0110`](#w0110) | warning (lint) | play with at= |
+| [`W0120`](#w0120) | warning (lint) | allow that silences nothing |
 
 <a id="k0101"></a>
 ### K0101: object not in the scene
@@ -97,6 +98,11 @@ s.play(c.to(x=2))
 ### W0110: play with at=
 
 *Warning (lint).* `play(..., at=)` does not move the cursor; use `s.start(..., at=)` to make that explicit.
+
+<a id="w0120"></a>
+### W0120: allow that silences nothing
+
+*Warning (lint).* A `# kinemo: allow CODE` comment whose code no longer reports anything on its line (the lint was fixed, or the code moved): remove it, so a real problem there is not hidden later. `kinemo check --fix` removes it.
 
 <a id="range-02"></a>
 ## K02xx / W02xx: Animations, conflicts, interpolation

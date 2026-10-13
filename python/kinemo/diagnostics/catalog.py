@@ -133,6 +133,7 @@ CATALOG: dict[str, Entry] = {
     ),
     # --- warnings ------------------------------------------------------------------
     "W0110": Entry("play with at=", "`play(..., at=)` does not move the cursor; use `s.start(..., at=)` to make that explicit."),
+    "W0120": Entry("allow that silences nothing", "A `# kinemo: allow CODE` comment whose code no longer reports anything on its line (the lint was fixed, or the code moved): remove it, so a real problem there is not hidden later. `kinemo check --fix` removes it."),
     "W0310": Entry("lambda in a loop", "The lambda captures the loop variable by reference; use `lambda i=i:` or `.map`."),
     "W0311": Entry("captured Python list", "Plain lists are not tracked; use `k.list([...])`."),
     "W0312": Entry("eased clock", "A signal used as a clock must advance linearly; use `k.time.map(...)`."),

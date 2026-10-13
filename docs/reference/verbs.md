@@ -17,6 +17,7 @@ Entrance, exit and emphasis animations (`k.draw`, `k.fade_out`, `k.indicate`, `k
 - [`k.squash`](#k-squash): Emphasis: an elastic squash against the object's base; `amount=` controls the intensity.
 - [`k.follow`](#k-follow): Motion: the object travels along a path (the outline of another object or a list of points, in world coordinates).
 - [`k.sound`](#k-sound): Audio: plays a sound file at the moment it is scheduled (zero duration in the script).
+- [`k.sfx`](#k-sfx): Built-in sound effects for `k.sound`: `k.sfx.click()`, `tick()`, `pop()`, `swish()`, `whoosh()` and `ding()` return the file of each effect.
 - [`k.music`](#k-music): Background music from the scheduled instant to the end of the scene: `gain=` sets its level, `duck=` its level while a voice speaks (0.25 = a quarter; 1 = no ducking), and `fade=` fades it in at its start and out at the end of the scene, in seconds.
 - [`k.morph`](#k-morph): Swap: `a` leaves, `b` enters and the matching parts travel between them (identical characters and tokens slide; the rest fades out and in).
 
@@ -429,7 +430,30 @@ def click(s: k.Scene):
     s.play(k.sound("click.wav", gain=0.8), k.indicate(button))
 ```
 
-**See also:** [`s.voice`](scene.md#scene-voice).
+**See also:** [`s.voice`](scene.md#scene-voice), [`k.sfx`](#k-sfx).
+
+<a id="k-sfx"></a>
+### `k.sfx` *(value)*
+
+```python
+k.sfx: SoundEffects
+```
+
+Built-in sound effects for `k.sound`: `k.sfx.click()`, `tick()`, `pop()`, `swish()`, `whoosh()` and `ding()` return the file of each effect. They are made by kinemo (no third-party license) the first time they are used, in the project's cache, and sound the same in every render. Overlapping sounds never clip: the mix ends in a limiter.
+
+**Example:**
+
+```python
+@k.scene
+def cells(s: k.Scene):
+    row = k.Row(*[k.Square(0.6) for _ in range(4)], gap=0.2).place(at="center")
+    s.play(k.draw(row))
+    for cell in row:
+        s.play(cell.to(fill=k.YELLOW, fill_opacity=1), k.sound(k.sfx.click(), gain=0.5), duration=0.3)
+    s.play(k.sound(k.sfx.ding(), gain=0.6), k.indicate(row))
+```
+
+**See also:** [`k.sound`](#k-sound), [`k.music`](#k-music).
 
 <a id="k-music"></a>
 ### `k.music` *(function)*

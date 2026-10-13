@@ -347,12 +347,12 @@ s.play(c.to(x=2))
 <a id="w1002"></a>
 ### W1002: text over text
 
-*Warning (lint).* Two texts overlap by more than 10% of their area.
+*Warning (lint).* Two texts overlap by more than 10% of their area. Text marked `emphasis="decorative"` (a backdrop) does not count.
 
 <a id="w1003"></a>
 ### W1003: low contrast
 
-*Warning (lint).* Contrast between text and what is behind it (the background, or a filled shape under it such as a card or a speech bubble) is below 4.5:1. Text dimmed on purpose (an off bit, a de-emphasized card) takes `emphasis="low"` and is judged against 3:1; text not meant to be read takes `emphasis="decorative"` and is not judged (nor by W1004). Children inherit it.
+*Warning (lint).* Contrast between text and what is behind it (the background, or a filled shape under it such as a card or a speech bubble) is below 4.5:1. Text dimmed on purpose (an off bit, a de-emphasized card) takes `emphasis="low"` and is judged against 3:1; text not meant to be read takes `emphasis="decorative"` and is not judged (nor by W1002 and W1004). Children inherit it.
 
 <a id="w1004"></a>
 ### W1004: small text

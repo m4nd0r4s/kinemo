@@ -4,9 +4,12 @@ name: website
 # the export renders the examples and runs the real `kinemo check` commands, then SvelteKit
 # prerenders the pages. Rendered videos are cached by the examples' source.
 
+# A release tag also rebuilds it: the tag is usually pushed right after its commit reaches main,
+# when that build has already checked out the tags without it.
 on:
   push:
     branches: [main]
+    tags: ["v*"]
   workflow_dispatch:
 
 permissions:

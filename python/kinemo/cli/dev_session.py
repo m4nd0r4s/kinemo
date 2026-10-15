@@ -82,6 +82,10 @@ class Session:
     generation: int = 0
     #: (file, function name) of the scene the preview shows: where editor mode writes.
     scene_function: tuple[str, str] | None = None
+    #: Preview edits that wrote files, newest last: each is (path, text before, text after)
+    #: per file. Undo writes the texts before back; redo, the texts after.
+    undo_stack: list[list[tuple[str, str, str]]] = field(default_factory=lambda: list[list[tuple[str, str, str]]]())
+    redo_stack: list[list[tuple[str, str, str]]] = field(default_factory=lambda: list[list[tuple[str, str, str]]]())
 
     @property
     def root(self) -> str:
@@ -225,6 +229,15 @@ class Session:
 
     def apply_edit(self, request: dict[str, Any]) -> bool:
         live = bool(request.get("live"))
+        ops = [change.get("op") for change in request.get("changes") or []]
+        if ops in (["undo"], ["redo"]):
+            try:
+                self.step_history(ops[0] == "undo")
+            except EditError as e:
+                self._notify(request, False, str(e))
+                return False
+            self._notify(request, True, "")
+            return True
         if not live and not request.get("changes"):
             # A cancelled drag: show the version on disk again.
             ok = self.rebuild()
@@ -238,6 +251,8 @@ class Session:
         if live:
             self._build(texts)
         else:
+            self.undo_stack.append([(path, self.texts.get(path, ""), text) for path, text in texts.items()])
+            self.redo_stack.clear()
             for path, text in texts.items():
                 with open(path, "w", encoding="utf-8", newline="") as fh:
                     fh.write(text)
@@ -294,6 +309,24 @@ class Session:
             else:
                 raise EditError(f"unknown edit {change['op']!r}")
         return {path: text}
+
+    def step_history(self, undo: bool) -> None:
+        """Undo (or redo) the latest preview edit: write its files back as they were, refused
+        when one of them changed since outside the preview."""
+        stack, other = (self.undo_stack, self.redo_stack) if undo else (self.redo_stack, self.undo_stack)
+        if not stack:
+            raise EditError("nothing to undo" if undo else "nothing to redo")
+        entry = stack[-1]
+        for path, before, after in entry:
+            if read_text(path) != (after if undo else before):
+                raise EditError(f"{os.path.basename(path)} changed outside the preview since that edit; undo it in your editor")
+        stack.pop()
+        for path, before, after in entry:
+            with open(path, "w", encoding="utf-8", newline="") as fh:
+                fh.write(before if undo else after)
+        other.append(entry)
+        changed = ", ".join(sorted(os.path.basename(path) for path, _, _ in entry))
+        print(f"kinemo dev: {'undid' if undo else 'redid'} the edit of {changed}", flush=True)
 
     def _notify(self, request: dict[str, Any], ok: bool, message: str) -> None:
         notify = getattr(self.server, "notify", None)

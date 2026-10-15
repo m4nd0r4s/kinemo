@@ -115,6 +115,10 @@ export function installPlayback() {
       setTime(lastFrameTime());
     } else if (e.key === "Escape") {
       emit("escape");
+    } else if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "z") {
+      // Undo / redo the latest edit made from the preview (the file goes back as it was).
+      e.preventDefault();
+      emit("history", e.shiftKey ? "redo" : "undo");
     }
   });
   view.play.addEventListener("click", () => (state.playing ? pause() : play()));

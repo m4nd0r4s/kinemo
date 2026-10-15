@@ -6,6 +6,7 @@ import { clipSections } from "./clip_inspector.js";
 import { isWatched, toggleWatch } from "./watch.js";
 import { positionEditor } from "./canvas.js";
 import { animationButtons } from "./palette.js";
+import { swapButtons } from "./timeline.js";
 import { pointEditor, propEditor, runsBadge, siteByKey, siteFor, valueEditor } from "./editing.js";
 import { selectObject, clearSelection } from "./selection.js";
 import { basename, editorLink, el, formatValue, listen, objectName, sourceLink, state, view } from "./state.js";
@@ -151,6 +152,7 @@ function renderBar(bar) {
     head(bar.label, "animation"),
     el("div", { class: "object-where" }, editorLink(bar.file, bar.line, `${basename(bar.file)}:${bar.line}`), `  · ${bar.start.toFixed(2)}–${bar.end.toFixed(2)} s`),
     el("pre", { class: "code" }, bar.code),
+    swapButtons(bar),
     ...sections,
     bar.objects.length ? el("div", { class: "section-title" }, "Objects") : null,
     ...bar.objects.map((id) => el("div", { class: "object-where" }, el("a", { href: "#", onclick: (e) => (e.preventDefault(), selectObject(id)) }, objectName(id))))

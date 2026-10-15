@@ -462,3 +462,6 @@ a:hover { text-decoration: underline; }
 .frame-wrap.placing canvas { cursor: crosshair; }
 .animate-buttons { display: flex; flex-wrap: wrap; gap: 4px; margin: 2px 0 6px; }
 .animate-buttons button.small { font-size: 11px; padding: 2px 8px; }
+.bar .resize { position: absolute; top: 0; right: 0; width: 6px; height: 100%; cursor: ew-resize; }
+.bar .resize:hover { background: rgba(255, 255, 255, 0.25); }
+.bar.moving { opacity: 0.75; z-index: 3; cursor: grabbing; }

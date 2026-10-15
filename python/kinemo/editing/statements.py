@@ -188,3 +188,82 @@ def definition_line(source: SourceFile, function: str, name: str) -> int | None:
     fn = scene_function(source, function)
     lines = [n.lineno for n in ast.walk(fn) if isinstance(n, ast.Name) and n.id == name and isinstance(n.ctx, ast.Store)]
     return min(lines) if lines else None
+
+
+def _wait_seconds(stmt: ast.stmt, scene_param: str) -> float | None:
+    """The seconds of `s.wait(1.5)` (a literal), else None."""
+    if not (isinstance(stmt, ast.Expr) and isinstance(stmt.value, ast.Call)):
+        return None
+    call = stmt.value
+    if not (isinstance(call.func, ast.Attribute) and call.func.attr == "wait" and isinstance(call.func.value, ast.Name) and call.func.value.id == scene_param):
+        return None
+    if len(call.args) != 1 or call.keywords:
+        return None
+    arg = call.args[0]
+    if isinstance(arg, ast.Constant) and isinstance(arg.value, (int, float)) and not isinstance(arg.value, bool):
+        return float(arg.value)
+    return None
+
+
+def _uses_scene(stmt: ast.stmt, scene_param: str) -> bool:
+    """Whether `stmt` calls a method of the scene (`s.play`, `s.wait`, `s.voice`...): only those
+    take time."""
+    return any(isinstance(n, ast.Attribute) and isinstance(n.value, ast.Name) and n.value.id == scene_param for n in ast.walk(stmt))
+
+
+def shift_statement(source: SourceFile, function: str, line: int, by: float) -> str:
+    """Start the statement on `line` `by` seconds later (earlier when negative): the literal
+    `s.wait(...)` right before it changes, or one is added before it."""
+    fn = scene_function(source, function)
+    if not fn.args.args:
+        raise EditError(f"{function}() takes no scene parameter")
+    scene_param = fn.args.args[0].arg
+    found = _statement_at(fn.body, line)
+    if found is None:
+        raise EditError(f"line {line} is not a statement of {function}()")
+    body, index = found
+    stmt = body[index]
+    # The wait that sets its start: the nearest statement before it that uses the scene
+    # (making `circle = k.Circle()` between them takes no time).
+    previous = next((body[i] for i in range(index - 1, -1, -1) if _uses_scene(body[i], scene_param)), None)
+    seconds = _wait_seconds(previous, scene_param) if previous is not None else None
+    lines = _lines_of(source.text)
+    if previous is not None and seconds is not None:
+        new = round(seconds + by, 2)
+        if new <= 0.005:
+            start, end = previous.lineno - 1, previous.end_lineno or previous.lineno
+            return _checked("\n".join(lines[:start] + lines[end:]), source.path)
+        start, end = previous.lineno - 1, previous.end_lineno or previous.lineno
+        indent = " " * previous.col_offset
+        return _checked("\n".join(lines[:start] + [f"{indent}{scene_param}.wait({_number(new)})"] + lines[end:]), source.path)
+    if by <= 0:
+        raise EditError("nothing waits before it to shorten; move the statement before it later instead")
+    indent = " " * stmt.col_offset
+    at = stmt.lineno - 1
+    return _checked("\n".join(lines[:at] + [f"{indent}{scene_param}.wait({_number(by)})"] + lines[at:]), source.path)
+
+
+def swap_statement(source: SourceFile, function: str, line: int, direction: int) -> str:
+    """Swap the statement on `line` with the one before (`direction` -1) or after (+1) it in
+    the same block, refused when the later one uses a name the earlier one assigns."""
+    fn = scene_function(source, function)
+    found = _statement_at(fn.body, line)
+    if found is None:
+        raise EditError(f"line {line} is not a statement of {function}()")
+    body, index = found
+    other = index + (1 if direction > 0 else -1)
+    if not 0 <= other < len(body):
+        raise EditError("it is already the " + ("last" if direction > 0 else "first") + " statement of its block")
+    first, second = sorted((index, other))
+    a, b = body[first], body[second]
+    assigned = {n.id for n in ast.walk(a) if isinstance(n, ast.Name) and isinstance(n.ctx, ast.Store)}
+    used = {n.id for n in ast.walk(b) if isinstance(n, ast.Name) and isinstance(n.ctx, ast.Load)}
+    if assigned & used:
+        names = ", ".join(sorted(assigned & used))
+        raise EditError(f"line {b.lineno} uses {names}, made on line {a.lineno}: they can't swap")
+    lines = _lines_of(source.text)
+    a_lines = lines[a.lineno - 1 : a.end_lineno or a.lineno]
+    b_lines = lines[b.lineno - 1 : b.end_lineno or b.lineno]
+    between = lines[(a.end_lineno or a.lineno) : b.lineno - 1]
+    start, end = a.lineno - 1, b.end_lineno or b.lineno
+    return _checked("\n".join(lines[:start] + b_lines + between + a_lines + lines[end:]), source.path)

@@ -453,3 +453,10 @@ a:hover { text-decoration: underline; }
 @media (prefers-reduced-motion: reduce) { .watch-row.changed .watch-value { animation: none; color: var(--accent); } }
 .spark { width: 70px; height: 16px; color: var(--accent-2); }
 .spark-head { stroke: var(--accent); stroke-width: 1; vector-effect: non-scaling-stroke; }
+
+/* Editor mode: the palette over the frame, and the crosshair while a tool is armed. */
+.palette { position: absolute; top: 8px; left: 8px; display: flex; gap: 2px; padding: 3px; background: rgba(20, 22, 27, 0.88); border: 1px solid var(--border, #2a2e36); border-radius: 6px; z-index: 5; }
+.palette-tool { width: 28px; height: 28px; border: 0; border-radius: 4px; background: transparent; color: var(--text); font-size: 15px; cursor: pointer; }
+.palette-tool:hover { background: rgba(95, 179, 249, 0.14); }
+.palette-tool.armed { background: rgba(95, 179, 249, 0.3); color: #fff; }
+.frame-wrap.placing canvas { cursor: crosshair; }

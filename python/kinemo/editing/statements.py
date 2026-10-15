@@ -123,3 +123,39 @@ def unique_name(source: SourceFile, function: str, base: str) -> str:
     while name in taken:
         name, n = f"{stem}_{n}", n + 1
     return name
+
+
+#: What the preview's palette adds: the constructor (placed at a point unless it says where it
+#: is itself) and the verb it enters with.
+OBJECT_KINDS: dict[str, tuple[str, str, str]] = {
+    # kind: (base name, constructor with {k}, {x}, {y}, entrance verb)
+    "text": ("label", '{k}.Text("Text", size=0.5).place(at=({x}, {y}))', "write"),
+    "math": ("formula", '{k}.Math(r"x^2").place(at=({x}, {y}))', "write"),
+    "circle": ("circle", "{k}.Circle(r=0.5).place(at=({x}, {y}))", "draw"),
+    "square": ("square", "{k}.Square(1).place(at=({x}, {y}))", "draw"),
+    "arrow": ("arrow", "{k}.Arrow(start=({x0}, {y}), end=({x1}, {y}))", "draw"),
+    "axes": ("axes", "{k}.Axes(x=(-3, 3, 1), y=(-2, 2, 1), width=6, height=4).place(at=({x}, {y}))", "draw"),
+}
+
+
+def _number(v: float) -> str:
+    text = f"{round(v, 2):.2f}".rstrip("0").rstrip(".")
+    return "0" if text in ("-0", "") else text
+
+
+def object_statements(source: SourceFile, function: str, kind: str, at: tuple[float, float], alias: str | None) -> str:
+    """The lines that add a `kind` object at `at` and bring it in: `circle = k.Circle(...)`
+    and `s.play(k.draw(circle))`, with a name the function does not use yet."""
+    if kind not in OBJECT_KINDS:
+        raise EditError(f"unknown object {kind!r} (objects: {', '.join(OBJECT_KINDS)})")
+    if alias is None:
+        raise EditError("the scene file does not import kinemo as a module (import kinemo as k)")
+    fn = scene_function(source, function)
+    if not fn.args.args:
+        raise EditError(f"{function}() takes no scene parameter")
+    scene_param = fn.args.args[0].arg
+    base, constructor, verb = OBJECT_KINDS[kind]
+    name = unique_name(source, function, base)
+    x, y = at
+    made = constructor.format(k=alias, x=_number(x), y=_number(y), x0=_number(x - 0.75), x1=_number(x + 0.75))
+    return f"{name} = {made}\n{scene_param}.play({alias}.{verb}({name}))"

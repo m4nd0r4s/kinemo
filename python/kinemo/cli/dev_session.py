@@ -273,8 +273,10 @@ class Session:
 
     def structural_edit(self, changes: list[dict[str, Any]]) -> dict[str, str]:
         """Statements inserted into or removed from the scene function (editor mode), in order:
-        `{"op": "insert", "after": line | None, "code": "..."}`, `{"op": "remove", "line": n}`."""
-        from ..editing.statements import insert_statement, remove_statement
+        `{"op": "insert", "after": line | None, "code": "..."}`, `{"op": "remove", "line": n}`,
+        and `{"op": "add", "kind": "circle", "at": [x, y], "after": line | None}` (an object
+        from the palette, with its entrance)."""
+        from ..editing.statements import insert_statement, object_statements, remove_statement
 
         if self.scene_function is None:
             raise EditError("no scene function to edit")
@@ -289,6 +291,12 @@ class Session:
             if change["op"] == "insert":
                 after = change.get("after")
                 text = insert_statement(source, function, int(after) if after is not None else None, str(change.get("code", "")))
+            elif change["op"] == "add":
+                at = change.get("at") or (0.0, 0.0)
+                after = change.get("after")
+                alias = sorted(source.module_aliases)[0] if source.module_aliases else None
+                code = object_statements(source, function, str(change.get("kind")), (float(at[0]), float(at[1])), alias)
+                text = insert_statement(source, function, int(after) if after is not None else None, code)
             elif change["op"] == "remove":
                 text = remove_statement(source, function, int(change["line"]))
             else:

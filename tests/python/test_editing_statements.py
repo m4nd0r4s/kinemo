@@ -150,3 +150,21 @@ def test_the_preview_adds_a_palette_object_at_the_playhead(tmp_path: object) -> 
         session.process_edits([{"id": 2, "live": False, "changes": [{"op": "add", "kind": kind, "at": [0, 0], "after": None}]}])  # type: ignore[attr-defined]
         assert server.notes[-1]["ok"] is True, server.notes[-1]  # type: ignore[attr-defined]
         assert session.rebuild(), kind  # type: ignore[attr-defined]
+
+
+def test_the_preview_animates_a_named_object_at_the_playhead(tmp_path: object) -> None:
+    session, server, path = session_with(tmp_path, SCENE)
+    animate = {"op": "animate", "object": "dot", "verb": "indicate", "after": 12}
+    session.process_edits([{"id": 1, "live": False, "changes": [animate]}])  # type: ignore[attr-defined]
+    assert path.read_text(encoding="utf-8").endswith("    s.wait(1)\n    s.play(k.indicate(dot))\n")  # type: ignore[attr-defined]
+    assert session.rebuild()  # type: ignore[attr-defined]
+
+
+def test_animating_before_the_object_exists_or_an_unknown_name_is_refused(tmp_path: object) -> None:
+    session, server, path = session_with(tmp_path, SCENE.replace("    dot = k.Dot()\n", "    s.wait(0.5)\n    dot = k.Dot()\n"))
+    before = path.read_text(encoding="utf-8")  # type: ignore[attr-defined]
+    session.process_edits([{"id": 1, "live": False, "changes": [{"op": "animate", "object": "dot", "verb": "indicate", "after": 6}]}])  # type: ignore[attr-defined]
+    assert server.notes[-1]["ok"] is False and "before dot exists" in server.notes[-1]["message"]  # type: ignore[attr-defined]
+    session.process_edits([{"id": 2, "live": False, "changes": [{"op": "animate", "object": "title.rest", "verb": "indicate", "after": None}]}])  # type: ignore[attr-defined]
+    assert server.notes[-1]["ok"] is False and "not a variable" in server.notes[-1]["message"]  # type: ignore[attr-defined]
+    assert path.read_text(encoding="utf-8") == before  # type: ignore[attr-defined]

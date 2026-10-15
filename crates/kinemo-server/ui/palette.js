@@ -31,7 +31,7 @@ function arm(kind) {
 
 /** The scene line the new statements go after: the last statement of the scene function that
  * started at or before the playhead (null: the start of the scene, so at its end of setup). */
-function afterLine() {
+export function afterLine() {
   const fn = state.meta && state.meta.scene_function;
   if (!fn) return null;
   let best = null;
@@ -67,4 +67,26 @@ export function installPalette() {
   // In the stage's corner, outside the frame: it never covers the scene.
   view.frameWrap.parentElement.append(bar);
   listen("escape", () => armed && arm(null));
+}
+
+/** `[verb, label]`: what `kinemo.editing.statements.ANIMATION_VERBS` writes. */
+export const ANIMATIONS = [
+  ["fade_in", "Fade in"],
+  ["draw", "Draw"],
+  ["write", "Write"],
+  ["grow", "Grow"],
+  ["indicate", "Indicate"],
+  ["fade_out", "Fade out"],
+  ["shrink", "Shrink"],
+];
+
+/** Buttons that add `s.play(k.<verb>(name))` for the selected object at the playhead. */
+export function animationButtons(name) {
+  return el(
+    "div",
+    { class: "animate-buttons" },
+    ...ANIMATIONS.map(([verb, label]) =>
+      el("button", { class: "ghost small", title: `s.play(k.${verb}(${name})) at the playhead`, onclick: () => sendEdit([{ op: "animate", object: name, verb, after: afterLine() }], false) }, label)
+    )
+  );
 }

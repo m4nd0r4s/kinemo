@@ -120,3 +120,33 @@ def json_dump(value: object) -> str:
     import json
 
     return json.dumps(value)
+
+
+def test_palette_objects_are_written_with_a_fresh_name_and_their_entrance() -> None:
+    from kinemo.editing.statements import OBJECT_KINDS, object_statements
+
+    code = object_statements(src(), "demo", "text", (1.234, -0.5), "k")
+    assert code == 'label = k.Text("Text", size=0.5).place(at=(1.23, -0.5))\ns.play(k.write(label))'
+    assert object_statements(src(), "demo", "circle", (0, 0), "k").startswith("circle = k.Circle(r=0.5).place(at=(0, 0))")
+    arrow = object_statements(src(), "demo", "arrow", (1, 2), "kn")
+    assert arrow.startswith("arrow = kn.Arrow(start=(0.25, 2), end=(1.75, 2))") and arrow.endswith("s.play(kn.draw(arrow))")
+    for kind in OBJECT_KINDS:
+        ast_ok = object_statements(src(), "demo", kind, (0.5, 0.5), "k")
+        assert ast_ok.count("\n") == 1
+    with pytest.raises(EditError, match="unknown object"):
+        object_statements(src(), "demo", "teapot", (0, 0), "k")
+    with pytest.raises(EditError, match="import kinemo as k"):
+        object_statements(src(), "demo", "text", (0, 0), None)
+
+
+def test_the_preview_adds_a_palette_object_at_the_playhead(tmp_path: object) -> None:
+    session, server, path = session_with(tmp_path, SCENE)
+    add = {"op": "add", "kind": "square", "at": [2, -1], "after": 7}
+    session.process_edits([{"id": 1, "live": False, "changes": [add]}])  # type: ignore[attr-defined]
+    text = path.read_text(encoding="utf-8")  # type: ignore[attr-defined]
+    assert "    s.play(k.fade_in(dot))\n    square = k.Square(1).place(at=(2, -1))\n    s.play(k.draw(square))\n" in text
+    assert session.rebuild()  # type: ignore[attr-defined]
+    for kind in ("text", "math", "circle", "arrow", "axes"):
+        session.process_edits([{"id": 2, "live": False, "changes": [{"op": "add", "kind": kind, "at": [0, 0], "after": None}]}])  # type: ignore[attr-defined]
+        assert server.notes[-1]["ok"] is True, server.notes[-1]  # type: ignore[attr-defined]
+        assert session.rebuild(), kind  # type: ignore[attr-defined]

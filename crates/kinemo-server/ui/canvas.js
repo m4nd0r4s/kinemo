@@ -5,6 +5,7 @@
 
 import { argumentFor, beginDrag, DRAG_THRESHOLD_PX, liveSender, propEditor, revertLive, sendEdit, siteFor } from "./editing.js";
 import { redrawHighlightLayer, setDragOffset } from "./frames.js";
+import { armedTool, placeAt } from "./palette.js";
 import { pickAt } from "./selection.js";
 import { formatNumber, listen, state, toast, view } from "./state.js";
 
@@ -85,6 +86,12 @@ export function installCanvas() {
   const canvas = view.frameCanvas;
   canvas.addEventListener("pointerdown", (e) => {
     const point = framePoint(e);
+    if (armedTool()) {
+      // A palette tool is armed: this click places the object.
+      press = { start: point, object: null, dragging: false, placing: true };
+      canvas.setPointerCapture(e.pointerId);
+      return;
+    }
     const object = state.pickedObject;
     const primary = state.selectedIds[0];
     const onSelection = object && object.id === primary && state.selectedBar === null && inside(state.boxes.get(primary), point);
@@ -113,6 +120,7 @@ export function installCanvas() {
     press = null;
     if (session.dragging) return session.release();
     const point = framePoint(e);
+    if (session.placing) return placeAt(point);
     if (Math.hypot(point.x - session.start.x, point.y - session.start.y) < DRAG_THRESHOLD_PX) pickAt(point.x, point.y);
   });
   // The drag offset is dropped once the scene rebuilt from the written file arrives.

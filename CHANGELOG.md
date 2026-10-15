@@ -4,6 +4,29 @@ All notable changes to kinemo are listed here. The project follows
 [semantic versioning](https://semver.org/); until 1.0, a minor version may change the API, and
 `kinemo upgrade` rewrites the forms it replaces.
 
+## 0.19.0
+
+Editor mode, first take: a scene can be built from the preview, which writes the code. Every
+action is one small edit to the scene function, and Ctrl/⌘+Z undoes it.
+
+**Added**
+
+- **Palette**: pick text, math, circle, square, arrow or axes above the frame and click where it
+  goes; the preview writes the object (a fresh name, placed where you clicked) and its entrance
+  after the statement at the playhead.
+- **Animate at the playhead**: with an object selected, fade in, draw, write, grow, indicate,
+  fade out or shrink adds `s.play(k.<verb>(obj))` at the playhead.
+- **Timeline editing**: drag a bar's right edge to change its `duration=`; drag the bar sideways
+  to start it later or earlier (the `s.wait` before it changes, or one is added); *Earlier* /
+  *Later* swap a statement with its neighbour unless one needs the other.
+- **Undo and redo** of every preview edit (Ctrl/⌘+Z, Shift+Ctrl/⌘+Z), refused when the file
+  changed in your editor since.
+- Guide chapter 14: building a scene from the editor.
+
+**Changed**
+
+- The website rebuilds when a release tag is pushed, so the docs list the new version at once.
+
 ## 0.18.0
 
 Vertical and social video: the zones apps cover, captions burned into the video, math inline

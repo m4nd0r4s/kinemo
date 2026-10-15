@@ -80,6 +80,8 @@ class Session:
     index: SceneIndex | None = None
     #: Counts builds from disk: a determinism check is dropped once a newer build started.
     generation: int = 0
+    #: (file, function name) of the scene the preview shows: where editor mode writes.
+    scene_function: tuple[str, str] | None = None
 
     @property
     def root(self) -> str:
@@ -130,12 +132,25 @@ class Session:
         meta["palette"] = {"colors": (self.index or index).colors, "eases": easing_names()}
         meta["live"] = live
         meta["editor"] = editor_meta(load_project(os.path.dirname(os.path.abspath(self.path))).editor)
+        meta["scene_function"] = self._scene_function_meta(chosen[0], sources)
         version = self.server.set_scene(result.scene.builder, json.dumps(meta))
         if not live:
             self._report(result, version)
             self.generation += 1
             self._schedule_determinism_check(chosen[0], ir_json, self.generation)
         return True
+
+    def _scene_function_meta(self, definition: Any, sources: dict[str, SourceFile]) -> dict[str, Any] | None:
+        """Where the editor mode writes: the scene function's file and name, and the name kinemo
+        is imported as there (`k`), so inserted code reads like the rest."""
+        code = getattr(definition.fn, "__code__", None)
+        if code is None:
+            return None
+        file = os.path.abspath(code.co_filename)
+        source = sources.get(file)
+        aliases = sorted(source.module_aliases) if source is not None else []
+        self.scene_function = (file, definition.fn.__name__)
+        return {"file": file, "name": definition.fn.__name__, "alias": aliases[0] if aliases else None}
 
     def _remember_files(self, main: str) -> None:
         self.watched = {main} | set(local_modules(self.root).values())
@@ -235,6 +250,8 @@ class Session:
         """New text of each file the changes touch (all or nothing)."""
         if self.index is None:
             raise EditError("no scene has been built yet")
+        if any("op" in change for change in changes):
+            return self.structural_edit(changes)
         by_file: dict[str, list[Change]] = {}
         sources: dict[str, SourceFile] = {}
         for change in changes:
@@ -253,6 +270,30 @@ class Session:
                 raise EditError(f"{os.path.basename(path)} changed since the preview was built; it reloads now")
             out[path] = apply_changes(sources[path], file_changes)
         return out
+
+    def structural_edit(self, changes: list[dict[str, Any]]) -> dict[str, str]:
+        """Statements inserted into or removed from the scene function (editor mode), in order:
+        `{"op": "insert", "after": line | None, "code": "..."}`, `{"op": "remove", "line": n}`."""
+        from ..editing.statements import insert_statement, remove_statement
+
+        if self.scene_function is None:
+            raise EditError("no scene function to edit")
+        if not all("op" in change for change in changes):
+            raise EditError("statements and values are edited separately")
+        path, function = self.scene_function
+        text = read_text(path)
+        if text is None or text != self.texts.get(path):
+            raise EditError(f"{os.path.basename(path)} changed since the preview was built; it reloads now")
+        for change in changes:
+            source = SourceFile(path, text)
+            if change["op"] == "insert":
+                after = change.get("after")
+                text = insert_statement(source, function, int(after) if after is not None else None, str(change.get("code", "")))
+            elif change["op"] == "remove":
+                text = remove_statement(source, function, int(change["line"]))
+            else:
+                raise EditError(f"unknown edit {change['op']!r}")
+        return {path: text}
 
     def _notify(self, request: dict[str, Any], ok: bool, message: str) -> None:
         notify = getattr(self.server, "notify", None)

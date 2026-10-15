@@ -4,12 +4,15 @@ name: website
 # the export renders the examples and runs the real `kinemo check` commands, then SvelteKit
 # prerenders the pages. Rendered videos are cached by the examples' source.
 
-# A release tag also rebuilds it: the tag is usually pushed right after its commit reaches main,
-# when that build has already checked out the tags without it.
+# A finished release rebuilds it too: the release commit reaches main before its tag is pushed,
+# so that build lists the docs versions without the new one. `workflow_run` runs on main, which
+# the github-pages environment accepts (a tag push would be refused), with the tag in place.
 on:
   push:
     branches: [main]
-    tags: ["v*"]
+  workflow_run:
+    workflows: [release]
+    types: [completed]
   workflow_dispatch:
 
 permissions:
@@ -23,6 +26,8 @@ concurrency:
 
 jobs:
   build:
+    # After a release, only once it is published (it waits for the PyPI approval).
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7

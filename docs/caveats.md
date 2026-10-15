@@ -118,8 +118,8 @@ code is given where one exists.
   edited where it is assigned only when it is assigned once to a literal (in the scene
   function or at module level). Parameters, loop variables, names assigned more than once
   and anything without a number in it stay read-only; edit them in the code. The preview
-  edits arguments that already exist (or adds a keyword for a default prop); it never adds
-  statements.
+  edits arguments that already exist (or adds a keyword for a default prop); new statements
+  come only from the editor's actions (palette, animate, timeline), in the scene function.
 - **A number that a drag crosses to negative keeps its operator**: dragging the `1.2` of
   `title.x + 1.2` below zero writes `title.x + -0.3`.
 - **Editing a line inside a loop changes every run of it** (the `×N` mark). A clip's body is

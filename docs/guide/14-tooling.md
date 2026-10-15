@@ -283,10 +283,42 @@ it, never the expression itself.
   `0.5` and `1`. A position with no such number (`place(above=...)`, a container,
   `title.x * 2`) is not dragged, and the inspector says why.
 
-Only what the code already wrote is edited; the preview never invents statements. A line that
+Values are edited where the code wrote them; new statements come only from the editor's own
+actions (see [Building a scene from the editor](#building-a-scene-from-the-editor)). A line that
 runs several times, as in a loop, carries a `×N` mark, and editing it changes every run. If
 the file was changed elsewhere since the last build (unsaved edits in your editor, for
 example), the preview refuses the edit and reloads.
+
+#### Building a scene from the editor
+
+The preview also writes new code, so a scene can be built without leaving it. Every action is
+one small edit to the scene function, as you would write it, and Ctrl/⌘+Z undoes it.
+
+![kinemo dev: the palette above the frame, a selected circle with Animate at the playhead](../examples/images/editor-mode.png)
+
+1. **Add an object**: pick one in the palette above the frame (text, math, circle, square,
+   arrow, axes) and click the frame where it goes. The preview writes it, with a fresh name,
+   placed where you clicked, and its entrance, after the statement at the playhead:
+
+   ```python
+   circle = k.Circle(r=0.5).place(at=(-3, -0.5))
+   s.play(k.draw(circle))
+   ```
+
+2. **Animate it**: with an object selected, *Animate at the playhead* adds
+   `s.play(k.indicate(circle))` (or fade in, draw, write, grow, fade out, shrink) after the
+   statement at the playhead. Objects that are not a variable of the scene (a part, an object
+   made in a loop) are animated in the code; the playhead must be past the line that makes
+   the object.
+3. **Time it on the timeline**: drag a bar's right edge to change its `duration=`, drag the
+   bar sideways to start it later or earlier (the `s.wait(...)` before it changes, or one is
+   added), and use *↑ Earlier* / *↓ Later* in its panel to swap it with the statement next to
+   it, unless one needs the other.
+4. **Adjust it** in the inspector, as any value: the text, the size, the position, the color.
+
+The editor writes only into the scene function and refuses, with the reason, where one line
+would stand for many (inside a loop) or for other code (a clip or helper defined inside the
+scene). Renaming, deleting and grouping objects are done in the code for now.
 
 #### From a warning to the fix
 

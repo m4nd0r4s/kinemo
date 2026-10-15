@@ -242,6 +242,9 @@ only those characters, and the scene rebuilds:
   drag, the scene rebuilds from the edited text without touching the file; the file is
   written once, on release. Esc cancels the drag.
 - **Click** a number or a string to type a new value (Enter saves, Esc cancels).
+- **Ctrl/⌘+Z** undoes the latest edit made from the preview (the file goes back exactly as it
+  was) and **Shift+Ctrl/⌘+Z** redoes it. An undo is refused when the file changed in your
+  editor since that edit.
 - Each value gets an editor for its type, read from the API's annotations:
   - enumerations (`align=`, `at="top"`, a brace's `direction=`) are a select; `at=` also
     offers *point (x, y)*, which writes the current position as a tuple;

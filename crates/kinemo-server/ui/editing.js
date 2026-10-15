@@ -250,5 +250,8 @@ export function runsBadge(site) {
 
 export function installEditing() {
   listen("message:edit_result", onEditResult);
+  listen("history", (step) => {
+    if (!state.editing) sendEdit([{ op: step }], false);
+  });
   listen("escape", () => cancelDrag && cancelDrag());
 }

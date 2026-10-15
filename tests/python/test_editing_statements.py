@@ -168,3 +168,49 @@ def test_animating_before_the_object_exists_or_an_unknown_name_is_refused(tmp_pa
     session.process_edits([{"id": 2, "live": False, "changes": [{"op": "animate", "object": "title.rest", "verb": "indicate", "after": None}]}])  # type: ignore[attr-defined]
     assert server.notes[-1]["ok"] is False and "not a variable" in server.notes[-1]["message"]  # type: ignore[attr-defined]
     assert path.read_text(encoding="utf-8") == before  # type: ignore[attr-defined]
+
+
+SEQUENCE = """import kinemo as k
+
+
+@k.scene
+def demo(s: k.Scene):
+    a = k.Dot()
+    b = k.Square(1)
+    s.play(k.fade_in(a))
+    s.wait(1)
+    s.play(k.draw(b))
+    s.play(k.indicate(a))
+"""
+
+
+def test_shifting_changes_the_wait_before_or_adds_one() -> None:
+    from kinemo.editing.statements import shift_statement
+
+    later = shift_statement(src(SEQUENCE), "demo", 10, 0.5)
+    assert "    s.wait(1.5)\n    s.play(k.draw(b))" in later
+    gone = shift_statement(src(SEQUENCE), "demo", 10, -1)
+    assert "s.wait" not in gone and "    s.play(k.fade_in(a))\n    s.play(k.draw(b))" in gone
+    added = shift_statement(src(SEQUENCE), "demo", 11, 0.25)
+    assert "    s.play(k.draw(b))\n    s.wait(0.25)\n    s.play(k.indicate(a))" in added
+    with pytest.raises(EditError, match="nothing waits before it"):
+        shift_statement(src(SEQUENCE), "demo", 11, -0.25)
+
+
+def test_swapping_neighbours_unless_one_needs_the_other() -> None:
+    from kinemo.editing.statements import swap_statement
+
+    swapped = swap_statement(src(SEQUENCE), "demo", 11, -1)
+    assert "    s.play(k.indicate(a))\n    s.play(k.draw(b))\n" in swapped
+    with pytest.raises(EditError, match="uses a, made on line 6"):
+        swap_statement(src(SEQUENCE.replace("    b = k.Square(1)\n", "    b = k.Square(1, x=a.x)\n")), "demo", 7, -1)
+    with pytest.raises(EditError, match="already the last"):
+        swap_statement(src(SEQUENCE), "demo", 11, 1)
+
+
+def test_shifting_finds_the_wait_past_statements_that_take_no_time() -> None:
+    from kinemo.editing.statements import shift_statement
+
+    text = SEQUENCE.replace("    s.wait(1)\n    s.play(k.draw(b))\n", "    s.wait(1)\n    c = k.Circle()\n    s.play(k.draw(b))\n")
+    earlier = shift_statement(src(text), "demo", 11, -0.5)
+    assert "    s.wait(0.5)\n    c = k.Circle()\n    s.play(k.draw(b))" in earlier

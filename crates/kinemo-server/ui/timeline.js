@@ -6,6 +6,7 @@
 
 import { pause, setTime } from "./playback.js";
 import { selectBar } from "./selection.js";
+import { beginDrag, liveSender, revertLive, sendEdit } from "./editing.js";
 import { basename, duration, el, listen, openInEditor, state, view } from "./state.js";
 
 const MAX_ZOOM = 64;
@@ -142,15 +143,115 @@ function barNode(bar) {
     if (e.metaKey || e.ctrlKey) {
       e.stopPropagation();
       openInEditor(bar.file, bar.line);
+      return;
     }
+    if (!instant && !bar.collapsed && e.button === 0) startMove(e, bar, node);
   });
-  node.addEventListener("click", () => selectBar(bar.indices[0]));
+  node.addEventListener("click", (e) => {
+    if (node.dataset.moved) return delete node.dataset.moved;
+    selectBar(bar.indices[0]);
+  });
+  if (!instant && !bar.collapsed && state.meta.sources[bar.call]) {
+    const handle = el("span", { class: "resize", title: "drag to change the duration (duration=)" });
+    handle.addEventListener("pointerdown", (e) => startResize(e, bar, node));
+    node.append(handle);
+  }
   node.addEventListener("dblclick", () => {
     const expanded = state.expandedGroups;
     expanded.has(bar.group) ? expanded.delete(bar.group) : expanded.add(bar.group);
     renderTimeline();
   });
   return node;
+}
+
+// ---- editing the timing by dragging bars ------------------------------------------------
+
+/** Snap of dragged times, in seconds (a clean number in the code). */
+const TIME_SNAP = 0.05;
+const snapTime = (seconds) => Math.round(seconds / TIME_SNAP) * TIME_SNAP;
+const secondsPerPixel = () => duration() / view.timelineContent.getBoundingClientRect().width;
+/** The line of the statement that scheduled a bar (its call span key is file:line:col:...). */
+const callLine = (bar) => +bar.call.split(":").slice(-4)[0];
+
+/** Drag the bar's right edge: live edits of the call's `duration=`, written on release. */
+function startResize(e, bar, node) {
+  e.stopPropagation();
+  e.preventDefault();
+  const x0 = e.clientX;
+  const length = bar.end - bar.start;
+  const width0 = node.getBoundingClientRect().width;
+  const write = (seconds, live) => sendEdit([{ site: bar.call, target: "duration", value: String(+seconds.toFixed(2)) }], live);
+  const sender = liveSender((seconds) => write(seconds, true));
+  let seconds = length;
+  const move = (ev) => {
+    seconds = Math.max(TIME_SNAP, snapTime(length + (ev.clientX - x0) * secondsPerPixel()));
+    node.style.width = `${(width0 * seconds) / length}px`;
+    sender.push(seconds);
+  };
+  const end = beginDrag(() => {
+    sender.cancel();
+    stop();
+    revertLive();
+    renderTimeline();
+  });
+  const up = () => {
+    sender.cancel();
+    stop();
+    if (Math.abs(seconds - length) > 1e-9) write(seconds, false);
+  };
+  const stop = () => {
+    end();
+    window.removeEventListener("pointermove", move);
+    window.removeEventListener("pointerup", up);
+  };
+  window.addEventListener("pointermove", move);
+  window.addEventListener("pointerup", up);
+}
+
+/** Drag the bar sideways: on release, the statement starts that much later or earlier (the
+ * `s.wait` before it changes, or one is added). A press without a drag selects and seeks. */
+function startMove(e, bar, node) {
+  e.stopPropagation();
+  const x0 = e.clientX;
+  let dragging = false;
+  const move = (ev) => {
+    const dx = ev.clientX - x0;
+    if (!dragging && Math.abs(dx) < 4) return;
+    dragging = true;
+    node.style.transform = `translateX(${dx}px)`;
+    node.classList.add("moving");
+  };
+  const up = (ev) => {
+    window.removeEventListener("pointermove", move);
+    window.removeEventListener("pointerup", up);
+    if (!dragging) {
+      pause();
+      setTime(timeFromPointer(ev));
+      return;
+    }
+    node.dataset.moved = "1";
+    const by = snapTime((ev.clientX - x0) * secondsPerPixel());
+    node.style.transform = "";
+    node.classList.remove("moving");
+    const fn = state.meta.scene_function;
+    if (!fn || bar.file !== fn.file || Math.abs(by) < 1e-9) return;
+    sendEdit([{ op: "shift", line: callLine(bar), by: +by.toFixed(2) }], false);
+  };
+  window.addEventListener("pointermove", move);
+  window.addEventListener("pointerup", up);
+}
+
+/** "Earlier" / "Later": swap the bar's statement with its neighbour in the code. */
+export function swapButtons(bar) {
+  const fn = state.meta.scene_function;
+  if (!fn || bar.file !== fn.file) return null;
+  const swap = (direction) => sendEdit([{ op: "swap", line: callLine(bar), direction }], false);
+  return el(
+    "div",
+    { class: "animate-buttons" },
+    el("button", { class: "ghost small", title: "swap this statement with the one before it", onclick: () => swap(-1) }, "↑ Earlier"),
+    el("button", { class: "ghost small", title: "swap this statement with the one after it", onclick: () => swap(1) }, "↓ Later")
+  );
 }
 
 function updateBars() {

@@ -292,7 +292,7 @@ class Session:
         `{"op": "add", "kind": "circle", "at": [x, y], "after": line | None}` (an object from
         the palette, with its entrance) and `{"op": "animate", "object": name, "verb":
         "fade_out", "after": line | None}`."""
-        from ..editing.statements import animation_statement, definition_line, insert_statement, object_statements, remove_statement
+        from ..editing.statements import animation_statement, definition_line, insert_statement, object_statements, remove_statement, shift_statement, swap_statement
 
         if self.scene_function is None:
             raise EditError("no scene function to edit")
@@ -322,6 +322,10 @@ class Session:
                 if defined is not None and after is not None and int(after) < defined:
                     raise EditError(f"the playhead is before {name} exists (line {defined}): move it past its entrance")
                 text = insert_statement(source, function, int(after) if after is not None else None, code)
+            elif change["op"] == "shift":
+                text = shift_statement(source, function, int(change["line"]), float(change.get("by", 0.0)))
+            elif change["op"] == "swap":
+                text = swap_statement(source, function, int(change["line"]), int(change.get("direction", 1)))
             elif change["op"] == "remove":
                 text = remove_statement(source, function, int(change["line"]))
             else:

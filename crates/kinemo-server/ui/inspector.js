@@ -5,6 +5,7 @@
 import { clipSections } from "./clip_inspector.js";
 import { isWatched, toggleWatch } from "./watch.js";
 import { positionEditor } from "./canvas.js";
+import { animationButtons } from "./palette.js";
 import { pointEditor, propEditor, runsBadge, siteByKey, siteFor, valueEditor } from "./editing.js";
 import { selectObject, clearSelection } from "./selection.js";
 import { basename, editorLink, el, formatValue, listen, objectName, sourceLink, state, view } from "./state.js";
@@ -113,6 +114,8 @@ function renderObject(object, t) {
     el("div", { class: "object-where" }, sourceLink(object.span), construction ? runsBadge(construction.site) : null, `  · id ${object.id}`),
     constructionRows.length ? el("div", { class: "section-title" }, `Construction · ${construction.site.callee}(…)`) : null,
     constructionRows.length ? el("table", { class: "props" }, ...constructionRows) : null,
+    /^[A-Za-z_]\w*$/.test(label) ? el("div", { class: "section-title" }, "Animate at the playhead") : null,
+    /^[A-Za-z_]\w*$/.test(label) ? animationButtons(label) : null,
     el("div", { class: "section-title" }, "Layout"),
     el("table", { class: "props" }, ...positionRows(object)),
     el("div", { class: "section-title" }, `Props at t = ${(t ?? state.t).toFixed(2)} s`),

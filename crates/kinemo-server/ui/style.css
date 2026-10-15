@@ -460,3 +460,5 @@ a:hover { text-decoration: underline; }
 .palette-tool:hover { background: rgba(95, 179, 249, 0.14); }
 .palette-tool.armed { background: rgba(95, 179, 249, 0.3); color: #fff; }
 .frame-wrap.placing canvas { cursor: crosshair; }
+.animate-buttons { display: flex; flex-wrap: wrap; gap: 4px; margin: 2px 0 6px; }
+.animate-buttons button.small { font-size: 11px; padding: 2px 8px; }

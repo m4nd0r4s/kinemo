@@ -159,3 +159,32 @@ def object_statements(source: SourceFile, function: str, kind: str, at: tuple[fl
     x, y = at
     made = constructor.format(k=alias, x=_number(x), y=_number(y), x0=_number(x - 0.75), x1=_number(x + 0.75))
     return f"{name} = {made}\n{scene_param}.play({alias}.{verb}({name}))"
+
+
+#: Animations the preview adds for a selected object at the playhead: entrances, emphasis,
+#: exits (verbs of `k` that take the object).
+ANIMATION_VERBS: tuple[str, ...] = ("fade_in", "draw", "write", "grow", "indicate", "fade_out", "shrink")
+
+
+def animation_statement(source: SourceFile, function: str, name: str, verb: str, alias: str | None) -> str:
+    """`s.play(k.<verb>(<name>))` for an object the scene function (or the module) names."""
+    if verb not in ANIMATION_VERBS:
+        raise EditError(f"unknown animation {verb!r} (animations: {', '.join(ANIMATION_VERBS)})")
+    if alias is None:
+        raise EditError("the scene file does not import kinemo as a module (import kinemo as k)")
+    if not name.isidentifier() or keyword.iskeyword(name):
+        raise EditError(f"{name} is not a variable of the scene (a part or an unnamed object); animate it in the code")
+    fn = scene_function(source, function)
+    bound = {n.id for n in ast.walk(source.tree or fn) if isinstance(n, ast.Name) and isinstance(n.ctx, ast.Store)}
+    if name not in bound:
+        raise EditError(f"{name} is not a variable of the scene; animate it in the code")
+    if not fn.args.args:
+        raise EditError(f"{function}() takes no scene parameter")
+    return f"{fn.args.args[0].arg}.play({alias}.{verb}({name}))"
+
+
+def definition_line(source: SourceFile, function: str, name: str) -> int | None:
+    """The line where `function` first assigns `name` (None: defined outside the function)."""
+    fn = scene_function(source, function)
+    lines = [n.lineno for n in ast.walk(fn) if isinstance(n, ast.Name) and n.id == name and isinstance(n.ctx, ast.Store)]
+    return min(lines) if lines else None

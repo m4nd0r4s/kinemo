@@ -4,6 +4,59 @@ All notable changes to kinemo are listed here. The project follows
 [semantic versioning](https://semver.org/); until 1.0, a minor version may change the API, and
 `kinemo upgrade` rewrites the forms it replaces.
 
+## 0.20.0
+
+Interactive lessons: a scene can stop for a question, and what plays next depends on the answer.
+The same file renders to video, plays as a lesson in any browser, and embeds in a learning
+platform.
+
+**Added**
+
+- **Questions.** `s.ask(prompt, answer, correct=, tolerance=, name=)`.
+  - `with q.correct():` and `with q.wrong():` hold what plays after each kind of answer. A wrong
+    answer then asks again (`then="retry"`) or the lesson goes on (`then="continue"`).
+  - Branches share the scene's one timeline: each starts from the state at the question, and
+    the lesson continues from the end of the correct branch.
+- **Answers.** They use the scene parameter kinds:
+  - `k.Choice`;
+  - `k.Float(lo, hi)` (a slider) or `k.Float()` (a typed number);
+  - `k.Int`;
+  - `k.Str`;
+  - the new `k.Point` (a point to drag).
+
+  `s.answer(kind)` gives the answer as a signal the scene uses while the learner chooses.
+- **`kinemo render --format lesson`.** A folder that plays the lesson in any browser, from any
+  static host. It holds the player (HTML, with kinemo's core compiled to WebAssembly and run in
+  a worker), the scene, and its audio and images.
+  - The frames adapt their resolution to the device. On an entry-level phone, a typical scene
+    plays at 30 fps at 640×360.
+- **Embedding.** `<kinemo-lesson src="...">` and a versioned `postMessage` protocol.
+  - Events: `loaded`, `question`, `answer`, `result`, `branch`, `finished`.
+  - Commands: `play`, `pause`, `restart`, `goto`, `grading`, `result`.
+  - With host grading, the platform decides which answers are right.
+- **`kinemo dev`** stops at each question and takes the answer; a slider or a dragged point
+  moves the frame live. Branches show as bands on the timeline.
+- **Diagnostics.**
+  - K1501: a branch out of place.
+  - K1502: no lesson player.
+  - W1501: a wrong branch that never plays.
+  - W1502: a question asked mid-motion.
+- **An example lesson**, `examples/lessons/slope.py` (the derivative as a slope), playable on the
+  website, and guide chapter 16: interactive lessons.
+
+**Changed**
+
+- A lesson's video plays its correct path: the wrong branches are left out, and each answer
+  takes its correct value.
+- W1302 (something an answer or a parameter drives is not native) is an error for
+  `--format lesson`.
+- `k.Float`'s range is optional.
+- The wheels include the lesson player (about 2 MB).
+
+**Fixed**
+
+- Playback in `kinemo dev` no longer starts a few milliseconds back.
+
 ## 0.19.0
 
 Editor mode, first take: a scene can be built from the preview, which writes the code. Every

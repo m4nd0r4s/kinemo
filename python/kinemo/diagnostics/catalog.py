@@ -182,6 +182,11 @@ CATALOG: dict[str, Entry] = {
         "A question's branches (`with q.correct():`, `with q.wrong():`) come right after `s.ask(...)`, one of each "
         "kind, and cannot hold another question: the lesson continues after the last branch.",
     ),
+    "K1502": Entry(
+        "no lesson player",
+        "`--format lesson` copies the player's WebAssembly from the kinemo package; the published wheels "
+        "include it, a source checkout builds it with `python scripts/build_player.py`.",
+    ),
     "W1501": Entry(
         "wrong branch that never plays",
         "Every possible answer counts as correct (all the options, or a tolerance covering the whole range), "

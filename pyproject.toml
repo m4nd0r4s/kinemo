@@ -54,6 +54,9 @@ python-source = "python"
 module-name = "kinemo._core"
 manifest-path = "crates/kinemo-py/Cargo.toml"
 features = ["pyo3/extension-module"]
+# The lesson player's WebAssembly is built (scripts/build_player.py), not committed.
+include = [{ path = "python/kinemo/export/player/pkg/*", format = "wheel" }]
+exclude = ["python/kinemo/export/player/lesson.test.mjs", "python/kinemo/export/player/.gitignore"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests/python"]

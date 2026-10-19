@@ -1,0 +1,15 @@
+name: Build the lesson player
+description: >
+  Builds the lesson player's WebAssembly (crates/kinemo-web) into python/kinemo/export/player/pkg,
+  which the wheels ship. Needs a Rust toolchain with the wasm32-unknown-unknown target.
+runs:
+  using: composite
+  steps:
+    - id: bindgen
+      shell: bash
+      run: echo "version=$(sed -n 's/^wasm-bindgen = "=\(.*\)"/\1/p' crates/kinemo-web/Cargo.toml)" >> "$GITHUB_OUTPUT"
+    - uses: taiki-e/install-action@v2
+      with:
+        tool: wasm-bindgen@${{ steps.bindgen.outputs.version }}
+    - shell: bash
+      run: python3 scripts/build_player.py

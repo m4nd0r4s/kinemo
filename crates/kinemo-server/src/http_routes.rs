@@ -40,7 +40,8 @@ const SCRIPTS: &[(&str, &str)] = &[
     ("stepping.js", include_str!("../ui/stepping.js")),
     ("watch.js", include_str!("../ui/watch.js")),
     ("palette.js", include_str!("../ui/palette.js")),
-    ("lesson.js", include_str!("../ui/lesson.js")),
+    // Shared with the lesson player, which the Python package ships.
+    ("lesson.js", include_str!("../../../python/kinemo/export/player/lesson.js")),
     ("questions.js", include_str!("../ui/questions.js")),
 ];
 

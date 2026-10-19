@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{title}: embedded</title>
+<style>
+  body { margin: 0; padding: 16px; background: #f4f5f7; color: #1b1d22; font: 15px/1.45 system-ui, sans-serif; }
+  main { max-width: 960px; margin: 0 auto; display: grid; gap: 12px; }
+  kinemo-lesson { display: block; background: #0f1013; border-radius: 8px; overflow: hidden; }
+  .bar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  button, select { font: inherit; padding: 6px 12px; }
+  ol { margin: 0; padding-left: 1.5em; font: 13px/1.5 ui-monospace, monospace; max-height: 40vh; overflow: auto; background: #fff; border: 1px solid #d9dbe0; border-radius: 8px; padding-top: 8px; padding-bottom: 8px; }
+</style>
+<script type="module" src="embed.js"></script>
+</head>
+<body>
+<main>
+  <h1>{title}</h1>
+  <p>This page embeds the lesson with <code>&lt;kinemo-lesson&gt;</code> and lists the events it reports. With grading by this page, it waits for your verdict on each answer.</p>
+  <kinemo-lesson id="lesson" src="./" title="{title}"></kinemo-lesson>
+  <div class="bar">
+    <button type="button" data-command="play">Play</button>
+    <button type="button" data-command="pause">Pause</button>
+    <button type="button" data-command="restart">Start over</button>
+    <label>Grading <select id="grading"><option value="player">by the player</option><option value="host">by this page</option></select></label>
+    <span id="verdict" hidden>Answer received: <button type="button" data-verdict="true">Right</button> <button type="button" data-verdict="false">Wrong</button></span>
+  </div>
+  <ol id="log" aria-label="Events"></ol>
+</main>
+<script type="module">
+  const lesson = document.getElementById("lesson");
+  const log = document.getElementById("log");
+  const verdict = document.getElementById("verdict");
+  let waiting = null;
+  for (const type of ["loaded", "question", "answer", "result", "branch", "finished", "error"]) {
+    lesson.addEventListener(type, (event) => {
+      const { source, version, ...rest } = event.detail;
+      const item = document.createElement("li");
+      item.textContent = JSON.stringify(rest);
+      log.append(item);
+      item.scrollIntoView({ block: "nearest" });
+      if (type === "answer" && document.getElementById("grading").value === "host") {
+        waiting = rest.id;
+        verdict.hidden = false;
+      }
+    });
+  }
+  document.querySelectorAll("[data-command]").forEach((b) => b.addEventListener("click", () => lesson[b.dataset.command]()));
+  document.getElementById("grading").addEventListener("change", (e) => lesson.grading(e.target.value));
+  document.querySelectorAll("[data-verdict]").forEach((b) =>
+    b.addEventListener("click", () => {
+      if (waiting === null) return;
+      lesson.result(waiting, b.dataset.verdict === "true");
+      waiting = null;
+      verdict.hidden = true;
+    }),
+  );
+</script>
+</body>
+</html>

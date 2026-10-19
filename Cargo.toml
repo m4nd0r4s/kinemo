@@ -103,3 +103,11 @@ debug = "line-tables-only"
 [profile.dev.package."*"]
 opt-level = 3
 debug = false
+
+# The lesson player's WebAssembly (`scripts/build_player.py`): small over fast.
+[profile.player]
+inherits = "release"
+opt-level = "s"
+lto = true
+codegen-units = 1
+panic = "abort"

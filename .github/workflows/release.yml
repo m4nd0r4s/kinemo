@@ -30,8 +30,23 @@ jobs:
       - name: THIRD_PARTY_LICENSES.md is up to date
         run: python scripts/third_party_licenses.py && git diff --exit-code THIRD_PARTY_LICENSES.md
 
-  wheels:
+  # The lesson player's WebAssembly, built once: every wheel ships the same files.
+  player:
     needs: preflight
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32-unknown-unknown
+      - uses: ./.github/actions/player
+      - uses: actions/upload-artifact@v7
+        with:
+          name: player
+          path: python/kinemo/export/player/pkg
+
+  wheels:
+    needs: player
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -43,6 +58,10 @@ jobs:
           - { os: windows-latest, target: x64 }
     steps:
       - uses: actions/checkout@v7
+      - uses: actions/download-artifact@v8
+        with:
+          name: player
+          path: python/kinemo/export/player/pkg
       - uses: PyO3/maturin-action@v1
         with:
           target: ${{ matrix.target }}

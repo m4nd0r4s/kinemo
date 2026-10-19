@@ -184,7 +184,7 @@ kinemo voice scene.py --force B03,B04
 Final output.
 
 ```text
-kinemo render [-h] [--scene SCENE] [--param NAME=VALUE] [--size SIZE] [--format {mp4,webm,mov,gif,png,svg,slides}] [--quality {draft,final}] [--out OUT] [--at AT] [--frames] [--transparent] [--progress {bar,json,none}] [--subtitles] file
+kinemo render [-h] [--scene SCENE] [--param NAME=VALUE] [--size SIZE] [--format {mp4,webm,mov,gif,png,svg,slides,lesson}] [--quality {draft,final}] [--out OUT] [--at AT] [--frames] [--transparent] [--progress {bar,json,none}] [--subtitles] file
 ```
 
 | Argument | Type | Default | Description |
@@ -193,7 +193,7 @@ kinemo render [-h] [--scene SCENE] [--param NAME=VALUE] [--size SIZE] [--format 
 | `--scene SCENE` | str |   | scene name (default: all) |
 | `--param NAME=VALUE` | str |   | (repeatable) |
 | `--size SIZE` | str |   | output size instead of the scene's: 1080p, 720p, 4k, square, vertical |
-| `--format FORMAT` | `mp4` \\| `webm` \\| `mov` \\| `gif` \\| `png` \\| `svg` \\| `slides` |   | default: from the --out extension, else mp4 |
+| `--format FORMAT` | `mp4` \\| `webm` \\| `mov` \\| `gif` \\| `png` \\| `svg` \\| `slides` \\| `lesson` |   | default: from the --out extension, else mp4; lesson: an interactive page (folder) for the browser |
 | `--quality QUALITY` | `draft` \\| `final` | `final` |   |
 | `--out OUT` | str | `out` | a folder (files named after the scene), or one file: clip.mp4, frame.png |
 | `--at AT` | str |   | time (png/svg): seconds, a mark name or 'end' |

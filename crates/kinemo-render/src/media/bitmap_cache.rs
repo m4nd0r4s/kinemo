@@ -18,8 +18,24 @@ fn cache() -> &'static Mutex<HashMap<CacheKey, Arc<Bitmap>>> {
     CACHE.get_or_init(Mutex::default)
 }
 
+/// Images given as bytes instead of read from disk (the WASM player has no files).
+fn shipped() -> &'static Mutex<HashMap<PathBuf, Arc<Bitmap>>> {
+    static SHIPPED: OnceLock<Mutex<HashMap<PathBuf, Arc<Bitmap>>>> = OnceLock::new();
+    SHIPPED.get_or_init(Mutex::default)
+}
+
+/// Use the image `encoded` (PNG or JPEG bytes) wherever the scene names `path`.
+pub fn register_bitmap(path: &Path, encoded: Vec<u8>) -> Result<(), String> {
+    let bitmap = Arc::new(decode_bitmap(encoded).map_err(|e| format!("{}: {e}", path.display()))?);
+    shipped().lock().map_err(|e| e.to_string())?.insert(path.to_path_buf(), bitmap);
+    Ok(())
+}
+
 /// The decoded image at `path`, from the cache when the file did not change.
 pub fn load_bitmap(path: &Path) -> Result<Arc<Bitmap>, String> {
+    if let Some(bitmap) = shipped().lock().map_err(|e| e.to_string())?.get(path) {
+        return Ok(bitmap.clone());
+    }
     let meta = std::fs::metadata(path).map_err(|e| format!("{}: {e}", path.display()))?;
     let key = (path.to_path_buf(), meta.len(), meta.modified().ok());
     if let Some(hit) = cache().lock().map_err(|e| e.to_string())?.get(&key) {

@@ -1,0 +1,20 @@
+[package]
+name = "kinemo-web"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+# The lesson player's core, compiled to WebAssembly: a scene's IR in, a frame's pixels out.
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+kinemo-ir.workspace = true
+kinemo-eval.workspace = true
+kinemo-render.workspace = true
+kinemo-code.workspace = true
+kinemo-math.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+wasm-bindgen = "=0.2.129"

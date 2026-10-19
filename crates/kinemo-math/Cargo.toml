@@ -8,11 +8,19 @@ publish.workspace = true
 [dependencies]
 kinemo-text.workspace = true
 kurbo.workspace = true
+serde.workspace = true
+serde_json.workspace = true
 ttf-parser.workspace = true
-typst.workspace = true
-typst-layout.workspace = true
-typst-assets.workspace = true
-comemo.workspace = true
+typst = { workspace = true, optional = true }
+typst-layout = { workspace = true, optional = true }
+typst-assets = { workspace = true, optional = true }
+comemo = { workspace = true, optional = true }
 mitex.workspace = true
 mitex-spec-gen.workspace = true
-fxhash.workspace = true
+fxhash = { workspace = true, optional = true }
+
+[features]
+# Typesetting with typst and its fonts. Without it (the WASM player), layouts come from `baked`:
+# computed at build time and shipped with the lesson.
+default = ["typeset"]
+typeset = ["dep:typst", "dep:typst-layout", "dep:typst-assets", "dep:comemo", "dep:fxhash"]

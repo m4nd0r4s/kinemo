@@ -18,6 +18,7 @@ pub(crate) fn list_tex(items: &[Ast]) -> String {
 }
 
 /// Normalized TeX of one item (as it appears inside a list).
+#[cfg(feature = "typeset")]
 pub(crate) fn single_tex(item: &Ast) -> String {
     item_tex(item, Context::List)
 }

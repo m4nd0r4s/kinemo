@@ -9,6 +9,7 @@ mod builder;
 mod code;
 mod errors;
 mod inspect;
+mod lesson;
 mod lints;
 mod math;
 mod media;

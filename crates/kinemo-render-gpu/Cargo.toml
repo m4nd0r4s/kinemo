@@ -15,5 +15,7 @@ pollster.workspace = true
 rayon.workspace = true
 
 [dev-dependencies]
+kinemo-math = { workspace = true, features = ["typeset"] }
+kinemo-code = { workspace = true, features = ["grammars"] }
 kinemo-ir.workspace = true
 kinemo-text.workspace = true

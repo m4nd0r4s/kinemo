@@ -13,3 +13,7 @@ kinemo-text.workspace = true
 kinemo-code.workspace = true
 kinemo-math.workspace = true
 kurbo.workspace = true
+
+[dev-dependencies]
+kinemo-math = { workspace = true, features = ["typeset"] }
+kinemo-code = { workspace = true, features = ["grammars"] }

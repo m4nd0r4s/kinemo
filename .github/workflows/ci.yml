@@ -36,6 +36,21 @@ jobs:
       - run: cargo test --workspace --exclude kinemo-render-gpu
         if: runner.os == 'Windows'
 
+  # The lesson player's core in WebAssembly: built without typst and tree-sitter, which a lesson
+  # export replaces with layouts baked natively.
+  wasm:
+    name: wasm player
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32-unknown-unknown
+          components: clippy
+      - uses: Swatinem/rust-cache@v2
+      - run: cargo clippy -p kinemo-web --target wasm32-unknown-unknown -- -D warnings
+      - run: cargo build -p kinemo-web --target wasm32-unknown-unknown --release
+
   # The extension is abi3 (Python 3.11+): one wheel per platform serves every Python version,
   # so it is built once here and the test jobs only install it.
   wheel:

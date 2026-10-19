@@ -29,8 +29,10 @@ kinemo-eval = { path = "crates/kinemo-eval" }
 kinemo-layout = { path = "crates/kinemo-layout" }
 kinemo-resolve = { path = "crates/kinemo-resolve" }
 kinemo-text = { path = "crates/kinemo-text" }
-kinemo-math = { path = "crates/kinemo-math" }
-kinemo-code = { path = "crates/kinemo-code" }
+kinemo-math = { path = "crates/kinemo-math", default-features = false }
+# Without tree-sitter and typst unless a crate asks for them (`grammars`, `typeset`): the WASM
+# player builds without them and reads code tokens and formula layouts baked at export.
+kinemo-code = { path = "crates/kinemo-code", default-features = false }
 kinemo-render = { path = "crates/kinemo-render" }
 kinemo-encode = { path = "crates/kinemo-encode" }
 kinemo-server = { path = "crates/kinemo-server" }

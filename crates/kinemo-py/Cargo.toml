@@ -16,10 +16,10 @@ rayon.workspace = true
 kinemo-ir.workspace = true
 kinemo-eval.workspace = true
 kinemo-layout.workspace = true
-kinemo-code.workspace = true
+kinemo-code = { workspace = true, features = ["grammars"] }
 kinemo-resolve.workspace = true
 kinemo-text.workspace = true
-kinemo-math.workspace = true
+kinemo-math = { workspace = true, features = ["typeset"] }
 kinemo-render.workspace = true
 kinemo-encode.workspace = true
 serde_json.workspace = true

@@ -31,11 +31,15 @@ fn cache() -> &'static Cache {
 /// The result is cached; identical calls return the same `Arc`.
 pub fn layout_math(tex: &str, opts: &MathOptions) -> Result<Arc<MathLayout>, MathError> {
     let key = CacheKey { tex: tex.to_owned(), size: opts.size.to_bits(), display: opts.display };
+    crate::baked::note(tex, opts);
     if let Some(hit) = cache().lock().unwrap_or_else(|e| e.into_inner()).get(&key) {
         return hit;
     }
     // Computed outside the lock; a concurrent duplicate computation is harmless
     // because layout is deterministic.
+    #[cfg(feature = "typeset")]
     let result = crate::pipeline::compute(tex, opts).map(Arc::new);
+    #[cfg(not(feature = "typeset"))]
+    let result = crate::baked::layout(tex, opts).map(Arc::new).ok_or_else(|| MathError::NotBaked(tex.to_owned()));
     cache().lock().unwrap_or_else(|e| e.into_inner()).insert(key, result)
 }

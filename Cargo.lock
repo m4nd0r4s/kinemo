@@ -1934,6 +1934,8 @@ version = "0.19.0"
 dependencies = [
  "kinemo-text",
  "kurbo 0.11.3",
+ "serde",
+ "serde_json",
  "tree-sitter",
  "tree-sitter-bash",
  "tree-sitter-c",
@@ -2001,6 +2003,8 @@ dependencies = [
  "kurbo 0.11.3",
  "mitex",
  "mitex-spec-gen",
+ "serde",
+ "serde_json",
  "ttf-parser",
  "typst",
  "typst-assets",
@@ -2038,10 +2042,12 @@ version = "0.19.0"
 dependencies = [
  "base64 0.22.1",
  "image",
+ "kinemo-code",
  "kinemo-encode",
  "kinemo-eval",
  "kinemo-ir",
  "kinemo-layout",
+ "kinemo-math",
  "kinemo-text",
  "kurbo 0.11.3",
  "png 0.17.16",
@@ -2056,7 +2062,9 @@ dependencies = [
 name = "kinemo-render-gpu"
 version = "0.19.0"
 dependencies = [
+ "kinemo-code",
  "kinemo-ir",
+ "kinemo-math",
  "kinemo-render",
  "kinemo-text",
  "kurbo 0.11.3",
@@ -2070,9 +2078,11 @@ dependencies = [
 name = "kinemo-resolve"
 version = "0.19.0"
 dependencies = [
+ "kinemo-code",
  "kinemo-eval",
  "kinemo-ir",
  "kinemo-layout",
+ "kinemo-math",
  "kurbo 0.11.3",
  "rayon",
  "serde",
@@ -2084,9 +2094,11 @@ name = "kinemo-server"
 version = "0.19.0"
 dependencies = [
  "axum",
+ "kinemo-code",
  "kinemo-eval",
  "kinemo-ir",
  "kinemo-layout",
+ "kinemo-math",
  "kinemo-render",
  "kinemo-render-gpu",
  "kurbo 0.11.3",
@@ -2102,6 +2114,20 @@ dependencies = [
  "kurbo 0.11.3",
  "rustybuzz",
  "ttf-parser",
+]
+
+[[package]]
+name = "kinemo-web"
+version = "0.19.0"
+dependencies = [
+ "kinemo-code",
+ "kinemo-eval",
+ "kinemo-ir",
+ "kinemo-math",
+ "kinemo-render",
+ "serde",
+ "serde_json",
+ "wasm-bindgen",
 ]
 
 [[package]]

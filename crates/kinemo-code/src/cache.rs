@@ -35,6 +35,7 @@ pub fn layout_code(
     options: &CodeOptions,
 ) -> Result<Arc<CodeLayout>, CodeError> {
     let language = resolve(language)?;
+    crate::baked::note(source, language);
     let key = CacheKey {
         source: source.to_owned(),
         language,

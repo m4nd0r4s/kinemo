@@ -20,3 +20,7 @@ base64.workspace = true
 rayon.workspace = true
 serde_json.workspace = true
 serde.workspace = true
+
+[dev-dependencies]
+kinemo-math = { workspace = true, features = ["typeset"] }
+kinemo-code = { workspace = true, features = ["grammars"] }

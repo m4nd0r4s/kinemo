@@ -33,6 +33,7 @@ export const view = {
   timelineContent: $("timeline-content"),
   ruler: $("ruler"),
   marks: $("marks"),
+  branches: $("branches"),
   markLabels: $("mark-labels"),
   instants: $("instants"),
   lanes: $("lanes"),

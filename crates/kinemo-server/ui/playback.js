@@ -8,9 +8,15 @@ let playStartedAt = 0;
 let playStartedT = 0;
 /** `(from, to) → stop time | null`: breakpoints, asked as the playhead advances while playing. */
 let breakCheck = null;
+/** `(from, to) → {stop} | {jump} | null`: a lesson's questions and branches. */
+const stopChecks = [];
 
 export function setBreakCheck(check) {
   breakCheck = check;
+}
+
+export function addStopCheck(check) {
+  stopChecks.push(check);
 }
 
 export function setTime(t, force = false) {
@@ -49,12 +55,29 @@ export function pause() {
 
 function tick(now) {
   if (!state.playing) return;
-  let t = playStartedT + ((now - playStartedAt) / 1000) * state.speed;
+  // A frame's timestamp can precede the moment play started: time never runs backwards.
+  let t = playStartedT + (Math.max(0, now - playStartedAt) / 1000) * state.speed;
   const stop = breakCheck && breakCheck(state.t, Math.min(t, lastFrameTime()));
   if (stop !== null && stop !== undefined) {
     pause();
     setTime(stop, true);
     return;
+  }
+  for (const check of stopChecks) {
+    const next = check(state.t, Math.min(t, lastFrameTime()));
+    if (next && next.stop !== undefined) {
+      pause();
+      setTime(next.stop, true);
+      return;
+    }
+    if (next && next.jump !== undefined) {
+      // On elsewhere, still playing: time keeps flowing from the jump's target.
+      playStartedAt = now;
+      playStartedT = next.jump;
+      setTime(next.jump, true);
+      requestAnimationFrame(tick);
+      return;
+    }
   }
   if (state.stopAt !== null && t >= state.stopAt) {
     setTime(state.stopAt);

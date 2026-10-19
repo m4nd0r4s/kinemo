@@ -75,6 +75,12 @@ async fn answer(state: &Arc<PreviewState>, body: &str) -> Option<Message> {
     let Some(publication) = state.current() else {
         return Some(text(&notice_message("no scene yet")));
     };
+    if let ClientMessage::Answer { signal, value } = request {
+        return match state.set_answer(&publication, signal, value) {
+            Ok(()) => None,
+            Err(message) => Some(text(&notice_message(&message))),
+        };
+    }
     let state = state.clone();
     let work = tokio::task::spawn_blocking(move || match request {
         ClientMessage::Frame { t, id, select, overlay } => {
@@ -102,7 +108,7 @@ async fn answer(state: &Arc<PreviewState>, body: &str) -> Option<Message> {
             let object = picked_object_json(&publication, x, y, t);
             text(&serde_json::json!({"type": "pick", "id": id, "t": t, "x": x, "y": y, "object": object}))
         }
-        ClientMessage::Edit { .. } | ClientMessage::Open { .. } => unreachable!("queued above"),
+        ClientMessage::Edit { .. } | ClientMessage::Open { .. } | ClientMessage::Answer { .. } => unreachable!("handled above"),
     });
     Some(work.await.unwrap_or_else(|e| text(&notice_message(&format!("render failed: {e}")))))
 }

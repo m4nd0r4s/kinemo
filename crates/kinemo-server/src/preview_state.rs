@@ -81,6 +81,19 @@ impl PreviewState {
         self.updates.subscribe()
     }
 
+    /// A lesson's answer signal takes `value` (the learner moves a slider or drags a point):
+    /// the scene is published again with that value, so the frames follow.
+    pub fn set_answer(&self, publication: &ScenePublication, signal: u32, value: Json) -> Result<(), String> {
+        let value: kinemo_ir::Value = serde_json::from_value(value).map_err(|e| format!("bad answer value: {e}"))?;
+        if !publication.scene.questions.iter().any(|q| q.signal == Some(signal)) {
+            return Err(format!("signal {signal} is not a question's answer"));
+        }
+        let mut scene = (*publication.scene).clone();
+        scene.signals[signal as usize].initial = value;
+        self.set_scene(scene, publication.meta.clone());
+        Ok(())
+    }
+
     /// Publishes a new scene (draft quality), clears the build error and notifies clients.
     pub fn set_scene(&self, scene: Scene, mut meta: Json) -> u64 {
         let render_options = RenderOptions::for_scene(&scene, Quality::Draft);

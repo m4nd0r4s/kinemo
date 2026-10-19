@@ -14,6 +14,9 @@
 //! - `{"type":"sample","id":11,"items":[{"object":3,"prop":"x"}],"times":[0,0.5,1]}`: the
 //!   values of props at several instants in one call (the Watch list and its sparklines);
 //!   at most 12 items and 240 instants.
+//! - `{"type":"answer","signal":20,"value":{"Float":3.5}}`: a lesson's answer (`s.ask`) while
+//!   the learner chooses: the answer signal takes `value` (an IR value), so the frames follow
+//!   a slider or a dragged point. Published as a new scene version.
 //! - `{"type":"open","file":"/abs/scene.py","line":12}`: open a source line in the editor of
 //!   `[editor] command`, when it is a command the page cannot open by URL. Queued for the
 //!   Python side like an edit.
@@ -87,6 +90,8 @@ pub enum ClientMessage {
         items: Vec<SampleItem>,
         times: Vec<f64>,
     },
+    /// A lesson's answer while the learner chooses: the answer signal takes `value`.
+    Answer { signal: u32, value: Json },
     /// Snapshot of a known object at `t`.
     Inspect {
         object: u32,

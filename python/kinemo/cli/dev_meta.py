@@ -325,6 +325,7 @@ def preview_meta(
         "scene_fps": s.config.fps,
         "timeline": timeline_bars(result, ir, sources),
         "marks": scene_marks(result),
+        "questions": ir.get("questions", []),
         "tracks": audio_tracks(result, ir),
         "statements": (statements := scene_statements(result)),
         "code": code_files(statements),

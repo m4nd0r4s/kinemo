@@ -1,4 +1,4 @@
-// `node --test crates/kinemo-server/ui/`: a lesson's route through its questions.
+// `node --test crates/kinemo-server/ui/lesson.test.mjs`: a lesson's route through its questions.
 import assert from "node:assert/strict";
 import { test } from "node:test";
 

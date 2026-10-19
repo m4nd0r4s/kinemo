@@ -1,4 +1,4 @@
-// `node --test python/kinemo/export/player/`: a lesson's route through its questions.
+// `node --test python/kinemo/export/player/lesson.test.mjs`: a lesson's route through its questions.
 import assert from "node:assert/strict";
 import { test } from "node:test";
 

@@ -56,7 +56,7 @@ jobs:
           path: python/kinemo/export/player/pkg
           retention-days: 1
       # The lesson route shared by `kinemo dev` and the player.
-      - run: node --test python/kinemo/export/player/
+      - run: node --test python/kinemo/export/player/lesson.test.mjs
 
   # The extension is abi3 (Python 3.11+): one wheel per platform serves every Python version,
   # so it is built once here and the test jobs only install it.

@@ -7,7 +7,7 @@
 
 use serde::{Deserialize, Serialize};
 
-use crate::{SignalId, Span};
+use crate::{SignalId, Span, Value};
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
 pub struct Question {
@@ -90,6 +90,16 @@ pub struct Branch {
 }
 
 impl Answer {
+    /// The value the answer's signal takes for the (first) correct answer.
+    pub fn correct_value(&self) -> Option<Value> {
+        match self {
+            Answer::Choice { options, correct } => correct.first().and_then(|i| options.get(*i)).map(|o| Value::Str(o.clone())),
+            Answer::Number { correct, .. } => Some(Value::Float(*correct)),
+            Answer::Point { correct, .. } => Some(Value::Vec2(*correct)),
+            Answer::Text { correct } => correct.first().map(|c| Value::Str(c.clone())),
+        }
+    }
+
     /// Whether `value` (an option index, a number, a point or a text) is correct.
     pub fn grade(&self, value: &serde_json::Value) -> bool {
         match self {

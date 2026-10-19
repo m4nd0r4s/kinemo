@@ -161,6 +161,19 @@ impl Scene {
         path
     }
 
+    /// The scene as a video shows it: each question's answer takes its correct value once the
+    /// question is asked (the learner's answer, in the player).
+    pub fn with_correct_answers(&self) -> Scene {
+        let mut scene = self.clone();
+        for q in &self.questions {
+            let (Some(signal), Some(value)) = (q.signal, q.answer.correct_value()) else { continue };
+            let pause = q.branches.iter().map(|b| b.t0).fold(q.resume, f64::min);
+            let timeline = &mut scene.signals[signal as usize].timeline;
+            timeline.push(crate::Entry::Set { t: pause, src: crate::Src::Val { v: value }, span: Default::default() });
+        }
+        scene
+    }
+
     pub fn present(&self, obj: ObjectId, t: f64) -> bool {
         let mut state = false;
         for (pt, p) in &self.objects[obj as usize].presence {
@@ -178,6 +191,26 @@ impl Scene {
 mod tests {
     use super::*;
     use crate::*;
+
+    #[test]
+    fn a_video_takes_the_correct_answer_when_the_question_is_asked() {
+        let mut scene = Scene::new(SceneConfig::default());
+        scene.signals.push(Signal { id: 0, initial: Value::Float(0.5), lerp: Lerp::Linear, timeline: vec![], owner: None, span: Span::default() });
+        scene.questions.push(Question {
+            id: "q1".into(),
+            t: 2.0,
+            prompt: "?".into(),
+            answer: Answer::Number { lo: Some(0.0), hi: Some(4.0), step: None, correct: 2.0, tolerance: 0.1 },
+            signal: Some(0),
+            default: serde_json::json!(0.5),
+            branches: vec![Branch { on: Outcome::Correct, t0: 2.1, t1: 3.0, then: Then::Continue, span: Span::default() }],
+            resume: 3.0,
+            span: Span::default(),
+        });
+        let video = scene.with_correct_answers();
+        assert_eq!(video.signals[0].timeline, vec![Entry::Set { t: 2.1, src: Src::Val { v: Value::Float(2.0) }, span: Span::default() }]);
+        assert!(scene.signals[0].timeline.is_empty(), "the player's scene keeps the learner's answer");
+    }
 
     #[test]
     fn roundtrip_json() {

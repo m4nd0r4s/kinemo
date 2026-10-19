@@ -79,7 +79,7 @@ def test_the_question_holds_one_frame_and_the_answer_is_a_signal() -> None:
     @build
     def scene(s: k.Scene) -> None:
         s.wait(1)
-        slope = s.answer(k.Float(0, 6, default=1))
+        slope = s.answer(k.Float(0, 6, default=1), name="angle")
         line = k.Line((0, 0), (1, 1))
         s.add(line)
         line.rotation = slope

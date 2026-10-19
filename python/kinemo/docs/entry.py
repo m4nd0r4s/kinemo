@@ -20,6 +20,7 @@ AREAS = (
     "Events",
     "Components",
     "Parameters",
+    "Interactive lessons",
     "Output",
     "Theme and colors",
 )

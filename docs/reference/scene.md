@@ -201,6 +201,8 @@ Documented together with [`s.play`](#scene-play).
 - [`remove`](#scene-remove): Takes objects out of the scene instantly, at the cursor.
 - [`wait_for`](#scene-wait_for): Moves the main cursor to the time of an event (the `count`-th firing after the cursor) and returns the `EventInfo`.
 - [`voice`](#scene-voice): Narrated `with` block: takes text (TTS from the provider in `kinemo.toml`) or an audio file (`text=` says what it says), and lasts at least as long as the audio.
+- [`answer`](#scene-answer): An answer the scene uses before its question is asked: the learner moves a slider (or drags a point) and the frame follows.
+- [`ask`](#scene-ask): Stops playback for a question; the learner answers in the lesson player (or in `kinemo dev`).
 
 <a id="scene-builder"></a>
 #### `k.Scene.builder` *(property)*
@@ -565,6 +567,78 @@ def narrated(s: k.Scene):
 ```
 
 **See also:** [`s.mark`](#scene-mark), [`k.sound`](verbs.md#k-sound).
+
+<a id="scene-answer"></a>
+#### `k.Scene.answer` *(method)*
+
+```python
+s.answer(kind: Param, name: str | None = None) -> Signal[Any]
+```
+
+An answer the scene uses before its question is asked: the learner moves a slider (or drags a point) and the frame follows. Until they answer it holds the default; in video, always. Anything it drives must be native (W1302).
+
+**Parameters:**
+
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `kind` | `Param` | required | `kind` is any answer kind (`k.Float(0, 6)`, `k.Choice([...])`, `k.Point()`...). |
+| `name` | `str \| None` | `None` | `name=` names it in diagnostics. |
+
+**Example:**
+
+```python
+@k.scene
+def tangent(s: k.Scene):
+    angle = s.answer(k.Float(0, 90, default=10))
+    line = k.Line((-3, 0), (3, 0), rotate=angle).place(at="center")
+    s.play(k.draw(line))
+    q = s.ask("Turn the line to 45°", angle, correct=45, tolerance=3)
+    with q.correct():
+        s.play(line.to(stroke=k.GREEN))
+```
+
+**See also:** [`s.ask`](#scene-ask), [`k.Float`](parameters.md#k-float).
+
+<a id="scene-ask"></a>
+#### `k.Scene.ask` *(method)*
+
+```python
+s.ask(
+    prompt: str,
+    answer: Param | Signal[Any],
+    *,
+    correct: Any = None,
+    tolerance: float = 0.0,
+    name: str | None = None,
+) -> Question
+```
+
+Stops playback for a question; the learner answers in the lesson player (or in `kinemo dev`). `with q.correct():` and `with q.wrong():` hold what plays for each kind of answer: each starts from the state at the question, a wrong answer asks again (`then="continue"` goes on instead), and the lesson continues from the end of the correct branch. A video plays the correct path.
+
+**Parameters:**
+
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| `prompt` | `str` | required | `prompt` is the question, shown beside the frame. |
+| `answer` | `Param \| Signal[Any]` | required | `answer` is the kind of answer: `k.Choice([...])` to pick one, `k.Float(lo, hi)` for a slider, `k.Float()` for a typed number, `k.Int`, `k.Point` to drag, `k.Str` to type; or a signal from `s.answer(...)` that the scene already uses. |
+| `correct` | `Any` | `None` | `correct=` is what counts as right (a list for several). |
+| `tolerance` | `float` | `0.0` | `tolerance=` is how far a number or point may be off. |
+| `name` | `str \| None` | `None` | `name=` is the question's id for a host platform (`q1`, `q2`... by default). |
+
+**Example:**
+
+```python
+@k.scene
+def slope(s: k.Scene):
+    s.play(k.write(k.Math("f(x) = x^2").place(at="center")))
+    q = s.ask("What is the slope of f at x = 2?", k.Choice(["2", "4", "8"]), correct="4")
+    with q.wrong():
+        s.play(k.write(k.Text("Hint: f'(x) = 2x").place(at="bottom")))
+    with q.correct():
+        s.play(k.write(k.Text("Right: 2 · 2 = 4").place(at="bottom")))
+```
+
+**See also:** [`s.answer`](#scene-answer), [`k.Choice`](parameters.md#k-choice), [`k.Point`](interactive-lessons.md#k-point).
 
 <a id="k-timespan"></a>
 ### `k.TimeSpan` *(class)*

@@ -68,7 +68,7 @@ from .objects.mass import Points, StreamLines, VectorField
 from .objects.math import Math
 from .objects.text import Text
 from .objects.trail import Trail, trace
-from .params import Bool, Choice, Float, Int, TextParam as Str
+from .params import Bool, Choice, Float, Int, Point, TextParam as Str
 from .reactive.expr import Expr, Time, Val
 from .reactive.native import (
     atan2,
@@ -147,7 +147,7 @@ __all__ = [
     "ArrowKeywords", "ColorKeywords", "PaintKeywords", "RectKeywords", "StyleKeywords", "TextKeywords", "TransformKeywords",
     "Animation", "Arc", "Arrow", "BLACK", "BLUE", "Bar", "Bool", "Choice", "Circle", "Color", "Column",
     "Diagnostic", "Dot", "Ellipse", "Expr", "Float", "GRAY", "GREEN", "Grid", "Group", "IR_VERSION", "Int",
-    "KinemoError", "Line", "Node", "ORANGE", "PINK", "PURPLE", "Path", "Polygon", "RED", "Rect", "RoundedRect",
+    "KinemoError", "Line", "Node", "ORANGE", "PINK", "PURPLE", "Path", "Point", "Polygon", "RED", "Rect", "RoundedRect",
     "Row", "Scene", "SceneDef", "Signal", "Square", "Stack", "Str", "TEAL", "TRANSPARENT", "Text", "Theme",
     "TimeSpan", "Triangle", "Val", "Vec", "Voice", "Script", "WHITE", "YELLOW", "atan2", "ceil", "clamp", "computed", "cos",
     "draw", "e", "ease", "exp", "fade_in", "fade_out", "floor", "grow", "indicate", "interp", "lerp", "log",

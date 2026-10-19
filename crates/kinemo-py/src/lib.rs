@@ -5,6 +5,7 @@
 
 mod arrow;
 mod boolean;
+mod branches;
 mod builder;
 mod code;
 mod errors;

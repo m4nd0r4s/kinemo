@@ -314,6 +314,15 @@ Scene parameters for the interactive player and exports.
 - [`k.Choice`](parameters.md#k-choice): Scene parameter with fixed options: `k.Choice([k.BLUE, k.RED])` (the default is the first option, or `default=`).
 - [`k.Str`](parameters.md#k-str): Text scene parameter: `k.Str(default="...")`.
 
+## [Interactive lessons](interactive-lessons.md)
+
+- [`k.Point`](interactive-lessons.md#k-point): A position as an answer: the learner drags a point, and `correct=(x, y)` with `tolerance=` grades it.
+
+Methods:
+
+- [`s.ask`](scene.md#scene-ask): Stops playback for a question; the learner answers in the lesson player (or in `kinemo dev`).
+- [`s.answer`](scene.md#scene-answer): An answer the scene uses before its question is asked: the learner moves a slider (or drags a point) and the frame follows.
+
 ## [Output](output.md)
 
 Movies made of several scenes and the transitions between them.

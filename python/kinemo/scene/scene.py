@@ -14,6 +14,7 @@ from .config import SceneConfig
 from .frame import Frame, frame_of
 from ..audio.voice import VoiceMixin
 from .events import EventsMixin
+from .lesson import LessonMixin, lesson_questions
 from .lifecycle import LifecycleMixin
 from .probe import ProbeMixin
 from .timeline import TimelineMixin
@@ -49,7 +50,7 @@ def _referenced_params(ir: Any, params: dict[int, str], builder: Builder, seen: 
     return found
 
 
-class Scene(TimelineMixin, LifecycleMixin, WritesMixin, ProbeMixin, EventsMixin, VoiceMixin):
+class Scene(TimelineMixin, LifecycleMixin, WritesMixin, ProbeMixin, EventsMixin, VoiceMixin, LessonMixin):
     """Timeline of one scene. Code runs once; every call records something at the cursor."""
 
     def __init_subclass__(cls, **kw: Any) -> None:
@@ -150,6 +151,7 @@ class Scene(TimelineMixin, LifecycleMixin, WritesMixin, ProbeMixin, EventsMixin,
             compute_tables(self, end + self.config.tail)
         self._fill_tables()
         self._lint_handler_objects()
+        lesson_questions(self)
 
     def _lint_handler_objects(self) -> None:
         end = self._b.duration

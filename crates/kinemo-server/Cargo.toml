@@ -7,6 +7,8 @@ publish.workspace = true
 description = "Preview server for `kinemo dev`: embedded web UI, frames and picking over WebSocket."
 
 [dependencies]
+kinemo-math = { workspace = true, features = ["typeset"] }
+kinemo-code = { workspace = true, features = ["grammars"] }
 kinemo-ir.workspace = true
 kinemo-eval.workspace = true
 kinemo-layout.workspace = true

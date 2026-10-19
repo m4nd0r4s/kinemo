@@ -5,10 +5,13 @@
 //! spaces included) so they travel as one unit in a morph. Tokens never span
 //! lines and whitespace is never a token.
 
+#[cfg(feature = "grammars")]
 use std::cell::RefCell;
 
+#[cfg(feature = "grammars")]
 use tree_sitter::Parser;
 
+#[cfg(feature = "grammars")]
 use crate::highlight::byte_kinds;
 use crate::languages::{resolve, Language};
 use crate::CodeError;
@@ -41,9 +44,12 @@ pub struct Token {
 
 /// Split `source` into highlighted tokens. Fails only for an unknown language.
 pub fn tokenize(source: &str, language: &str) -> Result<Vec<Token>, CodeError> {
-    tokenize_language(source, resolve(language)?)
+    let language = resolve(language)?;
+    crate::baked::note(source, language);
+    tokenize_language(source, language)
 }
 
+#[cfg(feature = "grammars")]
 pub(crate) fn tokenize_language(source: &str, language: Language) -> Result<Vec<Token>, CodeError> {
     let chars: Vec<char> = source.chars().collect();
     let byte_to_char = byte_to_char_table(source);
@@ -65,10 +71,22 @@ pub(crate) fn tokenize_language(source: &str, language: Language) -> Result<Vec<
     Ok(tokens)
 }
 
+/// Without the grammars (the WASM player): the tokens baked at build time, or plain text.
+#[cfg(not(feature = "grammars"))]
+pub(crate) fn tokenize_language(source: &str, language: Language) -> Result<Vec<Token>, CodeError> {
+    if let Some(tokens) = crate::baked::tokens(source, language) {
+        return Ok(tokens);
+    }
+    let chars: Vec<char> = source.chars().collect();
+    let kinds = vec![TokenKind::Plain; chars.len()];
+    Ok(split_tokens(&chars, &kinds, &character_class_boundaries(&chars)))
+}
+
 /// Fill gaps left by the bundled queries: numeric constants become `Number`
 /// (Rust highlights integers as constants), unhighlighted symbols become
 /// `Punctuation` (brackets, separators) or `Operator`, and unhighlighted
 /// identifiers become `Variable`.
+#[cfg(feature = "grammars")]
 fn refine_kind(text: &str, kind: TokenKind) -> TokenKind {
     let first = text.chars().next().unwrap_or(' ');
     match kind {
@@ -88,6 +106,7 @@ fn refine_kind(text: &str, kind: TokenKind) -> TokenKind {
     }
 }
 
+#[cfg(feature = "grammars")]
 fn byte_to_char_table(source: &str) -> Vec<usize> {
     let mut table = vec![0; source.len() + 1];
     let mut char_index = 0;
@@ -99,10 +118,12 @@ fn byte_to_char_table(source: &str) -> Vec<usize> {
     table
 }
 
+#[cfg(feature = "grammars")]
 thread_local! {
     static PARSER: RefCell<Parser> = RefCell::new(Parser::new());
 }
 
+#[cfg(feature = "grammars")]
 /// `boundary[i]` is true when a tree-sitter leaf starts or ends at char `i`.
 fn leaf_boundaries(
     source: &str,

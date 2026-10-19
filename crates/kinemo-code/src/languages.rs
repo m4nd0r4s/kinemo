@@ -1,5 +1,6 @@
 //! Supported languages, their aliases and their tree-sitter grammars/queries.
 
+#[cfg(feature = "grammars")]
 use tree_sitter::Language as Grammar;
 
 /// A supported language. `PlainText` has no grammar: every token is `Plain`.
@@ -115,6 +116,7 @@ impl Language {
     }
 
     /// The tree-sitter grammar, or `None` for plain text.
+    #[cfg(feature = "grammars")]
     pub(crate) fn grammar(self) -> Option<Grammar> {
         let grammar = match self {
             Language::Python => tree_sitter_python::LANGUAGE,
@@ -145,6 +147,7 @@ impl Language {
 
     /// Highlight query. Derived grammars (TypeScript, C++) inherit the base
     /// grammar's query, which is prepended, like the tree-sitter CLI does.
+    #[cfg(feature = "grammars")]
     pub(crate) fn highlights_query(self) -> String {
         match self {
             Language::Python => tree_sitter_python::HIGHLIGHTS_QUERY.to_owned(),
@@ -192,6 +195,7 @@ impl Language {
     }
 
     /// Locals query (scope-aware variable highlighting), where the grammar ships one.
+    #[cfg(feature = "grammars")]
     pub(crate) fn locals_query(self) -> String {
         match self {
             Language::JavaScript => tree_sitter_javascript::LOCALS_QUERY.to_owned(),

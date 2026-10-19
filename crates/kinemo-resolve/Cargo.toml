@@ -14,4 +14,6 @@ rayon.workspace = true
 serde.workspace = true
 
 [dev-dependencies]
+kinemo-math = { workspace = true, features = ["typeset"] }
+kinemo-code = { workspace = true, features = ["grammars"] }
 serde_json.workspace = true

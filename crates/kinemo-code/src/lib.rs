@@ -14,9 +14,11 @@
 //! assert_eq!(token.text, "x");
 //! ```
 
+pub mod baked;
 mod cache;
 mod diff;
 mod error;
+#[cfg(feature = "grammars")]
 mod highlight;
 mod languages;
 mod layout;

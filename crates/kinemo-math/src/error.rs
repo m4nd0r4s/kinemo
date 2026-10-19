@@ -11,6 +11,8 @@ pub enum MathError {
     Syntax(String),
     /// The typst engine rejected the converted formula.
     Layout(String),
+    /// Built without typst (the WASM player) and the formula was not baked with the lesson.
+    NotBaked(String),
 }
 
 impl MathError {
@@ -33,6 +35,7 @@ impl fmt::Display for MathError {
             ),
             MathError::Syntax(msg) => write!(f, "math syntax error: {msg}"),
             MathError::Layout(msg) => write!(f, "math layout error: {msg}"),
+            MathError::NotBaked(tex) => write!(f, "the formula `{tex}` was not baked with the lesson"),
         }
     }
 }

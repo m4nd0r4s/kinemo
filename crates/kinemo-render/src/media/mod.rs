@@ -3,7 +3,7 @@
 mod bitmap_cache;
 mod svg_import;
 
-pub use bitmap_cache::{decode_bitmap, load_bitmap};
+pub use bitmap_cache::{decode_bitmap, load_bitmap, register_bitmap};
 pub use svg_import::{import_svg, SvgImport, SvgNode, SvgNodeKind};
 
 #[cfg(test)]

@@ -1,4 +1,4 @@
-// `node --test crates/kinemo-server/ui/`: a lesson's route through its questions.
+// `node --test python/kinemo/export/player/`: a lesson's route through its questions.
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
@@ -37,6 +37,12 @@ test("without a branch for the outcome: a right answer resumes, a wrong one is a
   const route = new Route([bare]);
   assert.deepEqual(route.answered(bare, " Slope "), { correct: true, to: 1.02 });
   assert.deepEqual(route.answered(bare, "rate"), { correct: false, to: null });
+});
+
+test("a host's grade overrides the player's", () => {
+  const route = new Route([q1]);
+  assert.deepEqual(route.outcome(q1, true), { correct: true, to: 4 });
+  assert.deepEqual(route.outcome(q1, false), { correct: false, to: 2.02 });
 });
 
 test("grading and the value the scene sees", () => {

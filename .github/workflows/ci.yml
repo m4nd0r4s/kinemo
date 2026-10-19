@@ -37,7 +37,7 @@ jobs:
         if: runner.os == 'Windows'
 
   # The lesson player's core in WebAssembly: built without typst and tree-sitter, which a lesson
-  # export replaces with layouts baked natively.
+  # export replaces with layouts baked natively. Built once here; every wheel ships it.
   wasm:
     name: wasm player
     runs-on: ubuntu-latest
@@ -49,14 +49,20 @@ jobs:
           components: clippy
       - uses: Swatinem/rust-cache@v2
       - run: cargo clippy -p kinemo-web --target wasm32-unknown-unknown -- -D warnings
-      - run: cargo build -p kinemo-web --target wasm32-unknown-unknown --release
+      - uses: ./.github/actions/player
+      - uses: actions/upload-artifact@v7
+        with:
+          name: player
+          path: python/kinemo/export/player/pkg
+          retention-days: 1
       # The lesson route shared by `kinemo dev` and the player.
-      - run: node --test crates/kinemo-server/ui/
+      - run: node --test python/kinemo/export/player/
 
   # The extension is abi3 (Python 3.11+): one wheel per platform serves every Python version,
   # so it is built once here and the test jobs only install it.
   wheel:
     name: wheel (${{ matrix.os }})
+    needs: wasm
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -69,6 +75,10 @@ jobs:
           python-version: "3.11"
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
+      - uses: actions/download-artifact@v8
+        with:
+          name: player
+          path: python/kinemo/export/player/pkg
       - run: pip install maturin
       - run: maturin build --release --out dist
       - uses: actions/upload-artifact@v7

@@ -1,5 +1,5 @@
 // A lesson's route through its questions (`s.ask`), without any page: grading an answer and
-// deciding what plays next. Shared by `kinemo dev` and the lesson player.
+// deciding what plays next. Shared by the lesson player and `kinemo dev`, which serves it from here.
 //
 // A lesson is one timeline. Playback stops at a question's time; a correct answer plays the
 // correct branch (if any) and goes on from `resume`; a wrong one plays the wrong branch (if any),
@@ -67,10 +67,14 @@ export class Route {
     return null;
   }
 
-  /** The learner answered `question`: `{ correct, to }` where playback goes (`to` is null when
-   *  the question is asked again right away). */
+  /** The learner answered `question` with `value`, graded here: `{ correct, to }` where
+   *  playback goes (`to` is null when the question is asked again right away). */
   answered(question, value) {
-    const correct = grade(question.answer, value);
+    return this.outcome(question, grade(question.answer, value));
+  }
+
+  /** `question` was answered and graded elsewhere (a host platform): right or wrong. */
+  outcome(question, correct) {
     const branch = question.branches.find((b) => b.on === (correct ? "correct" : "wrong"));
     if (branch) {
       this.playing = { question, branch };

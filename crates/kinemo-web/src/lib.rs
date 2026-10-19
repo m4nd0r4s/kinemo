@@ -23,6 +23,12 @@ pub fn bake(json: &str) -> Result<(), JsError> {
     Ok(())
 }
 
+/// Use the image `bytes` (PNG or JPEG) wherever the scene names `path` (`k.Image`).
+#[wasm_bindgen]
+pub fn add_image(path: &str, bytes: Vec<u8>) -> Result<(), JsError> {
+    kinemo_render::media::register_bitmap(std::path::Path::new(path), bytes).map_err(|e| JsError::new(&e))
+}
+
 #[wasm_bindgen]
 pub struct Player {
     scene: Scene,
@@ -43,6 +49,16 @@ impl Player {
 
     pub fn duration(&self) -> f64 {
         self.scene.duration
+    }
+
+    /// The learner's answer: signal `signal` (a question's) takes `value`, an IR value as JSON
+    /// (`{"Float": 3.5}`), for every frame from now on.
+    pub fn set_signal(&mut self, signal: u32, value: &str) -> Result<(), JsError> {
+        let value: kinemo_ir::Value = serde_json::from_str(value)?;
+        let slot = self.scene.signals.get_mut(signal as usize).ok_or_else(|| JsError::new("no such signal"))?;
+        slot.initial = value;
+        self.index = Arc::new(TimelineIndex::new(&self.scene));
+        Ok(())
     }
 
     /// Draw frames at another size from now on (the canvas was resized).

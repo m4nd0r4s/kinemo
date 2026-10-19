@@ -38,8 +38,12 @@ jobs:
         with:
           python-version: "3.13"
       - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32-unknown-unknown
       - uses: Swatinem/rust-cache@v2
       - uses: ./.github/actions/ffmpeg
+      # The lesson player, for the example lessons the site publishes (static/lessons/).
+      - uses: ./.github/actions/player
       - uses: actions/setup-node@v7
         with:
           node-version: 24

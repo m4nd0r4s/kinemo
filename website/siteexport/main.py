@@ -17,7 +17,7 @@ import kinemo
 
 from .evidence import check_json, check_output, preview_edit, snippet, timings
 from .media import Media, render_example
-from .paths import DATA, EXAMPLES, MEDIA, ROOT
+from .paths import DATA, EXAMPLES, LESSONS, MEDIA, ROOT
 from .versions import export_versions
 
 #: The example shown in the landing page's studio, next to its source.
@@ -31,6 +31,27 @@ def gallery_entries() -> dict[str, tuple[str, str, list[str], tuple[float, ...]]
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
     return module.GALLERY
+
+
+def export_lessons() -> list[str]:
+    """`examples/lessons/*.py` as lesson pages in `static/lessons/<name>/`, when this kinemo has
+    the lesson player (the site's build makes it; a plain checkout skips them)."""
+    from kinemo.cli.loader import build, find_scenes, load_module
+    from kinemo.export.lesson import export, player_available
+
+    if not player_available():
+        print("lessons skipped: no lesson player (python scripts/build_player.py)", flush=True)
+        return []
+    if LESSONS.exists():
+        shutil.rmtree(LESSONS)
+    names = []
+    for path in sorted((EXAMPLES / "lessons").glob("*.py")):
+        for definition in find_scenes(load_module(str(path))):
+            scene = build(definition).scene
+            assert scene is not None, f"{path.name} does not build"
+            export(scene, str(LESSONS), definition.name)
+            names.append(definition.name)
+    return names
 
 
 def export(*, videos: bool = True, measure: bool = True, data_file: Path = DATA) -> dict[str, Any]:
@@ -47,6 +68,7 @@ def export(*, videos: bool = True, measure: bool = True, data_file: Path = DATA)
                 shutil.copy2(file, MEDIA / file.name)
         examples.append({"name": name, "title": title, "about": about, "features": features, "duration": media[name].duration})
     hero = media[HERO]
+    lessons = export_lessons()
     data: dict[str, Any] = {
         "version": kinemo.__version__,
         "hero": {
@@ -56,6 +78,7 @@ def export(*, videos: bool = True, measure: bool = True, data_file: Path = DATA)
             "bars": hero.bars,
         },
         "examples": examples,
+        "lessons": lessons,
         "docs_versions": export_versions(),
         "checks": {
             "timeline": {"command": f"kinemo check {HERO}.py", "output": check_output(EXAMPLES / f"{HERO}.py")},

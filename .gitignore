@@ -16,4 +16,5 @@ uv.lock
 /website/.svelte-kit
 /website/node_modules
 /website/static/media
+/website/static/lessons
 /website/src/lib/generated

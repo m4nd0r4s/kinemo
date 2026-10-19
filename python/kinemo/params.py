@@ -42,21 +42,40 @@ class Int(Param):
 
 @dataclass(frozen=True)
 class Float(Param):
-    lo: float = 0.0
-    hi: float = 1.0
+    lo: float | None = 0.0
+    hi: float | None = 1.0
 
-    def __init__(self, lo: float, hi: float, default: float | None = None) -> None:
-        object.__setattr__(self, "lo", float(lo))
-        object.__setattr__(self, "hi", float(hi))
-        object.__setattr__(self, "default", float(lo if default is None else default))
+    def __init__(self, lo: float | None = None, hi: float | None = None, default: float | None = None) -> None:
+        """`k.Float(lo, hi)`: a number in a range (a slider). Without a range, a typed number
+        (an answer field in a lesson)."""
+        object.__setattr__(self, "lo", None if lo is None else float(lo))
+        object.__setattr__(self, "hi", None if hi is None else float(hi))
+        start = default if default is not None else (lo if lo is not None else 0.0)
+        object.__setattr__(self, "default", float(start))
         object.__setattr__(self, "kind", "float")
 
     def validate(self, v: object) -> object:
         """Check a value given on the command line (`--param`) against the range."""
         v = float(cast("float", v))
-        if not self.lo <= v <= self.hi:
+        if (self.lo is not None and v < self.lo) or (self.hi is not None and v > self.hi):
             raise KinemoError.make("K0105", f"parameter outside the range [{self.lo}, {self.hi}]: {v}")
         return v
+
+
+class Point(Param):
+    """`k.Point(default=(0, 0))`: a position in scene units; as a lesson's answer, a point the
+    learner drags."""
+
+    def __init__(self, default: tuple[float, float] = (0.0, 0.0)) -> None:
+        x, y = default
+        super().__init__((float(x), float(y)), "vec2")
+
+    def validate(self, v: object) -> object:
+        """Accept `(x, y)` or `"x,y"` from the command line."""
+        parts = [float(p) for p in str(v).strip("()[] ").split(",")] if isinstance(v, str) else [float(p) for p in cast("tuple[float, float]", v)]
+        if len(parts) != 2:
+            raise KinemoError.make("K0105", f"not a point: {v!r}", fixes=[("give x and y", "--param target=1,2")])
+        return (parts[0], parts[1])
 
 
 class Bool(Param):

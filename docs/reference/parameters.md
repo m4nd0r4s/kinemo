@@ -65,7 +65,7 @@ Check a value given on the command line (`--param`) against the range.
 ### `k.Float` *(class)*
 
 ```python
-k.Float(lo: float, hi: float, default: float | None = None)
+k.Float(lo: float | None = None, hi: float | None = None, default: float | None = None)
 ```
 
 Real-valued scene parameter in the range `[lo, hi]`: `k.Float(0.5, 2, default=1)`. Parameters reach the scene function as signals: in video they take the `default` (or `--param name=value` on the CLI) and in interactive output they become controls. Reading a parameter with `.now` freezes it at build time (lint W1301).
@@ -74,8 +74,8 @@ Real-valued scene parameter in the range `[lo, hi]`: `k.Float(0.5, 2, default=1)
 
 | Name | Type | Default | Description |
 | --- | --- | --- | --- |
-| `lo` | `float` | required |   |
-| `hi` | `float` | required |   |
+| `lo` | `float \| None` | `None` |   |
+| `hi` | `float \| None` | `None` |   |
 | `default` | `float \| None` | `None` | Real-valued scene parameter in the range `[lo, hi]`: `k.Float(0.5, 2, default=1)`. |
 
 **Example:**

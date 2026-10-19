@@ -18,8 +18,10 @@ use kinemo_ir::retime::{remap, Op, Warp};
 #[pyclass(module = "kinemo._core")]
 pub struct Builder {
     pub(crate) scene: Scene,
-    log: Vec<Op>,
+    pub(crate) log: Vec<Op>,
     snapshots: Vec<(Scene, usize)>,
+    /// Copies of the scene kept by `freeze`: the states a lesson's branches start and end from.
+    pub(crate) frozen: Vec<Scene>,
 }
 
 /// Tolerance for touching time intervals (sequenced animations share an endpoint).
@@ -53,6 +55,21 @@ impl Builder {
         f(&layout)
     }
 
+    /// Insert a placement entry in time order, keeping the op log's indices right.
+    pub(crate) fn insert_place(&mut self, obj: u32, entry: PlaceEntry) {
+        let place = &mut self.scene.objects[obj as usize].place;
+        let index = place.iter().rposition(|e| e.t <= entry.t).map_or(0, |i| i + 1);
+        place.insert(index, entry);
+        for op in self.log.iter_mut() {
+            if let Op::Place { object, index: i } = op {
+                if *object == obj && *i >= index {
+                    *i += 1;
+                }
+            }
+        }
+        self.log.push(Op::Place { object: obj, index });
+    }
+
 
 }
 
@@ -61,7 +78,7 @@ impl Builder {
     #[new]
     fn new(config_json: &str) -> PyResult<Self> {
         let config: SceneConfig = parse("scene config", config_json)?;
-        Ok(Builder { scene: Scene::new(config), log: vec![], snapshots: vec![] })
+        Ok(Builder { scene: Scene::new(config), log: vec![], snapshots: vec![], frozen: vec![] })
     }
 
     // ---- construction -------------------------------------------------------------
@@ -142,7 +159,7 @@ impl Builder {
         }
     }
 
-    fn set_presence(&mut self, obj: u32, t: f64, present: bool) {
+    pub(crate) fn set_presence(&mut self, obj: u32, t: f64, present: bool) {
         let presence = &mut self.scene.objects[obj as usize].presence;
         // Keep toggles sorted; same-time toggles keep insertion order.
         let index = presence.iter().rposition(|(pt, _)| *pt <= t).map_or(0, |i| i + 1);
@@ -159,17 +176,7 @@ impl Builder {
 
     fn push_place(&mut self, obj: u32, entry_json: &str) -> PyResult<()> {
         let entry: PlaceEntry = parse("placement", entry_json)?;
-        let place = &mut self.scene.objects[obj as usize].place;
-        let index = place.iter().rposition(|e| e.t <= entry.t).map_or(0, |i| i + 1);
-        place.insert(index, entry);
-        for op in self.log.iter_mut() {
-            if let Op::Place { object, index: i } = op {
-                if *object == obj && *i >= index {
-                    *i += 1;
-                }
-            }
-        }
-        self.log.push(Op::Place { object: obj, index });
+        self.insert_place(obj, entry);
         Ok(())
     }
 

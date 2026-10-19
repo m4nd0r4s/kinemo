@@ -176,6 +176,23 @@ CATALOG: dict[str, Entry] = {
         fix="Install `kinemo-tts-<name>`, or use one of the installed providers the message lists.",
     ),
     "W1407": Entry("captions without narration", "`k.Captions()` shows the scene's `s.voice` lines; this scene has none, so there is nothing to caption."),
+    # --- K15xx / W15xx: interactive lessons -------------------------------------------
+    "K1501": Entry(
+        "branch out of place",
+        "A question's branches (`with q.correct():`, `with q.wrong():`) come right after `s.ask(...)`, one of each "
+        "kind, and cannot hold another question: the lesson continues after the last branch.",
+    ),
+    "W1501": Entry(
+        "wrong branch that never plays",
+        "Every possible answer counts as correct (all the options, or a tolerance covering the whole range), "
+        "so the learner can never reach `q.wrong()`.",
+    ),
+    "W1502": Entry(
+        "question asked mid-motion",
+        "An animation started before `s.ask` is still running when playback stops for the question: the "
+        "learner sees a frozen, half-finished move, and every branch starts from it.",
+        fix="Let it finish first (`s.wait(...)`), or start it after the question.",
+    ),
 }
 
 

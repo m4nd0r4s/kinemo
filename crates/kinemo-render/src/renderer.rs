@@ -138,7 +138,8 @@ pub fn render_png_frames(
     )
 }
 
-/// Renders the whole scene to a video file. `progress(done, total)` is called per frame.
+/// Renders the whole scene to a video file (a lesson: its correct path, see
+/// [`Scene::video_path`]). `progress(done, total)` is called per frame.
 pub fn render_video(
     scene: &Scene,
     path: &Path,
@@ -146,7 +147,7 @@ pub fn render_video(
     opts: &RenderOptions,
     progress: &(dyn Fn(usize, usize) + Sync),
 ) -> Result<(), RenderError> {
-    render_video_range(scene, path, format, opts, (0.0, scene.duration), progress)
+    render_video_path(scene, path, format, opts, &scene.video_path(), progress)
 }
 
 /// Renders the interval `[start, end)` of the scene (slides render one file per section).
@@ -158,13 +159,40 @@ pub fn render_video_range(
     (start_time, end_time): (f64, f64),
     progress: &(dyn Fn(usize, usize) + Sync),
 ) -> Result<(), RenderError> {
-    let total = opts.frame_count((end_time - start_time).max(0.0));
-    let audio = scene
-        .audio
-        .iter()
-        .filter(|a| a.t >= start_time && a.t < end_time)
-        .map(|a| audio_clip(a, a.t - start_time, None))
-        .collect();
+    render_video_path(scene, path, format, opts, &[(start_time, end_time)], progress)
+}
+
+/// Where output time `t` falls on the scene's timeline when the video plays `stretches` back to
+/// back (the end of the last one past the end).
+fn scene_time(stretches: &[(f64, f64)], t: f64) -> f64 {
+    let mut start = 0.0;
+    for (a, b) in stretches {
+        if t < start + (b - a) {
+            return a + (t - start);
+        }
+        start += b - a;
+    }
+    stretches.last().map_or(t, |(_, b)| *b)
+}
+
+/// Renders `stretches` of the scene's timeline back to back into one video, with the audio
+/// that starts inside them.
+fn render_video_path(
+    scene: &Scene,
+    path: &Path,
+    format: Format,
+    opts: &RenderOptions,
+    stretches: &[(f64, f64)],
+    progress: &(dyn Fn(usize, usize) + Sync),
+) -> Result<(), RenderError> {
+    let length: f64 = stretches.iter().map(|(a, b)| (b - a).max(0.0)).sum();
+    let total = opts.frame_count(length);
+    let mut audio = Vec::new();
+    let mut offset = 0.0;
+    for (a, b) in stretches {
+        audio.extend(scene.audio.iter().filter(|clip| clip.t >= *a && clip.t < *b).map(|clip| audio_clip(clip, clip.t - a + offset, None)));
+        offset += b - a;
+    }
     let enc_opts = EncoderOptions {
         width: opts.width,
         height: opts.height,
@@ -187,7 +215,7 @@ pub fn render_video_range(
                     // One evaluator per worker: its caches keep their capacity between frames.
                     evaluator.clear();
                     let layout = Layout::new(evaluator);
-                    let list = display_list_with(&layout, start_time + i as f64 / opts.fps, opts.size(), opts.transparent);
+                    let list = display_list_with(&layout, scene_time(stretches, i as f64 / opts.fps), opts.size(), opts.transparent);
                     // Converted to the encoder's pixel format here, on the rendering threads.
                     enc_opts.encoder_frame(rasterize(&list, opts.antialias).rgba)
                 },
@@ -195,4 +223,19 @@ pub fn render_video_range(
             .collect()
     };
     render_and_encode(encoder, total, render_batch, progress)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::scene_time;
+
+    #[test]
+    fn output_time_walks_the_stretches_back_to_back() {
+        let stretches = [(0.0, 2.0), (5.0, 6.0), (8.0, 10.0)];
+        assert_eq!(scene_time(&stretches, 1.0), 1.0);
+        assert_eq!(scene_time(&stretches, 2.5), 5.5);
+        assert_eq!(scene_time(&stretches, 3.5), 8.5);
+        assert_eq!(scene_time(&stretches, 9.0), 10.0);
+        assert_eq!(scene_time(&[(1.0, 3.0)], 0.5), 1.5);
+    }
 }

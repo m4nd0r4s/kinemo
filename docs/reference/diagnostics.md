@@ -23,6 +23,7 @@ Every problem kinemo reports has a stable code: `K` codes are errors, `W` codes 
 | [K12xx](#range-12) | Data and interoperability (Arrow, arrays) | 4 |
 | [W13xx](#range-13) | Parameters and export | 2 |
 | [W14xx](#range-14) | Audio and voice | 7 |
+| [K15xx / W15xx](#range-15) | Interactive lessons | 3 |
 
 <a id="range-00"></a>
 ## K00xx: General
@@ -541,3 +542,33 @@ Fix:
 ### W1407: captions without narration
 
 *Warning (lint).* `k.Captions()` shows the scene's `s.voice` lines; this scene has none, so there is nothing to caption.
+
+<a id="range-15"></a>
+## K15xx / W15xx: Interactive lessons
+
+| Code | Severity | Title |
+| --- | --- | --- |
+| [`K1501`](#k1501) | error | branch out of place |
+| [`W1501`](#w1501) | warning (lint) | wrong branch that never plays |
+| [`W1502`](#w1502) | warning (lint) | question asked mid-motion |
+
+<a id="k1501"></a>
+### K1501: branch out of place
+
+*Error.* A question's branches (`with q.correct():`, `with q.wrong():`) come right after `s.ask(...)`, one of each kind, and cannot hold another question: the lesson continues after the last branch.
+
+<a id="w1501"></a>
+### W1501: wrong branch that never plays
+
+*Warning (lint).* Every possible answer counts as correct (all the options, or a tolerance covering the whole range), so the learner can never reach `q.wrong()`.
+
+<a id="w1502"></a>
+### W1502: question asked mid-motion
+
+*Warning (lint).* An animation started before `s.ask` is still running when playback stops for the question: the learner sees a frozen, half-finished move, and every branch starts from it.
+
+Fix:
+
+```python
+Let it finish first (`s.wait(...)`), or start it after the question.
+```

@@ -14,6 +14,7 @@ import { installOutliner } from "./outliner.js";
 import { installPalette } from "./palette.js";
 import { installPlayback, setTime } from "./playback.js";
 import { installProblems } from "./problems.js";
+import { installQuestions } from "./questions.js";
 import { installResizer } from "./resizer.js";
 import { installSelection, selectBar, selectObject } from "./selection.js";
 import { emit, lastFrameTime, listen, state } from "./state.js";
@@ -69,6 +70,7 @@ installWatch();
 installResizer();
 installProblems();
 installAudio();
+installQuestions();
 listen("message:scene", onScene);
 window.addEventListener("hashchange", () => {
   if (!state.meta) return;

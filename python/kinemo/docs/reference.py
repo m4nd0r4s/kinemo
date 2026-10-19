@@ -86,6 +86,7 @@ DIAGNOSTIC_RANGES = (
     ("K12xx", "Data and interoperability (Arrow, arrays)"),
     ("W13xx", "Parameters and export"),
     ("W14xx", "Audio and voice"),
+    ("K15xx / W15xx", "Interactive lessons"),
 )
 
 

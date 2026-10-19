@@ -465,3 +465,33 @@ a:hover { text-decoration: underline; }
 .bar .resize { position: absolute; top: 0; right: 0; width: 6px; height: 100%; cursor: ew-resize; }
 .bar .resize:hover { background: rgba(255, 255, 255, 0.25); }
 .bar.moving { opacity: 0.75; z-index: 3; cursor: grabbing; }
+
+/* ---- lesson questions (s.ask) ----------------------------------------------------------- */
+.branches { position: relative; height: 14px; margin-top: 2px; }
+.branches:empty { display: none; }
+.branch-band {
+  position: absolute; top: 0; height: 14px; min-width: 3px; overflow: hidden; white-space: nowrap;
+  font-size: 10px; line-height: 14px; padding-left: 3px; border-radius: 2px; cursor: pointer; color: #111;
+}
+.branch-band.correct { background: color-mix(in srgb, var(--ok) 70%, transparent); }
+.branch-band.wrong { background: color-mix(in srgb, var(--error) 65%, transparent); }
+.branch-band:hover { filter: brightness(1.15); }
+.question-mark {
+  position: absolute; top: 0; transform: translateX(-50%); width: 14px; height: 14px; border-radius: 7px;
+  background: var(--accent); color: #111; font-size: 10px; font-weight: 700; line-height: 14px; text-align: center;
+}
+.question-panel {
+  position: absolute; left: 50%; bottom: 16px; transform: translateX(-50%); width: min(520px, calc(100% - 32px));
+  background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 14px 16px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.45); display: flex; flex-direction: column; gap: 10px;
+}
+.question-prompt { font-size: 15px; font-weight: 600; }
+.question-options { display: flex; flex-wrap: wrap; gap: 8px; }
+.question-option, .question-check { padding: 6px 14px; }
+.question-check { align-self: flex-start; background: var(--accent); color: #111; border: none; font-weight: 650; }
+.question-slider { display: flex; align-items: center; gap: 10px; }
+.question-slider input { flex: 1; }
+.question-value { color: var(--text-dim); font-variant-numeric: tabular-nums; }
+.question-feedback { color: var(--warning); min-height: 1em; }
+.question-feedback:empty { display: none; }
+canvas.answering { cursor: crosshair; }

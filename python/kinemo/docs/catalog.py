@@ -22,6 +22,7 @@ from .examples import (
     composition,
     events,
     layout,
+    lessons,
     mass,
     media,
     native,
@@ -35,7 +36,7 @@ from .examples import (
 )
 
 EXAMPLE_MODULES = (
-    scene, objects, media, mass, verbs, composition, text, layout, charts, reactive, native, events, components, params, output,
+    scene, objects, media, mass, verbs, composition, text, layout, charts, reactive, native, events, components, params, lessons, output,
 )
 
 #: Public names documented through the entry of what an author actually calls.

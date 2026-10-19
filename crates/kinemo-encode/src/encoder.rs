@@ -138,7 +138,8 @@ impl VideoEncoder {
     }
 
     fn shutdown(&mut self) -> Result<(), EncodeError> {
-        drop(self.stdin.take());
+        // Closing stdin ends the input: ffmpeg finishes the file.
+        self.stdin = None;
         let Some(mut child) = self.child.take() else { return Ok(()) };
         let status = child.wait()?;
         let err = self.stderr.take().and_then(|h| h.join().ok()).unwrap_or_default();
@@ -153,7 +154,7 @@ impl VideoEncoder {
 impl Drop for VideoEncoder {
     /// Dropping without `finish` aborts the encode.
     fn drop(&mut self) {
-        drop(self.stdin.take());
+        self.stdin = None;
         if let Some(mut child) = self.child.take() {
             let _ = child.kill();
             let _ = child.wait();

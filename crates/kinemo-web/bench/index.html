@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>kinemo player benchmark</title>
+<style>body{font:14px system-ui;margin:16px;background:#111;color:#eee}canvas{width:100%;max-width:960px;display:block;background:#000}pre{white-space:pre-wrap}</style></head>
+<body>
+<select id="scene"></select>
+<select id="size"><option>480x270</option><option selected>640x360</option><option>960x540</option><option>1280x720</option></select>
+<button id="run">Benchmark</button>
+<canvas id="c"></canvas><pre id="out"></pre>
+<script type="module">
+import init, { Player, bake } from "./pkg/kinemo_web.js";
+const t0 = performance.now();
+const wasm = await init();
+window.__wasm_memory_mb = () => wasm.memory.buffer.byteLength / 1e6;
+const initMs = performance.now() - t0;
+const names = await (await fetch("scenes/index.json")).json();
+const select = document.getElementById("scene");
+for (const n of names) select.add(new Option(n));
+const params = new URLSearchParams(location.search);
+if (params.get("scene")) select.value = params.get("scene");
+if (params.get("size")) document.getElementById("size").value = params.get("size");
+const canvas = document.getElementById("c"), ctx = canvas.getContext("2d");
+const out = document.getElementById("out");
+const pct = (a, p) => a[Math.min(a.length - 1, Math.floor(a.length * p))];
+
+async function benchmark(name, size) {
+  const [w, h] = size.split("x").map(Number);
+  canvas.width = w; canvas.height = h;
+  const ir = await (await fetch(`scenes/${name}.ir.json`)).text();
+  bake(await (await fetch(`scenes/${name}.baked.json`)).text());
+  const l0 = performance.now();
+  const player = new Player(ir, w, h);
+  const loadMs = performance.now() - l0;
+  const frames = Math.min(240, Math.ceil(player.duration() * 30));
+  const render = [], draw = [];
+  for (let i = 0; i < frames; i++) {
+    const t = player.duration() * i / frames;
+    const a = performance.now();
+    const rgba = player.render(t);
+    const b = performance.now();
+    ctx.putImageData(new ImageData(new Uint8ClampedArray(rgba.buffer, rgba.byteOffset, rgba.length), w, h), 0, 0);
+    const c = performance.now();
+    render.push(b - a); draw.push(c - b);
+    if (i % 10 === 0) await new Promise(r => requestAnimationFrame(r));
+  }
+  const layout = [];
+  for (let i = 0; i < frames; i += 4) { const a = performance.now(); player.layout_only(player.duration() * i / frames); layout.push(performance.now() - a); }
+  layout.sort((x, y) => x - y);
+  render.sort((x, y) => x - y); draw.sort((x, y) => x - y);
+  const total = render.map((r, i) => r + draw[i]).sort((x, y) => x - y);
+  const result = { name, size, frames, loadMs: +loadMs.toFixed(1), initMs: +initMs.toFixed(1),
+    renderP50: +pct(render, .5).toFixed(2), renderP95: +pct(render, .95).toFixed(2), renderMax: +render.at(-1).toFixed(2),
+    drawP50: +pct(draw, .5).toFixed(2), layoutP50: +pct(layout, .5).toFixed(2), totalP95: +pct(total, .95).toFixed(2),
+    fps30ok: pct(total, .95) < 33.3, wasmMemoryMB: +(window.__wasm_memory_mb?.() ?? 0).toFixed(1),
+    jsHeapMB: performance.memory ? +(performance.memory.usedJSHeapSize / 1e6).toFixed(1) : null };
+  player.free();
+  return result;
+}
+window.benchmark = benchmark;
+window.benchmarkAll = async (sizes) => { const all = []; for (const s of sizes) for (const n of names) all.push(await benchmark(n, s)); return all; };
+document.getElementById("run").onclick = async () => { out.textContent = JSON.stringify(await benchmark(select.value, document.getElementById("size").value), null, 1); };
+</script></body></html>

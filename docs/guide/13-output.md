@@ -25,7 +25,7 @@ kinemo render scene.py --format png --at 2.5    # one frame
 | Option | Default | Meaning |
 | --- | --- | --- |
 | `--scene NAME` | every scene | Which `@k.scene` function to render |
-| `--format` | `mp4` (or the `--out` file's extension) | `mp4`, `webm`, `mov`, `gif`, `png`, `svg`, `slides` |
+| `--format` | `mp4` (or the `--out` file's extension) | `mp4`, `webm`, `mov`, `gif`, `png`, `svg`, `slides`, `lesson` |
 | `--quality` | `final` | `draft` or `final` (see [Quality](#quality-and-size)) |
 | `--out PATH` | `out` | Output folder, created if needed; files are named after the scene. A path with an output extension (`intro.mp4`, `still.png`) is one file instead, for one scene. |
 | `--at T` | `end` | For `png`/`svg`: seconds, a mark name, or `end` |
@@ -45,6 +45,7 @@ kinemo render scene.py --format png --at 2.5    # one frame
 | `png` | `out/<scene>.png` | One frame at `--at` (default: the last frame), or every frame with `--frames`. Supports `--transparent`. |
 | `svg` | `out/<scene>.svg` | One vector frame at `--at`, for documents. Images are embedded. |
 | `slides` | `out/<scene>_slides/index.html` | One video per section and an HTML player (see [Slides](#slides)). |
+| `lesson` | `out/<scene>/index.html` | An interactive page that stops at each `s.ask` question (see [Interactive lessons](16-interactive-lessons.md)). |
 
 `mp4` and `gif` have no alpha channel, so `--transparent` has no effect on them.
 
@@ -159,10 +160,11 @@ Scene parameters are values you can change without editing the code. They are de
 | Type | Example |
 | --- | --- |
 | `k.Int(lo, hi, default=None)` | `k.Int(3, 12, default=5)` |
-| `k.Float(lo, hi, default=None)` | `k.Float(0.5, 3, default=1.5)` |
+| `k.Float(lo, hi, default=None)` | `k.Float(0.5, 3, default=1.5)` (without a range, any number) |
 | `k.Bool(default=False)` | `k.Bool(default=True)` |
 | `k.Choice(options, default=None)` | `k.Choice(["fast", "slow"])` (default: the first option) |
 | `k.Str(default="")` | `k.Str(default="Polygon")` |
+| `k.Point(default=(0, 0))` | `k.Point(default=(1, 2))` (`--param target=1,2`) |
 
 ```python
 import kinemo as k

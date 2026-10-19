@@ -25,6 +25,7 @@ Read them in order the first time; each one builds on the previous.
 | 13 | [Output](guide/13-output.md) | Video/GIF/PNG/SVG/slides, quality, parameters, movies, voice |
 | 14 | [Tooling](guide/14-tooling.md) | `check`, `inspect`, `snap`, `dev`, `--fix`, testing with pytest |
 | 15 | [AI agents](guide/15-ai-agents.md) | The agent loop, `llms.txt`, JSON outputs, the MCP server |
+| 16 | [Interactive lessons](guide/16-interactive-lessons.md) | Questions and branches, answers, `--format lesson`, embedding |
 
 ## Reference
 

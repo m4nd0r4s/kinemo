@@ -2,7 +2,7 @@
 
 use serde::{Deserialize, Serialize};
 
-use crate::{Object, ObjectId, Signal, SignalId, IR_VERSION};
+use crate::{Object, ObjectId, Question, Signal, SignalId, IR_VERSION};
 
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
@@ -107,6 +107,9 @@ pub struct Scene {
     /// Ids of root objects in insertion order (draw order tie-breaker).
     #[serde(default)]
     pub roots: Vec<ObjectId>,
+    /// Questions of an interactive lesson (`s.ask`), in timeline order.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub questions: Vec<Question>,
 }
 
 
@@ -140,6 +143,24 @@ impl Scene {
     }
 
     /// Whether the object itself is present at `t` (ancestors are not considered).
+    /// The stretches of the timeline a video plays: everything except the wrong branches of a
+    /// lesson's questions (the whole timeline when it has none).
+    pub fn video_path(&self) -> Vec<(f64, f64)> {
+        let mut path = Vec::new();
+        let mut from = 0.0;
+        for q in &self.questions {
+            let pause = q.branches.iter().map(|b| b.t0).fold(q.resume, f64::min);
+            path.push((from, pause));
+            if let Some(correct) = q.branches.iter().find(|b| b.on == crate::Outcome::Correct) {
+                path.push((correct.t0, correct.t1));
+            }
+            from = q.resume;
+        }
+        path.push((from, self.duration));
+        path.retain(|(a, b)| b > a);
+        path
+    }
+
     pub fn present(&self, obj: ObjectId, t: f64) -> bool {
         let mut state = false;
         for (pt, p) in &self.objects[obj as usize].presence {

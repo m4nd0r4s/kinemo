@@ -4,6 +4,7 @@
 //! so every crate except `kinemo-py` can be tested from a JSON scene.
 
 mod expr;
+mod lesson;
 mod object;
 mod placement;
 pub mod retime;
@@ -13,6 +14,7 @@ mod timeline;
 mod value;
 
 pub use expr::{BinOp, Expr, UnOp};
+pub use lesson::{Answer, Branch, Outcome, Question, Then};
 pub use object::Object;
 pub use placement::{PlaceEntry, Placement, Side};
 pub use scene::{Audio, AudioRole, Mark, Scene, SceneConfig, Table};

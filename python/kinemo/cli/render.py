@@ -35,6 +35,23 @@ def write_subtitles(scene: Any, base: str, lines: list[Any] | None = None) -> li
     return written
 
 
+def _lesson(result: Any, out: str, name: str) -> int:
+    """A lesson folder; anything an answer or a parameter drives must be native (W1302 fails)."""
+    from ..export.lesson import export
+
+    blocking = [d for d in result.diagnostics if d.code == "W1302"]
+    if blocking:
+        print("\n".join(d.render() for d in blocking))
+        print("kinemo: a lesson recomputes what answers and parameters drive in the browser; W1302 is an error here")
+        return 1
+    try:
+        print(f"kinemo: {export(result.scene, out, name)}")
+    except KinemoError as error:
+        print(error.diagnostic.render())
+        return 1
+    return 0
+
+
 def run(args: argparse.Namespace) -> int:
     try:
         module = load_module(args.file)
@@ -124,6 +141,8 @@ def run(args: argparse.Namespace) -> int:
             from ..export.slides import export
 
             print(f"kinemo: {export(result.scene, args.out, args.quality)}")
+        elif args.format == "lesson":
+            status = max(status, _lesson(result, args.out, defn.name))
         else:
             print(f"kinemo: format '{args.format}' is not supported yet")
             status = 2

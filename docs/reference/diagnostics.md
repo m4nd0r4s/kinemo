@@ -23,7 +23,7 @@ Every problem kinemo reports has a stable code: `K` codes are errors, `W` codes 
 | [K12xx](#range-12) | Data and interoperability (Arrow, arrays) | 4 |
 | [W13xx](#range-13) | Parameters and export | 2 |
 | [W14xx](#range-14) | Audio and voice | 7 |
-| [K15xx / W15xx](#range-15) | Interactive lessons | 3 |
+| [K15xx / W15xx](#range-15) | Interactive lessons | 4 |
 
 <a id="range-00"></a>
 ## K00xx: General
@@ -550,6 +550,7 @@ Fix:
 | --- | --- | --- |
 | [`K1501`](#k1501) | error | branch out of place |
 | [`W1501`](#w1501) | warning (lint) | wrong branch that never plays |
+| [`K1502`](#k1502) | error | no lesson player |
 | [`W1502`](#w1502) | warning (lint) | question asked mid-motion |
 
 <a id="k1501"></a>
@@ -561,6 +562,11 @@ Fix:
 ### W1501: wrong branch that never plays
 
 *Warning (lint).* Every possible answer counts as correct (all the options, or a tolerance covering the whole range), so the learner can never reach `q.wrong()`.
+
+<a id="k1502"></a>
+### K1502: no lesson player
+
+*Error.* `--format lesson` copies the player's WebAssembly from the kinemo package; the published wheels include it, a source checkout builds it with `python scripts/build_player.py`.
 
 <a id="w1502"></a>
 ### W1502: question asked mid-motion

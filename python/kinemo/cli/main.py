@@ -87,7 +87,7 @@ def parser() -> argparse.ArgumentParser:
 
     p = sub.add_parser("render", help="final output")
     _scene_args(p)
-    p.add_argument("--format", choices=["mp4", "webm", "mov", "gif", "png", "svg", "slides"], help="default: from the --out extension, else mp4")
+    p.add_argument("--format", choices=["mp4", "webm", "mov", "gif", "png", "svg", "slides", "lesson"], help="default: from the --out extension, else mp4; lesson: an interactive page (folder) for the browser")
     p.add_argument("--quality", choices=["draft", "final"], default="final")
     p.add_argument("--out", default="out", help="a folder (files named after the scene), or one file: clip.mp4, frame.png")
     p.add_argument("--at", help="time (png/svg): seconds, a mark name or 'end'")

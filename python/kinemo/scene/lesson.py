@@ -218,9 +218,10 @@ class LessonMixin:
             raise KinemoError.make("K0105", f"s.answer takes an answer kind such as k.Float(0, 6), not {kind!r}", spans=[user_span()])
         base = signal(kind.default, lerp="linear" if kind.kind in ("float", "vec2") else None, kind=kind.kind or "str")
         value = _param_signal_class()(self, base._id, base.kind, base.lerp)
-        label = name or f"answer {len(self.__dict__.setdefault('_answer_kinds', {})) + 1}"
+        kinds: dict[int, Param] = self.__dict__.setdefault("_answer_kinds", {})
+        label = name or f"answer {len(kinds) + 1}"
         object.__setattr__(value, "_param_name", label)
-        self.__dict__["_answer_kinds"][value._id] = kind
+        kinds[value._id] = kind
         self._param_signals[value._id] = label  # type: ignore[attr-defined]
         return value
 

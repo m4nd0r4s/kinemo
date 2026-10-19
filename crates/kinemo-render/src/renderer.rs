@@ -147,7 +147,11 @@ pub fn render_video(
     opts: &RenderOptions,
     progress: &(dyn Fn(usize, usize) + Sync),
 ) -> Result<(), RenderError> {
-    render_video_path(scene, path, format, opts, &scene.video_path(), progress)
+    if scene.questions.is_empty() {
+        return render_video_path(scene, path, format, opts, &scene.video_path(), progress);
+    }
+    let answered = scene.with_correct_answers();
+    render_video_path(&answered, path, format, opts, &answered.video_path(), progress)
 }
 
 /// Renders the interval `[start, end)` of the scene (slides render one file per section).

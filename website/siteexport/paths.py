@@ -12,6 +12,8 @@ WEBSITE = ROOT / "website"
 CACHE = WEBSITE / ".cache"
 #: Videos and posters, served by the site as static files.
 MEDIA = WEBSITE / "static" / "media"
+#: Interactive lessons (`examples/lessons/`), exported with `--format lesson`.
+LESSONS = WEBSITE / "static" / "lessons"
 #: The data the Svelte pages import.
 DATA = WEBSITE / "src" / "lib" / "generated" / "site-data.json"
 #: The built site (`npm run build`).

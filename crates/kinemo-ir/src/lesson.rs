@@ -70,7 +70,36 @@ pub struct Quiz {
     pub t0: f64,
     pub reveal: f64,
     pub t1: f64,
+    /// The side of the frame the band is on.
+    #[serde(default)]
+    pub at: QuizSide,
+    /// The band's box in scene units: left, bottom, right, top.
+    #[serde(default)]
+    pub rect: [f64; 4],
+    /// What the scene shows when the band comes in (left, bottom, right, top, in scene units): the
+    /// box the camera fits into the free part of the frame. Empty: the whole frame.
+    #[serde(default)]
+    pub content: [f64; 4],
+    /// The objects the quiz itself made (the band and its parts): ids `objects[0]..objects[1]`.
+    /// Everything else is the scene, which shrinks into the rest of the frame.
+    #[serde(default)]
+    pub objects: [u32; 2],
 }
+
+#[derive(Serialize, Deserialize, Clone, Copy, Debug, PartialEq, Eq, Default)]
+#[serde(rename_all = "snake_case")]
+pub enum QuizSide {
+    #[default]
+    Bottom,
+    Top,
+    Left,
+    Right,
+}
+
+/// Seconds the band takes to come in and to leave (as `INTRO` and `OUTRO` in `quiz.py`): the
+/// scene shrinks and grows back over the same time.
+pub const QUIZ_INTRO: f64 = 0.5;
+pub const QUIZ_OUTRO: f64 = 0.4;
 
 /// Seconds the reveal of a quiz stretch takes (as `REVEAL` in `python/kinemo/scene/quiz.py`).
 pub const QUIZ_REVEAL: f64 = 0.8;
@@ -168,7 +197,7 @@ mod tests {
             default: serde_json::json!(0),
             branches: vec![Branch { on: Outcome::Wrong, t0: 2.1, t1: 4.0, then: Then::Retry, span: Span::default() }],
             resume: 6.0,
-            quiz: Some(Quiz { t0: 2.1, reveal: 3.0, t1: 4.0 }),
+            quiz: Some(Quiz { t0: 2.1, reveal: 3.0, t1: 4.0, at: QuizSide::Right, rect: [3.0, -2.0, 7.5, 2.0], content: [-7.0, -4.0, 2.0, 4.0], objects: [10, 20] }),
             span: Span::default(),
         };
         let text = serde_json::to_string(&q).unwrap();

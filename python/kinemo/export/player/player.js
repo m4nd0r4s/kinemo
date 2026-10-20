@@ -2,7 +2,7 @@
 // question for an answer (HTML controls, not drawn on the canvas) and plays the branch the
 // answer takes. Frames come from a worker running the WebAssembly core; audio plays from the
 // lesson's files. Embedded in a page, it reports what happens to the host (see `embed.js`).
-import { grade, Route, signalValue, sliderStep } from "./lesson.js";
+import { closeEnough, exactAnswer, grade, Route, signalValue, sliderStep } from "./lesson.js";
 
 const PROTOCOL = 1;
 /** Frame sizes the player steps down through when frames take too long (16:9). */
@@ -20,6 +20,7 @@ const view = {
   scrub: $("scrub"),
   time: $("time"),
   panel: $("question"),
+  note: $("note"),
   status: $("status"),
 };
 const context = view.canvas.getContext("2d");
@@ -350,7 +351,23 @@ function ask(question, feedback = "") {
 }
 
 /** Where playback goes once `question` is known to be right or wrong. */
-function proceed(question, correct) {
+let noteTimer = 0;
+
+/** A short line under the controls, gone after a few seconds. */
+function note(text) {
+  view.note.textContent = text;
+  view.note.hidden = false;
+  clearTimeout(noteTimer);
+  noteTimer = setTimeout(() => (view.note.hidden = true), 4000);
+}
+
+function proceed(question, correct, value) {
+  // Right, but not exactly: say the exact answer, and the scene takes it before going on.
+  const close = correct && value !== undefined ? closeEnough(question.answer, value) : null;
+  if (close) {
+    setAnswer(question, exactAnswer(question.answer));
+    note(close);
+  }
   const { to } = route.outcome(question, correct);
   const branch = question.branches.find((b) => b.on === (correct ? "correct" : "wrong"));
   emit("result", { id: question.id, correct, by: grading });
@@ -373,7 +390,7 @@ function submit(question, value) {
     if (feedback) feedback.textContent = "Checking…";
     return;
   }
-  proceed(question, grade(question.answer, value));
+  proceed(question, grade(question.answer, value), value);
 }
 
 // ---- commands from the host page --------------------------------------------------------------
@@ -392,7 +409,7 @@ function command(message) {
       return;
     case "result": {
       const asking = state.asking;
-      if (asking && asking.question.id === message.id) proceed(asking.question, Boolean(message.correct));
+      if (asking && asking.question.id === message.id) proceed(asking.question, Boolean(message.correct), asking.awaiting);
       return;
     }
     case "goto": {

@@ -2,7 +2,7 @@
 // question for an answer (HTML controls, not drawn on the canvas) and plays the branch the
 // answer takes. Frames come from a worker running the WebAssembly core; audio plays from the
 // lesson's files. Embedded in a page, it reports what happens to the host (see `embed.js`).
-import { grade, Route, signalValue } from "./lesson.js";
+import { grade, Route, signalValue, sliderStep } from "./lesson.js";
 
 const PROTOCOL = 1;
 /** Frame sizes the player steps down through when frames take too long (16:9). */
@@ -55,6 +55,9 @@ let pending = null; // id of the frame being drawn by the worker
 let wanted = 0; // time of the latest frame asked for
 let nextId = 1;
 let loaded = false;
+/** Bumped by every answer the scene uses: a frame drawn before it is out of date. */
+let answers = 0;
+let pendingAnswers = 0;
 const recent = [];
 
 function frameSize() {
@@ -70,6 +73,7 @@ function requestFrame(t) {
   if (!loaded || pending !== null) return;
   const [width, height] = frameSize();
   pending = nextId++;
+  pendingAnswers = answers;
   worker.postMessage({ type: "frame", id: pending, t, width, height });
 }
 
@@ -92,7 +96,7 @@ worker.onmessage = ({ data }) => {
   }
   context.putImageData(new ImageData(new Uint8ClampedArray(data.pixels), data.width, data.height), 0, 0);
   if (state.playing) adapt(data.ms);
-  if (Math.abs(data.t - wanted) > 1e-9) requestFrame(wanted);
+  if (Math.abs(data.t - wanted) > 1e-9 || pendingAnswers !== answers) requestFrame(wanted);
 };
 
 function fail(message) {
@@ -218,6 +222,7 @@ function el(tag, attrs = {}, ...children) {
 
 function setAnswer(question, value) {
   worker.postMessage({ type: "set", signal: question.signal, value: signalValue(question.answer, value) });
+  answers++;
   requestFrame(state.t);
 }
 
@@ -242,15 +247,25 @@ function controls(question) {
     return { nodes: [el("div", { class: "options", role: "group", "aria-labelledby": "prompt" }, ...buttons)] };
   }
   if (answer.kind === "number" && answer.lo !== null && answer.hi !== null) {
+    const step = sliderStep(answer);
+    const decimals = Math.max(0, -Math.floor(Math.log10(step) + 1e-9));
     const output = el("output", { for: "answer-slider" });
-    const slider = el("input", { id: "answer-slider", type: "range", min: answer.lo, max: answer.hi, step: answer.step || "any", value: question.default ?? answer.lo, "aria-labelledby": "prompt" });
+    const slider = el("input", { id: "answer-slider", type: "range", min: answer.lo, max: answer.hi, step, value: question.default ?? answer.lo, "aria-labelledby": "prompt" });
     const update = (send) => {
-      output.textContent = String(round(Number(slider.value)));
+      output.textContent = Number(slider.value).toFixed(decimals);
       if (send) setAnswer(question, Number(slider.value));
+    };
+    // Buttons for the last step: a finger is wider than one step of the slider.
+    const nudge = (direction) => {
+      const next = Math.min(answer.hi, Math.max(answer.lo, Number(slider.value) + direction * step));
+      slider.value = String(Math.round(next / step) * step);
+      update(true);
     };
     slider.addEventListener("input", () => update(true));
     update(false);
-    return { nodes: [el("div", { class: "slider" }, slider, output)], value: () => Number(slider.value) };
+    const less = el("button", { type: "button", class: "nudge", "aria-label": `Decrease by ${step}`, onclick: () => nudge(-1) }, "−");
+    const more = el("button", { type: "button", class: "nudge", "aria-label": `Increase by ${step}`, onclick: () => nudge(1) }, "+");
+    return { nodes: [el("div", { class: "slider" }, less, slider, more, output)], value: () => Number(slider.value) };
   }
   if (answer.kind === "number") {
     const field = el("input", { type: "number", step: "any", inputmode: "decimal", "aria-labelledby": "prompt" });

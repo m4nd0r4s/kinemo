@@ -2,7 +2,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
-import { Route, grade, signalValue } from "./lesson.js";
+import { Route, grade, signalValue, sliderStep } from "./lesson.js";
 
 const q1 = {
   id: "q1", t: 2, resume: 5, answer: { kind: "number", correct: 76, tolerance: 4 },
@@ -51,4 +51,12 @@ test("grading and the value the scene sees", () => {
   assert.ok(grade({ kind: "choice", correct: [0, 2] }, 2) && !grade({ kind: "choice", correct: [0, 2] }, "2"));
   assert.deepEqual(signalValue(q2.answer, 1), { Str: "4" });
   assert.deepEqual(signalValue({ kind: "point" }, [1, 2]), { Vec2: [1, 2] });
+});
+
+test("a slider steps so the right value is a position a finger can land on", () => {
+  assert.equal(sliderStep({ lo: 0, hi: 4, step: null, tolerance: 0.15 }), 0.1);
+  assert.equal(sliderStep({ lo: 0, hi: 90, step: null, tolerance: 3 }), 2);
+  assert.equal(sliderStep({ lo: 0, hi: 10, step: 1, tolerance: 0 }), 1);
+  assert.equal(sliderStep({ lo: 0, hi: 4, step: null, tolerance: 0 }), 0.02);
+  assert.equal(sliderStep({ lo: 0, hi: 1, step: null, tolerance: 5 }), 1);
 });

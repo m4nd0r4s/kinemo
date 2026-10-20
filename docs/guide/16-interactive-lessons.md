@@ -114,7 +114,9 @@ def turn_the_line(s: k.Scene):
 ```
 
 Until the learner answers, the signal holds the default (`default=`, else the low end). After
-an answer, it keeps that answer. In a video it moves to the correct value when the quiz
+a wrong answer, it keeps that answer. A right answer within the tolerance that is not the exact
+one (2.2 for 2) is told "Close enough: the answer is 2.", and the signal takes the exact value,
+so the scene goes on from the right picture. In a video it moves to the correct value when the quiz
 reveals it (or takes it at the question, with `questions="answers"`).
 `q.value` is the same signal, for a question whose answer kind was given directly.
 
@@ -124,9 +126,11 @@ A point the learner drags works the same way: `pick = s.answer(k.Point())`, then
 ## Quiz videos
 
 Rendered to video (`kinemo render lesson.py`), a lesson cannot wait for an answer, so each
-question becomes a quiz. A band shows the prompt and the answer's controls, with "Pause and
-answer" and a countdown of `think=` seconds (5 by default). Then the right answer is revealed,
-and the video goes on along the correct branch. The reveal fits the kind of answer:
+question becomes a quiz. As the question comes in, the scene shrinks to make room for a band
+with the prompt and the answer's controls, "Pause and answer" and a countdown of `think=`
+seconds (5 by default). Then the right answer is revealed, the band leaves, the scene grows
+back to the whole frame, and the video goes on along the correct branch. So a lesson can use
+the whole frame: nothing is ever under the band. The reveal fits the kind of answer:
 
 | Kind | During the countdown | The reveal |
 | --- | --- | --- |
@@ -142,13 +146,12 @@ Settings:
 
 - `s.ask(..., think=8)`: seconds to think.
 - `s.ask(..., quiz_at="right")`: where the band goes: `"bottom"` (the default), `"top"`,
-  `"left"` or `"right"` of the safe area. At a side, the options stack in a column.
+  `"left"` or `"right"` of the safe area. At a side, the options stack in a column, and the
+  scene shrinks into the rest of the frame beside it.
 - `@k.scene(questions="answers")`, or `kinemo render --questions answers`: no quiz. The video
   plays on along the correct path, each answer set at its question.
 
-The band covers part of the frame while it is shown. W1503 reports text of the scene it
-covers: put the band elsewhere, or make room for it, as the example lesson does by keeping its
-axes on the left. W1504 reports a prompt that takes longer to read than `think=`.
+W1504 reports a prompt that takes longer to read than `think=`.
 
 ## Answering in `kinemo dev`
 

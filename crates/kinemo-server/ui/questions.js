@@ -6,7 +6,7 @@
 
 import { send } from "./connection.js";
 import { Route, signalValue, sliderStep } from "./lesson.js";
-import { addStopCheck, play, setTime } from "./playback.js";
+import { addStopCheck, play, playRange, setTime } from "./playback.js";
 import { el, formatNumber, listen, state, view } from "./state.js";
 
 let route = new Route([]);
@@ -119,6 +119,27 @@ function renderBands() {
   const bands = [];
   for (const question of route.questions) {
     bands.push(el("div", { class: "question-mark", style: `left:${pct(question.t)}`, title: `${question.id}: ${question.prompt}` }, "?"));
+    const quiz = question.quiz;
+    if (quiz) {
+      // What a quiz video shows here; the interactive player skips it.
+      bands.push(
+        el(
+          "div",
+          {
+            class: "branch-band quiz",
+            style: `left:${pct(quiz.t0)};width:${pct(quiz.t1 - quiz.t0)}`,
+            title: `${question.id}, quiz video: ${quiz.t0.toFixed(2)}–${quiz.t1.toFixed(2)} s (click to play; reveal at ${quiz.reveal.toFixed(2)} s)`,
+            onclick: (e) => {
+              e.stopPropagation();
+              close();
+              route.playing = null;
+              playRange(quiz.t0, quiz.t1);
+            },
+          },
+          `${question.id} quiz`,
+        ),
+      );
+    }
     for (const branch of question.branches) {
       const label = `${question.id} ${branch.on === "correct" ? "✓" : "✗"}`;
       bands.push(

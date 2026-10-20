@@ -5,7 +5,7 @@
 "use strict";
 
 import { send } from "./connection.js";
-import { Route, signalValue } from "./lesson.js";
+import { Route, signalValue, sliderStep } from "./lesson.js";
 import { addStopCheck, play, setTime } from "./playback.js";
 import { el, formatNumber, listen, state, view } from "./state.js";
 
@@ -43,7 +43,7 @@ function controls(question) {
     return { nodes: [el("div", { class: "question-options" }, ...buttons)], value: null };
   }
   if (answer.kind === "number" && answer.lo !== null && answer.hi !== null) {
-    const step = answer.step || "any";
+    const step = sliderStep(answer);
     const shown = el("span", { class: "question-value" }, "");
     const slider = el("input", { type: "range", min: answer.lo, max: answer.hi, step, value: question.default ?? answer.lo });
     const show = () => (shown.textContent = formatNumber(Number(slider.value)));

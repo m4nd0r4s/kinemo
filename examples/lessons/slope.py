@@ -35,14 +35,14 @@ def slope(s: k.Scene):
     m = s.answer(k.Float(0, 4, default=0.5), name="slope")
     line = k.Line(ax.point(0, 1 - m), ax.point(2, 1 + m), stroke=k.YELLOW)
     s.play(k.draw(line))
-    q1 = s.ask("Turn the line until it just touches the curve at x = 1.", m, correct=2, tolerance=0.15, name="tangent-at-1")
+    q1 = s.ask("Turn the line until it just touches the curve at x = 1.", m, correct=2, tolerance=0.25, name="tangent-at-1")
     with q1.wrong():
         hint = say("Not yet: the tangent touches the curve at x = 1 without crossing it.")
         s.play(k.write(hint))
         s.wait(2)
     with q1.correct():
         yes = say("That's the tangent. Its slope at x = 1 is 2.")
-        s.play(k.write(yes), k.sound(k.sfx.ding(), gain=0.3))
+        s.play(k.write(yes), k.sound(k.sfx.ding(), gain=0.7))
         s.wait(1.5)
         s.play(k.fade_out(yes, line))
 
@@ -60,7 +60,7 @@ def slope(s: k.Scene):
         s.play(k.fade_out(nope))
     with q2.correct():
         right = say("Right: 6, twice x.")
-        s.play(k.write(right), k.sound(k.sfx.ding(), gain=0.3))
+        s.play(k.write(right), k.sound(k.sfx.ding(), gain=0.7))
         s.wait(1.5)
         s.play(k.fade_out(right))
 
@@ -73,7 +73,7 @@ def slope(s: k.Scene):
         s.play(rule.to(fill=k.YELLOW), duration=0.4)
         s.play(rule.to(fill=k.WHITE), duration=0.4)
     with q3.correct():
-        s.play(k.sound(k.sfx.ding(), gain=0.3))
+        s.play(k.sound(k.sfx.ding(), gain=0.7))
     s.play(k.fade_out(rule))
     done = say("The derivative is the slope of the tangent, point by point: f'(5) = 10.")
     s.play(k.write(done))

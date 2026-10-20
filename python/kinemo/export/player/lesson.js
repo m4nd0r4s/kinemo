@@ -25,6 +25,18 @@ export function grade(answer, value) {
   }
 }
 
+/** The step of a number answer's slider: its own `step`, else the largest round step that a
+ *  tolerance can still catch (so the right value is a position a finger can land on), else a
+ *  hundredth of the range. */
+export function sliderStep(answer) {
+  if (answer.step) return answer.step;
+  const range = answer.hi - answer.lo;
+  const limit = answer.tolerance > 0 ? answer.tolerance : range / 100;
+  for (let power = 10 ** Math.ceil(Math.log10(Math.max(limit, 1e-9))); ; power /= 10) {
+    for (const m of [5, 2, 1]) if (m * power <= limit + 1e-12 && m * power <= range) return m * power;
+  }
+}
+
 /** The IR value the answer signal takes for `value` (what the scene sees). */
 export function signalValue(answer, value) {
   switch (answer.kind) {

@@ -135,6 +135,8 @@ and the video goes on along the correct branch. The reveal fits the kind of answ
 | `k.Float(lo, hi)`, `k.Int` | A slider at the default | The knob slides to the answer, and the scene follows if it uses the answer (`s.answer`) |
 | `k.Point` | Nothing on the band | A ring marks the right place, and the scene's point slides there |
 
+![The example lesson as a quiz video: the slider question while the viewer thinks, its reveal with the tangent in place, then the choice question and its reveal](../examples/images/quiz-video.png)
+
 The interactive player and the lesson page skip the quiz stretch: it only plays in video.
 Settings:
 

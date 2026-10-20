@@ -95,6 +95,11 @@ differences.
   and `k.morph` between versions.
 - **Charts and data.** `k.Axes`, plots that grow with a signal, animated zoom; data via
   Arrow (polars, pandas, pyarrow, duckdb) without copying.
+- **Interactive lessons.** `s.ask` stops for a question (a choice, a slider, a number, a point
+  to drag), and `with q.correct():` / `with q.wrong():` hold what plays next.
+  `--format lesson` writes a page that plays in any browser and embeds in a learning platform;
+  as a video, each question becomes a quiz with time to pause and think before the reveal.
+  [Try the example lesson](https://m4nd0r4s.github.io/kinemo/lessons/slope/).
 - **Narration.** `s.voice` speaks with a TTS provider, any voice program or recorded audio,
   beat by beat from a script (`k.Script`); animations follow the words (`v.at("the slope")`),
   music ducks under the voice, and `kinemo render --subtitles` writes SRT and WebVTT.

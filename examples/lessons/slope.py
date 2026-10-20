@@ -28,17 +28,22 @@ def slope(s: k.Scene):
     s.play(k.write(title), k.draw(ax), k.draw(curve))
     s.play(k.write(name))
 
-    # Explore: a secant through x = 1 and x = 1 + h turns as h shrinks.
+    # Explore: the secant through P = (1, 1) and a point Q further along the curve. As Q slides
+    # down to P, the secant turns into the tangent.
     point = k.Dot(r=0.09, fill=k.YELLOW).place(at=ax.point(1, 1))
-    point_label = k.Text("(1, 1)", size=0.32, fill=k.YELLOW).place(at=ax.point(1.5, 0.3))
+    point_label = k.Text("P (1, 1)", size=0.32, fill=k.YELLOW).place(at=ax.point(1.55, 0.2))
     s.play(k.fade_in(point, point_label))
-    h = k.signal(2.0)
-    secant = k.Line(ax.point(1, 1), ax.point(1 + h, (1 + h) * (1 + h)), stroke=k.YELLOW)
-    rise = k.Text(lambda: f"slope of the secant: {((1 + h()) ** 2 - 1) / h():.2f}", size=0.4).place(at="bottom", margin=0.6)
-    s.play(k.draw(secant), k.write(rise))
-    s.play(h.to(0.1), duration=3)
+    h = k.signal(1.8)
+    rise = 2 + h  # the secant's slope: ((1 + h)² - 1) / h
+    secant = k.Line(ax.point(0.5, 1 - 0.5 * rise), ax.point(3.2, 1 + 2.2 * rise), stroke=k.YELLOW)
+    q = k.Dot(r=0.09, fill=k.WHITE).place(at=ax.point(1 + h, (1 + h) * (1 + h)))
+    q_label = k.Text("Q", size=0.32).place(right_of=q, gap=0.12)
+    readout = k.Text(lambda: f"slope of the secant PQ: {2 + h():.2f}", size=0.4).place(at="bottom", margin=0.6)
+    s.play(k.fade_in(q, q_label), k.draw(secant), k.write(readout))
     s.wait(0.5)
-    s.play(k.fade_out(secant, rise))
+    s.play(h.to(0.05), duration=4)
+    s.wait(0.5)
+    s.play(k.fade_out(secant, readout, q, q_label))
 
     # Question 1: the learner turns a line until it is the tangent at x = 1.
     m = s.answer(k.Float(0, 4, default=0.5), name="slope")

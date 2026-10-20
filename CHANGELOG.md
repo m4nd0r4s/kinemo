@@ -4,6 +4,38 @@ All notable changes to kinemo are listed here. The project follows
 [semantic versioning](https://semver.org/); until 1.0, a minor version may change the API, and
 `kinemo upgrade` rewrites the forms it replaces.
 
+## 0.21.0
+
+Quiz videos: rendered to video, a lesson stops being a straight run of its answers. Each
+question shows on screen with its answers and a countdown to pause and think, then the right
+answer is revealed and the video goes on.
+
+**Added**
+
+- **The quiz stretch.** `s.ask` builds it right after each question. A band holds the prompt,
+  the answer's controls, "Pause and answer" and a countdown of `think=` seconds (5 by default),
+  then the reveal. A video plays it before the correct branch; the interactive player and the
+  lesson page skip it.
+- **A reveal for each kind of answer:**
+  - choice: cards A, B, C…, and the right one turns green while the others dim;
+  - typed number and text: written into a "?" box;
+  - slider: the knob slides to the answer, and the scene follows it;
+  - point: a ring marks the right place, and the scene's point slides there.
+- `quiz_at="bottom" | "top" | "left" | "right"` places the band. At a side, and in vertical
+  video, the options stack in a column.
+- `@k.scene(questions="quiz" | "answers")` (also `kinemo.toml [scene]`) and
+  `kinemo render --questions`. `answers` keeps the 0.20 video: the correct path, each answer
+  set at its question.
+- **Lints.**
+  - W1503: the quiz band covers text of the scene.
+  - W1504: a prompt takes longer to read than `think=`.
+- `kinemo dev` shows the quiz stretch as a band on the timeline; click it to play it.
+
+**Changed**
+
+- The example lesson keeps its axes on the left and its quiz band on the right.
+- The README lists interactive lessons.
+
 ## 0.20.0
 
 Interactive lessons: a scene can stop for a question, and what plays next depends on the answer.

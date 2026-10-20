@@ -1,10 +1,12 @@
 """The quiz stretch of a question: what a lesson's video shows in place of the interactive stop.
 
 Built by `s.ask` right after the question, like a branch (it starts from the state at the
-question and leaves nothing behind): the prompt and the answer's controls on a band at the
-bottom of the safe area, "Pause and answer" with a countdown of `think=` seconds, then the
-reveal (the right card lights up, the number is written in, the slider moves). The interactive
-player skips it; a video in quiz mode (`questions="quiz"`) plays it before the correct branch.
+question and leaves nothing behind): the prompt and the answer's controls on a band at a side
+of the safe area, "Pause and answer" with a countdown of `think=` seconds, then the reveal (the
+right card lights up, the number is written in, the slider moves). While it plays, the
+renderer shrinks the rest of the scene into the part of the frame the band leaves free. The
+interactive player skips it; a video in quiz mode (`questions="quiz"`) plays it before the
+correct branch.
 """
 
 from __future__ import annotations
@@ -211,6 +213,7 @@ def build_quiz(s: "Scene", prompt: str, answer: dict[str, Any], default: Any, th
     box, `rect`) and moves the cursor to its end."""
     from ..objects.shapes import RoundedRect
 
+    first_object = s._b.object_count()  # pyright: ignore[reportPrivateUsage]
     b = QuizBuilder(s, answer, default, at, span)
     theme = s.theme
     safe = s.frame.safe
@@ -265,5 +268,25 @@ def build_quiz(s: "Scene", prompt: str, answer: dict[str, Any], default: Any, th
     controls.reveal(reveal)
     s.cursor = t1
     s._max_end = max(s._max_end, t1)  # pyright: ignore[reportPrivateUsage]
-    rect = (cx - b.width / 2, cy - height / 2, cx + b.width / 2, cy + height / 2)
-    return {"t0": t0, "reveal": reveal, "t1": t1, "rect": rect, "parts": {part.node._id for part in placed} | {ring._id for ring, _, _ in b.rings}}
+    rect = [cx - b.width / 2, cy - height / 2, cx + b.width / 2, cy + height / 2]
+    # Everything made from here on is the quiz's own: the renderer shrinks the rest of the
+    # scene beside the band while it plays.
+    objects = [first_object, s._b.object_count()]  # pyright: ignore[reportPrivateUsage]
+    return {"t0": t0, "reveal": reveal, "t1": t1, "at": at, "rect": rect, "content": scene_box(s, t0, first_object), "objects": objects}
+
+
+def scene_box(s: "Scene", t: float, before: int) -> list[float]:
+    """What the scene shows at `t` (objects made before id `before`), as one box in scene units;
+    the camera fits it beside the band."""
+    import json
+
+    b = s._b  # pyright: ignore[reportPrivateUsage]
+    box: list[float] | None = None
+    for node in s._nodes:  # pyright: ignore[reportPrivateUsage]
+        if node._id >= before or node._parent is not None or not b.present(node._id, t):
+            continue
+        sides = [json.loads(b.derived(node._id, side, t, True))["Float"] for side in ("left", "bottom", "right", "top")]
+        if sides[2] <= sides[0] and sides[3] <= sides[1]:
+            continue
+        box = sides if box is None else [min(box[0], sides[0]), min(box[1], sides[1]), max(box[2], sides[2]), max(box[3], sides[3])]
+    return box or [0.0, 0.0, 0.0, 0.0]

@@ -25,6 +25,27 @@ export function grade(answer, value) {
   }
 }
 
+/** The exact answer, in the terms `grade` takes, for kinds where an answer within the
+ *  tolerance still differs from it (a number, a point); null for the others. */
+export function exactAnswer(answer) {
+  if (answer.kind === "number") return answer.correct;
+  if (answer.kind === "point") return answer.correct;
+  return null;
+}
+
+/** How a right answer that is not the exact one is told: "Close enough: the answer is 2.", or
+ *  null when `value` is the exact answer (or the kind has no tolerance). */
+export function closeEnough(answer, value) {
+  const exact = exactAnswer(answer);
+  if (exact === null) return null;
+  const round = (v) => Math.round(v * 1e6) / 1e6;
+  if (answer.kind === "number") {
+    return round(value) === round(exact) ? null : `Close enough: the answer is ${round(exact)}.`;
+  }
+  const [x, y] = value;
+  return round(x) === round(exact[0]) && round(y) === round(exact[1]) ? null : `Close enough: the answer is (${round(exact[0])}, ${round(exact[1])}).`;
+}
+
 /** The step of a number answer's slider: its own `step`, else the largest round step that a
  *  tolerance can still catch (so the right value is a position a finger can land on), else a
  *  hundredth of the range. */

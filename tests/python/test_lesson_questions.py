@@ -140,14 +140,17 @@ def test_the_quiz_stretch_leaves_the_question_state_as_it_was() -> None:
 
 @pytest.mark.parametrize("at", ["bottom", "top", "left", "right"])
 def test_the_band_goes_where_quiz_at_says(at: str) -> None:
-    rects: dict[str, object] = {}
-
     @build
     def scene(s: k.Scene) -> None:
-        q = s.ask("Pick one", k.Choice(["a", "b"]), correct="a", quiz_at=at)
-        rects["quiz"] = q._quiz  # pyright: ignore[reportPrivateUsage]
+        s.ask("Pick one", k.Choice(["a", "b"]), correct="a", quiz_at=at)
 
-    assert rects["quiz"] is not None
+    quiz = ir(scene)["questions"][0]["quiz"]
+    left, bottom, right, top = quiz["rect"]
+    assert quiz["at"] == at
+    middle = {"bottom": bottom < 0 and top < 0, "top": bottom > 0, "left": right < 0, "right": left > 0}
+    assert middle[at], quiz["rect"]
+    first, end = quiz["objects"]
+    assert end > first, "the band's own objects, which the camera leaves alone"
 
 
 def test_quiz_lints() -> None:
@@ -156,7 +159,8 @@ def test_quiz_lints() -> None:
         s.add(k.Text("A label at the bottom", size=0.4).place(at="bottom", margin=0.8))
         s.ask("A question with a great many words to read before the countdown runs out, far too many for it", k.Choice(["yes", "no"]), correct="yes", think=2)
 
-    assert {"W1503", "W1504"} <= lint_codes(scene)
+    assert "W1504" in lint_codes(scene)
+    assert "W1503" not in lint_codes(scene), "the scene shrinks beside the band: nothing is covered"
 
 
 @pytest.mark.parametrize(

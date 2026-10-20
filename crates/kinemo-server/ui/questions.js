@@ -5,9 +5,9 @@
 "use strict";
 
 import { send } from "./connection.js";
-import { Route, signalValue, sliderStep } from "./lesson.js";
+import { closeEnough, exactAnswer, Route, signalValue, sliderStep } from "./lesson.js";
 import { addStopCheck, play, playRange, setTime } from "./playback.js";
-import { el, formatNumber, listen, state, view } from "./state.js";
+import { el, formatNumber, listen, state, toast, view } from "./state.js";
 
 let route = new Route([]);
 let routeKey = "";
@@ -24,7 +24,13 @@ function close() {
 }
 
 function submit(question, value) {
-  const { to } = route.answered(question, value);
+  const { correct, to } = route.answered(question, value);
+  // Right, but not exactly: say the exact answer, and the scene takes it.
+  const close = correct ? closeEnough(question.answer, value) : null;
+  if (close) {
+    setAnswer(question, exactAnswer(question.answer));
+    toast(close);
+  }
   const feedback = asking && asking.panel.querySelector(".question-feedback");
   if (to === null) {
     if (feedback) feedback.textContent = "Not quite. Try again.";

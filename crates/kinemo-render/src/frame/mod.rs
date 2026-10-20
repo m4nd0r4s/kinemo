@@ -1,5 +1,6 @@
 //! Builds the display list of one frame: what to draw, where, and with which style.
 
+mod camera;
 pub(crate) mod collect;
 mod image;
 mod mass;
@@ -63,12 +64,22 @@ pub fn display_list_with(layout: &Layout, t: f64, size: FrameSize, transparent: 
     if transparent {
         background[3] = 0.0;
     }
+    let camera = camera::quiz_camera(scene, t, size);
     let items = collect::leaves(layout, t)
         .into_iter()
-        .flat_map(|leaf| match scene.object(leaf).kind.as_str() {
-            "morph" => morph::draw_items(layout, leaf, t, size),
-            k if kinemo_layout::mass::is_mass_kind(k) => mass::draw_items(layout, leaf, t, size),
-            _ => style::draw_items(layout, leaf, t, size),
+        .flat_map(|leaf| {
+            let mut items = match scene.object(leaf).kind.as_str() {
+                "morph" => morph::draw_items(layout, leaf, t, size),
+                k if kinemo_layout::mass::is_mass_kind(k) => mass::draw_items(layout, leaf, t, size),
+                _ => style::draw_items(layout, leaf, t, size),
+            };
+            // During a quiz stretch the scene shrinks beside the band; the band stays put.
+            if let Some((transform, k, [first, end])) = camera {
+                if !(first..end).contains(&leaf) {
+                    items.iter_mut().for_each(|item| camera::transform_item(item, transform, k));
+                }
+            }
+            items
         })
         .collect();
     DisplayList { width: size.width, height: size.height, background, items }

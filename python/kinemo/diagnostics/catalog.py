@@ -199,10 +199,10 @@ CATALOG: dict[str, Entry] = {
         fix="Let it finish first (`s.wait(...)`), or start it after the question.",
     ),
     "W1503": Entry(
-        "quiz band over text",
-        "In a quiz video, the band with the question and its answers covers text of the scene while the "
-        "viewer thinks.",
-        fix="Put the band elsewhere with `s.ask(..., quiz_at=\"top\")` (or `\"left\"`, `\"right\"`), or make room for it.",
+        "quiz band over text (retired)",
+        "Reported by 0.21.0 when a quiz video's band covered text of the scene. Since 0.21.1 the scene "
+        "shrinks beside the band while it is shown, so nothing is covered and this lint is no longer "
+        "reported.",
     ),
     "W1504": Entry(
         "quiz prompt too long to read",

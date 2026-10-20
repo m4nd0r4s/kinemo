@@ -2,7 +2,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
-import { Route, grade, signalValue, sliderStep } from "./lesson.js";
+import { Route, closeEnough, grade, signalValue, sliderStep } from "./lesson.js";
 
 const q1 = {
   id: "q1", t: 2, resume: 5, answer: { kind: "number", correct: 76, tolerance: 4 },
@@ -59,4 +59,12 @@ test("a slider steps so the right value is a position a finger can land on", () 
   assert.equal(sliderStep({ lo: 0, hi: 10, step: 1, tolerance: 0 }), 1);
   assert.equal(sliderStep({ lo: 0, hi: 4, step: null, tolerance: 0 }), 0.02);
   assert.equal(sliderStep({ lo: 0, hi: 1, step: null, tolerance: 5 }), 1);
+});
+
+test("a right answer within the tolerance is told the exact one", () => {
+  const number = { kind: "number", correct: 2, tolerance: 0.25 };
+  assert.equal(closeEnough(number, 2.2), "Close enough: the answer is 2.");
+  assert.equal(closeEnough(number, 2), null);
+  assert.equal(closeEnough({ kind: "point", correct: [1, 2], tolerance: 0.5 }, [1.2, 2]), "Close enough: the answer is (1, 2).");
+  assert.equal(closeEnough({ kind: "choice", correct: [1] }, 1), null);
 });

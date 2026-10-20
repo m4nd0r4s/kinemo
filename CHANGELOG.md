@@ -4,6 +4,19 @@ All notable changes to kinemo are listed here. The project follows
 [semantic versioning](https://semver.org/); until 1.0, a minor version may change the API, and
 `kinemo upgrade` rewrites the forms it replaces.
 
+## 0.21.1
+
+**Changed**
+
+- In a quiz video, the scene shrinks into the part of the frame the band leaves free while
+  the band shows, and grows back after the reveal. A lesson can use the whole frame, and
+  W1503 (the band over text) is no longer reported.
+- A right answer within the tolerance that is not the exact one (2.2 for 2) is told
+  "Close enough: the answer is 2.", and the scene goes on from the exact answer. This applies
+  in the lesson player and in `kinemo dev`.
+- The example lesson keeps `f(x) = x²` on screen, marks the point (1, 1), and opens with a
+  secant that turns into the tangent.
+
 ## 0.21.0
 
 Quiz videos: rendered to video, a lesson stops being a straight run of its answers. Each

@@ -94,6 +94,12 @@ impl Builder {
         to_json(&self.scene.video_path())
     }
 
+    /// What a video does at the questions: `"quiz"` or `"answers"` (`--questions`).
+    fn set_questions_video(&mut self, mode: &str) -> PyResult<()> {
+        self.scene.config.questions = parse("questions mode", &format!("\"{mode}\""))?;
+        Ok(())
+    }
+
     /// The scene's questions (`s.ask`), replacing any set before.
     fn set_questions(&mut self, questions_json: &str) -> PyResult<()> {
         self.scene.questions = parse::<Vec<Question>>("questions", questions_json)?;

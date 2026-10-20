@@ -38,6 +38,7 @@ allow = []
 | `[scene] theme` | `Theme \| str \| None` | `None` | A `k.Theme` or the name of one in `k.themes` (`"dark"`, `"light"`, `"blueprint"`). |
 | `[scene] camera` | `str` | `"2d"` | `"2d"` or `"3d"`. |
 | `[scene] platform` | `Literal['reels', 'tiktok', 'shorts'] \| None` | `None` | The app a vertical video is made for (`"reels"`, `"tiktok"`, `"shorts"`): the zones its buttons and captions cover narrow the safe area. Ignored for frames that are not vertical. |
+| `[scene] questions` | `Literal['quiz', 'answers']` | `"quiz"` | What a lesson's video does at each `s.ask` question: `"quiz"` shows the question and its answers, gives `think=` seconds to pause, then reveals the right answer; `"answers"` plays on along the correct path. `kinemo render --questions` overrides it. |
 | `[presets.<name>] *` | table | `{}` | Named scene defaults (the keys of `[scene]`), chosen with `@k.scene(preset="<name>")`: decorator > preset > `[scene]` > defaults. For defaults in Python, `k.scene_preset(...)`. |
 | `[render] *` | table | `{}` | Read into `ProjectConfig.render`; the CLI does not use it yet. The output directory is set with `--out` (default `out`). |
 | `[lints] allow` | `list[str]` | `[]` | Lint codes allowed in the whole project (see [diagnostics](diagnostics.md)). |
@@ -74,6 +75,7 @@ def intro(s: k.Scene): ...
 | `name` | `str \| None` | `None` | Scene name used by `--scene`; defaults to the function name. | decorator only |
 | `preset` | `str \| None` | `None` | Name of a `[presets.<name>]` table of `kinemo.toml` whose values this scene starts from. | decorator only |
 | `platform` | `Literal['reels', 'tiktok', 'shorts'] \| None` | `None` | The app a vertical video is made for (`"reels"`, `"tiktok"`, `"shorts"`): the zones its buttons and captions cover narrow the safe area. Ignored for frames that are not vertical. | also `[scene]` |
+| `questions` | `Literal['quiz', 'answers']` | `"quiz"` | What a lesson's video does at each `s.ask` question: `"quiz"` shows the question and its answers, gives `think=` seconds to pause, then reveals the right answer; `"answers"` plays on along the correct path. `kinemo render --questions` overrides it. | also `[scene]` |
 
 See [`k.scene`](scene.md#k-scene) and [`k.SceneDef`](scene.md#k-scenedef).
 

@@ -106,6 +106,7 @@ def scene(
     name: str | None = None,
     preset: str | None = None,
     platform: Literal["reels", "tiktok", "shorts"] | None = None,
+    questions: Literal["quiz", "answers"] = "quiz",
 ) -> Callable[[SceneFn], SceneDef]: ...
 
 
@@ -145,6 +146,7 @@ def scene(fn: SceneFn | None = None, **kwargs: Any) -> SceneDef | Callable[[Scen
             params=dict(kwargs.get("params") or {}),
             loudness=config.audio_loudness,
             platform=_platform(merged.get("platform")),
+            questions=_questions(merged.get("questions", "quiz")),
         )
         return SceneDef(f, cfg)
 
@@ -163,6 +165,15 @@ def _platform(value: object) -> str | None:
     raise KinemoError.make("K0105", f"unknown platform {value!r}", spans=[user_span()], fixes=[(f"use one of {', '.join(PLATFORMS)}", None)])
 
 
+def _questions(value: object) -> str:
+    from .._runtime.spans import user_span
+    from ..diagnostics import KinemoError
+
+    if value in ("quiz", "answers"):
+        return value  # type: ignore[return-value]
+    raise KinemoError.make("K0105", f"questions={value!r}: use 'quiz' or 'answers'", spans=[user_span()])
+
+
 class SceneOptions(TypedDict, total=False):
     """The arguments of `@k.scene` (see `k.scene_preset`)."""
 
@@ -178,6 +189,8 @@ class SceneOptions(TypedDict, total=False):
     preset: str | None
     #: The app a vertical video is made for: its buttons and captions narrow the safe area.
     platform: Literal["reels", "tiktok", "shorts"] | None
+    #: What a lesson's video does at its questions: a quiz with time to answer, or the answers.
+    questions: Literal["quiz", "answers"]
 
 
 class ScenePreset(Protocol):

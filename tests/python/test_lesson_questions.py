@@ -90,7 +90,9 @@ def test_the_question_holds_one_frame_and_the_answer_is_a_signal() -> None:
 
     (question,) = ir(scene)["questions"]
     assert question["id"] == "tangent" and question["t"] == 1.0
-    assert question["branches"][0]["t0"] == pytest.approx(1.0 + 1 / scene.config.fps)
+    # The quiz stretch follows the question's frame; the branches follow the quiz stretch.
+    assert question["quiz"]["t0"] == pytest.approx(1.0 + 1 / scene.config.fps)
+    assert question["branches"][0]["t0"] == pytest.approx(question["quiz"]["t1"])
     assert question["answer"] == {"kind": "number", "lo": 0.0, "hi": 6.0, "step": None, "correct": 4.0, "tolerance": 0.2}
     assert ir(scene)["signals"][question["signal"]]["initial"] == {"Float": 1.0}
 
@@ -113,12 +115,48 @@ def test_answer_kinds(kind: Any, correct: Any, expected: dict[str, Any]) -> None
     assert ir(scene)["questions"][0]["answer"] == expected
 
 
-def test_a_video_plays_the_correct_path() -> None:
+def test_a_video_plays_the_quiz_then_the_correct_path() -> None:
     scene, _ = lesson(("wrong", "correct"))
     (question,) = ir(scene)["questions"]
     wrong, correct = question["branches"]
+    quiz = question["quiz"]
+    assert question["t"] < quiz["t0"] < quiz["reveal"] < quiz["t1"] == wrong["t0"]
     path = json.loads(scene.builder.video_path())
-    assert path == [[0.0, wrong["t0"]], [correct["t0"], correct["t1"]], [question["resume"], scene.duration]]
+    assert path == [[0.0, quiz["t0"]], [quiz["t0"], quiz["t1"]], [correct["t0"], correct["t1"]], [question["resume"], scene.duration]]
+    scene.builder.set_questions_video("answers")
+    path = json.loads(scene.builder.video_path())
+    assert path == [[0.0, quiz["t0"]], [correct["t0"], correct["t1"]], [question["resume"], scene.duration]]
+
+
+def test_the_quiz_stretch_leaves_the_question_state_as_it_was() -> None:
+    scene, seen = lesson(("correct",))
+    (question,) = ir(scene)["questions"]
+    quiz = question["quiz"]
+    b = scene.builder
+    shown = [obj["id"] for obj in ir(scene)["objects"] if any(present for _, present in obj.get("presence", [])) and b.present(obj["id"], quiz["reveal"])]
+    assert len(shown) > len([o for o in shown if b.present(o, question["t"])]), "the band appears in the stretch"
+    assert not any(b.present(o, quiz["t1"]) and not b.present(o, question["t"]) for o in shown), "and is gone after it"
+
+
+@pytest.mark.parametrize("at", ["bottom", "top", "left", "right"])
+def test_the_band_goes_where_quiz_at_says(at: str) -> None:
+    rects: dict[str, object] = {}
+
+    @build
+    def scene(s: k.Scene) -> None:
+        q = s.ask("Pick one", k.Choice(["a", "b"]), correct="a", quiz_at=at)
+        rects["quiz"] = q._quiz  # pyright: ignore[reportPrivateUsage]
+
+    assert rects["quiz"] is not None
+
+
+def test_quiz_lints() -> None:
+    @build
+    def scene(s: k.Scene) -> None:
+        s.add(k.Text("A label at the bottom", size=0.4).place(at="bottom", margin=0.8))
+        s.ask("A question with a great many words to read before the countdown runs out, far too many for it", k.Choice(["yes", "no"]), correct="yes", think=2)
+
+    assert {"W1503", "W1504"} <= lint_codes(scene)
 
 
 @pytest.mark.parametrize(
@@ -128,6 +166,8 @@ def test_a_video_plays_the_correct_path() -> None:
         ("q = s.ask('?', k.Choice(['1', '4']))", "needs correct="),
         ("q = s.ask('?', k.Float(0, 1), correct=5)", "outside the range"),
         ("q = s.ask('?', k.Bool(), correct=True)", "cannot be a lesson's answer"),
+        ("q = s.ask('?', k.Str(), correct='x', quiz_at='middle')", "quiz_at="),
+        ("q = s.ask('?', k.Str(), correct='x', think=-1)", "think="),
         ("q = s.ask('?', k.Choice(['1', '4']), correct='4')\ns.wait(1)\nwith q.correct():\n    pass", "right after its question"),
         ("q = s.ask('?', k.Choice(['1', '4']), correct='4')\nwith q.correct():\n    s.ask('again?', k.Str(), correct='x')", "inside another question's branch"),
         ("q = s.ask('?', k.Choice(['1', '4']), correct='4')\nwith q.wrong():\n    pass\nwith q.wrong():\n    pass", "already has a wrong branch"),

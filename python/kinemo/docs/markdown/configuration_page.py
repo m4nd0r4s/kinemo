@@ -23,6 +23,7 @@ SCENE_OPTIONS = {
     "name": "Scene name used by `--scene`; defaults to the function name.",
     "preset": "Name of a `[presets.<name>]` table of `kinemo.toml` whose values this scene starts from.",
     "platform": "The app a vertical video is made for (`\"reels\"`, `\"tiktok\"`, `\"shorts\"`): the zones its buttons and captions cover narrow the safe area. Ignored for frames that are not vertical.",
+    "questions": "What a lesson's video does at each `s.ask` question: `\"quiz\"` shows the question and its answers, gives `think=` seconds to pause, then reveals the right answer; `\"answers\"` plays on along the correct path. `kinemo render --questions` overrides it.",
 }
 
 #: Options that only the decorator accepts (not `kinemo.toml [scene]`).

@@ -184,7 +184,7 @@ kinemo voice scene.py --force B03,B04
 Final output.
 
 ```text
-kinemo render [-h] [--scene SCENE] [--param NAME=VALUE] [--size SIZE] [--format {mp4,webm,mov,gif,png,svg,slides,lesson}] [--quality {draft,final}] [--out OUT] [--at AT] [--frames] [--transparent] [--progress {bar,json,none}] [--subtitles] file
+kinemo render [-h] [--scene SCENE] [--param NAME=VALUE] [--size SIZE] [--format {mp4,webm,mov,gif,png,svg,slides,lesson}] [--quality {draft,final}] [--out OUT] [--at AT] [--frames] [--transparent] [--progress {bar,json,none}] [--subtitles] [--questions {quiz,answers}] file
 ```
 
 | Argument | Type | Default | Description |
@@ -201,6 +201,7 @@ kinemo render [-h] [--scene SCENE] [--param NAME=VALUE] [--size SIZE] [--format 
 | `--transparent` | flag |   |   |
 | `--progress PROGRESS` | `bar` \\| `json` \\| `none` | `bar` | on stderr: a bar, one JSON object per line, or nothing |
 | `--subtitles` | flag |   | also write <scene>.srt and <scene>.vtt from the narration |
+| `--questions QUESTIONS` | `quiz` \\| `answers` |   | a lesson's video at its questions: time to answer then the reveal (quiz), or the correct path (answers); default: the scene's |
 
 Examples:
 

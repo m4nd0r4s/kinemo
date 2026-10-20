@@ -49,6 +49,7 @@ k.scene(
     name: str | None = None,
     preset: str | None = None,
     platform: Literal['reels', 'tiktok', 'shorts'] | None = None,
+    questions: Literal['quiz', 'answers'] = "quiz",
 ) -> Callable[[SceneFn], SceneDef]
 ```
 
@@ -71,6 +72,7 @@ Turns a function `def name(s: k.Scene)` into a scene. The body runs exactly once
 | `name` | `str \| None` | `None` | Scene name used by `--scene`; defaults to the function name. |
 | `preset` | `str \| None` | `None` | The decorator arguments (size, fps, background, seed, tail, theme, parameters) take precedence over `kinemo.toml`; `preset="short"` starts from a `[presets.short]` table there. |
 | `platform` | `Literal['reels', 'tiktok', 'shorts'] \| None` | `None` | The app a vertical video is made for (`"reels"`, `"tiktok"`, `"shorts"`): the zones its buttons and captions cover narrow the safe area. Ignored for frames that are not vertical. |
+| `questions` | `Literal['quiz', 'answers']` | `"quiz"` | What a lesson's video does at each `s.ask` question: `"quiz"` shows the question and its answers, gives `think=` seconds to pause, then reveals the right answer; `"answers"` plays on along the correct path. `kinemo render --questions` overrides it. |
 
 **Example:**
 
@@ -144,7 +146,7 @@ A scene decorator with defaults of its own, for a series or a shared library: `e
 
 | Name | Type | Default | Description |
 | --- | --- | --- | --- |
-| `**defaults` | `Unpack[SceneOptions]` | variadic | Keyword arguments (`SceneOptions`): `size: str \| tuple[int, int]`, `fps: float`, `background: ColorLike \| None`, `seed: int`, `tail: float`, `theme: Theme \| str \| None`, `camera: str`, `params: dict[str, Param] \| None`, `name: str \| None`, `preset: str \| None`, `platform: Literal['reels', 'tiktok', 'shorts'] \| None`. |
+| `**defaults` | `Unpack[SceneOptions]` | variadic | Keyword arguments (`SceneOptions`): `size: str \| tuple[int, int]`, `fps: float`, `background: ColorLike \| None`, `seed: int`, `tail: float`, `theme: Theme \| str \| None`, `camera: str`, `params: dict[str, Param] \| None`, `name: str \| None`, `preset: str \| None`, `platform: Literal['reels', 'tiktok', 'shorts'] \| None`, `questions: Literal['quiz', 'answers']`. |
 
 **Example:**
 
@@ -610,6 +612,8 @@ s.ask(
     correct: Any = None,
     tolerance: float = 0.0,
     name: str | None = None,
+    think: float | None = None,
+    quiz_at: Literal['bottom', 'top', 'left', 'right'] = "bottom",
 ) -> Question
 ```
 
@@ -624,6 +628,8 @@ Stops playback for a question; the learner answers in the lesson player (or in `
 | `correct` | `Any` | `None` | `correct=` is what counts as right (a list for several). |
 | `tolerance` | `float` | `0.0` | `tolerance=` is how far a number or point may be off. |
 | `name` | `str \| None` | `None` | `name=` is the question's id for a host platform (`q1`, `q2`... by default). |
+| `think` | `float \| None` | `None` | `think=` is the time a quiz video gives to pause and answer (5 s by default), and `quiz_at=` where its band goes (`"bottom"`, `"top"`, `"left"` or `"right"` of the safe area). |
+| `quiz_at` | `Literal['bottom', 'top', 'left', 'right']` | `"bottom"` | `think=` is the time a quiz video gives to pause and answer (5 s by default), and `quiz_at=` where its band goes (`"bottom"`, `"top"`, `"left"` or `"right"` of the safe area). |
 
 **Example:**
 

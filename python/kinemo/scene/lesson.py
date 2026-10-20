@@ -56,8 +56,8 @@ class Question:
         self.resume = t + 1.0 / scene.config.fps
         self._open_at = (self.resume, self._since)
         self._correct_end: tuple[int, float] | None = None
-        #: The quiz stretch a video plays instead of stopping (`{t0, reveal, t1}`).
-        self._quiz: dict[str, float] | None = None
+        #: The quiz stretch a video plays instead of stopping (`{t0, reveal, t1, at, rect, objects}`).
+        self._quiz: dict[str, Any] | None = None
 
     def _build_quiz(self, think: float, at: str) -> None:
         """The quiz stretch, right after the question and before its branches: it starts from
@@ -66,38 +66,17 @@ class Question:
 
         s, b = self._scene, self._scene._b
         s.cursor = self.resume
-        before = len(s._nodes)  # pyright: ignore[reportPrivateUsage]
-        built = build_quiz(s, self.prompt, self._answer, self._default, think, at, self._span)
-        self._quiz = {key: built[key] for key in ("t0", "reveal", "t1")}
-        self._lint_quiz(s._nodes[:before], built["rect"], think, at)  # pyright: ignore[reportPrivateUsage]
+        self._quiz = build_quiz(s, self.prompt, self._answer, self._default, think, at, self._span)
+        self._lint_quiz(think)
         self._reset(self._frozen, self.t, self._quiz["t1"])
         self.resume = self._quiz["t1"]
         self._open_at = (self.resume, b.log_position())
 
-    def _lint_quiz(self, scene_nodes: list[Any], rect: tuple[float, float, float, float], think: float, at: str) -> None:
-        """W1503: the band covers text of the scene; W1504: the prompt takes longer to read
-        than the time given."""
-        s, b = self._scene, self._scene._b
-        t = self._quiz["t0"] if self._quiz else self.t
-        covered = []
-        for node in scene_nodes:
-            if getattr(node, "kind", None) not in ("text", "math", "code") or not b.present(node._id, t):
-                continue
-            box = [json.loads(b.derived(node._id, side, t, True))["Float"] for side in ("left", "bottom", "right", "top")]
-            if box[0] < rect[2] and rect[0] < box[2] and box[1] < rect[3] and rect[1] < box[3]:
-                covered.append(node._label())
-        if covered:
-            others = [p for p in ("top", "bottom", "left", "right") if p != at]
-            s.lints.warn(
-                "W1503",
-                f"the quiz band of '{self.id}' covers {', '.join(covered[:3])}{' and more' if len(covered) > 3 else ''}",
-                spans=[self._span],
-                time=t,
-                fixes=[(f"put the band elsewhere: quiz_at=\"{others[0]}\" (or {', '.join(repr(o) for o in others[1:])})", None), ("or make room for it in the scene", None)],
-            )
+    def _lint_quiz(self, think: float) -> None:
+        """W1504: the prompt and its options take longer to read than the time given."""
         words = len(self.prompt.split()) + sum(len(str(o).split()) for o in self._answer.get("options", []))
         if words / READING_WORDS_PER_SECOND > think:
-            s.lints.warn(
+            self._scene.lints.warn(
                 "W1504",
                 f"'{self.id}' has {words} words to read in think={think:g} s",
                 spans=[self._span],

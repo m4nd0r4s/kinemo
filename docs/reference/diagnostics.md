@@ -552,7 +552,7 @@ Fix:
 | [`W1501`](#w1501) | warning (lint) | wrong branch that never plays |
 | [`K1502`](#k1502) | error | no lesson player |
 | [`W1502`](#w1502) | warning (lint) | question asked mid-motion |
-| [`W1503`](#w1503) | warning (lint) | quiz band over text |
+| [`W1503`](#w1503) | warning (lint) | quiz band over text (retired) |
 | [`W1504`](#w1504) | warning (lint) | quiz prompt too long to read |
 
 <a id="k1501"></a>
@@ -582,15 +582,9 @@ Let it finish first (`s.wait(...)`), or start it after the question.
 ```
 
 <a id="w1503"></a>
-### W1503: quiz band over text
+### W1503: quiz band over text (retired)
 
-*Warning (lint).* In a quiz video, the band with the question and its answers covers text of the scene while the viewer thinks.
-
-Fix:
-
-```python
-Put the band elsewhere with `s.ask(..., quiz_at="top")` (or `"left"`, `"right"`), or make room for it.
-```
+*Warning (lint).* Reported by 0.21.0 when a quiz video's band covered text of the scene. Since 0.21.1 the scene shrinks beside the band while it is shown, so nothing is covered and this lint is no longer reported.
 
 <a id="w1504"></a>
 ### W1504: quiz prompt too long to read

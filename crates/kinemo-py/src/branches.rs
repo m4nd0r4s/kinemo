@@ -89,6 +89,11 @@ impl Builder {
         to_json(&sources.iter().map(|(s, src)| (s, src)).collect::<Vec<_>>())
     }
 
+    /// How many objects the scene has: the id the next one gets.
+    fn object_count(&self) -> u32 {
+        self.scene.objects.len() as u32
+    }
+
     /// The stretches of the timeline a video plays (a lesson: its correct path), as JSON.
     fn video_path(&self) -> String {
         to_json(&self.scene.video_path())

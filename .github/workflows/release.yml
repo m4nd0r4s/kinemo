@@ -125,10 +125,16 @@ jobs:
     permissions:
       id-token: write
     steps:
+      # The wheels and the sdist only: the player's files (artifact `player`) are inside the wheels.
       - uses: actions/download-artifact@v8
         with:
-          path: dist
+          pattern: wheels-*
           merge-multiple: true
+          path: dist
+      - uses: actions/download-artifact@v8
+        with:
+          name: sdist
+          path: dist
       - uses: pypa/gh-action-pypi-publish@release/v1
 
   github-release:
@@ -139,10 +145,16 @@ jobs:
       contents: write
     steps:
       - uses: actions/checkout@v7
+      # The wheels and the sdist only: the player's files (artifact `player`) are inside the wheels.
       - uses: actions/download-artifact@v8
         with:
-          path: dist
+          pattern: wheels-*
           merge-multiple: true
+          path: dist
+      - uses: actions/download-artifact@v8
+        with:
+          name: sdist
+          path: dist
       - name: Create the release with this version's changelog
         env:
           GH_TOKEN: ${{ github.token }}

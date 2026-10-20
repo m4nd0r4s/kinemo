@@ -53,9 +53,13 @@ platform.
 - `k.Float`'s range is optional.
 - The wheels include the lesson player (about 2 MB).
 
+- A lesson's slider moves in round steps that its tolerance can catch, with − and + buttons for
+  the last step, so a finger can set it on a phone.
+
 **Fixed**
 
 - Playback in `kinemo dev` no longer starts a few milliseconds back.
+- A lesson's frame follows answers given while a frame was being drawn.
 
 ## 0.19.0
 

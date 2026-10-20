@@ -28,6 +28,9 @@ pub struct Question {
     pub branches: Vec<Branch>,
     /// Where the lesson continues after a correct answer (and its branch).
     pub resume: f64,
+    /// The stretch a quiz video plays instead of stopping (the interactive player skips it).
+    #[serde(default)]
+    pub quiz: Option<Quiz>,
     #[serde(default)]
     pub span: Span,
 }
@@ -58,6 +61,29 @@ pub enum Answer {
     },
     /// Type a short text; compared without case or surrounding spaces.
     Text { correct: Vec<String> },
+}
+
+/// A question's quiz stretch: the prompt and the answers on screen from `t0`, time to pause
+/// and think, the right answer revealed at `reveal`, gone at `t1`.
+#[derive(Serialize, Deserialize, Clone, Copy, Debug, PartialEq)]
+pub struct Quiz {
+    pub t0: f64,
+    pub reveal: f64,
+    pub t1: f64,
+}
+
+/// Seconds the reveal of a quiz stretch takes (as `REVEAL` in `python/kinemo/scene/quiz.py`).
+pub const QUIZ_REVEAL: f64 = 0.8;
+
+/// What a lesson's video does at its questions (`questions=`).
+#[derive(Serialize, Deserialize, Clone, Copy, Debug, PartialEq, Eq, Default)]
+#[serde(rename_all = "snake_case")]
+pub enum QuestionsVideo {
+    /// Show the question and its answers, give time to think, reveal the right one.
+    #[default]
+    Quiz,
+    /// Play on along the correct path, the answers set at each question.
+    Answers,
 }
 
 #[derive(Serialize, Deserialize, Clone, Copy, Debug, PartialEq, Eq)]
@@ -142,6 +168,7 @@ mod tests {
             default: serde_json::json!(0),
             branches: vec![Branch { on: Outcome::Wrong, t0: 2.1, t1: 4.0, then: Then::Retry, span: Span::default() }],
             resume: 6.0,
+            quiz: Some(Quiz { t0: 2.1, reveal: 3.0, t1: 4.0 }),
             span: Span::default(),
         };
         let text = serde_json::to_string(&q).unwrap();

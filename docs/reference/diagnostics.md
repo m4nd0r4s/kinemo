@@ -23,7 +23,7 @@ Every problem kinemo reports has a stable code: `K` codes are errors, `W` codes 
 | [K12xx](#range-12) | Data and interoperability (Arrow, arrays) | 4 |
 | [W13xx](#range-13) | Parameters and export | 2 |
 | [W14xx](#range-14) | Audio and voice | 7 |
-| [K15xx / W15xx](#range-15) | Interactive lessons | 4 |
+| [K15xx / W15xx](#range-15) | Interactive lessons | 6 |
 
 <a id="range-00"></a>
 ## K00xx: General
@@ -552,6 +552,8 @@ Fix:
 | [`W1501`](#w1501) | warning (lint) | wrong branch that never plays |
 | [`K1502`](#k1502) | error | no lesson player |
 | [`W1502`](#w1502) | warning (lint) | question asked mid-motion |
+| [`W1503`](#w1503) | warning (lint) | quiz band over text |
+| [`W1504`](#w1504) | warning (lint) | quiz prompt too long to read |
 
 <a id="k1501"></a>
 ### K1501: branch out of place
@@ -577,4 +579,26 @@ Fix:
 
 ```python
 Let it finish first (`s.wait(...)`), or start it after the question.
+```
+
+<a id="w1503"></a>
+### W1503: quiz band over text
+
+*Warning (lint).* In a quiz video, the band with the question and its answers covers text of the scene while the viewer thinks.
+
+Fix:
+
+```python
+Put the band elsewhere with `s.ask(..., quiz_at="top")` (or `"left"`, `"right"`), or make room for it.
+```
+
+<a id="w1504"></a>
+### W1504: quiz prompt too long to read
+
+*Warning (lint).* The question and its options take longer to read (about 3 words a second) than the `think=` seconds a quiz video gives.
+
+Fix:
+
+```python
+Give more time (`think=`) or shorten the prompt.
 ```

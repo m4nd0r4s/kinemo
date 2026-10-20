@@ -14,7 +14,7 @@ mod timeline;
 mod value;
 
 pub use expr::{BinOp, Expr, UnOp};
-pub use lesson::{Answer, Branch, Outcome, Question, Then};
+pub use lesson::{Answer, Branch, Outcome, Question, QuestionsVideo, Quiz, Then, QUIZ_REVEAL};
 pub use object::Object;
 pub use placement::{PlaceEntry, Placement, Side};
 pub use scene::{Audio, AudioRole, Mark, Scene, SceneConfig, Table};

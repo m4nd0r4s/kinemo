@@ -2,7 +2,7 @@
 
 use serde::{Deserialize, Serialize};
 
-use crate::{Object, ObjectId, Question, Signal, SignalId, IR_VERSION};
+use crate::{Object, ObjectId, Question, QuestionsVideo, Signal, SignalId, IR_VERSION};
 
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
@@ -41,6 +41,9 @@ pub struct SceneConfig {
     /// (`platform="reels"`), in scene units: the safe area stays clear of it.
     #[serde(default)]
     pub covered: [f64; 4],
+    /// What a video does at a lesson's questions.
+    #[serde(default)]
+    pub questions: QuestionsVideo,
 }
 
 impl Default for SceneConfig {
@@ -57,6 +60,7 @@ impl Default for SceneConfig {
             frame_h: 9.0,
             loudness: None,
             covered: [0.0; 4],
+            questions: QuestionsVideo::Quiz,
         }
     }
 }
@@ -144,13 +148,18 @@ impl Scene {
 
     /// Whether the object itself is present at `t` (ancestors are not considered).
     /// The stretches of the timeline a video plays: everything except the wrong branches of a
-    /// lesson's questions (the whole timeline when it has none).
+    /// lesson's questions (the whole timeline when it has none); in quiz mode, each question's
+    /// quiz stretch before its correct branch.
     pub fn video_path(&self) -> Vec<(f64, f64)> {
+        let quiz = self.config.questions == QuestionsVideo::Quiz;
         let mut path = Vec::new();
         let mut from = 0.0;
         for q in &self.questions {
-            let pause = q.branches.iter().map(|b| b.t0).fold(q.resume, f64::min);
+            let pause = q.branches.iter().map(|b| b.t0).chain(q.quiz.map(|z| z.t0)).fold(q.resume, f64::min);
             path.push((from, pause));
+            if let (true, Some(z)) = (quiz, q.quiz) {
+                path.push((z.t0, z.t1));
+            }
             if let Some(correct) = q.branches.iter().find(|b| b.on == crate::Outcome::Correct) {
                 path.push((correct.t0, correct.t1));
             }
@@ -161,15 +170,28 @@ impl Scene {
         path
     }
 
-    /// The scene as a video shows it: each question's answer takes its correct value once the
-    /// question is asked (the learner's answer, in the player).
+    /// The scene as a video shows it: each question's answer takes its correct value (the
+    /// learner's answer, in the player): once the question is asked, or in quiz mode moving
+    /// there during the reveal.
     pub fn with_correct_answers(&self) -> Scene {
+        let quiz = self.config.questions == QuestionsVideo::Quiz;
         let mut scene = self.clone();
         for q in &self.questions {
             let (Some(signal), Some(value)) = (q.signal, q.answer.correct_value()) else { continue };
-            let pause = q.branches.iter().map(|b| b.t0).fold(q.resume, f64::min);
-            let timeline = &mut scene.signals[signal as usize].timeline;
-            timeline.push(crate::Entry::Set { t: pause, src: crate::Src::Val { v: value }, span: Default::default() });
+            let pause = q.branches.iter().map(|b| b.t0).chain(q.quiz.map(|z| z.t0)).fold(q.resume, f64::min);
+            let entry = match (quiz, q.quiz) {
+                (true, Some(z)) => crate::Entry::Anim {
+                    t0: z.reveal,
+                    t1: z.reveal + crate::QUIZ_REVEAL,
+                    to: crate::Src::Val { v: value },
+                    from: None,
+                    ease: Default::default(),
+                    blend: Default::default(),
+                    span: Default::default(),
+                },
+                _ => crate::Entry::Set { t: pause, src: crate::Src::Val { v: value }, span: Default::default() },
+            };
+            scene.signals[signal as usize].timeline.push(entry);
         }
         scene
     }
@@ -205,8 +227,10 @@ mod tests {
             default: serde_json::json!(0.5),
             branches: vec![Branch { on: Outcome::Correct, t0: 2.1, t1: 3.0, then: Then::Continue, span: Span::default() }],
             resume: 3.0,
+            quiz: None,
             span: Span::default(),
         });
+        scene.config.questions = QuestionsVideo::Answers;
         let video = scene.with_correct_answers();
         assert_eq!(video.signals[0].timeline, vec![Entry::Set { t: 2.1, src: Src::Val { v: Value::Float(2.0) }, span: Span::default() }]);
         assert!(scene.signals[0].timeline.is_empty(), "the player's scene keeps the learner's answer");

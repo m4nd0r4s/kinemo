@@ -95,6 +95,7 @@ def parser() -> argparse.ArgumentParser:
     p.add_argument("--transparent", action="store_true")
     p.add_argument("--progress", choices=["bar", "json", "none"], default="bar", help="on stderr: a bar, one JSON object per line, or nothing")
     p.add_argument("--subtitles", action="store_true", help="also write <scene>.srt and <scene>.vtt from the narration")
+    p.add_argument("--questions", choices=["quiz", "answers"], help="a lesson's video at its questions: time to answer then the reveal (quiz), or the correct path (answers); default: the scene's")
     p.set_defaults(run=render.run)
 
     p = sub.add_parser("mcp", help="MCP server (stdio) with check, inspect, snap, docs and explain")

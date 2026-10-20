@@ -45,6 +45,9 @@ class SceneConfig:
     #: The app a vertical video is made for (`platform="reels"`): its covered zones narrow the
     #: safe area. Ignored for frames that are not vertical.
     platform: str | None = None
+    #: What a video does at a lesson's questions: a quiz (time to answer, then the reveal) or
+    #: the correct path.
+    questions: str = "quiz"
 
     @property
     def covered_units(self) -> tuple[float, float, float, float]:
@@ -83,6 +86,7 @@ class SceneConfig:
             "frame_h": fh,
             "loudness": self.loudness,
             "covered": list(self.covered_units),
+            "questions": self.questions,
         }
 
 

@@ -475,6 +475,7 @@ a:hover { text-decoration: underline; }
 }
 .branch-band.correct { background: color-mix(in srgb, var(--ok) 70%, transparent); }
 .branch-band.wrong { background: color-mix(in srgb, var(--error) 65%, transparent); }
+.branch-band.quiz { background: color-mix(in srgb, var(--accent-2) 55%, transparent); }
 .branch-band:hover { filter: brightness(1.15); }
 .question-mark {
   position: absolute; top: 0; transform: translateX(-50%); width: 14px; height: 14px; border-radius: 7px;

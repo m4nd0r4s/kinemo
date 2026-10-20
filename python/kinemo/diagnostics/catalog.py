@@ -198,6 +198,18 @@ CATALOG: dict[str, Entry] = {
         "learner sees a frozen, half-finished move, and every branch starts from it.",
         fix="Let it finish first (`s.wait(...)`), or start it after the question.",
     ),
+    "W1503": Entry(
+        "quiz band over text",
+        "In a quiz video, the band with the question and its answers covers text of the scene while the "
+        "viewer thinks.",
+        fix="Put the band elsewhere with `s.ask(..., quiz_at=\"top\")` (or `\"left\"`, `\"right\"`), or make room for it.",
+    ),
+    "W1504": Entry(
+        "quiz prompt too long to read",
+        "The question and its options take longer to read (about 3 words a second) than the `think=` "
+        "seconds a quiz video gives.",
+        fix="Give more time (`think=`) or shorten the prompt.",
+    ),
 }
 
 

@@ -109,6 +109,8 @@ def run(args: argparse.Namespace) -> int:
             status = 1
             continue
         b = result.scene.builder
+        if getattr(args, "questions", None):
+            b.set_questions_video(args.questions)
         base = os.path.splitext(single[0])[0] if single else os.path.join(args.out, defn.name)
         if args.format in VIDEO:
             path = f"{base}.{args.format}"

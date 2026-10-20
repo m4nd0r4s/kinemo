@@ -23,9 +23,15 @@ def slope(s: k.Scene):
     ax = k.Axes(x=(-1, 3.5, 1), y=(-1, 13, 2), grid=True, labels=("x", "y"), width=8.5, height=5.4).place(at="left", margin=0.8)
     title.place(above=ax, gap=0.25)
     curve = ax.plot(f, color=k.BLUE)
+    # The function stays on screen: every question is about it.
+    name = k.Math(r"f(x) = x^2", size=0.5, fill=k.BLUE).place(at=ax.point(0.75, 11))
     s.play(k.write(title), k.draw(ax), k.draw(curve))
+    s.play(k.write(name))
 
     # Explore: a secant through x = 1 and x = 1 + h turns as h shrinks.
+    point = k.Dot(r=0.09, fill=k.YELLOW).place(at=ax.point(1, 1))
+    point_label = k.Text("(1, 1)", size=0.32, fill=k.YELLOW).place(at=ax.point(1.5, 0.3))
+    s.play(k.fade_in(point, point_label))
     h = k.signal(2.0)
     secant = k.Line(ax.point(1, 1), ax.point(1 + h, (1 + h) * (1 + h)), stroke=k.YELLOW)
     rise = k.Text(lambda: f"slope of the secant: {((1 + h()) ** 2 - 1) / h():.2f}", size=0.4).place(at="bottom", margin=0.6)
@@ -47,7 +53,7 @@ def slope(s: k.Scene):
         yes = say("That's the tangent. Its slope at x = 1 is 2.")
         s.play(k.write(yes), k.sound(k.sfx.ding(), gain=0.7))
         s.wait(1.5)
-        s.play(k.fade_out(yes, line))
+        s.play(k.fade_out(yes, line, point, point_label))
 
     # Question 2: the tangent slides to x = 3.
     x = k.signal(1.0)

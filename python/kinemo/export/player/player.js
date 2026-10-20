@@ -363,10 +363,10 @@ function note(text) {
 
 function proceed(question, correct, value) {
   // Right, but not exactly: say the exact answer, and the scene takes it before going on.
-  const close = correct && value !== undefined ? closeEnough(question.answer, value) : null;
-  if (close) {
+  const told = correct && value !== undefined ? closeEnough(question.answer, value) : null;
+  if (told) {
     setAnswer(question, exactAnswer(question.answer));
-    note(close);
+    note(told);
   }
   const { to } = route.outcome(question, correct);
   const branch = question.branches.find((b) => b.on === (correct ? "correct" : "wrong"));

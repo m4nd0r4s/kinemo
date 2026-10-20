@@ -2,13 +2,15 @@
 
 A lesson is a scene that stops to ask. The learner answers by picking an option, moving a
 slider, typing a number or dragging a point. What plays next depends on the answer: a hint and
-another try, or the next step. The same file still renders to video, and `--format lesson`
-turns it into a page that plays in any browser and can be embedded in a learning platform.
+another try, or the next step. The same file renders to a quiz video (the question on screen,
+time to pause and think, then the answer), and `--format lesson` turns it into a page that
+plays in any browser and can be embedded in a learning platform.
 
 This guide covers:
 
 - asking a question with `s.ask` and branching with `q.correct()` and `q.wrong()`;
 - the kinds of answer, and answers the scene reacts to while the learner chooses;
+- quiz videos: what a lesson's video shows at each question;
 - answering in `kinemo dev`;
 - exporting with `--format lesson`, and embedding the page with its event protocol;
 - what can be interactive, and how lessons run on phones.
@@ -25,7 +27,7 @@ import kinemo as k
 
 @k.scene
 def first_question(s: k.Scene):
-    formula = k.Math(r"f(x) = x^2", size=0.7).place(at="center")
+    formula = k.Math(r"f(x) = x^2", size=0.7).place(at=(0, 2))
     s.play(k.write(formula))
     q = s.ask("What is the slope of f at x = 2?", k.Choice(["2", "4", "8"]), correct="4")
     with q.wrong():
@@ -64,8 +66,9 @@ like this:
 3. After the last branch, the lesson continues from the state at the end of the correct
    branch, whichever order you wrote them in.
 
-The player only decides which stretch plays next. A video plays the correct path: it leaves
-out the wrong branches, and each answer takes its correct value once its question is asked.
+The player only decides which stretch plays next. A video plays the correct path, leaving
+out the wrong branches; at each question it plays a quiz stretch that kinemo builds (see
+[Quiz videos](#quiz-videos)).
 
 Branches come right after their question (K1501 otherwise), and a branch cannot ask another
 question. Ask the next one after the branches, as the example lesson does three times.
@@ -111,11 +114,39 @@ def turn_the_line(s: k.Scene):
 ```
 
 Until the learner answers, the signal holds the default (`default=`, else the low end). After
-an answer, it keeps that answer. In video it takes the correct value at the question.
+an answer, it keeps that answer. In a video it moves to the correct value when the quiz
+reveals it (or takes it at the question, with `questions="answers"`).
 `q.value` is the same signal, for a question whose answer kind was given directly.
 
 A point the learner drags works the same way: `pick = s.answer(k.Point())`, then
 `k.Dot(position=pick)`.
+
+## Quiz videos
+
+Rendered to video (`kinemo render lesson.py`), a lesson cannot wait for an answer, so each
+question becomes a quiz. A band shows the prompt and the answer's controls, with "Pause and
+answer" and a countdown of `think=` seconds (5 by default). Then the right answer is revealed,
+and the video goes on along the correct branch. The reveal fits the kind of answer:
+
+| Kind | During the countdown | The reveal |
+| --- | --- | --- |
+| `k.Choice` | The options as cards: A, B, C... | The right card turns green, the others dim |
+| `k.Float()`, `k.Str()` | A box with "?" | The answer is written in |
+| `k.Float(lo, hi)`, `k.Int` | A slider at the default | The knob slides to the answer, and the scene follows if it uses the answer (`s.answer`) |
+| `k.Point` | Nothing on the band | A ring marks the right place, and the scene's point slides there |
+
+The interactive player and the lesson page skip the quiz stretch: it only plays in video.
+Settings:
+
+- `s.ask(..., think=8)`: seconds to think.
+- `s.ask(..., quiz_at="right")`: where the band goes: `"bottom"` (the default), `"top"`,
+  `"left"` or `"right"` of the safe area. At a side, the options stack in a column.
+- `@k.scene(questions="answers")`, or `kinemo render --questions answers`: no quiz. The video
+  plays on along the correct path, each answer set at its question.
+
+The band covers part of the frame while it is shown. W1503 reports text of the scene it
+covers: put the band elsewhere, or make room for it, as the example lesson does by keeping its
+axes on the left. W1504 reports a prompt that takes longer to read than `think=`.
 
 ## Answering in `kinemo dev`
 
@@ -125,7 +156,8 @@ The preview plays a lesson like the player does:
   dragged point moves the frame live.
 - After the answer, playback follows the branch that answer takes.
 - On the timeline, a "?" marks each question, and the branches are bands under the ruler:
-  green for correct, red for wrong. Click a band to play that branch.
+  green for correct, red for wrong, blue for the quiz stretch a video plays. Click a band to
+  play that stretch.
 
 Scrubbing still moves freely across the whole timeline, branches included.
 

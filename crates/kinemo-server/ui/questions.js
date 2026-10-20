@@ -26,10 +26,10 @@ function close() {
 function submit(question, value) {
   const { correct, to } = route.answered(question, value);
   // Right, but not exactly: say the exact answer, and the scene takes it.
-  const close = correct ? closeEnough(question.answer, value) : null;
-  if (close) {
+  const told = correct ? closeEnough(question.answer, value) : null;
+  if (told) {
     setAnswer(question, exactAnswer(question.answer));
-    toast(close);
+    toast(told);
   }
   const feedback = asking && asking.panel.querySelector(".question-feedback");
   if (to === null) {

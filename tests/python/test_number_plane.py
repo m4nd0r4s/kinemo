@@ -28,7 +28,8 @@ def test_apply_moves_basis_vectors_objects_and_shapes() -> None:
     assert seen["j"] == pytest.approx((1.0, 1.0))
     assert seen["v"] == pytest.approx((3.0, 1.0))
     assert seen["p"] == pytest.approx((0.0, 2.0))
-    assert seen["square"] == pytest.approx([(0, 0), (1, 0), (2, 1), (1, 1)])
+    # pytest 9 refuses approx over nested sequences: compare point by point.
+    assert seen["square"] == [pytest.approx(pt) for pt in [(0, 0), (1, 0), (2, 1), (1, 1)]]
 
 
 def test_transformations_compose_and_reset() -> None:

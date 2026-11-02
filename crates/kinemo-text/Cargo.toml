@@ -9,3 +9,7 @@ publish.workspace = true
 kurbo.workspace = true
 rustybuzz.workspace = true
 ttf-parser.workspace = true
+
+[features]
+# Latin/Greek/maths subsets of the bundled faces (assets/fonts/subset).
+subset-fonts = []

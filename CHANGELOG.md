@@ -4,6 +4,15 @@ All notable changes to kinemo are listed here. The project follows
 [semantic versioning](https://semver.org/); until 1.0, a minor version may change the API, and
 `kinemo upgrade` rewrites the forms it replaces.
 
+## Unreleased
+
+**Added**
+
+- `kinemo-text` has a `subset-fonts` feature that embeds the DejaVu faces cut to Latin, Greek,
+  punctuation, arrows and mathematical symbols, without hinting: 0.27 MB brotli instead of
+  1.03 MB, for builds that ship to a browser. It is off by default, so videos keep full
+  coverage; `scripts/subset-fonts.sh` regenerates the subsets.
+
 ## 0.21.1
 
 **Changed**

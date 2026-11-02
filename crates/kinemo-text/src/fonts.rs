@@ -4,10 +4,26 @@ use std::sync::OnceLock;
 
 use crate::types::FontStyle;
 
+#[cfg(not(feature = "subset-fonts"))]
 static REGULAR_DATA: &[u8] = include_bytes!("../../../assets/fonts/DejaVuSans.ttf");
+#[cfg(not(feature = "subset-fonts"))]
 static BOLD_DATA: &[u8] = include_bytes!("../../../assets/fonts/DejaVuSans-Bold.ttf");
+#[cfg(not(feature = "subset-fonts"))]
 static ITALIC_DATA: &[u8] = include_bytes!("../../../assets/fonts/DejaVuSans-Oblique.ttf");
+#[cfg(not(feature = "subset-fonts"))]
 static MONO_DATA: &[u8] = include_bytes!("../../../assets/fonts/DejaVuSansMono.ttf");
+
+// The same faces cut to Latin, Greek, punctuation, arrows and mathematical
+// symbols, without hinting: a quarter of the size, for builds that ship to a
+// browser. `scripts/subset-fonts.sh` regenerates them.
+#[cfg(feature = "subset-fonts")]
+static REGULAR_DATA: &[u8] = include_bytes!("../../../assets/fonts/subset/DejaVuSans.ttf");
+#[cfg(feature = "subset-fonts")]
+static BOLD_DATA: &[u8] = include_bytes!("../../../assets/fonts/subset/DejaVuSans-Bold.ttf");
+#[cfg(feature = "subset-fonts")]
+static ITALIC_DATA: &[u8] = include_bytes!("../../../assets/fonts/subset/DejaVuSans-Oblique.ttf");
+#[cfg(feature = "subset-fonts")]
+static MONO_DATA: &[u8] = include_bytes!("../../../assets/fonts/subset/DejaVuSansMono.ttf");
 
 pub(crate) type Face = rustybuzz::Face<'static>;
 
